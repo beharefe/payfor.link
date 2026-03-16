@@ -1,363 +1,158 @@
-# Security and Abuse Handling Policy
+# Security & Abuse Handling
 
-## Purpose
+## Threat Model
 
-This document defines the platform's security policies and procedures for detecting, preventing, and responding to abuse.
-
-The goal is to:
-
-- protect buyers from scams or malicious content
-- protect sellers from fraudulent disputes
-- comply with payment provider requirements
-- ensure a safe marketplace for digital transactions
-
-The platform acts as an **intermediary payment and access gateway**, not a content host.
-
----
-
-# Threat Categories
-
-The platform may encounter several types of abuse.
-
-## 1. Piracy
-
-Examples:
-
-- selling copyrighted material without permission
-- distributing pirated software
-- reselling paid courses illegally
-- selling stolen digital assets
+| Threat | Risk | Mitigation |
+|---|---|---|
+| Malware links | Buyer gets infected | Google Safe Browsing on create |
+| Scam products | Buyer defrauded | Abuse reporting + moderation |
+| Stolen cards | Chargebacks, platform risk | Stripe Radar (built-in) |
+| Token sharing | Paid content leaked | Single-use tokens, 30min expiry |
+| Duplicate webhooks | Double purchase records | `stripe_payment_id` UNIQUE constraint |
+| Webhook spoofing | Fake purchase records | Stripe signature verification |
+| Brute force unlocks | Token guessing | 32-byte random tokens = impossible to brute force |
+| Email scanner pre-click | Token consumed before buyer | Browser-side confirmation step before consuming token |
 
 ---
 
-## 2. Malware Distribution
+## Link Safety (On Create)
 
-Examples:
+Every destination URL is checked before a product can go active:
 
-- links to malicious downloads
-- files containing viruses
-- phishing pages
-- credential harvesting links
+```
+1. URL format validation (must be https://)
+2. Google Safe Browsing API check
+3. Domain blacklist check
+4. Platform-specific validation (see product-validation.md)
+```
 
----
+If flagged: `links.status = 'suspended'`, seller notified.
 
-## 3. Scam Products
-
-Examples:
-
-- selling fake digital goods
-- selling empty or misleading content
-- misleading descriptions
-- bait-and-switch products
+Google Safe Browsing: free, 10K requests/day, sufficient for MVP.
 
 ---
 
-## 4. Payment Fraud
+## Webhook Security
 
-Examples:
+```typescript
+// Always verify Stripe signature — never trust raw payload
+const event = stripe.webhooks.constructEvent(
+  rawBody,           // must be raw bytes, not parsed JSON
+  req.headers['stripe-signature'],
+  process.env.STRIPE_WEBHOOK_SECRET
+)
+```
 
-- stolen credit cards
-- repeated chargebacks
-- fraudulent buyer behavior
-
----
-
-# Platform Responsibilities
-
-The platform provides:
-
-- payment processing
-- link access control
-- abuse reporting
-- moderation mechanisms
-
-The platform **does not host or verify seller content directly**.
-
-Sellers are responsible for the legality and safety of their content.
+If signature fails → return 400, capture to Sentry, do nothing.
 
 ---
 
-# Seller Identity Verification
+## Token Security
 
-All sellers must connect a verified Stripe account via **Stripe Connect**.
+```
+Raw token: crypto.randomBytes(32).toString('hex')  → 64 char hex string
+Stored:    sha256(raw_token)                        → never store raw token
+URL:       /unlock?token=<raw_token>
+Lookup:    hash incoming token → query by hash
+```
 
-Stripe performs:
-
-- identity verification (KYC)
-- bank account verification
-- fraud detection
-- tax reporting
-
-This prevents anonymous sellers.
-
-Seller identity data is managed by Stripe.
-
----
-
-# Link Safety Checks
-
-When a seller creates a product, the destination URL is scanned.
-
-Automated checks include:
-
-- Google Safe Browsing API
-- malware domain blacklist
-- suspicious domain patterns
-
-If a link is flagged:
-
-product.status = suspended
-
-The product cannot be published until reviewed.
+Token properties:
+- 32 bytes = 256 bits entropy — brute force is computationally impossible
+- SHA-256 stored — database leak doesn't expose usable tokens
+- Single-use — `used_at` set on first valid use
+- 30-minute expiry — limits exposure window
+- Browser confirmation step — prevents email scanner pre-consumption
 
 ---
 
-# File Upload Scanning (If Enabled)
+## Stripe Connect Security
 
-If the platform allows file uploads, files must be scanned.
-
-Scanning methods:
-
-- VirusTotal API
-- ClamAV malware scanning
-- file type validation
-
-Suspicious files are automatically blocked.
+- Sellers verified by Stripe (KYC deferred but required for payouts)
+- Platform never touches card data — Stripe handles PCI compliance
+- Application fee deducted by Stripe automatically — no manual fee logic
+- Seller funds held in Stripe — platform never holds money
 
 ---
 
-# Abuse Reporting System
+## Abuse Reporting
 
-Every public product page includes a **Report Abuse** option.
+Every `/pay/[slug]` page has a "Report" link (small, bottom of page).
 
-Example button:
+Report flow:
+```
+Buyer submits report (reason + description)
+→ insert abuse_reports row
+→ admin notified (email or Slack webhook)
+→ admin reviews in moderation queue
+→ if confirmed violation:
+    links.status = 'suspended'
+    seller notified
+→ if repeated violations:
+    seller account suspended
+    pending payouts reviewed
+```
 
-Report this product
-
-Reports include:
-
-- product ID
-- reporter email (optional)
-- reason for report
-- description
-
-Reports are stored in the moderation queue.
-
----
-
-# Moderation Workflow
-
-When abuse is reported:
-
-Report received
-↓
-Moderation review
-↓
-Decision
-
-Possible outcomes:
-
-## No Violation
-
-Product remains active.
-
-## Minor Violation
-
-Seller warned.
-
-## Serious Violation
-
-Actions taken:
-
-product.status = suspended
-seller.account = suspended
+Immediate suspension (no review needed):
+- Malware / phishing links
+- Illegal content
+- Large-scale fraud
 
 ---
 
-# Immediate Suspension Conditions
+## Dispute & Chargeback Handling
 
-The following violations result in immediate removal:
+Stripe handles the financial side automatically.
 
-- malware distribution
-- phishing links
-- illegal content
-- large-scale copyright violations
-- repeated scam activity
+Platform supports disputes by providing evidence:
+- `purchases.created_at` — proof of purchase timestamp
+- `unlock_tokens.used_at` — proof of delivery
+- `purchases.buyer_email` — proof of who purchased
 
----
-
-# Seller Account Suspension
-
-Accounts may be suspended if:
-
-- multiple abuse reports confirmed
-- repeated chargebacks
-- illegal content detected
-
-Suspended accounts:
-
-cannot create products
-cannot receive payouts
+When `charge.dispute.created` fires (Phase 2 webhook):
+- Mark `purchases.status = 'disputed'`
+- Alert seller
+- Provide evidence to Stripe
 
 ---
 
-# Refund and Dispute Handling
+## RLS (Row Level Security)
 
-Payments are processed through Stripe.
+All tables have RLS enabled. Key rules:
 
-Buyers may dispute transactions via:
+- **users**: read/update own row only
+- **links**: sellers manage own; anyone reads `status = 'active'` only
+- **purchases**: sellers see their own sales; buyers via service role only
+- **unlock_tokens**: service role only — never client-accessible
+- **abuse_reports**: anyone can insert; only service role reads
 
-- Stripe dispute process
-- credit card chargebacks
-
-Stripe manages:
-
-- dispute evidence
-- chargeback resolution
-- fraud detection
-
-The platform provides supporting evidence:
-
-- purchase timestamp
-- unlock timestamp
-- email verification logs
+All sensitive operations (webhook, unlock, resend) use `SUPABASE_SERVICE_ROLE_KEY`.
+Client-side code uses `NEXT_PUBLIC_SUPABASE_ANON_KEY` with RLS enforced.
 
 ---
 
-# Refund Policy
+## Rate Limiting
 
-Refund responsibility lies primarily with the seller.
+| Endpoint | Limit |
+|---|---|
+| POST /api/create-product | 5/day per user |
+| POST /api/create-checkout | 10/min per IP |
+| POST /api/resend-unlock | 3 resends/purchase/hour |
+| POST /api/report-abuse | 5/day per IP |
 
-The platform may issue refunds when:
-
-- content is clearly fraudulent
-- product violates platform rules
-- seller account is banned
-
-Refunds may be issued via Stripe.
-
----
-
-# Chargeback Monitoring
-
-The platform monitors chargeback rates.
-
-High chargeback rates trigger review.
-
-If a seller exceeds thresholds:
-
-seller.account → manual review
-
-Possible actions:
-
-- payout delay
-- account suspension
+Implement via Supabase RLS + Vercel Edge middleware or upstash/ratelimit.
 
 ---
 
-# Payment Fraud Protection
+## DMCA
 
-Stripe provides built-in fraud protection.
-
-Features include:
-
-- Stripe Radar
-- suspicious payment detection
-- card fraud prevention
-- transaction monitoring
-
-The platform relies on Stripe for payment-level fraud detection.
+Copyright complaints: `dmca@payfor.link`
+Response time: 24-48 hours
+Action: suspend link, notify seller, retain for legal hold
 
 ---
 
-# Legal Compliance
+## Data Minimization
 
-The platform complies with:
-
-- DMCA takedown procedures
-- payment provider policies
-- anti-fraud practices
-
-DMCA complaints may be submitted via:
-
-dmca@platform-domain.com
-
-Reported content will be reviewed and removed if necessary.
-
----
-
-# Platform Security Principles
-
-The platform follows these principles:
-
-1. **Minimal data storage**
-
-Only store metadata required for operations.
-
-2. **Delegation to trusted infrastructure**
-
-Stripe handles payments and identity verification.
-
-3. **Fast response to abuse**
-
-Moderation actions should occur quickly after reports.
-
-4. **Transparent policies**
-
-Users must understand acceptable behavior.
-
----
-
-# Seller Responsibilities
-
-Sellers must ensure:
-
-- they own rights to their content
-- their links do not contain malware
-- product descriptions are accurate
-
-Violations may result in:
-
-- product removal
-- account suspension
-- payout restrictions
-
----
-
-# Buyer Protection
-
-Buyers are protected through:
-
-- Stripe secure payments
-- refund options
-- dispute mechanisms
-- abuse reporting tools
-
----
-
-# Continuous Monitoring
-
-The platform will continuously monitor:
-
-- suspicious links
-- repeated reports
-- high refund rates
-- abnormal purchase patterns
-
-These signals help identify malicious actors.
-
----
-
-# Core Safety Principle
-
-The platform aims to provide **safe monetization of digital resources** while remaining lightweight.
-
-Core workflow:
-
-Create link
-↓
-Pay securely
-↓
-Unlock content
-
-Security and abuse prevention must support this simple interaction without adding excessive friction.
+- Buyer PII stored: email only (no name, no address, no card data)
+- Logs: emails masked (`h***@gmail.com`), tokens never logged
+- Sentry: no secrets, no full emails, no destination URLs in error context

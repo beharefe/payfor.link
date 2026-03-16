@@ -2,9 +2,9 @@
 
 ## Product Summary
 
-A simple platform that allows creators to monetize any link.
+A simple platform that lets anyone get paid before sharing anything.
 
-Users paste a destination link (Notion, Figma, Google Drive, etc.), set a price, and receive a pay-to-unlock URL. Buyers pay via Stripe and gain access after email verification.
+Paste any link, set a price, share the paywall URL. The other person pays via Stripe and gets access instantly by email.
 
 **Core mechanic**
 
@@ -12,35 +12,115 @@ Paste link → set price → share → buyer pays → unlock link
 
 ---
 
-# Target Users (MVP)
+# Core Value Proposition
 
-Primary users:
+**Get paid before you share anything.**
 
-- Notion template creators
-- Indie hackers
-- Freelancers selling digital resources
-- Developers selling starter kits
-- Twitter/X creators selling small digital products
+No invoices chased. No files sent before payment. No storefront needed.
 
-Example products:
-
-- Notion templates
-- Figma design kits
-- Google Sheets dashboards
-- Prompt packs
-- Resource libraries
+One link. One price. Done.
 
 ---
 
-# Core Value Proposition
+# Target Users (MVP)
 
-Sell any digital resource with a single link.
+## 1. Freelancers & Contractors
 
-No storefronts.  
-No product pages.  
-No platform lock-in.
+People who deliver work as a file or link and need payment before handing it over.
 
-Paste link → Set price → Get paid
+Examples:
+- Designer shares final Figma file after client pays
+- Developer sends source code / GitHub repo after payment
+- Video editor delivers exported file via Drive link
+- Photographer sends full-res gallery link after deposit
+- Agency delivers staging site URL once invoice is paid
+- Consultant locks calendar booking link behind a paid session fee
+
+Pain they have today: share work → wait for payment → follow up → regret sharing early
+
+---
+
+## 2. Digital Product Creators
+
+People building once and selling repeatedly.
+
+Examples:
+- Notion template creators
+- Figma UI kits and design systems
+- Google Sheets dashboards and financial models
+- Airtable and Coda templates
+- Canva template packs
+- Prompt packs and AI workflows
+- Resource libraries and swipe files
+- Developer starter kits and boilerplates
+
+Pain they have today: Gumroad/Lemon Squeezy require a full storefront setup just to sell one thing
+
+---
+
+## 3. Artists & Independent Creators
+
+People sharing creative work who want to charge for specific pieces.
+
+Examples:
+- Musician shares private SoundCloud / Google Drive track link
+- Illustrator delivers commission files after payment
+- Photographer sells individual shoots
+- Writer locks premium essays or research behind a paywall
+- Video creator shares unlisted YouTube link after payment
+- Animator delivers project files to client
+
+Pain they have today: no simple way to charge for a single piece without a full platform
+
+---
+
+## 4. Community & Access Sellers
+
+People selling access to a private space or session.
+
+Examples:
+- Private Discord or Telegram invite link
+- Paid Zoom / Google Meet session link
+- Notion workspace or database invite
+- Paid newsletter archive access
+- Private community or group access
+
+Pain they have today: manually DM-ing payment details and links, no automation
+
+---
+
+## 5. Indie Hackers & Developers
+
+People with small tools or datasets to monetize.
+
+Examples:
+- Selling a dataset as a CSV / Drive link
+- Charging for a private GitHub repo
+- Monetizing an Airtable base or API key
+- Selling access to a private tool or dashboard
+
+---
+
+# Use Cases Summary
+
+| Type | What they lock | What buyer gets |
+|---|---|---|
+| Freelancer | Figma / Drive / GitHub | Delivered work |
+| Template creator | Notion / Sheets / Figma | Duplicate template |
+| Artist | Drive / SoundCloud / Dropbox | Creative file |
+| Access seller | Discord / Telegram / Notion invite | Community access |
+| Developer | GitHub repo / dataset / API | Code or data |
+| Consultant | Calendly / cal.com link | Paid session booking |
+
+---
+
+# Core Mechanic (unchanged)
+
+Same flow for every use case:
+
+Paste link → Set price → Share → Buyer pays → Unlock
+
+The platform doesn't care what the link is. It just gates it behind a payment.
 
 ---
 
@@ -48,55 +128,57 @@ Paste link → Set price → Get paid
 
 ## Seller Features
 
-- Create account
-- Create link product
-- Paste destination link
-- Set price
-- Connect Stripe
-- Share paywall link
+- Create account (magic link, no password)
+- Create a paywall link
+- Paste any destination URL
+- Set a title, description, and price
+- Connect Stripe to receive payouts
+- Share the paywall link anywhere
 - View sales dashboard
 
 ---
 
 ## Buyer Features
 
-- View product page
+- View product / service page
 - Pay via Stripe Checkout
-- Email verification
-- Unlock content
-- Purchase library (simple history)
+- Receive unlock email instantly
+- Access the link
+- Re-access purchases via library
 
 ---
 
 ## Platform Features
 
 - Stripe Checkout
-- Stripe Connect payouts
-- Email unlock verification
+- Stripe Connect Express payouts
+- Email-based unlock (single-use token, 30min expiry)
+- Token resend flow
 - Basic abuse reporting
+- URL safety check (Google Safe Browsing)
 - Simple analytics events
 
 ---
 
-# User Flow
+# User Flows
 
 ## Seller Flow
 
 Sign up
 ↓
-Create product
+Create paywall link
 ↓
-Paste destination link
+Paste destination URL
 ↓
-Set price
+Set title + price
 ↓
-Before publishing → connect Stripe
+Connect Stripe (before going live)
 ↓
 Share paywall link
 
-Example shared link:
+Example:
 
-domain.com/notion-crm-template
+payfor.link/pay/brand-identity-final-files
 
 ---
 
@@ -104,15 +186,13 @@ domain.com/notion-crm-template
 
 Open paywall link
 ↓
-View product page
+View product/service page
 ↓
-Stripe checkout
+Pay via Stripe
 ↓
-Payment success
+Receive unlock email
 ↓
-Email verification
-↓
-Unlock destination link
+Click link → access content
 
 ---
 
@@ -121,8 +201,8 @@ Unlock destination link
 ## Marketing
 
 /
-pricing
-how-it-works
+/pricing
+/how-it-works
 
 ---
 
@@ -131,13 +211,16 @@ how-it-works
 /dashboard
 /create
 /product/[id]
+/settings
 
 ---
 
 ## Buyer
 
-/pay/[linkId]
-/unlock/[linkId]
+/pay/[slug]
+/pay/[slug]/success
+/unlock
+/unlock-request
 /library
 
 ---
@@ -160,7 +243,7 @@ how-it-works
 
 ## Payments
 
-- Stripe Checkout
+- Stripe Checkout (hosted redirect)
 - Stripe Connect Express
 
 ---
@@ -168,12 +251,13 @@ how-it-works
 ## Email
 
 - Resend (transactional emails)
+- Custom SMTP with SPF/DKIM/DMARC configured
 
 ---
 
 ## Analytics
 
-- Amplitude (free plan) or PostHog
+- PostHog (preferred) or Amplitude free plan
 
 ---
 
@@ -181,34 +265,49 @@ how-it-works
 
 ## users
 
-id
-email
-name
-stripe_account_id
-created_at
+id uuid
+email text
+name text
+stripe_account_id text
+created_at timestamp
 
 ---
 
 ## links
 
-id
-seller_id
-title
-destination_url
-price
-description
-created_at
+id uuid
+seller_id uuid
+slug text unique
+title text
+description text
+destination_url text
+price numeric
+status text  -- draft | active | suspended | deleted
+created_at timestamp
 
 ---
 
 ## purchases
 
-id
-link_id
-buyer_email
-stripe_payment_id
-amount
-created_at
+id uuid
+link_id uuid
+buyer_email text
+stripe_payment_id text unique
+amount numeric
+delivery_url text  -- snapshot at purchase time
+status text        -- paid | refunded | disputed
+created_at timestamp
+
+---
+
+## unlock_tokens
+
+id uuid
+purchase_id uuid
+token_hash text
+expires_at timestamp
+used_at timestamp
+created_at timestamp
 
 ---
 
@@ -219,6 +318,7 @@ POST /api/create-checkout
 POST /api/stripe-webhook
 POST /api/connect-stripe
 GET  /api/purchases
+POST /api/unlock-request
 
 ---
 
@@ -226,26 +326,15 @@ GET  /api/purchases
 
 ## Stripe Checkout
 
-Handles buyer payments.
-
-Features:
-
-- payment UI
-- card validation
-- receipts
+Handles buyer payments — payment UI, card validation, Apple Pay, Google Pay, receipts.
 
 ---
 
 ## Stripe Connect Express
 
-Handles seller payouts.
+Handles seller payouts — identity verification, bank onboarding, automatic payouts, tax compliance.
 
-Features:
-
-- seller identity verification
-- bank account onboarding
-- automatic payouts
-- tax compliance
+Platform fee: 4.5% collected as Stripe Connect application fee per transaction.
 
 ---
 
@@ -253,38 +342,44 @@ Features:
 
 Basic protections:
 
-- Google Safe Browsing link scan
-- domain blacklist
-- report abuse button
+- Google Safe Browsing API on destination URL
+- Domain blacklist check
+- Report abuse button on every paywall page
 
 Abuse handling:
 
-report → review → disable link → ban seller
+report → review → suspend link → ban seller
 
 ---
 
 # SEO Strategy
 
-Landing pages targeting creator queries:
+Landing pages targeting both creator and freelancer queries:
 
-/paywall-link
 /sell-notion-template
-/monetize-google-drive
 /sell-figma-template
+/monetize-google-drive
+/sell-ai-prompts
+/paywall-a-link
+/get-paid-before-sharing
+/freelance-file-delivery
+/sell-digital-downloads
+/charge-for-discord-access
+/sell-design-files
 
-Goal: capture creator search traffic.
+Goal: capture search traffic from both digital product creators and freelancers looking for simple payment solutions.
 
 ---
 
 # Analytics Events
-
-Track minimal events:
 
 signup
 product_created
 checkout_started
 payment_success
 unlock_success
+unlock_resent
+token_expired
 
 ---
 
@@ -292,57 +387,59 @@ unlock_success
 
 ## Phase 1 — Core MVP
 
-Build:
-
-- auth
-- create link
-- paywall page
-- Stripe checkout
-- webhook payment handling
-- unlock page
+- Auth (magic link)
+- Create paywall link
+- Paywall page
+- Stripe Checkout
+- Webhook payment handling
+- Unlock email + token
+- Unlock page
+- Token resend flow
 
 ---
 
 ## Phase 2 — Seller Dashboard
 
-Add:
-
-- product list
-- sales table
-- Stripe connect onboarding
+- Product list
+- Sales table with revenue breakdown
+- Stripe Connect onboarding
+- Product edit / delete
 
 ---
 
-## Phase 3 — Product Polish
+## Phase 3 — Polish
 
-Add:
-
-- buyer purchase library
-- preview images
-- abuse reporting
+- Buyer purchase library
+- Refund flow (seller-initiated)
+- Abuse reporting UI
 - SEO landing pages
+- Preview image support
 
 ---
 
 # Success Metrics
 
-Early traction indicators:
+Early traction targets:
 
-20 sellers
+20 active sellers
 100 purchases
 
 Key metrics:
 
-- active sellers
-- products created
-- total purchases
+- Active sellers (at least 1 sale)
+- Products created
+- Total purchases
 - GMV (gross merchandise volume)
+- Platform fee revenue (GMV × 4.5%)
+- Unlock success rate (payments that result in successful unlocks)
 
 ---
 
 # Core Product Principle
 
-Keep the product extremely simple.
+**Get paid before you share anything.**
+
+The entire system exists to solve one problem: people share links before getting paid and regret it.
 
 Lock link
 ↓
@@ -350,4 +447,6 @@ Pay
 ↓
 Unlock
 
-Complex storefront features are intentionally excluded from the MVP.
+Works for templates. Works for freelance deliverables. Works for creative files. Works for community access.
+
+The link type doesn't matter. The mechanic is universal.

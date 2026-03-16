@@ -1,402 +1,231 @@
-# payfor.link — System Flows & Core Logic
+# System Flows
 
 ## Overview
 
-This document describes the high-level system flows and business logic for the Paywall Link platform.
+Actors: Seller, Buyer, Platform (Next.js), Stripe, Resend, Supabase
 
-The platform enables creators to monetize any digital resource (links, files, datasets) by creating a pay-to-unlock URL.
-
-Core mechanic:
-
-Create link → Pay → Verify → Unlock
-
-Actors in the system:
-
-- Seller (creator of a paid link)
-- Buyer (person purchasing access)
-- Platform (Next.js + backend logic)
-- Stripe (payment + payout infrastructure)
+Core mechanic: Lock link → Pay → Unlock
 
 ---
 
-# Core System Entities
+## 1. Seller Onboarding
 
-## User (Seller)
-
-Represents a creator using the platform to sell links.
-
-Properties:
-
-- id
-- email
-- name
-- stripe_account_id
-- created_at
+```
+Seller visits payfor.link
+→ enters email → Supabase magic link sent
+→ clicks link → authenticated
+→ users row upserted (id = auth.uid())
+→ lands on /dashboard (empty state)
+→ clicks "Create link"
+```
 
 ---
 
-## Link (Product)
+## 2. Create Product
 
-Represents a monetized resource.
-
-Properties:
-
-- id
-- seller_id
-- title
-- description
-- destination_url
-- price
-- created_at
-- status
-
-Status options:
-
-- active
-- suspended
-- deleted
+```
+Seller fills form: title, description, destination URL, price
+→ POST /api/create-product
+→ validate URL format
+→ Google Safe Browsing check
+→ detect platform (notion/figma/drive/github/other)
+→ platform-specific validation (see product-validation.md)
+→ auto-generate slug from title + collision check
+→ insert links row:
+    status = 'draft' (if Stripe not connected)
+    status = 'active' (if Stripe already connected)
+→ redirect to /product/[id]
+```
 
 ---
 
-## Purchase
+## 3. Stripe Connect — Deferred Onboarding
 
-Represents a completed payment for a link.
+### Phase A: Connect (minimal friction, no KYC)
 
-Properties:
+```
+Seller clicks "Connect Stripe"
+→ POST /api/connect-stripe
+→ stripe.accounts.create({ type: 'express', email }) if no account yet
+→ stripe.accountLinks.create({
+    type: 'account_onboarding',
+    collect: 'eventually_due'   ← deferred KYC
+  })
+→ redirect to Stripe
+→ seller authorizes (email only, no ID docs)
+→ returns to /connect/return
+→ stripe.accounts.retrieve() → check charges_enabled
+→ update users:
+    stripe_connected = true
+    stripe_charges_enabled = true/false
+    stripe_details_submitted = true/false
+→ activate all seller's draft links → status = 'active'
+→ redirect to /dashboard
+```
 
-- id
-- link_id
-- buyer_email
-- stripe_payment_id
-- amount
-- created_at
+**Why `eventually_due`**: Sellers have no earnings at signup. Requiring KYC causes dropoffs. Defer to payout time.
 
----
+### Phase B: Earnings accumulate (no action needed)
 
-# High-Level Flows
+```
+Buyers pay → checkout.session.completed webhook
+→ money held in seller's Stripe connected account
+→ platform fee (4.5%) deducted automatically
+→ seller sees balance in dashboard (queried from Stripe)
+→ payouts_enabled = false until KYC done
+```
 
-## 1. Seller Onboarding Flow
+### Phase C: Withdraw (KYC triggered here)
 
-Goal: allow creators to start selling links.
-
-Flow:
-
-Seller visits platform
-↓
-Creates account (email magic login)
-↓
-Access dashboard
-↓
-Creates first link product
-↓
-Before publishing → connect Stripe
-↓
-Stripe Connect onboarding
-↓
-Seller receives shareable paywall link
-
-Key logic:
-
-- Seller must connect Stripe before selling
-- Stripe account ID is stored in `users.stripe_account_id`
-
----
-
-## 2. Create Link Product Flow
-
-Goal: seller creates a monetized link.
-
-Flow:
-
-Seller opens dashboard
-↓
-Clicks “Create Product”
-↓
-Inputs:
-	•	title
-	•	description
-	•	destination URL
-	•	price
-↓
-System validates URL
-↓
-System performs safety checks
-↓
-Link stored in database
-↓
-Platform generates public paywall URL
-
-Example generated URL:
-
-domain.com/pay/notion-crm-template
-
-Logic checks:
-
-- URL format validation
-- optional malware check
-- optional domain blacklist
+```
+Seller clicks "Withdraw funds"
+→ GET stripe.balance.retrieve({ stripeAccount })
+→ if payouts_enabled = false:
+    → stripe.accountLinks.create({ collect: 'currently_due' })
+    → redirect to Stripe KYC
+    → seller completes identity + bank account
+    → account.updated webhook fires
+→ if payouts_enabled = true:
+    → Stripe handles payout to bank automatically
+    → query stripe.payouts.list() for history display
+```
 
 ---
 
-## 3. Buyer Purchase Flow
+## 4. Buyer Purchase Flow
 
-Goal: buyer purchases access to content.
-
-Flow:
-
-Buyer opens paywall link
-↓
-Product page loads
-↓
-Buyer clicks “Pay”
-↓
-Platform creates Stripe Checkout session
-↓
-Buyer redirected to Stripe
-↓
-Buyer completes payment
-
-Stripe responsibilities:
-
-- payment processing
-- card validation
-- fraud detection
-- receipt generation
+```
+Buyer opens /pay/[slug]
+→ fetch link where status = 'active'
+→ buyer clicks "Pay $X & Get Access"
+→ POST /api/create-checkout
+→ Stripe Checkout session created with:
+    application_fee_amount = price * 0.045
+    transfer_data.destination = seller.stripe_account_id
+→ buyer redirected to Stripe hosted checkout
+→ buyer enters payment details
+→ Stripe processes payment
+→ buyer redirected to /pay/[slug]/success?session_id=xxx
+```
 
 ---
 
-## 4. Payment Confirmation Flow
+## 5. Payment Confirmation (Webhook)
 
-Goal: platform confirms payment and records purchase.
+```
+Stripe fires checkout.session.completed
+→ POST /api/stripe-webhook
+→ verify Stripe signature
+→ check purchases.stripe_payment_id (idempotency — skip if exists)
+→ fetch link by metadata.link_id
+→ insert purchase:
+    delivery_url = links.destination_url (SNAPSHOT)
+    product_title = links.title (SNAPSHOT)
+    price_paid = session.amount_total / 100 (SNAPSHOT)
+    platform_fee = price_paid * 0.045
+    link_version = links.version (SNAPSHOT)
+    buyer_email = session.customer_email
+    seller_id = links.seller_id
+→ UPDATE links SET total_sales++, total_revenue += price_paid
+→ UPDATE users SET total_earned += price_paid, total_fees += platform_fee
+→ generate unlock token:
+    raw = crypto.randomBytes(32).toString('hex')
+    hash = sha256(raw)
+    insert unlock_tokens: { purchase_id, token_hash, expires_at: now + 30min }
+→ send unlock email via Resend with raw token in URL
+→ return 200 immediately
+```
 
-Flow:
-
-Stripe payment completed
-↓
-Stripe sends webhook event
-↓
-Platform receives webhook
-↓
-Verify webhook signature
-↓
-Create purchase record in database
-↓
-Send unlock email to buyer
-
-Webhook event used:
-
-checkout.session.completed
-
-Database logic:
-
-create purchase:
-link_id
-buyer_email
-stripe_payment_id
-amount
+**Critical**: Always return 200. Capture errors to Sentry before returning.
 
 ---
 
-## 5. Email Verification & Unlock Flow
+## 6. Stripe Account Updated (Webhook)
 
-Goal: ensure only the buyer accesses the content.
-
-Flow:
-
-Buyer receives unlock email
-↓
-Clicks magic unlock link
-↓
-Platform verifies purchase record
-↓
-Buyer confirms email
-↓
-Platform generates temporary unlock session
-↓
-Redirect buyer to destination URL
-
-Security logic:
-
-- email must match purchase record
-- unlock session may expire after a time window
+```
+Stripe fires account.updated
+→ find user by stripe_account_id
+→ update:
+    stripe_charges_enabled = account.charges_enabled
+    stripe_payouts_enabled = account.payouts_enabled
+    stripe_details_submitted = account.details_submitted
+→ if payouts_enabled just became true:
+    → send seller email: "Identity verified — you can now withdraw"
+→ return 200
+```
 
 ---
 
-## 6. Seller Revenue Flow
+## 7. Unlock Flow
 
-Goal: distribute payments to sellers.
+```
+Buyer clicks link in email: /unlock?token=abc123
+→ hash token: sha256(abc123)
+→ lookup unlock_tokens by token_hash
+→ validate:
+    exists? → else: show "invalid link"
+    expires_at > now()? → else: show "link expired" + resend option
+    used_at IS NULL? → else: show "already used" + library link
+→ mark used_at = now()
+→ fetch purchase.delivery_url
+→ 302 redirect → delivery_url
+```
 
-Flow:
-
-Buyer pays via Stripe Checkout
-↓
-Stripe processes payment
-↓
-Platform collects application fee
-↓
-Remaining amount sent to seller Stripe account
-↓
-Stripe pays seller bank account
-
-Platform never holds seller funds.
-
-Stripe Connect handles:
-
-- payouts
-- identity verification
-- tax compliance
+**Browser-side confirmation step**: Don't consume token on GET — show a "Click to access" button first. This prevents email scanners from pre-clicking and consuming the token.
 
 ---
 
-## 7. Buyer Purchase Library Flow
+## 8. Token Resend / Expired Flow
 
-Goal: allow buyers to re-access purchases.
-
-Flow:
-
-Buyer logs in with email
-↓
-System fetches purchases by email
-↓
-Display purchase list
-↓
-Buyer clicks product
-↓
-Unlock flow triggered
-
-Example data query:
-
-SELECT * FROM purchases WHERE buyer_email = user_email
+```
+Buyer clicks "Resend" or visits /unlock-request
+→ enters email
+→ POST /api/resend-unlock
+→ find purchases by buyer_email where status = 'paid'
+→ rate limit: max 3 active tokens per purchase per hour
+→ for each purchase:
+    generate new token
+    insert unlock_tokens
+    send unlock email
+→ show "Check your inbox"
+```
 
 ---
 
-# Abuse & Safety Flow
+## 9. Buyer Library
 
-Goal: prevent malicious or illegal content.
-
-Detection methods:
-
-- domain reputation checks
-- Google Safe Browsing API
-- manual reports
-
-User reporting flow:
-
-User clicks “Report Product”
-↓
-Report stored in moderation queue
-↓
-Admin reviews report
-↓
-If violation confirmed:
-suspend link
-disable seller
-
-Suspended links return:
-
-Product unavailable
+```
+Buyer visits /library
+→ enters email
+→ Supabase magic link sent (buyer-scoped session)
+→ buyer clicks link → authenticated
+→ fetch purchases by buyer_email
+→ show list: product title, date, amount, "Re-access" button
+→ "Re-access" → triggers resend flow for that purchase
+```
 
 ---
 
-# Stripe Integration Logic
+## 10. Abuse Report
 
-## Checkout Creation
-
-Endpoint:
-
-POST /api/create-checkout
-
-Logic:
-
-receive link_id
-↓
-fetch product
-↓
-create Stripe Checkout session
-↓
-include seller Stripe account
-↓
-redirect buyer to Stripe
+```
+Buyer clicks "Report" on /pay/[slug]
+→ fill reason + optional description
+→ POST /api/report-abuse
+→ insert abuse_reports row
+→ admin reviews in moderation queue
+→ if confirmed: links.status = 'suspended', notify seller
+```
 
 ---
 
-## Webhook Handler
+## Webhook Events
 
-Endpoint:
+```bash
+# Local dev
+stripe listen \
+  --forward-to localhost:3000/api/stripe-webhook \
+  --events checkout.session.completed,account.updated
 
-POST /api/stripe-webhook
-
-Logic:
-
-verify Stripe signature
-↓
-detect event type
-↓
-if checkout.session.completed:
-record purchase
-trigger unlock email
-
----
-
-# Security Principles
-
-Platform responsibilities:
-
-- verify Stripe webhooks
-- validate URLs
-- restrict malicious domains
-- allow abuse reporting
-- maintain purchase verification
-
-Platform does NOT:
-
-- host seller content
-- guarantee seller product quality
-- process payouts directly
-
-Stripe handles:
-
-- payments
-- fraud detection
-- seller identity
-- chargebacks
-
----
-
-# Scaling Considerations
-
-The architecture supports early scaling:
-
-Next.js (Vercel)
-↓
-Supabase (Postgres)
-↓
-Stripe
-
-Expected capabilities:
-
-- thousands of sellers
-- tens of thousands of purchases
-- minimal infrastructure complexity
-
-Future scaling areas:
-
-- caching paywall pages
-- background job queues
-- link analytics
-
----
-
-# Core Design Principle
-
-The product should remain extremely simple.
-
-The entire system is built around a single interaction:
-
-Lock link
-↓
-Pay
-↓
-Unlock
-
-All additional features should support this core mechanic without increasing complexity.
+# Production: configure both events in Stripe Dashboard → Webhooks
+```

@@ -1,107 +1,151 @@
-#  System Architecture Diagram
+# System Architecture
 
-## Mermaid
+## Stack Overview
 
-```mermaid
-flowchart TD
-    A[Seller] --> B[Next.js App on Vercel]
-    C[Buyer] --> B
+```
+Browser (Seller / Buyer)
+        ↓
+Next.js App Router (Vercel)
+        ↓
+┌────────────────────────────────────────┐
+│              Services                  │
+│                                        │
+│  Supabase Auth    Supabase Postgres    │
+│  Stripe Checkout  Stripe Connect       │
+│  Resend Email     Google Safe Browsing │
+│  Axiom Logs       Amplitude Analytics  │
+│  Sentry Errors                         │
+└────────────────────────────────────────┘
+```
 
-    B --> D[Supabase Auth]
-    B --> E[Supabase Postgres]
-    B --> F[Stripe Checkout]
-    B --> G[Stripe Connect]
-    B --> H[Resend Email]
-    B --> I[Safe Browsing / URL Checks]
+---
 
-    F --> J[Stripe Webhook]
-    J --> B
+## Request Flows
 
-    B --> K[Unlock Logic]
-    K --> E
-    K --> H
-    K --> L[Destination URL<br/>Notion / Figma / Drive / etc.]
+### Seller creates a product
+```
+Browser → POST /api/create-product
+  → Supabase: insert links row
+  → Google Safe Browsing: validate URL
+  ← return { slug, paywall_url }
+```
 
-    G --> M[Seller Bank Account]
+### Buyer pays
+```
+Browser → POST /api/create-checkout
+  → Stripe: create Checkout Session
+  ← return { url }
+Browser → redirect to Stripe hosted checkout
+Stripe → POST /api/stripe-webhook (checkout.session.completed)
+  → Supabase: insert purchases row
+  → Resend: send unlock email
+  ← 200 OK
+Browser → /pay/[slug]/success
+```
 
-    E --> N[Users]
-    E --> O[Links]
-    E --> P[Purchases]
+### Buyer unlocks
+```
+Email link → GET /unlock?token=xxx
+  → Supabase: validate unlock_tokens
+  → mark token used
+  ← 302 redirect → delivery_url (e.g. notion.so/template)
+```
 
+### Seller withdraws
+```
+Browser → "Withdraw funds"
+  → Stripe: check balance (stripe.balance.retrieve)
+  → if KYC needed: Stripe accountLinks → KYC flow
+  → Stripe: account.updated webhook → sync payouts_enabled
+  → Stripe: handles payout to bank automatically
+```
 
-⸻
+---
 
-ASCII
+## Sequence Diagram
 
-                    +---------------------+
-                    |       Seller        |
-                    +----------+----------+
-                               |
-                               v
-+---------------------+   +------------------------+   +----------------------+
-|        Buyer        +-->+  Next.js App (Vercel)  +-->|  Supabase Auth       |
-+----------+----------+   +-----------+------------+   +----------------------+
-           |                          |
-           |                          +-----------------> Supabase Postgres
-           |                          |                   - users
-           |                          |                   - links
-           |                          |                   - purchases
-           |                          |
-           |                          +-----------------> Stripe Checkout
-           |                          |
-           |                          +<---------------- Stripe Webhook
-           |                          |
-           |                          +-----------------> Stripe Connect
-           |                          |                   (seller onboarding,
-           |                          |                    payouts)
-           |                          |
-           |                          +-----------------> Resend Email
-           |                          |
-           |                          +-----------------> Safe Browsing / URL Scan
-           |                          |
-           |                          +-----------------> Unlock Logic
-           |                                              |
-           |                                              v
-           |                                   +----------------------+
-           +---------------------------------->|  Destination URL     |
-                                               | Notion / Figma /     |
-                                               | Drive / GitHub / etc |
-                                               +----------------------+
+```
+Seller          App             Supabase        Stripe          Resend
+  |               |                |               |               |
+  |-- create ----→|                |               |               |
+  |               |-- insert -----→|               |               |
+  |               |-- safe browse →|               |               |
+  |←- paywall URL-|                |               |               |
+  |               |                |               |               |
+  |-- connect ----→|               |               |               |
+  |               |-- create acct →               |               |
+  |               |←- account_id --|               |               |
+  |               |-- account link→|               |               |
+  |←- redirect ---|                |               |               |
+  |                                                |               |
 
-Stripe Connect
-      |
-      v
-+----------------------+
-| Seller Bank Account  |
-+----------------------+
+Buyer           App             Supabase        Stripe          Resend
+  |               |                |               |               |
+  |-- /pay/slug --→|               |               |               |
+  |               |-- fetch link --→|              |               |
+  |←- paywall page|                |               |               |
+  |-- pay --------→|               |               |               |
+  |               |-- create session ------------->|               |
+  |←- redirect ---|                |               |               |
+  |-- pays ------->|               |               |               |
+  |               |←- webhook -----|               |               |
+  |               |-- insert purchase →|           |               |
+  |               |-- send email --|               |-------------->|
+  |←- unlock email|                |               |               |
+  |-- /unlock?token →|             |               |               |
+  |               |-- validate ----→|              |               |
+  |               |-- mark used ---→|              |               |
+  |←- 302 redirect|                |               |               |
+  |-- notion.so -->|               |               |               |
+```
 
+---
 
-⸻
+## Data Flow Principles
 
-Main Runtime Flow
+1. **Supabase** — stores metadata: users, links, purchases, tokens, reports
+2. **Stripe** — owns all financial data: payments, payouts, balances, KYC
+3. **Resend** — owns email delivery logs
+4. **Axiom** — owns application logs (via pino + next-axiom)
+5. **Sentry** — owns error events
+6. **Amplitude** — owns analytics events
 
-sequenceDiagram
-    participant S as Seller
-    participant App as Next.js App
-    participant DB as Supabase
-    participant Stripe as Stripe
-    participant Email as Resend
-    participant B as Buyer
-    participant Dest as Destination URL
+Platform never duplicates data that external services own authoritatively.
 
-    S->>App: Create product
-    App->>DB: Save link/product
-    S->>App: Connect Stripe
-    App->>Stripe: Stripe Connect onboarding
+---
 
-    B->>App: Open paywall page
-    B->>App: Click pay
-    App->>Stripe: Create Checkout Session
-    B->>Stripe: Complete payment
-    Stripe->>App: Webhook: checkout.session.completed
-    App->>DB: Create purchase
-    App->>Email: Send unlock email
+## API Routes
 
-    B->>App: Open unlock link / verify email
-    App->>DB: Check purchase
-    App->>Dest: Redirect buyer
+```
+POST /api/create-product          seller creates link
+POST /api/create-checkout         buyer initiates payment
+POST /api/stripe-webhook          Stripe events (checkout.completed, account.updated)
+POST /api/connect-stripe          seller initiates Stripe Connect
+GET  /api/connect-stripe/return   post-OAuth return handler
+GET  /api/connect-stripe/refresh  re-trigger onboarding if expired
+POST /api/resend-unlock           resend unlock email
+POST /api/report-abuse            buyer reports product
+GET  /api/purchases               seller fetches their sales
+```
+
+---
+
+## Page Routes
+
+```
+/                           marketing homepage
+/how-it-works               education page
+/pricing                    fee structure
+
+/auth                       magic link login (sellers)
+/dashboard                  seller home
+/create                     create new product
+/product/[id]               product detail + management
+/settings                   account settings
+
+/pay/[slug]                 public paywall page (buyer)
+/pay/[slug]/success         post-payment confirmation
+/unlock                     token validation + redirect
+/unlock-request             request new unlock link
+/library                    buyer purchase history
+```

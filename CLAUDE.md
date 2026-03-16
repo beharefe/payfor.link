@@ -1,6 +1,6 @@
 # payfor.link
 
-A minimal platform where sellers paste any link, set a price, and share a paywall URL. Buyers pay via Stripe and receive email-based access.
+A minimal platform where sellers paste any link, set a price, and share a paywall URL. Buyers pay via Stripe and receive email-based access. No storefronts, no platform lock-in.
 
 **Core mechanic**: Lock link → Pay → Unlock
 
@@ -10,149 +10,239 @@ A minimal platform where sellers paste any link, set a price, and share a paywal
 
 | Layer | Tech |
 |---|---|
-| Frontend / Backend | Next.js (App Router) |
+| Frontend / Backend | Next.js 15 (App Router) |
 | Hosting | Vercel |
 | Database + Auth | Supabase (Postgres + magic link auth) |
 | Payments | Stripe Checkout + Stripe Connect Express |
 | Email | Resend |
-| Analytics | Amplitude or PostHog |
+| Analytics | Amplitude (10M events/month free) |
+| Logging | pino + next-axiom → Axiom (500MB/day, 30d retention free) |
+| Error Tracking | Sentry |
 
 ---
 
-## Docs
-
-Read these before writing any code:
+## Docs — Read Before Writing Any Code
 
 | Doc | Path | What it covers |
 |---|---|---|
+| **Build Plan** | `/docs/build-plan.md` | Schema, build order, step-by-step logic per feature — START HERE |
 | PRD | `/docs/prd.md` | Product summary, features, phases, success metrics |
-| System Flows | `/docs/flows.md` | All high-level flows: seller, buyer, payment, unlock, revenue |
-| Architecture | `/docs/architecture.md` | System architecture diagram (Mermaid + ASCII) |
-| Database | `/docs/database.md` | Schema, entity relationships, external service data flows |
-| UX Spec | `/docs/ux.md` | Design system, colors, components, every page layout |
-| Revenue | `/docs/revenue.md` | Fee model (4.5%), pricing strategy, future plans |
+| System Flows | `/docs/flows.md` | All flows including corrected Stripe Connect deferred onboarding |
+| Architecture | `/docs/architecture.md` | System diagram |
+| Database | `/docs/database.md` | Entity relationships, external service data flows |
+| UX Spec | `/docs/ux.md` | Design system, colors (WeTransfer palette), components, every page layout |
+| Revenue | `/docs/revenue.md` | Fee model (4.5%), future pricing tiers |
 | Security | `/docs/security.md` | Abuse handling, link safety, moderation workflow |
-| SEO | `/docs/seo.md` | Marketing page strategy, content standards, metadata rules |
-| Delivery | `/docs/delivery.md` | Token-based unlock system, anti-abuse measures |
+| SEO | `/docs/seo.md` | Marketing page strategy, metadata rules, AI bot crawling |
+| Delivery | `/docs/delivery.md` | Token-based unlock system, anti-abuse |
 | Template Delivery | `/docs/template-delivery.md` | Notion/Figma/Drive/GitHub delivery specifics |
 | Creator Onboarding | `/docs/creator-onboarding.md` | Per-platform setup guides for sellers |
 | Product Validation | `/docs/product-validation.md` | Pre-publish link validation rules |
-| ADR-001 | `/docs/adr/adr-001.md` | Link lifecycle, purchase model, tokens, slugs, pricing floor |
-| ADR-002 | `/docs/adr/adr-002.md` | Delivery URL snapshot, refund UX, token expiry, final schema |
+| Logging | `/docs/logging.md` | pino + Axiom setup, structured logging patterns |
+| Analytics | `/docs/analytics.md` | Amplitude setup, 5 core events, server-side tracking |
+| Error Tracking | `/docs/error-tracking.md` | Sentry setup, critical errors, alerts |
+| ADR-001 | `/docs/adr/adr-001.md` | Link lifecycle, tokens, slugs, pricing floor decisions |
+| ADR-002 | `/docs/adr/adr-002.md` | Delivery URL snapshot, refund UX, token expiry, schema |
 
 ---
 
-## Key Decisions (summary)
+## Environment Variables
 
-**Auth**
-- Magic link only via Supabase — no passwords ever
-- Sellers = Supabase users
+```env
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+
+# Stripe
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=        # from: stripe listen --forward-to localhost:3000/api/stripe-webhook
+
+# Resend
+RESEND_API_KEY=
+RESEND_FROM_EMAIL=noreply@payfor.link
+
+# Axiom (logging)
+NEXT_PUBLIC_AXIOM_DATASET=
+NEXT_PUBLIC_AXIOM_TOKEN=
+
+# Amplitude (analytics)
+NEXT_PUBLIC_AMPLITUDE_API_KEY=
+
+# Sentry (error tracking)
+SENTRY_DSN=
+SENTRY_AUTH_TOKEN=
+
+# Google Safe Browsing
+GOOGLE_SAFE_BROWSING_API_KEY=
+
+# App
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+---
+
+## Key Architecture Decisions
+
+### Auth
+- Magic link only (Supabase) — no passwords ever
+- Sellers = Supabase users with row in `users` table
 - Buyers = email only, no account required
+- Middleware protects: `/dashboard`, `/create`, `/product/*`, `/settings`
 
-**Links**
-- Status enum: `draft` | `active` | `suspended` | `deleted`
-- Slug auto-generated from title, collision-handled (`notion-crm-template-2`)
+### Stripe Connect — Deferred Onboarding
+- Sellers connect Stripe with `collect: 'eventually_due'` — no KYC upfront
+- Links go active immediately after OAuth
+- KYC only triggered when seller clicks "Withdraw funds"
+- `account.updated` webhook syncs `charges_enabled` + `payouts_enabled`
+- **Never store payouts in DB** — query Stripe directly: `stripe.payouts.list({}, { stripeAccount: id })`
+
+### Links
+- Status: `draft` → `active` → `suspended` | `deleted`
+- Draft until seller connects Stripe → then auto-activates
+- Slug auto-generated from title, collision-handled
 - Minimum price: $3
-- Limits: 20 links per user, 5 per day
+- Rate limits: 20 links/user, 5/day
+- `version` auto-increments via DB trigger on seller edits
 
-**Purchases**
-- `purchases.delivery_url` is snapshotted at purchase time — never read from `links.destination_url`
-- This ensures deleted/edited products don't break existing buyer access
-- Idempotency: `stripe_payment_id` is UNIQUE — duplicate webhooks ignored
-- Status enum: `paid` | `refunded` | `disputed`
+### Purchases — Immutable Snapshots
+- `delivery_url` — snapshot at purchase time, NEVER re-read from `links`
+- `product_title` — snapshot
+- `price_paid` — snapshot
+- `platform_fee` — 4.5% of price_paid, stored for accounting
+- `link_version` — which version was purchased
+- `stripe_payment_id` — UNIQUE constraint for webhook idempotency
 
-**Unlock tokens**
-- Separate `unlock_tokens` table (not stored in purchases)
-- 32-byte random, stored hashed, single-use, 30-minute expiry
-- Multiple tokens per purchase allowed (for resend flows)
-- Browser-side confirmation step before consuming token (prevents email scanner pre-click)
+### Unlock Tokens
+- 32-byte random, stored as SHA-256 hash
+- 30-minute expiry
+- Single-use (`used_at` timestamp)
+- Multiple tokens per purchase allowed (resend flow)
+- Browser-side confirmation before consuming (prevents email scanner pre-click)
+- Separate `unlock_tokens` table — never store on `purchases`
 
-**Payments**
-- Platform fee: 4.5% via Stripe Connect application fee
-- Stripe Checkout: hosted redirect for MVP
-- Seller must connect Stripe before going live (Stripe Connect Express)
-- Platform never holds seller funds
+### Webhooks (2 events only)
+```
+checkout.session.completed  → create purchase → generate token → send email
+account.updated             → sync Stripe Connect status → notify seller on KYC complete
+```
 
-**Database schema (final)**
+### Payouts
+- **No payouts table** — Stripe is source of truth
+- Query: `stripe.payouts.list({}, { stripeAccount: seller.stripe_account_id })`
+- Store only: `users.total_earned`, `users.total_fees`, `users.total_paid_out` for fast dashboard
+
+---
+
+## Final Database Schema
 
 ```sql
--- users
-id uuid
-email text
+-- users (sellers)
+id uuid PK → auth.users.id
+email text UNIQUE
 name text
-stripe_account_id text
-created_at timestamp
+stripe_account_id text UNIQUE
+stripe_connected boolean DEFAULT false        -- OAuth complete → can sell
+stripe_charges_enabled boolean DEFAULT false  -- can accept payments
+stripe_payouts_enabled boolean DEFAULT false  -- KYC complete → can withdraw
+stripe_details_submitted boolean DEFAULT false
+total_earned numeric(10,2) DEFAULT 0
+total_fees numeric(10,2) DEFAULT 0
+total_paid_out numeric(10,2) DEFAULT 0
+username text UNIQUE                          -- Phase 2
+avatar_url text                               -- Phase 2
+bio text                                      -- Phase 2
+created_at, updated_at timestamptz
 
--- links
-id uuid
-seller_id uuid → users.id
-slug text unique
-title text
-description text
+-- links (products)
+id uuid PK
+seller_id uuid FK → users.id
+slug text UNIQUE per seller
+title, description text
 destination_url text
-price numeric
-status text  -- draft | active | suspended | deleted
-created_at timestamp
+price numeric(10,2) CHECK >= 3.00
+currency text DEFAULT 'usd'
+status text CHECK IN (draft|active|suspended|deleted) DEFAULT 'draft'
+version integer DEFAULT 1                     -- auto-incremented by trigger
+preview_image_url text                        -- Phase 2
+cta_text text                                 -- Phase 2
+expires_at timestamptz                        -- Phase 2
+max_purchases integer                         -- Phase 2
+total_sales integer DEFAULT 0
+total_revenue numeric(10,2) DEFAULT 0
+reported_at timestamptz
+suspended_reason text
+created_at, updated_at timestamptz
 
--- purchases
-id uuid
-link_id uuid → links.id
+-- purchases (immutable snapshots)
+id uuid PK
+link_id uuid FK → links.id
+seller_id uuid FK → users.id
 buyer_email text
-stripe_payment_id text unique
-amount numeric
-delivery_url text  -- snapshot of destination_url at purchase time
-status text        -- paid | refunded | disputed
-created_at timestamp
+stripe_payment_id text UNIQUE                 -- idempotency
+stripe_checkout_session_id text
+delivery_url text NOT NULL                    -- snapshot, never from links table
+product_title text NOT NULL                   -- snapshot
+price_paid numeric(10,2) NOT NULL             -- snapshot
+platform_fee numeric(10,2) NOT NULL           -- 4.5% stored for accounting
+currency text DEFAULT 'usd'
+link_version integer DEFAULT 1               -- snapshot
+status text CHECK IN (paid|refunded|disputed|fraud) DEFAULT 'paid'
+refunded_at timestamptz
+refund_reason text
+stripe_refund_id text
+created_at, updated_at timestamptz
 
 -- unlock_tokens
-id uuid
-purchase_id uuid → purchases.id
-token_hash text
-expires_at timestamp
-used_at timestamp
-created_at timestamp
-```
+id uuid PK
+purchase_id uuid FK → purchases.id
+token_hash text UNIQUE                        -- SHA-256 of raw token
+expires_at timestamptz NOT NULL
+used_at timestamptz                           -- null = unused
+created_at timestamptz
 
-**API endpoints**
-
-```
-POST /api/create-product
-POST /api/create-checkout
-POST /api/stripe-webhook
-POST /api/connect-stripe
-GET  /api/purchases
-POST /api/unlock-request
+-- abuse_reports
+id uuid PK
+link_id uuid FK → links.id
+reporter_email text
+reason text CHECK IN (scam|malware|copyright|other)
+description text
+status text CHECK IN (pending|reviewed|actioned|dismissed) DEFAULT 'pending'
+created_at timestamptz
 ```
 
 ---
 
-## Design System (quick ref)
+## Design System (Quick Ref)
 
-Full spec in `/docs/ux.md`. Key tokens:
+Full spec in `/docs/ux.md`.
 
-**Light mode**
-- Background: `#F5F4EF` (warm off-white)
-- Surface: `#FFFFFF`
-- Text: `#111111`
-- CTA button: black pill (`#111111` bg, `#FFFFFF` text)
-- Success: `#1A7A4A`
-
-**Dark mode**
-- Background: `#111111`
-- Surface: `#1C1C1C`
-- Text: `#F5F4EF`
-- CTA button: cream pill (`#F5F4EF` bg, `#111111` text)
-
-**Font**: DM Sans (400, 500 weights only)
+**Font**: DM Sans (400, 500 only)
 **Components**: shadcn/ui + Tailwind CSS
-**Border radius**: 100px for buttons (pill), 12px for inputs, 16px for cards
+**Border radius**: 100px buttons (pill), 12px inputs, 16px cards
+
+| Token | Light | Dark |
+|---|---|---|
+| Background | `#F5F4EF` | `#111111` |
+| Surface | `#FFFFFF` | `#1C1C1C` |
+| Text primary | `#111111` | `#F5F4EF` |
+| Text secondary | `#6B6B6B` | `#999999` |
+| CTA button | `#111111` bg / `#FFFFFF` text | `#F5F4EF` bg / `#111111` text |
+| Border | `#E5E5E5` | `#2C2C2C` |
+| Success | `#1A7A4A` | `#2ECC71` |
+| Error | `#C0392B` | `#E74C3C` |
 
 ---
 
 ## Core Principles
 
-1. **Never host content** — platform controls access, not files
-2. **Stripe handles money** — never hold funds, never touch raw card data
-3. **One thing per screen** — WeTransfer philosophy
-4. **Purchases are immutable snapshots** — always use `delivery_url`, never re-read from `links`
-5. **Simple > complete** — if a feature isn't in Phase 1, don't build it yet
+1. **One thing per screen** — WeTransfer philosophy, no distractions
+2. **Never host content** — platform controls access, sellers own content
+3. **Stripe handles money** — never hold funds, never touch card data
+4. **Purchases are immutable** — always use `delivery_url`, never re-read `links.destination_url`
+5. **Deferred KYC** — only trigger when seller requests payout
+6. **Stripe is source of truth for payouts** — never duplicate payout data in DB
+7. **Webhook idempotency** — always check `stripe_payment_id` before inserting
+8. **Return 200 to Stripe fast** — capture errors to Sentry, never let webhooks timeout
+9. **Simple > complete** — Phase 1 only until first real users
