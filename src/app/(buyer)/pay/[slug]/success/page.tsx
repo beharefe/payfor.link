@@ -1,6 +1,6 @@
-import { createClient } from "@payforlink/lib/supabase/server";
+import { createServiceClient } from "@payforlink/lib/supabase/server";
 import { stripe } from "@payforlink/lib/stripe";
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import { SuccessPageClient } from "./success-page-client";
 
 type Props = {
@@ -48,7 +48,7 @@ export default async function PaymentSuccessPage({ params, searchParams }: Props
     );
   }
 
-  const supabase = await createClient();
+  const supabase = createServiceClient();
   const { data: purchase } = await supabase
     .from("purchases")
     .select("id, buyer_email, buyer_email_verified")
@@ -65,10 +65,11 @@ export default async function PaymentSuccessPage({ params, searchParams }: Props
   }
 
   if (purchase.buyer_email_verified) {
+    redirect(`/delivery/${purchase.id}`);
     return (
       <main style={{ padding: "2rem", maxWidth: "28rem", margin: "0 auto" }}>
         <h1>You&apos;re all set</h1>
-        <p>Check your email for your access link.</p>
+        <p>Your purchase was already verified. Check your email for access.</p>
       </main>
     );
   }

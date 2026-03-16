@@ -4,7 +4,6 @@ import { verifyOtp, resendOtp } from "@payforlink/app/actions/otp";
 import { useActionState, useState } from "react";
 
 export function SuccessPageClient({ purchaseId }: { purchaseId: string }) {
-  const [verified, setVerified] = useState(false);
   const [resendMessage, setResendMessage] = useState<string | null>(null);
 
   async function handleVerify(_prev: string | null, formData: FormData): Promise<string | null> {
@@ -12,7 +11,6 @@ export function SuccessPageClient({ purchaseId }: { purchaseId: string }) {
     if (!code) return "Enter the 6-digit code.";
     const result = await verifyOtp(purchaseId, code);
     if ("error" in result) return result.error;
-    setVerified(true);
     return null;
   }
 
@@ -27,14 +25,6 @@ export function SuccessPageClient({ purchaseId }: { purchaseId: string }) {
   }
 
   const [error, formAction] = useActionState(handleVerify, null);
-
-  if (verified) {
-    return (
-      <p style={{ color: "green", marginTop: "1rem" }}>
-        Check your email for your access link.
-      </p>
-    );
-  }
 
   return (
     <>

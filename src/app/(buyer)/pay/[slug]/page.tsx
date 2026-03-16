@@ -1,4 +1,4 @@
-import { createClient } from "@payforlink/lib/supabase/server";
+import { createClient, createServiceClient } from "@payforlink/lib/supabase/server";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { createCheckoutSession } from "@payforlink/app/actions/checkout";
@@ -66,7 +66,8 @@ export default async function PaywallPage({ params }: Props) {
     );
   }
 
-  const { data: seller } = await supabase
+  const service = createServiceClient();
+  const { data: seller } = await service
     .from("users")
     .select("name, email")
     .eq("id", link.seller_id)
@@ -77,9 +78,9 @@ export default async function PaywallPage({ params }: Props) {
   return (
     <main style={{ padding: "2rem", maxWidth: "28rem", margin: "0 auto" }}>
       <h1>{link.title}</h1>
-      {seller && (
+      {seller?.name && (
         <p style={{ color: "#666" }}>
-          by {seller.name ?? seller.email ?? "Seller"}
+          by {seller.name}
         </p>
       )}
       {link.description && <p>{link.description}</p>}

@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { createClient } from "@payforlink/lib/supabase/server";
+import { createClient, createServiceClient } from "@payforlink/lib/supabase/server";
 import { stripe, platformFeeCents } from "@payforlink/lib/stripe";
 import { log } from "@payforlink/lib/logger";
 
@@ -21,7 +21,8 @@ export async function createCheckoutSession(
 
   if (!link) return { error: "This product is no longer available" };
 
-  const { data: seller } = await supabase
+  const service = createServiceClient();
+  const { data: seller } = await service
     .from("users")
     .select("stripe_account_id, stripe_charges_enabled")
     .eq("id", link.seller_id)
