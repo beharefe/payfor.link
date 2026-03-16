@@ -7,7 +7,7 @@ import {
 
 export function InitiateStripeConnectButton() {
   return (
-    <form action={async () => { await initiateStripeConnect(); }}>
+    <form action={initiateStripeConnect}>
       <button type="submit">Connect Stripe</button>
     </form>
   );
@@ -15,7 +15,7 @@ export function InitiateStripeConnectButton() {
 
 export function WithdrawButton() {
   return (
-    <form action={async () => { await requestWithdraw(); }}>
+    <form action={requestWithdraw}>
       <button type="submit">Manage payouts</button>
     </form>
   );

@@ -1,10 +1,10 @@
 "use client";
 
-import { createProduct } from "@payforlink/app/actions/product";
+import { createProductAction } from "@payforlink/app/actions/product";
 import type { ProductType } from "@payforlink/types/database";
-import { useRef } from "react";
+import { useActionState, useRef } from "react";
 
-const PRICE_PRESETS = [5, 9, 19, 49];
+const PRICE_PRESETS = [9.99, 19, 29, 49];
 const PRODUCT_TYPES: { value: ProductType; label: string }[] = [
   { value: "template", label: "Template" },
   { value: "file", label: "File" },
@@ -15,32 +15,12 @@ const PRODUCT_TYPES: { value: ProductType; label: string }[] = [
 ];
 
 export function NewLinkForm() {
+  const [error, formAction] = useActionState(createProductAction, null);
   const priceInputRef = useRef<HTMLInputElement>(null);
 
   return (
     <form
-      action={async (formData: FormData) => {
-        const title = formData.get("title")?.toString() ?? "";
-        const description = formData.get("description")?.toString() ?? "";
-        const destination_url = formData.get("destination_url")?.toString() ?? "";
-        const price = Number(formData.get("price"));
-        const product_type = (formData.get("product_type")?.toString() ||
-          undefined) as ProductType | undefined;
-
-        const result = await createProduct({
-          title,
-          description,
-          destination_url,
-          price: Number.isFinite(price) ? price : 3,
-          product_type,
-        });
-
-        if ("error" in result) {
-          const { redirect } = await import("next/navigation");
-          redirect(`/studio/links/new?error=${encodeURIComponent(result.error)}`);
-        }
-      }}
-      method="post"
+      action={formAction}
       style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
     >
       <div>
@@ -88,7 +68,7 @@ export function NewLinkForm() {
         />
       </div>
       <div>
-        <label>Price (USD) * — min $3</label>
+        <label>Price (USD) * — min $9.99</label>
         <div
           style={{
             display: "flex",
@@ -115,10 +95,10 @@ export function NewLinkForm() {
           id="price"
           name="price"
           type="number"
-          min={3}
+          min={9.99}
           step={0.01}
           required
-          defaultValue={5}
+          defaultValue={9.99}
           style={{
             display: "block",
             width: "100%",
@@ -147,6 +127,7 @@ export function NewLinkForm() {
           ))}
         </select>
       </div>
+      {error && <p style={{ color: "red" }}>{error}</p>}
       <button
         type="submit"
         style={{ padding: "0.5rem 1rem", alignSelf: "flex-start" }}

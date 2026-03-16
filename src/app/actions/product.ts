@@ -8,7 +8,7 @@ import { checkUrlSafe } from "@payforlink/lib/safe-browsing";
 import { detectProductType, isValidUrl } from "@payforlink/lib/product-utils";
 import type { ProductType } from "@payforlink/types/database";
 
-const MIN_PRICE = 3;
+const MIN_PRICE = 9.99;
 
 type CreateProductInput = {
   title: string;
@@ -93,4 +93,21 @@ export async function createProduct(
   }
 
   redirect(`/studio/links/${link.id}`);
+}
+
+/** FormData-compatible wrapper for use with useActionState in Client Components. */
+export async function createProductAction(
+  _prev: string | null,
+  formData: FormData,
+): Promise<string | null> {
+  const price = Number(formData.get("price"));
+  const result = await createProduct({
+    title: formData.get("title")?.toString() ?? "",
+    description: formData.get("description")?.toString() ?? "",
+    destination_url: formData.get("destination_url")?.toString() ?? "",
+    price: Number.isFinite(price) ? price : MIN_PRICE,
+    product_type: (formData.get("product_type")?.toString() || undefined) as ProductType | undefined,
+  });
+  if ("error" in result) return result.error;
+  return null; // createProduct redirects on success
 }
