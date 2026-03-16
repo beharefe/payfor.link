@@ -128,7 +128,7 @@ describe("createProduct — validation", () => {
       price: 1,
     });
 
-    expect(result).toEqual({ error: "Minimum price is $3" });
+    expect(result).toEqual({ error: "Minimum price is $9.99" });
   });
 });
 

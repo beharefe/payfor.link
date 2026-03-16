@@ -105,7 +105,7 @@ create table links (
   title           text not null,
   description     text,
   destination_url text not null,
-  price           numeric(10,2) not null check (price >= 3.00),
+  price           numeric(10,2) not null check (price >= 9.99),
   currency        text not null default 'usd',
 
   -- Status lifecycle: draft | active | suspended | archived | deleted

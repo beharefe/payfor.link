@@ -30,13 +30,13 @@ Stripe deducts the fee automatically. Platform never manually moves money.
 
 | Product Price | Platform Fee (4.5%) | Stripe Fee (~2.9% + $0.30) | Seller Receives |
 |---|---|---|---|
-| $5 | $0.23 | $0.45 | ~$4.32 |
-| $10 | $0.45 | $0.59 | ~$8.96 |
-| $25 | $1.13 | $1.03 | ~$22.85 |
-| $50 | $2.25 | $1.75 | ~$46.00 |
-| $100 | $4.50 | $3.20 | ~$92.30 |
+| $9.99 | $0.45 | $0.59 | ~$8.95 |
+| $19 | $0.86 | $0.85 | ~$17.29 |
+| $29 | $1.31 | $1.14 | ~$26.55 |
+| $49 | $2.21 | $1.72 | ~$45.07 |
+| $99 | $4.46 | $3.17 | ~$91.37 |
 
-Minimum price: $3.00 (enforced by DB constraint + UI validation)
+Minimum price: $9.99 (enforced by DB constraint + UI validation)
 
 ---
 

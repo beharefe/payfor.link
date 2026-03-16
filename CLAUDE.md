@@ -102,7 +102,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - Status: `draft` → `active` → `suspended` | `deleted`
 - Draft until seller connects Stripe → then auto-activates
 - Slug auto-generated from title, collision-handled
-- Minimum price: $3
+- Minimum price: $9.99
 - Rate limits: 20 links/user, 5/day
 - `version` auto-increments via DB trigger on seller edits
 
@@ -161,7 +161,7 @@ seller_id uuid FK → users.id
 slug text UNIQUE per seller
 title, description text
 destination_url text
-price numeric(10,2) CHECK >= 3.00
+price numeric(10,2) CHECK >= 9.99
 currency text DEFAULT 'usd'
 status text CHECK IN (draft|active|suspended|archived|deleted) DEFAULT 'draft'
 -- archived = seller stopped selling, keeps analytics

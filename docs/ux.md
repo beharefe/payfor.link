@@ -304,8 +304,8 @@ Two inputs. One button. That's the whole page.
   [Validation hint: We'll check this link can be duplicated]
 
   [Label: Price]
-  [Price presets: $5 · $9 · $19 · $49]  ← quick-select buttons, clicking fills the input
-  [Input: $ ___  — numeric, min $3]
+  [Price presets: $9.99 · $19 · $29 · $49]  ← quick-select buttons, clicking fills the input
+  [Input: $ ___  — numeric, min $9.99]
 
   [ Create paywall link → ]
 
