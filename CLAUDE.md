@@ -49,10 +49,10 @@ A minimal platform where sellers paste any link, set a price, and share a paywal
 ## Environment Variables
 
 ```env
-# Supabase
+# Supabase (use publishable + secret keys per https://supabase.com/docs/guides/api/api-keys)
 NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=   # sb_publishable_... (or legacy NEXT_PUBLIC_SUPABASE_ANON_KEY)
+SUPABASE_SECRET_KEY=                     # sb_secret_... (or legacy SUPABASE_SERVICE_ROLE_KEY)
 
 # Stripe
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
@@ -89,7 +89,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - Magic link only (Supabase) — no passwords ever
 - Sellers = Supabase users with row in `users` table
 - Buyers = email only, no account required
-- Middleware protects: `/dashboard`, `/create`, `/product/*`, `/settings`
+- Middleware protects: `/dashboard` and all `/dashboard/*` routes (e.g. `/dashboard/links/new`, `/dashboard/links/[id]`, `/dashboard/settings`)
 
 ### Stripe Connect — Deferred Onboarding
 - Sellers connect Stripe with `collect: 'eventually_due'` — no KYC upfront
@@ -124,7 +124,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 ### Webhooks (2 events only)
 ```
-checkout.session.completed  → create purchase → generate token → send email
+checkout.session.completed  → create purchase → Supabase signInWithOtp(buyer_email) → buyer verifies on success page → then unlock token + email
 account.updated             → sync Stripe Connect status → notify seller on KYC complete
 ```
 

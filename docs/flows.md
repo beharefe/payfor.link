@@ -34,7 +34,7 @@ Seller fills form: title, description, destination URL, price
 → insert links row:
     status = 'draft' (if Stripe not connected)
     status = 'active' (if Stripe already connected)
-→ redirect to /product/[id]
+→ redirect to /dashboard/links/[id]
 ```
 
 ---

@@ -125,8 +125,8 @@ All tables have RLS enabled. Key rules:
 - **unlock_tokens**: service role only — never client-accessible
 - **abuse_reports**: anyone can insert; only service role reads
 
-All sensitive operations (webhook, unlock, resend) use `SUPABASE_SERVICE_ROLE_KEY`.
-Client-side code uses `NEXT_PUBLIC_SUPABASE_ANON_KEY` with RLS enforced.
+All sensitive operations (webhook, unlock, resend) use the Supabase secret key (`SUPABASE_SECRET_KEY`, or legacy `SUPABASE_SERVICE_ROLE_KEY`).
+Client-side code uses the publishable key (`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, or legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY`) with RLS enforced. See [Supabase API keys](https://supabase.com/docs/guides/api/api-keys).
 
 ---
 

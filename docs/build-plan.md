@@ -82,9 +82,8 @@ create table users (
   stripe_details_submitted   boolean not null default false,  -- onboarding form submitted
 
   -- Earnings totals (updated on each purchase webhook)
-  total_earned    numeric(10,2) not null default 0,  -- gross revenue
+  total_earned    numeric(10,2) not null default 0,  -- gross revenue (updated on each purchase webhook)
   total_fees      numeric(10,2) not null default 0,  -- platform fees collected
-  total_paid_out  numeric(10,2) not null default 0,  -- total withdrawn to bank
 
   -- Phase 2: seller profile
   username        text unique,
@@ -153,7 +152,12 @@ create table purchases (
 
   -- Buyer (no account required)
   buyer_email                 text not null,
-  buyer_email_verified        boolean not null default false,  -- Phase 2 abuse protection
+  buyer_email_verified        boolean not null default false,  -- verified via OTP before unlock is issued
+
+  -- Email verification via Supabase Auth OTP (signInWithOtp / verifyOtp). Columns below unused when using Supabase OTP.
+  otp_code_hash               text,           -- legacy: unused with Supabase OTP
+  otp_expires_at              timestamptz,
+  otp_attempts                integer not null default 0,
 
   -- Stripe
   stripe_payment_id           text not null unique,   -- idempotency key
@@ -224,7 +228,6 @@ create index idx_purchases_link_id on purchases(link_id);
 create index idx_purchases_seller_id on purchases(seller_id);
 create unique index idx_unlock_tokens_hash on unlock_tokens(token_hash);
 create index idx_unlock_tokens_purchase_id on unlock_tokens(purchase_id);
-create index idx_payouts_seller_id on payouts(seller_id);
 
 -- ============================================================
 -- UPDATED_AT TRIGGER
@@ -247,10 +250,6 @@ create trigger links_updated_at
 
 create trigger purchases_updated_at
   before update on purchases
-  for each row execute function set_updated_at();
-
-create trigger payouts_updated_at
-  before update on payouts
   for each row execute function set_updated_at();
 
 -- ============================================================
@@ -286,7 +285,6 @@ alter table links enable row level security;
 alter table purchases enable row level security;
 alter table unlock_tokens enable row level security;
 alter table abuse_reports enable row level security;
-alter table payouts enable row level security;
 
 -- Users
 create policy "users: select own" on users
@@ -306,12 +304,14 @@ create policy "links: public read active" on links
 create policy "purchases: seller sees own" on purchases
   for select using (auth.uid() = seller_id);
 
--- Payouts: sellers see own
-create policy "payouts: seller sees own" on payouts
-  for select using (auth.uid() = seller_id);
+-- NOTE: No payouts table — Stripe is source of truth.
+-- Query payout history via: stripe.payouts.list({}, { stripeAccount: seller.stripe_account_id })
 
--- Unlock tokens: service role only (never expose to client)
--- Abuse reports: anyone can insert
+-- Unlock tokens: no client policies — RLS enabled with zero policies = blanket deny for all
+-- client roles. Service role key bypasses RLS entirely. Only ever touch unlock_tokens
+-- server-side using the service role key. Never expose to browser clients.
+
+-- Abuse reports: anyone can insert. Rate limiting handled at API route level, not DB.
 create policy "abuse_reports: public insert" on abuse_reports
   for insert with check (true);
 ```
@@ -322,7 +322,8 @@ create policy "abuse_reports: public insert" on abuse_reports
 
 ### Step 1 — Project Setup
 - [ ] `npx create-next-app@latest payfor-link --typescript --tailwind --app`
-- [ ] Install: `shadcn/ui`, `@supabase/supabase-js`, `@supabase/ssr`, `stripe`, `next-axiom`, `pino`, `pino-pretty`, `resend`, `@amplitude/analytics-browser`, `slugify`, `@sentry/nextjs`
+- [ ] Install: `shadcn/ui`, `@supabase/supabase-js`, `@supabase/ssr`, `stripe`, `next-axiom`, `resend`, `@amplitude/analytics-browser`, `slugify`, `@sentry/nextjs`
+  - Logging: `next-axiom` only — it ships logs to Axiom and provides `log` helpers for server/edge. No need for `pino`/`pino-pretty`.
 - [ ] Copy `.env.local`
 - [ ] Run schema SQL in Supabase
 - [ ] `npx @sentry/wizard@latest -i nextjs`
@@ -340,12 +341,12 @@ create policy "abuse_reports: public insert" on abuse_reports
 **Logic**:
 - Supabase magic link — email OTP, no password ever
 - On first login → upsert row in `users` table
-- Middleware redirects unauthenticated users away from `/dashboard`, `/create`, `/product`, `/settings`
+- Middleware redirects unauthenticated users away from `/dashboard` (and all `/dashboard/*` routes)
 
 ---
 
 ### Step 3 — Create Product
-**Pages**: `/create`
+**Pages**: `/dashboard/links/new`
 **API**: `POST /api/create-product`
 **Logic**:
 - Validate URL format
@@ -354,7 +355,7 @@ create policy "abuse_reports: public insert" on abuse_reports
 - Auto-generate slug from title + collision check
 - Insert `links` row with `status = 'draft'`
 - If seller `stripe_connected = true` → set `status = 'active'` immediately
-- Redirect to `/product/[id]` — the activation/copy-link moment
+- Redirect to `/dashboard/links/[id]` — the activation/copy-link moment
 
 **Form fields**:
 - Title (required)
@@ -373,8 +374,8 @@ create policy "abuse_reports: public insert" on abuse_reports
 ---
 
 ### Step 4 — Seller Dashboard + Product Detail
-**Pages**: `/dashboard`, `/product/[id]`
-**Logic (`/product/[id]` — the activation moment)**:
+**Pages**: `/dashboard` (seller home), `/dashboard/links/[id]` (link detail)
+**Logic (`/dashboard/links/[id]` — the activation moment)**:
 - Show "🎉 Your paywall is ready" hero section
 - Large copy-link button — this is the primary CTA on this page
 - Share prompt: "Share on Twitter · Discord · Email"
@@ -422,9 +423,7 @@ Seller clicks "Withdraw funds"
     → stripe.accountLinks.create({ collect: 'currently_due' })
     → redirect to Stripe KYC
 → if stripe_payouts_enabled = true:
-    → stripe.transfers.create or stripe.payouts.create
-    → insert payouts row
-    → update users.total_paid_out
+    → stripe.payouts.create (Stripe handles it — no local record needed)
 ```
 
 ---
@@ -444,9 +443,9 @@ verify Stripe signature
     link_version (snapshot), seller_id, link_id
 → update links: total_sales++, total_revenue += price
 → update users: total_earned += price, total_fees += platform_fee
-→ generate unlock token (32 bytes random → sha256 → store hashed)
-→ send unlock email via Resend
+→ send verification email via Supabase: signInWithOtp({ email: buyer_email }) (Supabase sends 6-digit OTP or magic link; configure in Supabase Auth)
 → return 200
+-- NOTE: unlock token is NOT generated here — only after buyer verifies OTP on success page
 ```
 
 **Event: `account.updated`**:
@@ -515,13 +514,35 @@ receive { link_id }
 
 ---
 
-### Step 9 — Payment Success Page
+### Step 9 — Payment Success + OTP Verification
 **Pages**: `/pay/[slug]/success`
+**Actions**: `verifyOtp()`, `resendOtp()`
+
+**We use Supabase Auth OTP** for post-purchase email verification (same system as seller magic link, different use case):
+- **Webhook**: after creating the purchase, call `supabase.auth.signInWithOtp({ email: buyer_email })` so Supabase sends the 6-digit OTP (or magic link, per project settings).
+- **Success page**: user enters the code; we call `supabase.auth.verifyOtp({ email, token, type: 'email' })`. On success we set `buyer_email_verified`, create the unlock token, and send the unlock email via Resend.
+- **Resend code**: `signInWithOtp` again; Supabase handles rate limits and expiry. No custom OTP storage or hashing.
+
 **Logic**:
 - Read `session_id` from URL params
 - Fetch Stripe session → get `customer_email`
-- Show success + "check your email" message
-- Resend button → `POST /api/resend-unlock`
+- Show OTP input: "Enter the 6-digit code we sent to {email}"
+- `verifyOtp(purchase_id, code)`:
+  ```
+  → load purchase by id, get buyer_email
+  → supabase.auth.verifyOtp({ email: buyer_email, token: code, type: 'email' })
+  → if error (expired/invalid): return error
+  → set buyer_email_verified = true
+  → generate unlock token (32 bytes → sha256 → store hashed)
+  → send unlock email via Resend
+  → return { success: true }
+  ```
+- `resendOtp(purchase_id)`:
+  ```
+  → supabase.auth.signInWithOtp({ email: purchase.buyer_email })
+  → Supabase sends OTP email and enforces rate limits
+  ```
+- After successful verify → show "Check your email for your access link" + done state
 
 ---
 
@@ -531,9 +552,10 @@ receive { link_id }
 
 **Unlock**:
 ```
-GET /unlock?token=xxx
+GET /unlock?token=xxx  (server component — no action needed)
 → hash token → lookup by token_hash
 → check: exists, not expired (expires_at > now()), not used (used_at is null)
+→ check: purchase.buyer_email_verified = true (guard — should always be true here)
 → mark used_at = now()
 → fetch purchase.delivery_url
 → 302 redirect → delivery_url
