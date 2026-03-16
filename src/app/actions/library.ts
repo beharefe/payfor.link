@@ -7,22 +7,36 @@ import { log } from "@payforlink/lib/logger";
 
 export type LibraryActionResult = { error: string } | { ok: true };
 
-export async function sendLibraryMagicLink(formData: FormData): Promise<LibraryActionResult> {
+export async function sendLibraryOtp(formData: FormData): Promise<LibraryActionResult> {
   const email = formData.get("email")?.toString()?.trim();
   if (!email) return { error: "Email is required" };
 
   const supabase = await createClient();
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options: {
-      emailRedirectTo: `${appUrl}/library`,
-      shouldCreateUser: true,
-    },
+    options: { shouldCreateUser: false },
   });
 
   if (error) return { error: error.message };
+  return { ok: true };
+}
+
+export async function verifyLibraryOtp(formData: FormData): Promise<LibraryActionResult> {
+  const email = formData.get("email")?.toString()?.trim();
+  const code = formData.get("code")?.toString()?.trim();
+  if (!email || !code) return { error: "Email and code are required" };
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.verifyOtp({ email, token: code, type: "email" });
+
+  if (error) {
+    const msg = error.message?.toLowerCase().includes("expired")
+      ? "Code expired. Request a new one."
+      : (error.message ?? "Invalid or expired code.");
+    return { error: msg };
+  }
+
   return { ok: true };
 }
 
