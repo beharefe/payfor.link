@@ -96,6 +96,9 @@ Examples:
 /sell-digital-downloads
 /monetize-google-drive
 /paywall-a-link
+/sell-files-online
+/sell-digital-product-without-store
+/get-paid-before-sharing-files
 
 Each page targets a single creator query.
 

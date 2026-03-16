@@ -304,6 +304,7 @@ Two inputs. One button. That's the whole page.
   [Validation hint: We'll check this link can be duplicated]
 
   [Label: Price]
+  [Price presets: $5 · $9 · $19 · $49]  ← quick-select buttons, clicking fills the input
   [Input: $ ___  — numeric, min $3]
 
   [ Create paywall link → ]
@@ -328,7 +329,8 @@ Two inputs. One button. That's the whole page.
 
 ## 6. Product Detail (Seller View) `/product/[id]`
 
-Post-creation confirmation and management screen.
+Post-creation confirmation and management screen. First thing seller sees after creating.
+This is the **activation moment** — seller must feel "I can use this right now."
 
 ```
 [Navbar: logo | Dashboard]
@@ -341,8 +343,9 @@ Post-creation confirmation and management screen.
   [Price: $19]
   [Description: one line preview]
 
-  [Section: Your paywall link]
+  [Section: 🎉 Your paywall is ready]   ← celebratory, prominent
   [URL display: payfor.link/pay/notion-crm-template  |  Copy]
+  [Share prompt: Share this on Twitter · Discord · Email · Anywhere]
 
   [Section: Stripe]
   [If not connected:]
@@ -355,12 +358,15 @@ Post-creation confirmation and management screen.
 
   [Stats row: 0 sales · $0 earned]
 
-  [Actions row: Edit  ·  Delete]
+  [Actions row: Edit  ·  Archive  ·  Delete]
 ```
 
 ### Design Notes
-- URL is displayed in a monospace-ish input-style box with one-click copy.
-- Stripe connection CTA is prominent if not connected — this is the blocker.
+- **Copy link is the hero action** — large, prominent, one click. This is the "aha moment."
+- URL displayed in a monospace-ish input-style box with one-click copy + "Copied!" feedback.
+- Share prompt is plain text, not buttons — keeps it light.
+- Stripe connection CTA is the only blocker shown if not connected.
+- "Archive" replaces soft-delete — seller stops selling but keeps analytics.
 - Deleting shows a confirmation dialog: "Existing buyers will keep their access."
 
 ---
@@ -436,15 +442,10 @@ Zero distractions. One job: pay.
 
 ### States
 
-**If link is SUSPENDED:**
+**If link is SUSPENDED or ARCHIVED or DELETED:**
 ```
   [H2: This product is unavailable]
-  [Subtext: It may have been removed or suspended.]
-```
-
-**If link is DELETED:**
-```
-  Same as suspended.
+  [Subtext: It may have been removed by the seller.]
 ```
 
 ### Mobile Layout
@@ -457,6 +458,49 @@ Zero distractions. One job: pay.
 - Background is `--bg`. Card is `--surface` with subtle shadow.
 - Seller name shown without avatar in MVP (no upload yet).
 - Stripe Checkout opens as redirect, not modal (simpler, more trusted).
+
+### OG / SEO Metadata (critical for sharing on Twitter, Slack, Discord, iMessage)
+
+```typescript
+// app/pay/[slug]/page.tsx
+export async function generateMetadata({ params }): Promise<Metadata> {
+  const link = await getLinkBySlug(params.slug)
+  if (!link) return {}
+
+  return {
+    title: `${link.title} — $${link.price}`,
+    description: link.description ?? `Pay once and get instant access to ${link.title}.`,
+    openGraph: {
+      title: `${link.title} — $${link.price}`,
+      description: link.description ?? `Pay once and get instant access.`,
+      url: `https://payfor.link/pay/${link.slug}`,
+      siteName: 'payfor.link',
+      images: link.preview_image_url
+        ? [{ url: link.preview_image_url, width: 1200, height: 630 }]
+        : [{ url: 'https://payfor.link/og-default.png', width: 1200, height: 630 }],
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${link.title} — $${link.price}`,
+      description: link.description ?? `Pay once and get instant access.`,
+      images: link.preview_image_url
+        ? [link.preview_image_url]
+        : ['https://payfor.link/og-default.png'],
+    },
+    other: {
+      'product:price:amount': String(link.price),
+      'product:price:currency': link.currency.toUpperCase(),
+    }
+  }
+}
+```
+
+**Default OG image** (`/og-default.png`): static 1200×630 image with payfor.link branding.
+Used for links without a `preview_image_url`. Design it once, use everywhere.
+
+OG tags make shared links show rich previews on: Twitter/X, Slack, Discord, Telegram, iMessage, LinkedIn.
+This is the #1 distribution multiplier — costs nothing to implement.
 
 ---
 
@@ -512,7 +556,7 @@ You purchased [Product Title] for $[price].
 
 [ Access your purchase → ]   ← large CTA button
 
-This link expires in 30 minutes and can only be used once.
+This link expires in 24 hours and can only be used once.
 If it expires, visit payfor.link/unlock-request to get a new one.
 
 ---
@@ -564,7 +608,7 @@ After clicking the email link.
 ```
   [⏱ This link has expired]
 
-  [Body: Unlock links expire after 30 minutes for security.]
+  [Body: Unlock links expire after 24 hours for security.]
 
   [Input: Your purchase email]
   [ Send new access link → ]

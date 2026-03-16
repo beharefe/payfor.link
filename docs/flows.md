@@ -131,7 +131,7 @@ Stripe fires checkout.session.completed
 → generate unlock token:
     raw = crypto.randomBytes(32).toString('hex')
     hash = sha256(raw)
-    insert unlock_tokens: { purchase_id, token_hash, expires_at: now + 30min }
+    insert unlock_tokens: { purchase_id, token_hash, expires_at: now + 24h }
 → send unlock email via Resend with raw token in URL
 → return 200 immediately
 ```

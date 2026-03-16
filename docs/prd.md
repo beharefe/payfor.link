@@ -152,7 +152,7 @@ The platform doesn't care what the link is. It just gates it behind a payment.
 
 - Stripe Checkout
 - Stripe Connect Express payouts
-- Email-based unlock (single-use token, 30min expiry)
+- Email-based unlock (single-use token, 24h expiry)
 - Token resend flow
 - Basic abuse reporting
 - URL safety check (Google Safe Browsing)

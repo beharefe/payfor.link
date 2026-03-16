@@ -7,7 +7,7 @@
 | Malware links | Buyer gets infected | Google Safe Browsing on create |
 | Scam products | Buyer defrauded | Abuse reporting + moderation |
 | Stolen cards | Chargebacks, platform risk | Stripe Radar (built-in) |
-| Token sharing | Paid content leaked | Single-use tokens, 30min expiry |
+| Token sharing | Paid content leaked | Single-use tokens, 24h expiry |
 | Duplicate webhooks | Double purchase records | `stripe_payment_id` UNIQUE constraint |
 | Webhook spoofing | Fake purchase records | Stripe signature verification |
 | Brute force unlocks | Token guessing | 32-byte random tokens = impossible to brute force |
@@ -60,7 +60,7 @@ Token properties:
 - 32 bytes = 256 bits entropy — brute force is computationally impossible
 - SHA-256 stored — database leak doesn't expose usable tokens
 - Single-use — `used_at` set on first valid use
-- 30-minute expiry — limits exposure window
+- 24h expiry — limits exposure window
 - Browser confirmation step — prevents email scanner pre-consumption
 
 ---

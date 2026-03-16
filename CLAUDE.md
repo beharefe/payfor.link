@@ -39,7 +39,7 @@ A minimal platform where sellers paste any link, set a price, and share a paywal
 | Creator Onboarding | `/docs/creator-onboarding.md` | Per-platform setup guides for sellers |
 | Product Validation | `/docs/product-validation.md` | Pre-publish link validation rules |
 | Logging | `/docs/logging.md` | pino + Axiom setup, structured logging patterns |
-| Analytics | `/docs/analytics.md` | Amplitude setup, 5 core events, server-side tracking |
+| Analytics | `/docs/analytics.md` | Amplitude setup, 6 core events (paywall_viewed first), server-side tracking |
 | Error Tracking | `/docs/error-tracking.md` | Sentry setup, critical errors, alerts |
 | ADR-001 | `/docs/adr/adr-001.md` | Link lifecycle, tokens, slugs, pricing floor decisions |
 | ADR-002 | `/docs/adr/adr-002.md` | Delivery URL snapshot, refund UX, token expiry, schema |
@@ -116,7 +116,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 ### Unlock Tokens
 - 32-byte random, stored as SHA-256 hash
-- 30-minute expiry
+- 24h expiry
 - Single-use (`used_at` timestamp)
 - Multiple tokens per purchase allowed (resend flow)
 - Browser-side confirmation before consuming (prevents email scanner pre-click)
@@ -163,9 +163,12 @@ title, description text
 destination_url text
 price numeric(10,2) CHECK >= 3.00
 currency text DEFAULT 'usd'
-status text CHECK IN (draft|active|suspended|deleted) DEFAULT 'draft'
+status text CHECK IN (draft|active|suspended|archived|deleted) DEFAULT 'draft'
+-- archived = seller stopped selling, keeps analytics
+-- suspended = platform action
+product_type text CHECK IN (template|file|access|service|dataset|other)  -- optional
 version integer DEFAULT 1                     -- auto-incremented by trigger
-preview_image_url text                        -- Phase 2
+preview_image_url text                        -- Phase 2 (used for OG tags immediately)
 cta_text text                                 -- Phase 2
 expires_at timestamptz                        -- Phase 2
 max_purchases integer                         -- Phase 2
@@ -180,6 +183,7 @@ id uuid PK
 link_id uuid FK → links.id
 seller_id uuid FK → users.id
 buyer_email text
+buyer_email_verified boolean DEFAULT false    -- Phase 2 abuse protection
 stripe_payment_id text UNIQUE                 -- idempotency
 stripe_checkout_session_id text
 delivery_url text NOT NULL                    -- snapshot, never from links table
@@ -198,7 +202,7 @@ created_at, updated_at timestamptz
 id uuid PK
 purchase_id uuid FK → purchases.id
 token_hash text UNIQUE                        -- SHA-256 of raw token
-expires_at timestamptz NOT NULL
+expires_at timestamptz NOT NULL               -- now() + 24h
 used_at timestamptz                           -- null = unused
 created_at timestamptz
 
@@ -210,6 +214,9 @@ reason text CHECK IN (scam|malware|copyright|other)
 description text
 status text CHECK IN (pending|reviewed|actioned|dismissed) DEFAULT 'pending'
 created_at timestamptz
+
+-- NO payouts table — query Stripe directly
+-- stripe.payouts.list({}, { stripeAccount: seller.stripe_account_id })
 ```
 
 ---

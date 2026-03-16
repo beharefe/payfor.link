@@ -78,9 +78,28 @@ export default function RootLayout({ children }) {
 
 ## Events
 
-### Core 5 (MVP — track these first, nothing else)
+### Core 6 (MVP — track these, nothing else)
 
-These map directly to the PRD success metrics.
+These map directly to the funnel. Without `paywall_viewed` you cannot calculate conversion rate.
+
+---
+
+#### `paywall_viewed`
+Fired when a buyer opens a paywall page. Most important funnel event.
+
+```typescript
+// In /pay/[slug]/page.tsx — server component, use server-side tracking
+await trackServer('paywall_viewed', {
+  link_id: link.id,
+  slug: link.slug,
+  price: link.price,
+  platform: detectPlatform(link.destination_url)  // notion|figma|drive|github|other
+})
+```
+
+When: on every load of `/pay/[slug]` where `status = 'active'`.
+
+**Funnel anchor**: drop-off between `paywall_viewed` → `checkout_started` = your paywall conversion rate.
 
 ---
 
@@ -228,18 +247,19 @@ Most valuable replays to watch: sessions that hit the paywall page but never com
 ## Funnel to Monitor
 
 ```
-paywall_viewed  (page view — auto-tracked)
+paywall_viewed        (server-side — every page load)
         ↓
-checkout_started
+checkout_started      (client-side — buyer clicks CTA)
         ↓
-payment_success   (webhook — server)
+payment_success       (webhook — server)
         ↓
-unlock_success    (server)
+unlock_success        (server — token validated)
 ```
 
-Drop-off between `paywall_viewed` → `checkout_started` = paywall conversion rate.
-Drop-off between `checkout_started` → `payment_success` = Stripe completion rate (Stripe handles this, should be >90%).
-Drop-off between `payment_success` → `unlock_success` = email deliverability issue.
+Key conversion rates:
+- `paywall_viewed` → `checkout_started` = **paywall conversion** (optimize this)
+- `checkout_started` → `payment_success` = Stripe completion rate (should be >90%, Stripe handles it)
+- `payment_success` → `unlock_success` = email deliverability (should be >95%)
 
 ---
 

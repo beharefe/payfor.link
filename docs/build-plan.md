@@ -109,12 +109,18 @@ create table links (
   price           numeric(10,2) not null check (price >= 3.00),
   currency        text not null default 'usd',
 
-  -- Status lifecycle: draft | active | suspended | deleted
+  -- Status lifecycle: draft | active | suspended | archived | deleted
   status          text not null default 'draft'
-                    check (status in ('draft','active','suspended','deleted')),
+                    check (status in ('draft','active','suspended','archived','deleted')),
+  -- archived = seller stopped selling but keeps analytics
+  -- suspended = platform action
+  -- deleted = soft delete
 
   -- Version tracking — auto-incremented by trigger on seller edits
   version         integer not null default 1,
+
+  -- Product type (optional — useful for filtering later)
+  product_type    text check (product_type in ('template','file','access','service','dataset','other')),
 
   -- Phase 2
   preview_image_url text,
@@ -147,6 +153,7 @@ create table purchases (
 
   -- Buyer (no account required)
   buyer_email                 text not null,
+  buyer_email_verified        boolean not null default false,  -- Phase 2 abuse protection
 
   -- Stripe
   stripe_payment_id           text not null unique,   -- idempotency key
@@ -181,25 +188,14 @@ create table unlock_tokens (
   id            uuid primary key default gen_random_uuid(),
   purchase_id   uuid not null references purchases(id) on delete cascade,
   token_hash    text not null unique,   -- sha256 of raw token
-  expires_at    timestamptz not null,
+  expires_at    timestamptz not null,   -- now() + 24h (not 30min — buyers open email later)
   used_at       timestamptz,            -- null = not yet used
   created_at    timestamptz not null default now()
 );
 
--- ============================================================
--- PAYOUTS (Phase 2 — table ready now)
--- ============================================================
-create table payouts (
-  id                  uuid primary key default gen_random_uuid(),
-  seller_id           uuid not null references users(id),
-  stripe_payout_id    text unique,
-  amount              numeric(10,2) not null,
-  currency            text not null default 'usd',
-  status              text not null default 'pending'
-                        check (status in ('pending','paid','failed','cancelled')),
-  created_at          timestamptz not null default now(),
-  updated_at          timestamptz not null default now()
-);
+-- NOTE: No payouts table.
+-- Stripe is source of truth for payout history.
+-- Query: stripe.payouts.list({}, { stripeAccount: seller.stripe_account_id })
 
 -- ============================================================
 -- ABUSE REPORTS
@@ -354,11 +350,18 @@ create policy "abuse_reports: public insert" on abuse_reports
 **Logic**:
 - Validate URL format
 - Google Safe Browsing check
-- Detect platform from domain (notion/figma/drive/github/other)
+- Detect platform from domain (notion/figma/drive/github/other) → auto-set `product_type`
 - Auto-generate slug from title + collision check
 - Insert `links` row with `status = 'draft'`
 - If seller `stripe_connected = true` → set `status = 'active'` immediately
-- Redirect to `/product/[id]`
+- Redirect to `/product/[id]` — the activation/copy-link moment
+
+**Form fields**:
+- Title (required)
+- Description (optional)
+- Destination URL (required)
+- Price — with quick-select presets: `$5 · $9 · $19 · $49` (clicking fills the input)
+- Product type — optional dropdown auto-detected, seller can override
 
 **Validation**:
 - Notion: `notion.so` or `notion.site` + `?duplicate=true`
@@ -369,14 +372,20 @@ create policy "abuse_reports: public insert" on abuse_reports
 
 ---
 
-### Step 4 — Seller Dashboard
+### Step 4 — Seller Dashboard + Product Detail
 **Pages**: `/dashboard`, `/product/[id]`
-**Logic**:
+**Logic (`/product/[id]` — the activation moment)**:
+- Show "🎉 Your paywall is ready" hero section
+- Large copy-link button — this is the primary CTA on this page
+- Share prompt: "Share on Twitter · Discord · Email"
+- Stripe connect CTA if not connected
+- Edit / Archive / Delete actions
+
+**Logic (`/dashboard`)**:
 - Fetch seller's links + per-link stats
-- Show total earnings balance
-- Show "Withdraw funds" button (triggers KYC if needed)
-- Show Stripe connect status
-- Copy paywall URL per link
+- Show total earnings (query Stripe balance)
+- "Withdraw funds" button
+- "Copy URL" on each link row — most-used action
 
 ---
 
@@ -461,11 +470,26 @@ verify Stripe signature
 **Pages**: `/pay/[slug]`
 **Logic**:
 - Fetch link by slug where `status = 'active'`
-- 404 if not found, suspended page if suspended
+- Show unavailable state if `suspended` | `archived` | `deleted`
 - No nav, no escape hatches
 - Show: title, description, price, seller name, CTA button
-- SEO: title, description, OG tags, schema.org Product markup
+- Price presets not shown here (seller-side only) — just show the set price clearly
 - CTA calls `POST /api/create-checkout`
+- Track `paywall_viewed` server-side on every load (see analytics.md)
+
+**SEO / OG tags** (use Next.js `generateMetadata`):
+```
+og:title    = "{title} — ${price}"
+og:description = link.description or "Pay once and get instant access."
+og:image    = preview_image_url ?? /og-default.png (1200×630)
+og:url      = https://payfor.link/pay/{slug}
+twitter:card = summary_large_image
+product:price:amount = price
+product:price:currency = USD
+```
+
+OG tags are the #1 distribution multiplier — makes shared links show rich previews on
+Twitter, Slack, Discord, Telegram, iMessage, LinkedIn.
 
 ---
 

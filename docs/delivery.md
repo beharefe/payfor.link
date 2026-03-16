@@ -106,7 +106,7 @@ Token properties:
 random 32 byte token
 stored hashed in database
 single-use
-24 hour expiration
+24h expiration
 
 Tokens prove that the buyer completed a purchase.
 
