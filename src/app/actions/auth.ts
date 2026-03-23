@@ -46,13 +46,22 @@ export async function verifySellerOtp(formData: FormData): Promise<AuthResult> {
     data: { user },
   } = await supabase.auth.getUser();
 
+  let needsName = false;
   if (user) {
+    const { data: existing } = await supabase
+      .from("users")
+      .select("name")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    needsName = !existing?.name;
+
     await supabase.from("users").upsert(
       { id: user.id, email: user.email ?? "", name: user.user_metadata?.name ?? null },
       { onConflict: "id" },
     );
   }
 
-  redirect("/dashboard");
+  redirect(needsName ? "/onboarding/name" : "/dashboard");
 }
 

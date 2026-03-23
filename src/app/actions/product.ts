@@ -17,6 +17,7 @@ type CreateProductInput = {
   destination_url: string;
   price: number;
   product_type?: ProductType;
+  preview_image_url?: string;
 };
 
 type ActionResult = { error: string } | { id: string };
@@ -34,6 +35,8 @@ export async function createProduct(
   if (!input.title?.trim()) return { error: "Title is required" };
   if (!input.destination_url?.trim()) return { error: "URL is required" };
   if (!isValidUrl(input.destination_url)) return { error: "URL must start with https://" };
+  if (input.preview_image_url && !isValidUrl(input.preview_image_url))
+    return { error: "Preview image URL must start with https://" };
   if (input.price < MIN_PRICE)
     return { error: `Minimum price is $${MIN_PRICE}` };
 
@@ -85,6 +88,7 @@ export async function createProduct(
       destination_url: input.destination_url.trim(),
       price: input.price,
       product_type: productType,
+      preview_image_url: input.preview_image_url?.trim() || null,
       status,
     })
     .select("id")
@@ -113,6 +117,7 @@ export async function createProductAction(
     destination_url: formData.get("destination_url")?.toString() ?? "",
     price: Number.isFinite(price) ? price : MIN_PRICE,
     product_type: (formData.get("product_type")?.toString() || undefined) as ProductType | undefined,
+    preview_image_url: formData.get("preview_image_url")?.toString() || undefined,
   });
   if ("error" in result) return result.error;
   return null; // createProduct redirects on success

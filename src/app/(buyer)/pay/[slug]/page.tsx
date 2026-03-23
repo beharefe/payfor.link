@@ -23,6 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
   const title = `${link.title} — $${link.price}`;
   const description = link.description ?? "Pay once and get instant access.";
+  const ogImage = `${appUrl}/api/og/${slug}`;
 
   return {
     title,
@@ -32,13 +33,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description,
       url: `${appUrl}/pay/${slug}`,
-      images: link.preview_image_url ? [{ url: link.preview_image_url }] : [],
+      images: [{ url: ogImage, width: 1200, height: 630 }],
       type: "website",
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
+      images: [ogImage],
     },
     other: {
       "product:price:amount": String(link.price),

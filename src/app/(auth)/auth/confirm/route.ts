@@ -27,7 +27,16 @@ export async function GET(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  let needsName = false;
   if (user) {
+    const { data: existing } = await supabase
+      .from("users")
+      .select("name")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    needsName = !existing?.name;
+
     await supabase.from("users").upsert(
       {
         id: user.id,
@@ -38,5 +47,5 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  return NextResponse.redirect(new URL("/dashboard", appUrl));
+  return NextResponse.redirect(new URL(needsName ? "/onboarding/name" : "/dashboard", appUrl));
 }
