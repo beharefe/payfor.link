@@ -98,7 +98,7 @@ export async function createProduct(
     return { error: "Failed to create product" };
   }
 
-  redirect(`/studio/links/${link.id}`);
+  redirect(`/dashboard/links/${link.id}`);
 }
 
 /** FormData-compatible wrapper for use with useActionState in Client Components. */

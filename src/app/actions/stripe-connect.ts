@@ -25,5 +25,5 @@ export async function requestWithdraw(_formData?: FormData): Promise<ActionResul
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Failed to start withdraw" };
   }
-  redirect(url ?? "/studio");
+  redirect(url ?? "/dashboard");
 }

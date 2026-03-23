@@ -53,6 +53,6 @@ export async function verifySellerOtp(formData: FormData): Promise<AuthResult> {
     );
   }
 
-  redirect("/studio");
+  redirect("/dashboard");
 }
 

@@ -341,12 +341,12 @@ create policy "abuse_reports: public insert" on abuse_reports
 **Logic**:
 - Supabase magic link — email OTP, no password ever
 - On first login → upsert row in `users` table
-- Middleware protects `/studio` (seller) and `/orders` (buyer) routes
+- Middleware protects `/dashboard` (seller) and `/orders` (buyer) routes
 
 ---
 
 ### Step 3 — Create Product
-**Pages**: `/studio/links/new`
+**Pages**: `/dashboard/links/new`
 **Actions**: `createProduct()`
 **Logic**:
 - Validate URL format
@@ -356,7 +356,7 @@ create policy "abuse_reports: public insert" on abuse_reports
   - Globally unique — check `links.slug` without seller filter, retry up to 5× with new suffix
 - Insert `links` row with `status = 'draft'`
 - If seller `stripe_connected = true` → set `status = 'active'` immediately
-- Redirect to `/studio/links/[id]` — the activation/copy-link moment
+- Redirect to `/dashboard/links/[id]` — the activation/copy-link moment
 
 **Form fields**:
 - Title (required)
@@ -375,15 +375,15 @@ create policy "abuse_reports: public insert" on abuse_reports
 ---
 
 ### Step 4 — Seller Dashboard + Product Detail
-**Pages**: `/studio` (seller home), `/studio/links/[id]` (link detail)
-**Logic (`/studio/links/[id]` — the activation moment)**:
+**Pages**: `/dashboard` (seller home), `/dashboard/links/[id]` (link detail)
+**Logic (`/dashboard/links/[id]` — the activation moment)**:
 - Show "🎉 Your paywall is ready" hero section
 - Large copy-link button — this is the primary CTA on this page
 - Share prompt: "Share on Twitter · Discord · Email"
 - Stripe connect CTA if not connected
 - Edit / Archive / Delete actions
 
-**Logic (`/studio`)**:
+**Logic (`/dashboard`)**:
 - Fetch seller's links + per-link stats
 - Show total earnings (query Stripe balance)
 - "Withdraw funds" button
@@ -415,7 +415,7 @@ GET /api/connect-stripe/return
 → set stripe_connected = true
 → set stripe_charges_enabled, stripe_details_submitted from Stripe response
 → activate all seller's draft links → status = 'active'
-→ redirect to /studio
+→ redirect to /dashboard
 ```
 
 **Withdraw flow (KYC triggered on demand)**:

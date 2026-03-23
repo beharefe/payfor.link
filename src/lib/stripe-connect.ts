@@ -83,8 +83,8 @@ export async function getStripeWithdrawUrl(): Promise<string | null> {
       account: seller.stripe_account_id,
       type: "account_onboarding",
       collection_options: { fields: "currently_due" },
-      return_url: `${appUrl}/studio`,
-      refresh_url: `${appUrl}/studio?withdraw=refresh`,
+      return_url: `${appUrl}/dashboard`,
+      refresh_url: `${appUrl}/dashboard?withdraw=refresh`,
     });
     return accountLink.url;
   }

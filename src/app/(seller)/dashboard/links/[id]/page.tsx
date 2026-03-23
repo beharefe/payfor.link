@@ -37,7 +37,7 @@ export default async function LinkDetailPage({
     <main style={{ padding: "2rem", maxWidth: "36rem", margin: "0 auto" }}>
       <h1>Your paywall is ready</h1>
       <p>
-        <Link href="/studio">← Studio</Link>
+        <Link href="/dashboard">← Studio</Link>
       </p>
 
       {!seller?.stripe_connected && (

@@ -15,7 +15,7 @@ Seller visits unseal.link
 → enters email → Supabase magic link sent
 → clicks link → authenticated
 → users row upserted (id = auth.uid())
-→ lands on /studio (empty state)
+→ lands on /dashboard (empty state)
 → clicks "Create link"
 ```
 
@@ -34,7 +34,7 @@ Seller fills form: title, description, destination URL, price
 → insert links row:
     status = 'draft' (if Stripe not connected)
     status = 'active' (if Stripe already connected)
-→ redirect to /studio/links/[id]
+→ redirect to /dashboard/links/[id]
 ```
 
 ---
@@ -60,7 +60,7 @@ Seller clicks "Connect Stripe"
     stripe_charges_enabled = true/false
     stripe_details_submitted = true/false
 → activate all seller's draft links → status = 'active'
-→ redirect to /studio
+→ redirect to /dashboard
 ```
 
 **Why `eventually_due`**: Sellers have no earnings at signup. Requiring KYC causes dropoffs. Defer to payout time.

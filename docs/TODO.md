@@ -31,7 +31,7 @@ ALTER TABLE links DROP CONSTRAINT links_seller_id_slug_key;
 ALTER TABLE links ADD CONSTRAINT links_slug_key UNIQUE (slug);
 ```
 
-### 5. Seller activation moment (`/studio/links/[id]`)
+### 5. Seller activation moment (`/dashboard/links/[id]`)
 After creating a link, seller lands on this page. It should be the "🎉 moment":
 - Big headline: "Your paywall is ready"
 - Large copy-link button (the primary action)
@@ -92,10 +92,10 @@ DB totals are useful for display but Stripe is the source of truth.
 
 ### 15. Seller new sale email: include delivery context
 Beyond just notifying of a sale, include:
-- link to `/studio` to see full sales history
+- link to `/dashboard` to see full sales history
 - reminder that the buyer has 24h to use their unlock link
 
-### 16. `/studio/settings`
+### 16. `/dashboard/settings`
 Seller can update their name (used on paywall page as "by {name}").
 Phase 2: avatar, bio, custom payout schedule.
 
@@ -162,4 +162,4 @@ Simple weekly cron: total sales this week, total revenue, top product.
 
 ### 30. Duplicate link
 Sellers want to create variations of the same product (different price points).
-"Duplicate" button on `/studio/links/[id]` that pre-fills the create form.
+"Duplicate" button on `/dashboard/links/[id]` that pre-fills the create form.

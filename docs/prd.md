@@ -212,10 +212,10 @@ Re-access (later): sign in at /orders → see all purchases → access any time
 
 ## Seller
 
-/studio
-/studio/links/new
-/studio/links/[id]
-/studio/settings
+/dashboard
+/dashboard/links/new
+/dashboard/links/[id]
+/dashboard/settings
 
 ---
 

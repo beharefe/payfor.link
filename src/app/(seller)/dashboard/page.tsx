@@ -61,7 +61,7 @@ export default async function DashboardPage() {
       <section style={{ marginBottom: "2rem" }}>
         <h2>Your links</h2>
         <p>
-          <Link href="/studio/links/new">+ Create link</Link>
+          <Link href="/dashboard/links/new">+ Create link</Link>
         </p>
         {!links?.length ? (
           <p>No links yet. Create one to get started.</p>
@@ -81,7 +81,7 @@ export default async function DashboardPage() {
                 <br />
                 <CopyLinkButtons url={`${appUrl}/pay/${link.slug}`} />
                 <Link
-                  href={`/studio/links/${link.id}`}
+                  href={`/dashboard/links/${link.id}`}
                   style={{ marginLeft: "0.5rem" }}
                 >
                   View

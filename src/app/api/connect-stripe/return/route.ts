@@ -21,7 +21,7 @@ export async function GET() {
     .single();
 
   if (!seller?.stripe_account_id) {
-    return NextResponse.redirect(new URL("/studio", appUrl));
+    return NextResponse.redirect(new URL("/dashboard", appUrl));
   }
 
   try {
@@ -46,5 +46,5 @@ export async function GET() {
     log.error("connect-stripe return failed", { user_id: user.id, error: String(err) });
   }
 
-  return NextResponse.redirect(new URL("/studio", appUrl));
+  return NextResponse.redirect(new URL("/dashboard", appUrl));
 }

@@ -145,6 +145,6 @@ describe("createProduct — status", () => {
         destination_url: "https://notion.so/page",
         price: 10,
       }),
-    ).rejects.toThrow("NEXT_REDIRECT:/studio/links/link-abc");
+    ).rejects.toThrow("NEXT_REDIRECT:/dashboard/links/link-abc");
   });
 });

@@ -6,7 +6,7 @@ export default function NewLinkPage() {
     <main style={{ padding: "2rem", maxWidth: "32rem", margin: "0 auto" }}>
       <h1>Create link</h1>
       <p>
-        <Link href="/studio">← Studio</Link>
+        <Link href="/dashboard">← Studio</Link>
       </p>
       <NewLinkForm />
     </main>
