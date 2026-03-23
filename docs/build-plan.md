@@ -46,7 +46,7 @@ Step 4 — Stripe transfers to seller bank account
 Two events only:
 
 ```
-checkout.session.completed   → buyer paid → create purchase → send unlock email
+checkout.session.completed   → buyer paid → create purchase → send OTP to buyer email
 account.updated              → seller KYC complete → enable payouts
 ```
 
@@ -139,7 +139,7 @@ create table links (
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now(),
 
-  unique(seller_id, slug)
+  unique(slug)   -- globally unique: slugs include a random 4-char suffix (title-a3f2)
 );
 
 -- ============================================================
@@ -341,21 +341,22 @@ create policy "abuse_reports: public insert" on abuse_reports
 **Logic**:
 - Supabase magic link — email OTP, no password ever
 - On first login → upsert row in `users` table
-- Middleware redirects unauthenticated users away from `/dashboard` (and all `/dashboard/*` routes)
+- Middleware protects `/studio` (seller) and `/orders` (buyer) routes
 
 ---
 
 ### Step 3 — Create Product
-**Pages**: `/dashboard/links/new`
-**API**: `POST /api/create-product`
+**Pages**: `/studio/links/new`
+**Actions**: `createProduct()`
 **Logic**:
 - Validate URL format
 - Google Safe Browsing check
 - Detect platform from domain (notion/figma/drive/github/other) → auto-set `product_type`
-- Auto-generate slug from title + collision check
+- Auto-generate slug: `slugify(title) + "-" + crypto.randomBytes(2).toString("hex")` → e.g. `notion-crm-a3f2`
+  - Globally unique — check `links.slug` without seller filter, retry up to 5× with new suffix
 - Insert `links` row with `status = 'draft'`
 - If seller `stripe_connected = true` → set `status = 'active'` immediately
-- Redirect to `/dashboard/links/[id]` — the activation/copy-link moment
+- Redirect to `/studio/links/[id]` — the activation/copy-link moment
 
 **Form fields**:
 - Title (required)
@@ -374,19 +375,20 @@ create policy "abuse_reports: public insert" on abuse_reports
 ---
 
 ### Step 4 — Seller Dashboard + Product Detail
-**Pages**: `/dashboard` (seller home), `/dashboard/links/[id]` (link detail)
-**Logic (`/dashboard/links/[id]` — the activation moment)**:
+**Pages**: `/studio` (seller home), `/studio/links/[id]` (link detail)
+**Logic (`/studio/links/[id]` — the activation moment)**:
 - Show "🎉 Your paywall is ready" hero section
 - Large copy-link button — this is the primary CTA on this page
 - Share prompt: "Share on Twitter · Discord · Email"
 - Stripe connect CTA if not connected
 - Edit / Archive / Delete actions
 
-**Logic (`/dashboard`)**:
+**Logic (`/studio`)**:
 - Fetch seller's links + per-link stats
 - Show total earnings (query Stripe balance)
 - "Withdraw funds" button
 - "Copy URL" on each link row — most-used action
+- Real-time new order toast (Supabase Realtime `purchases` INSERT → `router.refresh()` + toast)
 
 ---
 
@@ -413,7 +415,7 @@ GET /api/connect-stripe/return
 → set stripe_connected = true
 → set stripe_charges_enabled, stripe_details_submitted from Stripe response
 → activate all seller's draft links → status = 'active'
-→ redirect to /dashboard
+→ redirect to /studio
 ```
 
 **Withdraw flow (KYC triggered on demand)**:
@@ -542,21 +544,27 @@ receive { link_id }
   → supabase.auth.signInWithOtp({ email: purchase.buyer_email })
   → Supabase sends OTP email and enforces rate limits
   ```
-- After successful verify → show "Check your email for your access link" + done state
+- After successful verify → redirect to `/orders/[purchase_id]`
+- If purchase not yet created (webhook in-flight): client polls every 2s (`SuccessPoller`) until purchase appears, then shows OTP form
 
 ---
 
-### Step 10 — Unlock Flow
+### Step 10 — Unlock Flow (email link — sessionless re-access)
 **Pages**: `/unlock`, `/unlock-request`
 **API**: `POST /api/resend-unlock`
 
 **Unlock**:
 ```
-GET /unlock?token=xxx  (server component — no action needed)
+GET /unlock?token=xxx
 → hash token → lookup by token_hash
-→ check: exists, not expired (expires_at > now()), not used (used_at is null)
-→ check: purchase.buyer_email_verified = true (guard — should always be true here)
-→ mark used_at = now()
+→ check: exists / not used (used_at IS NULL) / not expired / purchase not refunded
+→ if invalid: show error page (do NOT redirect)
+→ if valid: show confirmation screen — "You're one click away · {product_title}"
+    NEVER consume token on GET — email scanners pre-fetch and would burn it silently
+
+User clicks "Access content →" (Server Action form POST):
+→ re-validate token atomically
+→ UPDATE unlock_tokens SET used_at = now() WHERE id = ? AND used_at IS NULL
 → fetch purchase.delivery_url
 → 302 redirect → delivery_url
 ```
@@ -571,13 +579,17 @@ POST /api/resend-unlock { email }
 
 ---
 
-### Step 11 — Buyer Library
-**Pages**: `/library`
+### Step 11 — Buyer Orders (session-based)
+**Pages**: `/orders` (list), `/orders/[order_id]` (detail)
+**API**: `GET /api/orders/[order_id]/access`
 **Logic**:
-- Email input → Supabase magic link (buyer session, no seller access)
-- Fetch purchases by `buyer_email`
-- Each row: product title, date, amount, "Re-access" button
-- Re-access → generates new token + sends email
+- Middleware protects both routes — session required
+- `/orders`: fetch all purchases WHERE buyer_email = user.email AND status = 'paid'
+- `/orders/[id]`: verify ownership (buyer_email = user.email), show order detail
+  - `delivery_url` is NEVER rendered in HTML
+- "Access content →" → `GET /api/orders/[order_id]/access`
+  - Server validates session + ownership → 302 to `purchase.delivery_url`
+- noindex on all `/orders/*` pages
 
 ---
 

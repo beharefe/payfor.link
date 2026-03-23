@@ -60,7 +60,7 @@ create table links (
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now(),
 
-  unique(seller_id, slug)
+  unique(slug)   -- globally unique: slugs include a random 4-char suffix (title-a3f2)
 );
 
 -- ============================================================
