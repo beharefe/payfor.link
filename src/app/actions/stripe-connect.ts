@@ -6,24 +6,24 @@ import {
   getStripeWithdrawUrl,
 } from "@unseallink/lib/stripe-connect";
 
-type ActionResult = { error: string };
-
-export async function initiateStripeConnect(_formData?: FormData): Promise<ActionResult | never> {
+export async function initiateStripeConnect(_formData?: FormData): Promise<void> {
   let url: string;
   try {
     url = await getStripeConnectAccountLinkUrl();
   } catch (err) {
-    return { error: err instanceof Error ? err.message : "Failed to connect Stripe" };
+    const msg = err instanceof Error ? err.message : "Failed to connect Stripe";
+    redirect(`/dashboard?error=${encodeURIComponent(msg)}`);
   }
   redirect(url);
 }
 
-export async function requestWithdraw(_formData?: FormData): Promise<ActionResult | never> {
+export async function requestWithdraw(_formData?: FormData): Promise<void> {
   let url: string | null;
   try {
     url = await getStripeWithdrawUrl();
   } catch (err) {
-    return { error: err instanceof Error ? err.message : "Failed to start withdraw" };
+    const msg = err instanceof Error ? err.message : "Failed to start withdraw";
+    redirect(`/dashboard?error=${encodeURIComponent(msg)}`);
   }
   redirect(url ?? "/dashboard");
 }

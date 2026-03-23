@@ -3,11 +3,11 @@
 import { createClient } from "@unseallink/lib/supabase/server";
 import { redirect } from "next/navigation";
 
-export type AuthResult = { error?: string };
-
-export async function signInWithOtp(formData: FormData): Promise<AuthResult> {
+export async function signInWithOtp(formData: FormData): Promise<void> {
   const email = formData.get("email")?.toString()?.trim();
-  if (!email) return { error: "Email is required" };
+  if (!email) {
+    redirect(`/auth?error=${encodeURIComponent("Email is required")}`);
+  }
 
   const supabase = await createClient();
 
@@ -22,10 +22,12 @@ export async function signInWithOtp(formData: FormData): Promise<AuthResult> {
   redirect(`/auth?sent=1&email=${encodeURIComponent(email)}`);
 }
 
-export async function verifySellerOtp(formData: FormData): Promise<AuthResult> {
+export async function verifySellerOtp(formData: FormData): Promise<void> {
   const email = formData.get("email")?.toString()?.trim();
   const code = formData.get("code")?.toString()?.trim();
-  if (!email || !code) return { error: "Email and code are required" };
+  if (!email || !code) {
+    redirect(`/auth?error=${encodeURIComponent("Email and code are required")}`);
+  }
 
   const supabase = await createClient();
 

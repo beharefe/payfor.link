@@ -6,6 +6,9 @@ const withNextIntl = createNextIntlPlugin();
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  experimental: {
+    turbopackUseSystemTlsCerts: true,
+  },
 };
 
 export default withAxiom(withNextIntl(nextConfig));
