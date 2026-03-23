@@ -16,7 +16,7 @@ export async function updateName(formData: FormData): Promise<SettingsResult> {
   if (!user) return { error: "Not signed in" };
 
   const { error } = await supabase
-    .from("users")
+    .from("sellers")
     .update({ name })
     .eq("id", user.id);
 

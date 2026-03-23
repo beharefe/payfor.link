@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const supabase = await createClient();
   const { data: link } = await supabase
-    .from("links")
+    .from("products")
     .select("title, description, price, preview_image_url")
     .eq("slug", slug)
     .eq("status", "active")
@@ -54,7 +54,7 @@ export default async function PaywallPage({ params }: Props) {
   const supabase = await createClient();
 
   const { data: link } = await supabase
-    .from("links")
+    .from("products")
     .select("id, title, description, price, currency, seller_id, status")
     .eq("slug", slug)
     .single();
@@ -71,7 +71,7 @@ export default async function PaywallPage({ params }: Props) {
 
   const service = createServiceClient();
   const { data: seller } = await service
-    .from("users")
+    .from("sellers")
     .select("name, email")
     .eq("id", link.seller_id)
     .single();
@@ -92,7 +92,7 @@ export default async function PaywallPage({ params }: Props) {
       </p>
       <PaywallCTA linkId={link.id} />
       <div style={{ marginTop: "2rem", textAlign: "center" }}>
-        <AbuseReportForm linkId={link.id} />
+        <AbuseReportForm productId={link.id} />
       </div>
     </main>
   );

@@ -51,14 +51,14 @@ export async function verifySellerOtp(formData: FormData): Promise<void> {
   let needsName = false;
   if (user) {
     const { data: existing } = await supabase
-      .from("users")
+      .from("sellers")
       .select("name")
       .eq("id", user.id)
       .maybeSingle();
 
     needsName = !existing?.name;
 
-    await supabase.from("users").upsert(
+    await supabase.from("sellers").upsert(
       { id: user.id, email: user.email ?? "", name: user.user_metadata?.name ?? null },
       { onConflict: "id" },
     );

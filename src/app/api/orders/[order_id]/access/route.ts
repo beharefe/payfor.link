@@ -19,7 +19,7 @@ export async function GET(
 
   const service = createServiceClient();
   const { data: order } = await service
-    .from("purchases")
+    .from("orders")
     .select("buyer_email, delivery_url, status")
     .eq("id", order_id)
     .single();

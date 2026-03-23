@@ -9,24 +9,24 @@ import { log } from "@unseallink/lib/logger";
 type ActionResult = { success: true } | { error: string };
 
 export async function verifyOtp(
-  purchaseId: string,
+  orderId: string,
   code: string,
 ): Promise<ActionResult> {
   const supabase = createServiceClient();
 
-  const { data: purchase } = await supabase
-    .from("purchases")
+  const { data: order } = await supabase
+    .from("orders")
     .select(
       "id, buyer_email, buyer_email_verified, delivery_url, product_title",
     )
-    .eq("id", purchaseId)
+    .eq("id", orderId)
     .single();
 
-  if (!purchase) return { error: "Purchase not found" };
-  if (purchase.buyer_email_verified) redirect(`/orders/${purchaseId}`);
+  if (!order) return { error: "Order not found" };
+  if (order.buyer_email_verified) redirect(`/orders/${orderId}`);
 
   const { error: verifyError } = await supabase.auth.verifyOtp({
-    email: purchase.buyer_email,
+    email: order.buyer_email,
     token: code.trim(),
     type: "email",
   });
@@ -41,34 +41,34 @@ export async function verifyOtp(
   }
 
   await supabase
-    .from("purchases")
+    .from("orders")
     .update({ buyer_email_verified: true })
-    .eq("id", purchaseId);
+    .eq("id", orderId);
 
-  // Generate unlock token and send access email
+  // Generate access token and send access email
   const rawToken = crypto.randomBytes(32).toString("hex");
   const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
   const unlockUrl = `${appUrl}/unlock?token=${rawToken}`;
 
-  const { error: tokenError } = await supabase.from("unlock_tokens").insert({
-    purchase_id: purchaseId,
+  const { error: tokenError } = await supabase.from("access_tokens").insert({
+    order_id: orderId,
     token_hash: tokenHash,
     expires_at: expiresAt,
   });
 
   if (tokenError) {
-    log.error("verifyOtp: insert unlock_token failed", { purchase_id: purchaseId, error: tokenError.message });
+    log.error("verifyOtp: insert access_token failed", { order_id: orderId, error: tokenError.message });
   } else {
     await resend.emails.send({
       from: FROM_EMAIL,
-      to: purchase.buyer_email,
-      subject: `Your access link — ${purchase.product_title}`,
+      to: order.buyer_email,
+      subject: `Your access link — ${order.product_title}`,
       html: `
         <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px;">
           <h2 style="font-size:20px;font-weight:500;margin:0 0 8px;">Your access is ready</h2>
-          <p style="color:#666;margin:0 0 20px;">${purchase.product_title}</p>
+          <p style="color:#666;margin:0 0 20px;">${order.product_title}</p>
           <a href="${unlockUrl}" style="display:inline-block;background:#111111;color:#ffffff;padding:14px 28px;border-radius:100px;text-decoration:none;font-weight:500;font-size:16px;">
             Access content →
           </a>
@@ -87,26 +87,25 @@ export async function verifyOtp(
     });
   }
 
-  redirect(`/orders/${purchaseId}`);
+  redirect(`/orders/${orderId}`);
 }
 
-export async function resendOtp(purchaseId: string): Promise<ActionResult> {
+export async function resendOtp(orderId: string): Promise<ActionResult> {
   const supabase = createServiceClient();
 
-  const { data: purchase } = await supabase
-    .from("purchases")
+  const { data: order } = await supabase
+    .from("orders")
     .select("id, buyer_email, buyer_email_verified, product_title")
-    .eq("id", purchaseId)
+    .eq("id", orderId)
     .single();
 
-  if (!purchase) return { error: "Purchase not found" };
-  if (purchase.buyer_email_verified) return { success: true };
+  if (!order) return { error: "Order not found" };
+  if (order.buyer_email_verified) return { success: true };
 
   const { error } = await supabase.auth.signInWithOtp({
-    email: purchase.buyer_email,
+    email: order.buyer_email,
     options: {
       shouldCreateUser: true,
-      // Optional: customize redirect if using magic link; 6-digit OTP is configured in Supabase
     },
   });
 
@@ -115,7 +114,7 @@ export async function resendOtp(purchaseId: string): Promise<ActionResult> {
       return { error: "Too many attempts. Please try again later." };
     }
     log.error("resendOtp signInWithOtp failed", {
-      purchase_id: purchaseId,
+      order_id: orderId,
       error: error.message,
     });
     return { error: "Failed to send code. Please try again." };

@@ -15,7 +15,7 @@ export async function GET() {
   }
 
   const { data: seller } = await supabase
-    .from("users")
+    .from("sellers")
     .select("stripe_account_id")
     .eq("id", user.id)
     .single();
@@ -28,7 +28,7 @@ export async function GET() {
     const account = await stripe.accounts.retrieve(seller.stripe_account_id);
 
     await supabase
-      .from("users")
+      .from("sellers")
       .update({
         stripe_connected: true,
         stripe_charges_enabled: account.charges_enabled ?? false,
@@ -38,7 +38,7 @@ export async function GET() {
       .eq("id", user.id);
 
     await supabase
-      .from("links")
+      .from("products")
       .update({ status: "active" })
       .eq("seller_id", user.id)
       .eq("status", "draft");

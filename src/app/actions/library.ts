@@ -40,7 +40,7 @@ export async function verifyLibraryOtp(formData: FormData): Promise<LibraryActio
   return { ok: true };
 }
 
-export async function resendAccess(purchaseId: string): Promise<LibraryActionResult> {
+export async function resendAccess(orderId: string): Promise<LibraryActionResult> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -48,21 +48,21 @@ export async function resendAccess(purchaseId: string): Promise<LibraryActionRes
   if (!user?.email) return { error: "Not signed in" };
 
   const service = createServiceClient();
-  const { data: purchase } = await service
-    .from("purchases")
+  const { data: order } = await service
+    .from("orders")
     .select("id, product_title, buyer_email")
-    .eq("id", purchaseId)
+    .eq("id", orderId)
     .eq("status", "paid")
     .single();
 
-  if (!purchase) return { error: "Purchase not found" };
-  if (purchase.buyer_email !== user.email) return { error: "Not your purchase" };
+  if (!order) return { error: "Order not found" };
+  if (order.buyer_email !== user.email) return { error: "Not your order" };
 
   // Invalidate any unused tokens before issuing a new one.
   await service
-    .from("unlock_tokens")
+    .from("access_tokens")
     .delete()
-    .eq("purchase_id", purchaseId)
+    .eq("order_id", orderId)
     .is("used_at", null);
 
   const rawToken = crypto.randomBytes(32).toString("hex");
@@ -71,21 +71,21 @@ export async function resendAccess(purchaseId: string): Promise<LibraryActionRes
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   const unlockUrl = `${appUrl}/unlock?token=${rawToken}`;
 
-  const { error: insertError } = await service.from("unlock_tokens").insert({
-    purchase_id: purchase.id,
+  const { error: insertError } = await service.from("access_tokens").insert({
+    order_id: order.id,
     token_hash: tokenHash,
     expires_at: expiresAt,
   });
 
   if (insertError) {
-    log.error("resendAccess: insert token failed", { purchase_id: purchaseId });
+    log.error("resendAccess: insert token failed", { order_id: orderId });
     return { error: "Failed to generate link" };
   }
 
   await resend.emails.send({
     from: FROM_EMAIL,
-    to: purchase.buyer_email,
-    subject: `Your access link — ${purchase.product_title}`,
+    to: order.buyer_email,
+    subject: `Your access link — ${order.product_title}`,
     html: `<p>Here is your access link. It expires in 24 hours and can only be used once.</p>
            <p><a href="${unlockUrl}">Access your purchase →</a></p>`,
   });

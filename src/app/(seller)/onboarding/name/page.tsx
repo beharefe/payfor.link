@@ -11,7 +11,7 @@ export default async function OnboardingNamePage() {
 
   // Already has a name — skip onboarding
   const { data: seller } = await supabase
-    .from("users")
+    .from("sellers")
     .select("name")
     .eq("id", user.id)
     .single();

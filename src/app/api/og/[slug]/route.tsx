@@ -9,7 +9,7 @@ export async function GET(
 
   const supabase = createServiceClient();
   const { data: link } = await supabase
-    .from("links")
+    .from("products")
     .select("title, description, price, currency, preview_image_url, seller_id")
     .eq("slug", slug)
     .eq("status", "active")
@@ -20,7 +20,7 @@ export async function GET(
   }
 
   const { data: seller } = await supabase
-    .from("users")
+    .from("sellers")
     .select("name")
     .eq("id", link.seller_id)
     .single();

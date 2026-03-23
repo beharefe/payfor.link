@@ -14,7 +14,7 @@ export async function saveOnboardingName(formData: FormData) {
   if (!user) redirect("/auth");
 
   await supabase
-    .from("users")
+    .from("sellers")
     .update({ name: name.slice(0, 60) })
     .eq("id", user.id);
 

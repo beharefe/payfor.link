@@ -1,10 +1,10 @@
-export type LinkStatus =
+export type ProductStatus =
   | "draft"
   | "active"
   | "suspended"
   | "archived"
   | "deleted";
-export type PurchaseStatus = "paid" | "refunded" | "disputed" | "fraud";
+export type OrderStatus = "paid" | "refunded" | "disputed" | "fraud";
 export type ProductType =
   | "template"
   | "file"
@@ -12,14 +12,14 @@ export type ProductType =
   | "service"
   | "dataset"
   | "other";
-export type AbuseReportReason = "scam" | "malware" | "copyright" | "other";
-export type AbuseReportStatus =
+export type ReportReason = "scam" | "malware" | "copyright" | "other";
+export type ReportStatus =
   | "pending"
   | "reviewed"
   | "actioned"
   | "dismissed";
 
-export interface User {
+export interface Seller {
   id: string;
   email: string;
   name: string | null;
@@ -37,7 +37,7 @@ export interface User {
   updated_at: string;
 }
 
-export interface Link {
+export interface Product {
   id: string;
   seller_id: string;
   slug: string;
@@ -46,13 +46,13 @@ export interface Link {
   destination_url: string;
   price: number;
   currency: string;
-  status: LinkStatus;
+  status: ProductStatus;
   version: number;
   product_type: ProductType | null;
   preview_image_url: string | null;
   cta_text: string | null;
   expires_at: string | null;
-  max_purchases: number | null;
+  max_orders: number | null;
   total_sales: number;
   total_revenue: number;
   reported_at: string | null;
@@ -61,9 +61,9 @@ export interface Link {
   updated_at: string;
 }
 
-export interface Purchase {
+export interface Order {
   id: string;
-  link_id: string;
+  product_id: string;
   seller_id: string;
   buyer_email: string;
   buyer_email_verified: boolean;
@@ -77,8 +77,8 @@ export interface Purchase {
   price_paid: number;
   platform_fee: number;
   currency: string;
-  link_version: number;
-  status: PurchaseStatus;
+  product_version: number;
+  status: OrderStatus;
   refunded_at: string | null;
   refund_reason: string | null;
   stripe_refund_id: string | null;
@@ -86,21 +86,21 @@ export interface Purchase {
   updated_at: string;
 }
 
-export interface UnlockToken {
+export interface AccessToken {
   id: string;
-  purchase_id: string;
+  order_id: string;
   token_hash: string;
   expires_at: string;
   used_at: string | null;
   created_at: string;
 }
 
-export interface AbuseReport {
+export interface Report {
   id: string;
-  link_id: string;
+  product_id: string;
   reporter_email: string | null;
-  reason: AbuseReportReason;
+  reason: ReportReason;
   description: string | null;
-  status: AbuseReportStatus;
+  status: ReportStatus;
   created_at: string;
 }

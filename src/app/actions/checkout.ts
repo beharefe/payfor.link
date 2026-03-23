@@ -13,7 +13,7 @@ export async function createCheckoutSession(
   const supabase = await createClient();
 
   const { data: link } = await supabase
-    .from("links")
+    .from("products")
     .select("id, title, price, currency, slug, seller_id, version, status")
     .eq("id", linkId)
     .eq("status", "active")
@@ -23,7 +23,7 @@ export async function createCheckoutSession(
 
   const service = createServiceClient();
   const { data: seller } = await service
-    .from("users")
+    .from("sellers")
     .select("stripe_account_id, stripe_charges_enabled")
     .eq("id", link.seller_id)
     .single();
@@ -54,8 +54,8 @@ export async function createCheckoutSession(
     success_url: `${appUrl}/pay/${link.slug}/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${appUrl}/pay/${link.slug}`,
     metadata: {
-      link_id: link.id,
-      link_version: String(link.version),
+      product_id: link.id,
+      product_version: String(link.version),
     },
   });
 

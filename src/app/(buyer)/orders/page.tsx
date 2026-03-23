@@ -18,7 +18,7 @@ export default async function OrdersPage() {
 
   const service = createServiceClient();
   const { data: orders } = await service
-    .from("purchases")
+    .from("orders")
     .select("id, product_title, price_paid, currency, created_at, status")
     .eq("buyer_email", user.email ?? "")
     .eq("status", "paid")

@@ -20,21 +20,21 @@ export default async function UnlockPage({ searchParams }: Props) {
   const supabase = createServiceClient();
   const tokenHash = crypto.createHash("sha256").update(token.trim()).digest("hex");
 
-  const { data: unlockToken } = await supabase
-    .from("unlock_tokens")
-    .select("id, purchase_id, expires_at, used_at")
+  const { data: accessToken } = await supabase
+    .from("access_tokens")
+    .select("id, order_id, expires_at, used_at")
     .eq("token_hash", tokenHash)
     .single();
 
-  if (!unlockToken) {
+  if (!accessToken) {
     return <UnlockError title="Invalid link" body="This link is invalid or has already been used." />;
   }
 
-  if (unlockToken.used_at) {
+  if (accessToken.used_at) {
     return <UnlockError title="Already used" body="This link has already been used. Sign in to access your orders." />;
   }
 
-  if (new Date(unlockToken.expires_at) < new Date()) {
+  if (new Date(accessToken.expires_at) < new Date()) {
     return (
       <UnlockError
         title="Link expired"
@@ -44,13 +44,13 @@ export default async function UnlockPage({ searchParams }: Props) {
     );
   }
 
-  const { data: purchase } = await supabase
-    .from("purchases")
+  const { data: order } = await supabase
+    .from("orders")
     .select("product_title, status")
-    .eq("id", unlockToken.purchase_id)
+    .eq("id", accessToken.order_id)
     .single();
 
-  if (!purchase || purchase.status === "refunded") {
+  if (!order || order.status === "refunded") {
     return <UnlockError title="Access denied" body="This order is no longer valid." />;
   }
 
@@ -63,9 +63,9 @@ export default async function UnlockPage({ searchParams }: Props) {
 
     // Re-validate atomically before consuming
     const { data: t } = await svc
-      .from("unlock_tokens")
-      .select("purchase_id, used_at, expires_at")
-      .eq("id", unlockToken!.id)
+      .from("access_tokens")
+      .select("order_id, used_at, expires_at")
+      .eq("id", accessToken!.id)
       .single();
 
     if (!t || t.used_at || new Date(t.expires_at) < new Date()) {
@@ -74,19 +74,19 @@ export default async function UnlockPage({ searchParams }: Props) {
 
     // Mark used only if still unused (race-condition guard)
     await svc
-      .from("unlock_tokens")
+      .from("access_tokens")
       .update({ used_at: new Date().toISOString() })
-      .eq("id", unlockToken!.id)
+      .eq("id", accessToken!.id)
       .is("used_at", null);
 
-    const { data: p } = await svc
-      .from("purchases")
+    const { data: o } = await svc
+      .from("orders")
       .select("delivery_url, status")
-      .eq("id", t.purchase_id)
+      .eq("id", t.order_id)
       .single();
 
-    if (!p || p.status === "refunded") redirect("/orders");
-    redirect(p.delivery_url);
+    if (!o || o.status === "refunded") redirect("/orders");
+    redirect(o.delivery_url);
   }
 
   return (
@@ -107,7 +107,7 @@ export default async function UnlockPage({ searchParams }: Props) {
       <h1 style={{ fontSize: "1.5rem", fontWeight: 500, marginBottom: "0.5rem" }}>
         You&apos;re one click away
       </h1>
-      <p style={{ color: "#6B6B6B", marginBottom: "2rem" }}>{purchase.product_title}</p>
+      <p style={{ color: "#6B6B6B", marginBottom: "2rem" }}>{order.product_title}</p>
 
       <form action={consumeAndRedirect} style={{ width: "100%" }}>
         <button

@@ -55,7 +55,7 @@ export default async function PaymentSuccessPage({ params, searchParams }: Props
 
   const supabase = createServiceClient();
   const { data: purchase } = await supabase
-    .from("purchases")
+    .from("orders")
     .select("id, buyer_email, buyer_email_verified, product_title, price_paid, currency")
     .eq("stripe_checkout_session_id", session.id)
     .single();
@@ -90,7 +90,7 @@ export default async function PaymentSuccessPage({ params, searchParams }: Props
       <p style={{ margin: "0 0 0.75rem" }}>
         Enter the 6-digit code we sent to <strong>{customerEmail}</strong>
       </p>
-      <SuccessPageClient purchaseId={purchase.id} />
+      <SuccessPageClient orderId={purchase.id} />
     </main>
   );
 }

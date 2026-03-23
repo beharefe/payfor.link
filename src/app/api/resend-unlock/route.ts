@@ -20,37 +20,37 @@ export async function POST(request: Request) {
   }
 
   const supabase = createServiceClient();
-  const { data: purchases } = await supabase
-    .from("purchases")
+  const { data: orders } = await supabase
+    .from("orders")
     .select("id, product_title, buyer_email")
     .eq("buyer_email", email)
     .eq("status", "paid");
 
-  if (!purchases?.length) {
-    return NextResponse.json({ ok: true, message: "No purchases found for this email." });
+  if (!orders?.length) {
+    return NextResponse.json({ ok: true, message: "No orders found for this email." });
   }
 
-  for (const purchase of purchases) {
-    // Invalidate any unused tokens for this purchase before issuing a new one.
+  for (const order of orders) {
+    // Invalidate any unused tokens for this order before issuing a new one.
     await supabase
-      .from("unlock_tokens")
+      .from("access_tokens")
       .delete()
-      .eq("purchase_id", purchase.id)
+      .eq("order_id", order.id)
       .is("used_at", null);
 
     const rawToken = crypto.randomBytes(32).toString("hex");
     const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
-    const { error: insertError } = await supabase.from("unlock_tokens").insert({
-      purchase_id: purchase.id,
+    const { error: insertError } = await supabase.from("access_tokens").insert({
+      order_id: order.id,
       token_hash: tokenHash,
       expires_at: expiresAt,
     });
 
     if (insertError) {
       log.error("resend-unlock: insert token failed", {
-        purchase_id: purchase.id,
+        order_id: order.id,
         error: insertError.message,
       });
       continue;
@@ -59,8 +59,8 @@ export async function POST(request: Request) {
     const unlockUrl = `${APP_URL}/unlock?token=${rawToken}`;
     await resend.emails.send({
       from: FROM_EMAIL,
-      to: purchase.buyer_email,
-      subject: `Your access link — ${purchase.product_title}`,
+      to: order.buyer_email,
+      subject: `Your access link — ${order.product_title}`,
       html: `<p>Here is your access link. It expires in 24 hours and can only be used once.</p>
              <p><a href="${unlockUrl}">Access your purchase →</a></p>
              <p>If you didn't request this, ignore this email.</p>`,

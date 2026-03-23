@@ -30,14 +30,14 @@ export async function GET(request: NextRequest) {
   let needsName = false;
   if (user) {
     const { data: existing } = await supabase
-      .from("users")
+      .from("sellers")
       .select("name")
       .eq("id", user.id)
       .maybeSingle();
 
     needsName = !existing?.name;
 
-    await supabase.from("users").upsert(
+    await supabase.from("sellers").upsert(
       {
         id: user.id,
         email: user.email ?? "",

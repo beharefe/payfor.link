@@ -11,7 +11,7 @@ export async function getStripeConnectAccountLinkUrl(): Promise<string> {
   if (!user) throw new Error("Unauthorized");
 
   const { data: seller } = await supabase
-    .from("users")
+    .from("sellers")
     .select("stripe_account_id, email")
     .eq("id", user.id)
     .single();
@@ -28,7 +28,7 @@ export async function getStripeConnectAccountLinkUrl(): Promise<string> {
     });
     stripeAccountId = account.id;
     const { error } = await supabase
-      .from("users")
+      .from("sellers")
       .update({ stripe_account_id: stripeAccountId })
       .eq("id", user.id);
     if (error) {
@@ -66,7 +66,7 @@ export async function getStripeWithdrawUrl(): Promise<string | null> {
   if (!user) throw new Error("Unauthorized");
 
   const { data: seller } = await supabase
-    .from("users")
+    .from("sellers")
     .select("stripe_account_id")
     .eq("id", user.id)
     .single();

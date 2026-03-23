@@ -54,7 +54,7 @@ export async function createProduct(
     const suffix = crypto.randomBytes(2).toString("hex");
     const candidate = `${baseSlug}-${suffix}`;
     const { data: existing } = await supabase
-      .from("links")
+      .from("products")
       .select("id")
       .eq("slug", candidate)
       .maybeSingle();
@@ -71,7 +71,7 @@ export async function createProduct(
 
   // Detect status — active immediately if Stripe already connected
   const { data: seller } = await supabase
-    .from("users")
+    .from("sellers")
     .select("stripe_connected")
     .eq("id", user.id)
     .single();
@@ -79,7 +79,7 @@ export async function createProduct(
   const status = seller?.stripe_connected ? "active" : "draft";
 
   const { data: link, error } = await supabase
-    .from("links")
+    .from("products")
     .insert({
       seller_id: user.id,
       slug,

@@ -17,7 +17,7 @@ export default async function LinkDetailPage({
   if (!user) redirect("/auth");
 
   const { data: link } = await supabase
-    .from("links")
+    .from("products")
     .select("id, title, slug, status, seller_id")
     .eq("id", id)
     .single();
@@ -25,7 +25,7 @@ export default async function LinkDetailPage({
   if (!link || link.seller_id !== user.id) notFound();
 
   const { data: seller } = await supabase
-    .from("users")
+    .from("sellers")
     .select("stripe_connected")
     .eq("id", user.id)
     .single();

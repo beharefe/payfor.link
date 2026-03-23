@@ -13,7 +13,7 @@ export default async function DashboardPage() {
   if (!user) redirect("/auth");
 
   const { data: seller } = await supabase
-    .from("users")
+    .from("sellers")
     .select(
       "stripe_connected, total_earned, total_fees",
     )
@@ -21,7 +21,7 @@ export default async function DashboardPage() {
     .single();
 
   const { data: links } = await supabase
-    .from("links")
+    .from("products")
     .select("id, title, slug, status, total_sales, total_revenue")
     .eq("seller_id", user.id)
     .order("created_at", { ascending: false });

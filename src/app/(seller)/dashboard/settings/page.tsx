@@ -11,7 +11,7 @@ export default async function SettingsPage() {
   if (!user) redirect("/auth");
 
   const { data: seller } = await supabase
-    .from("users")
+    .from("sellers")
     .select("name, email")
     .eq("id", user.id)
     .single();
