@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@unseallink/lib/supabase/server";
 import { TABLES } from "@unseallink/lib/db";
+import { isValidUrl } from "@unseallink/lib/product-utils";
 
 export async function GET(
   _request: Request,
@@ -35,6 +36,11 @@ export async function GET(
 
   if (order.status === "refunded") {
     return NextResponse.redirect(new URL(`/orders/${order_id}`, appUrl));
+  }
+
+  // Re-validate delivery_url at redirect time — defense against compromised DB records
+  if (!isValidUrl(order.delivery_url)) {
+    return NextResponse.json({ error: "Invalid delivery URL" }, { status: 500 });
   }
 
   return NextResponse.redirect(order.delivery_url);

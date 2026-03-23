@@ -68,3 +68,8 @@ export async function verifySellerOtp(formData: FormData): Promise<void> {
   redirect(needsName ? "/onboarding/name" : "/dashboard");
 }
 
+export async function signOut(): Promise<void> {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  redirect("/auth");
+}

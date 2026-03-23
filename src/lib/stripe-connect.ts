@@ -36,7 +36,6 @@ export async function getStripeConnectAccountLinkUrl(): Promise<string> {
       // Log the Stripe account ID so it can be manually linked if needed.
       log.error("Failed to save stripe_account_id — orphaned Stripe account created", {
         user_id: user.id,
-        stripe_account_id: stripeAccountId,
       });
       throw new Error("Failed to connect Stripe");
     }

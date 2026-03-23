@@ -15,12 +15,29 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const email = body.email?.toString()?.trim();
+  const email = body.email?.toString()?.trim().toLowerCase();
   if (!email) {
     return NextResponse.json({ error: "Email is required" }, { status: 400 });
   }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return NextResponse.json({ error: "Invalid email" }, { status: 400 });
+  }
 
   const supabase = createServiceClient();
+
+  // Rate limit: max 3 resend requests per email per hour via token count
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  const { count } = await supabase
+    .from(TABLES.ACCESS_TOKENS)
+    .select("id", { count: "exact", head: true })
+    .gte("created_at", oneHourAgo)
+    .in(
+      "order_id",
+      supabase.from(TABLES.ORDERS).select("id").eq("buyer_email", email),
+    );
+  if ((count ?? 0) >= 3) {
+    return NextResponse.json({ ok: true }); // Silent: don't reveal throttle exists
+  }
   const { data: orders } = await supabase
     .from(TABLES.ORDERS)
     .select("id, product_title, buyer_email")

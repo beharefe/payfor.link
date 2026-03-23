@@ -34,6 +34,9 @@ export async function createProduct(
   if (!user) return { error: "Unauthorized" };
 
   if (!input.title?.trim()) return { error: "Title is required" };
+  if (input.title.trim().length > 200) return { error: "Title must be 200 characters or less" };
+  if (input.description && input.description.length > 2000)
+    return { error: "Description must be 2000 characters or less" };
   if (!input.destination_url?.trim()) return { error: "URL is required" };
   if (!isValidUrl(input.destination_url)) return { error: "URL must start with https://" };
   if (input.preview_image_url && !isValidUrl(input.preview_image_url))
@@ -80,7 +83,7 @@ export async function createProduct(
   const status = seller?.stripe_connected ? "active" : "draft";
 
   const { data: link, error } = await supabase
-    .from("products")
+    .from(TABLES.PRODUCTS)
     .insert({
       seller_id: user.id,
       slug,

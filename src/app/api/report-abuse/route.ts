@@ -35,10 +35,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Product not found" }, { status: 404 });
   }
 
+  const trimmedDescription = description?.trim() || null;
+  if (trimmedDescription && trimmedDescription.length > 500) {
+    return NextResponse.json({ error: "Description must be 500 characters or less" }, { status: 400 });
+  }
+
   const { error } = await supabase.from(TABLES.REPORTS).insert({
     product_id,
     reason,
-    description: description?.trim().slice(0, 500) || null,
+    description: trimmedDescription,
   });
 
   if (error) {
