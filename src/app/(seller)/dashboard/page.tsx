@@ -35,7 +35,8 @@ export default async function DashboardPage() {
     <main style={{ padding: "2rem", maxWidth: "48rem", margin: "0 auto" }}>
       <SellerRealtimeNotifier sellerId={user.id} />
       <h1>Dashboard</h1>
-      <p style={{ marginBottom: "1.5rem" }}>
+      <p style={{ marginBottom: "1.5rem", display: "flex", gap: "1rem" }}>
+        <Link href="/dashboard/settings">Settings</Link>
         <Link href="/auth">Sign out</Link>
       </p>
 

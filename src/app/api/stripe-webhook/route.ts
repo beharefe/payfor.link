@@ -113,10 +113,38 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
     supabase.rpc("increment_seller_stats", { p_seller_id: link.seller_id, p_earned: pricePaid, p_fees: platformFee }),
   ]);
 
+  // Send OTP to buyer for email verification on the success page
   await supabase.auth.signInWithOtp({
     email: customerEmail,
     options: { shouldCreateUser: true },
   });
+
+  // Notify seller of the new sale
+  const { data: seller } = await supabase
+    .from("users")
+    .select("email, name")
+    .eq("id", link.seller_id)
+    .single();
+
+  if (seller?.email) {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: seller.email,
+      subject: `New sale — ${link.title}`,
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px;">
+          <h2 style="font-size:20px;font-weight:500;margin:0 0 8px;">You just made a sale 🎉</h2>
+          <p style="font-size:16px;margin:0 0 4px;"><strong>${link.title}</strong></p>
+          <p style="font-size:24px;font-weight:500;margin:0 0 20px;">$${pricePaid.toFixed(2)}</p>
+          <a href="${appUrl}/dashboard" style="display:inline-block;background:#111;color:#fff;padding:12px 24px;border-radius:100px;text-decoration:none;font-weight:500;">
+            View dashboard →
+          </a>
+          <p style="color:#aaa;font-size:12px;margin-top:24px;">unseal.link · Platform fee: $${platformFee.toFixed(2)} (4.5%)</p>
+        </div>
+      `,
+    });
+  }
 }
 
 async function handleAccountUpdated(account: Stripe.Account) {

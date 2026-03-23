@@ -56,7 +56,7 @@ export default async function PaymentSuccessPage({ params, searchParams }: Props
   const supabase = createServiceClient();
   const { data: purchase } = await supabase
     .from("purchases")
-    .select("id, buyer_email, buyer_email_verified")
+    .select("id, buyer_email, buyer_email_verified, product_title, price_paid, currency")
     .eq("stripe_checkout_session_id", session.id)
     .single();
 
@@ -80,9 +80,14 @@ export default async function PaymentSuccessPage({ params, searchParams }: Props
   }
 
   return (
-    <main style={{ padding: "2rem", maxWidth: "28rem", margin: "0 auto" }}>
-      <h1>Verify your email</h1>
-      <p>
+    <main style={{ padding: "2rem", maxWidth: "28rem", margin: "0 auto", textAlign: "center" }}>
+      <p style={{ fontSize: "2rem", margin: "0 0 0.5rem" }}>✅</p>
+      <h1 style={{ fontSize: "1.4rem", fontWeight: 500, margin: "0 0 0.25rem" }}>Payment confirmed</h1>
+      <p style={{ fontWeight: 500, margin: "0 0 0.25rem" }}>{purchase.product_title}</p>
+      <p style={{ color: "#6B6B6B", margin: "0 0 1.5rem" }}>
+        ${purchase.price_paid.toFixed(2)} {purchase.currency.toUpperCase()}
+      </p>
+      <p style={{ margin: "0 0 0.75rem" }}>
         Enter the 6-digit code we sent to <strong>{customerEmail}</strong>
       </p>
       <SuccessPageClient purchaseId={purchase.id} />

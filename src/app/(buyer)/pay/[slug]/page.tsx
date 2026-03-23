@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { createCheckoutSession } from "@unseallink/app/actions/checkout";
 import { log } from "@unseallink/lib/logger";
 import { PaywallCTA } from "./paywall-cta";
+import { AbuseReportForm } from "./abuse-report-form";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -88,6 +89,9 @@ export default async function PaywallPage({ params }: Props) {
         <strong>${link.price.toFixed(2)}</strong> {link.currency.toUpperCase()}
       </p>
       <PaywallCTA linkId={link.id} />
+      <div style={{ marginTop: "2rem", textAlign: "center" }}>
+        <AbuseReportForm linkId={link.id} />
+      </div>
     </main>
   );
 }

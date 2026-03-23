@@ -1,7 +1,9 @@
 "use server";
 
+import crypto from "node:crypto";
 import { redirect } from "next/navigation";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
+import { resend, FROM_EMAIL } from "@unseallink/lib/resend";
 import { log } from "@unseallink/lib/logger";
 
 type ActionResult = { success: true } | { error: string };
@@ -42,6 +44,48 @@ export async function verifyOtp(
     .from("purchases")
     .update({ buyer_email_verified: true })
     .eq("id", purchaseId);
+
+  // Generate unlock token and send access email
+  const rawToken = crypto.randomBytes(32).toString("hex");
+  const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
+  const unlockUrl = `${appUrl}/unlock?token=${rawToken}`;
+
+  const { error: tokenError } = await supabase.from("unlock_tokens").insert({
+    purchase_id: purchaseId,
+    token_hash: tokenHash,
+    expires_at: expiresAt,
+  });
+
+  if (tokenError) {
+    log.error("verifyOtp: insert unlock_token failed", { purchase_id: purchaseId, error: tokenError.message });
+  } else {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: purchase.buyer_email,
+      subject: `Your access link — ${purchase.product_title}`,
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px;">
+          <h2 style="font-size:20px;font-weight:500;margin:0 0 8px;">Your access is ready</h2>
+          <p style="color:#666;margin:0 0 20px;">${purchase.product_title}</p>
+          <a href="${unlockUrl}" style="display:inline-block;background:#111111;color:#ffffff;padding:14px 28px;border-radius:100px;text-decoration:none;font-weight:500;font-size:16px;">
+            Access content →
+          </a>
+          <p style="color:#aaa;font-size:13px;margin-top:20px;">
+            This link expires in 24 hours and can only be used once.<br>
+            Can't click the button? Copy this link:<br>
+            <span style="color:#666;">${unlockUrl}</span>
+          </p>
+          <hr style="border:none;border-top:1px solid #eee;margin:20px 0;">
+          <p style="color:#aaa;font-size:12px;margin:0;">
+            Purchased via <a href="${appUrl}" style="color:#aaa;">unseal.link</a> ·
+            <a href="${appUrl}/orders" style="color:#aaa;">View your orders</a>
+          </p>
+        </div>
+      `,
+    });
+  }
 
   redirect(`/orders/${purchaseId}`);
 }
