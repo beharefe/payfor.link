@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { resend, FROM_EMAIL } from "@unseallink/lib/resend";
 import { log } from "@unseallink/lib/logger";
+import { TABLES } from "@unseallink/lib/db";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
@@ -21,7 +22,7 @@ export async function POST(request: Request) {
 
   const supabase = createServiceClient();
   const { data: orders } = await supabase
-    .from("orders")
+    .from(TABLES.ORDERS)
     .select("id, product_title, buyer_email")
     .eq("buyer_email", email)
     .eq("status", "paid");
@@ -33,7 +34,7 @@ export async function POST(request: Request) {
   for (const order of orders) {
     // Invalidate any unused tokens for this order before issuing a new one.
     await supabase
-      .from("access_tokens")
+      .from(TABLES.ACCESS_TOKENS)
       .delete()
       .eq("order_id", order.id)
       .is("used_at", null);
@@ -42,7 +43,7 @@ export async function POST(request: Request) {
     const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
-    const { error: insertError } = await supabase.from("access_tokens").insert({
+    const { error: insertError } = await supabase.from(TABLES.ACCESS_TOKENS).insert({
       order_id: order.id,
       token_hash: tokenHash,
       expires_at: expiresAt,

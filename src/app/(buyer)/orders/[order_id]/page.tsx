@@ -2,6 +2,7 @@ import { createClient, createServiceClient } from "@unseallink/lib/supabase/serv
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { TABLES } from "@unseallink/lib/db";
 
 export const metadata: Metadata = {
   robots: { index: false },

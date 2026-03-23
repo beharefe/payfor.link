@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { resend, FROM_EMAIL } from "@unseallink/lib/resend";
 import { log } from "@unseallink/lib/logger";
+import { TABLES } from "@unseallink/lib/db";
 
 type ActionResult = { success: true } | { error: string };
 
@@ -15,7 +16,7 @@ export async function verifyOtp(
   const supabase = createServiceClient();
 
   const { data: order } = await supabase
-    .from("orders")
+    .from(TABLES.ORDERS)
     .select(
       "id, buyer_email, buyer_email_verified, delivery_url, product_title",
     )
@@ -41,7 +42,7 @@ export async function verifyOtp(
   }
 
   await supabase
-    .from("orders")
+    .from(TABLES.ORDERS)
     .update({ buyer_email_verified: true })
     .eq("id", orderId);
 
@@ -52,7 +53,7 @@ export async function verifyOtp(
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
   const unlockUrl = `${appUrl}/unlock?token=${rawToken}`;
 
-  const { error: tokenError } = await supabase.from("access_tokens").insert({
+  const { error: tokenError } = await supabase.from(TABLES.ACCESS_TOKENS).insert({
     order_id: orderId,
     token_hash: tokenHash,
     expires_at: expiresAt,
@@ -94,7 +95,7 @@ export async function resendOtp(orderId: string): Promise<ActionResult> {
   const supabase = createServiceClient();
 
   const { data: order } = await supabase
-    .from("orders")
+    .from(TABLES.ORDERS)
     .select("id, buyer_email, buyer_email_verified, product_title")
     .eq("id", orderId)
     .single();

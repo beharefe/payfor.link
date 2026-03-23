@@ -2,6 +2,7 @@ import { createClient, createServiceClient } from "@unseallink/lib/supabase/serv
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { TABLES } from "@unseallink/lib/db";
 
 export const metadata: Metadata = {
   title: "Your orders",
@@ -18,7 +19,7 @@ export default async function OrdersPage() {
 
   const service = createServiceClient();
   const { data: orders } = await service
-    .from("orders")
+    .from(TABLES.ORDERS)
     .select("id, product_title, price_paid, currency, created_at, status")
     .eq("buyer_email", user.email ?? "")
     .eq("status", "paid")

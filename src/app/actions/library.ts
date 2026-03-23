@@ -4,6 +4,7 @@ import crypto from "node:crypto";
 import { createClient, createServiceClient } from "@unseallink/lib/supabase/server";
 import { resend, FROM_EMAIL } from "@unseallink/lib/resend";
 import { log } from "@unseallink/lib/logger";
+import { TABLES } from "@unseallink/lib/db";
 
 export type LibraryActionResult = { error: string } | { ok: true };
 
@@ -49,7 +50,7 @@ export async function resendAccess(orderId: string): Promise<LibraryActionResult
 
   const service = createServiceClient();
   const { data: order } = await service
-    .from("orders")
+    .from(TABLES.ORDERS)
     .select("id, product_title, buyer_email")
     .eq("id", orderId)
     .eq("status", "paid")
@@ -60,7 +61,7 @@ export async function resendAccess(orderId: string): Promise<LibraryActionResult
 
   // Invalidate any unused tokens before issuing a new one.
   await service
-    .from("access_tokens")
+    .from(TABLES.ACCESS_TOKENS)
     .delete()
     .eq("order_id", orderId)
     .is("used_at", null);
@@ -71,7 +72,7 @@ export async function resendAccess(orderId: string): Promise<LibraryActionResult
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   const unlockUrl = `${appUrl}/unlock?token=${rawToken}`;
 
-  const { error: insertError } = await service.from("access_tokens").insert({
+  const { error: insertError } = await service.from(TABLES.ACCESS_TOKENS).insert({
     order_id: order.id,
     token_hash: tokenHash,
     expires_at: expiresAt,

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import crypto from "node:crypto";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { TABLES } from "@unseallink/lib/db";
 
 export const metadata: Metadata = {
   robots: { index: false },
@@ -21,7 +22,7 @@ export default async function UnlockPage({ searchParams }: Props) {
   const tokenHash = crypto.createHash("sha256").update(token.trim()).digest("hex");
 
   const { data: accessToken } = await supabase
-    .from("access_tokens")
+    .from(TABLES.ACCESS_TOKENS)
     .select("id, order_id, expires_at, used_at")
     .eq("token_hash", tokenHash)
     .single();
@@ -45,7 +46,7 @@ export default async function UnlockPage({ searchParams }: Props) {
   }
 
   const { data: order } = await supabase
-    .from("orders")
+    .from(TABLES.ORDERS)
     .select("product_title, status")
     .eq("id", accessToken.order_id)
     .single();
@@ -63,7 +64,7 @@ export default async function UnlockPage({ searchParams }: Props) {
 
     // Re-validate atomically before consuming
     const { data: t } = await svc
-      .from("access_tokens")
+      .from(TABLES.ACCESS_TOKENS)
       .select("order_id, used_at, expires_at")
       .eq("id", accessToken!.id)
       .single();
@@ -74,13 +75,13 @@ export default async function UnlockPage({ searchParams }: Props) {
 
     // Mark used only if still unused (race-condition guard)
     await svc
-      .from("access_tokens")
+      .from(TABLES.ACCESS_TOKENS)
       .update({ used_at: new Date().toISOString() })
       .eq("id", accessToken!.id)
       .is("used_at", null);
 
     const { data: o } = await svc
-      .from("orders")
+      .from(TABLES.ORDERS)
       .select("delivery_url, status")
       .eq("id", t.order_id)
       .single();

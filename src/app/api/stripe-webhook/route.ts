@@ -4,6 +4,7 @@ import { stripe, platformFeeCents } from "@unseallink/lib/stripe";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { resend, FROM_EMAIL } from "@unseallink/lib/resend";
 import { log } from "@unseallink/lib/logger";
+import { TABLES } from "@unseallink/lib/db";
 
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
 
@@ -56,7 +57,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
   }
 
   const { data: existing } = await supabase
-    .from("orders")
+    .from(TABLES.ORDERS)
     .select("id")
     .eq("stripe_payment_id", paymentIntentId)
     .maybeSingle();
@@ -69,7 +70,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
   }
 
   const { data: product } = await supabase
-    .from("products")
+    .from(TABLES.PRODUCTS)
     .select("id, seller_id, destination_url, title, price, version, total_sales, total_revenue")
     .eq("id", productId)
     .single();
@@ -88,7 +89,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
   const pricePaid = amountTotal / 100;
   const platformFee = platformFeeCents(pricePaid) / 100;
 
-  const { error: insertError } = await supabase.from("orders").insert({
+  const { error: insertError } = await supabase.from(TABLES.ORDERS).insert({
     product_id: product.id,
     seller_id: product.seller_id,
     buyer_email: customerEmail,
@@ -121,7 +122,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
   // Notify seller of the new sale
   const { data: seller } = await supabase
-    .from("sellers")
+    .from(TABLES.SELLERS)
     .select("email, name")
     .eq("id", product.seller_id)
     .single();
@@ -150,7 +151,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 async function handleAccountUpdated(account: Stripe.Account) {
   const supabase = createServiceClient();
   const { data: seller } = await supabase
-    .from("sellers")
+    .from(TABLES.SELLERS)
     .select("id, stripe_payouts_enabled")
     .eq("stripe_account_id", account.id)
     .single();
@@ -159,7 +160,7 @@ async function handleAccountUpdated(account: Stripe.Account) {
   const payoutsJustEnabled = !seller.stripe_payouts_enabled && account.payouts_enabled;
 
   await supabase
-    .from("sellers")
+    .from(TABLES.SELLERS)
     .update({
       stripe_charges_enabled: account.charges_enabled ?? false,
       stripe_payouts_enabled: account.payouts_enabled ?? false,
@@ -168,7 +169,7 @@ async function handleAccountUpdated(account: Stripe.Account) {
     .eq("id", seller.id);
 
   if (payoutsJustEnabled) {
-    const { data: updated } = await supabase.from("sellers").select("email").eq("id", seller.id).single();
+    const { data: updated } = await supabase.from(TABLES.SELLERS).select("email").eq("id", seller.id).single();
     if (updated?.email) {
       await resend.emails.send({
         from: FROM_EMAIL,
