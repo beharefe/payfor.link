@@ -3,11 +3,11 @@
 import crypto from "node:crypto";
 import { redirect } from "next/navigation";
 import slugify from "slugify";
-import { createClient } from "@payforlink/lib/supabase/server";
-import { log } from "@payforlink/lib/logger";
-import { checkUrlSafe } from "@payforlink/lib/safe-browsing";
-import { detectProductType, isValidUrl } from "@payforlink/lib/product-utils";
-import type { ProductType } from "@payforlink/types/database";
+import { createClient } from "@unseallink/lib/supabase/server";
+import { log } from "@unseallink/lib/logger";
+import { checkUrlSafe } from "@unseallink/lib/safe-browsing";
+import { detectProductType, isValidUrl } from "@unseallink/lib/product-utils";
+import type { ProductType } from "@unseallink/types/database";
 
 const MIN_PRICE = 9.99;
 

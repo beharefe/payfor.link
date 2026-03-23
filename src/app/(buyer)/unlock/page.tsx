@@ -1,4 +1,4 @@
-import { createServiceClient } from "@payforlink/lib/supabase/server";
+import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { redirect } from "next/navigation";
 import crypto from "node:crypto";
 import Link from "next/link";

@@ -1,6 +1,6 @@
-import { createClient } from "@payforlink/lib/supabase/server";
-import { stripe } from "@payforlink/lib/stripe";
-import { log } from "@payforlink/lib/logger";
+import { createClient } from "@unseallink/lib/supabase/server";
+import { stripe } from "@unseallink/lib/stripe";
+import { log } from "@unseallink/lib/logger";
 
 /** Returns the Stripe account onboarding URL for the current user. Throws if unauthorized or no user. */
 export async function getStripeConnectAccountLinkUrl(): Promise<string> {

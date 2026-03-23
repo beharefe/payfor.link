@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getStripeConnectAccountLinkUrl } from "@payforlink/lib/stripe-connect";
+import { getStripeConnectAccountLinkUrl } from "@unseallink/lib/stripe-connect";
 
 export async function GET() {
   try {

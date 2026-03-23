@@ -1,4 +1,4 @@
-# Build Plan — payfor.link MVP
+# Build Plan — unseal.link MVP
 
 ## Philosophy
 
@@ -321,7 +321,7 @@ create policy "abuse_reports: public insert" on abuse_reports
 ## Build Order — Phase 1
 
 ### Step 1 — Project Setup
-- [ ] `npx create-next-app@latest payfor-link --typescript --tailwind --app`
+- [ ] `npx create-next-app@latest unseal-link --typescript --tailwind --app`
 - [ ] Install: `shadcn/ui`, `@supabase/supabase-js`, `@supabase/ssr`, `stripe`, `next-axiom`, `resend`, `@amplitude/analytics-browser`, `slugify`, `@sentry/nextjs`
   - Logging: `next-axiom` only — it ships logs to Axiom and provides `log` helpers for server/edge. No need for `pino`/`pino-pretty`.
 - [ ] Copy `.env.local`
@@ -481,7 +481,7 @@ verify Stripe signature
 og:title    = "{title} — ${price}"
 og:description = link.description or "Pay once and get instant access."
 og:image    = preview_image_url ?? /og-default.png (1200×630)
-og:url      = https://payfor.link/pay/{slug}
+og:url      = https://unseal.link/pay/{slug}
 twitter:card = summary_large_image
 product:price:amount = price
 product:price:currency = USD

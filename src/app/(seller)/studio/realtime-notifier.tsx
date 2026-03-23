@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@payforlink/lib/supabase/client";
+import { createClient } from "@unseallink/lib/supabase/client";
 
 type NewOrder = { product_title: string; price_paid: number; currency: string };
 

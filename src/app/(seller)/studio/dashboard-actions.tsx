@@ -3,7 +3,7 @@
 import {
   initiateStripeConnect,
   requestWithdraw,
-} from "@payforlink/app/actions/stripe-connect";
+} from "@unseallink/app/actions/stripe-connect";
 
 export function InitiateStripeConnectButton() {
   return (

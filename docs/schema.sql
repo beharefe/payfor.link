@@ -1,4 +1,4 @@
--- payfor.link — Run once in Supabase SQL Editor. Do not alter production tables after deploy.
+-- unseal.link — Run once in Supabase SQL Editor. Do not alter production tables after deploy.
 -- See docs/build-plan.md and docs/schema.md for context.
 
 -- ============================================================

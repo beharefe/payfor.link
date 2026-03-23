@@ -11,7 +11,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@payforlink": path.resolve(__dirname, "./src"),
+      "@unseallink": path.resolve(__dirname, "./src"),
     },
   },
 });

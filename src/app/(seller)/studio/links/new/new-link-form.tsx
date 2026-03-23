@@ -1,7 +1,7 @@
 "use client";
 
-import { createProductAction } from "@payforlink/app/actions/product";
-import type { ProductType } from "@payforlink/types/database";
+import { createProductAction } from "@unseallink/app/actions/product";
+import type { ProductType } from "@unseallink/types/database";
 import { useActionState, useRef } from "react";
 
 const PRICE_PRESETS = [9.99, 19, 29, 49];

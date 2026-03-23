@@ -1,6 +1,6 @@
 "use client";
 
-import { verifyOtp, resendOtp } from "@payforlink/app/actions/otp";
+import { verifyOtp, resendOtp } from "@unseallink/app/actions/otp";
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 

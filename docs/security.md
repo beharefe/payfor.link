@@ -145,7 +145,7 @@ Implement via Supabase RLS + Vercel Edge middleware or upstash/ratelimit.
 
 ## DMCA
 
-Copyright complaints: `dmca@payfor.link`
+Copyright complaints: `dmca@unseal.link`
 Response time: 24-48 hours
 Action: suspend link, notify seller, retain for legal hold
 

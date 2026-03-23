@@ -1,4 +1,4 @@
-# payfor.link
+# unseal.link
 
 ## Product Summary
 
@@ -178,7 +178,7 @@ Share paywall link
 
 Example:
 
-payfor.link/pay/brand-identity-final-files
+unseal.link/pay/brand-identity-final-files
 
 ---
 

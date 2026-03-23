@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
-import { stripe, platformFeeCents } from "@payforlink/lib/stripe";
-import { createServiceClient } from "@payforlink/lib/supabase/server";
-import { resend, FROM_EMAIL } from "@payforlink/lib/resend";
-import { log } from "@payforlink/lib/logger";
+import { stripe, platformFeeCents } from "@unseallink/lib/stripe";
+import { createServiceClient } from "@unseallink/lib/supabase/server";
+import { resend, FROM_EMAIL } from "@unseallink/lib/resend";
+import { log } from "@unseallink/lib/logger";
 
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
 

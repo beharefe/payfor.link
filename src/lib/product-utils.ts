@@ -1,4 +1,4 @@
-import type { ProductType } from "@payforlink/types/database";
+import type { ProductType } from "@unseallink/types/database";
 
 const HOST_TO_TYPE: Record<string, ProductType> = {
   "notion.so": "template",

@@ -1,5 +1,5 @@
-import { createServiceClient } from "@payforlink/lib/supabase/server";
-import { stripe } from "@payforlink/lib/stripe";
+import { createServiceClient } from "@unseallink/lib/supabase/server";
+import { stripe } from "@unseallink/lib/stripe";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { SuccessPageClient, SuccessPoller } from "./success-page-client";

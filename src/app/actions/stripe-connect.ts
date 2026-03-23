@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import {
   getStripeConnectAccountLinkUrl,
   getStripeWithdrawUrl,
-} from "@payforlink/lib/stripe-connect";
+} from "@unseallink/lib/stripe-connect";
 
 type ActionResult = { error: string };
 

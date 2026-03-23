@@ -1,8 +1,8 @@
-import { createClient, createServiceClient } from "@payforlink/lib/supabase/server";
+import { createClient, createServiceClient } from "@unseallink/lib/supabase/server";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { createCheckoutSession } from "@payforlink/app/actions/checkout";
-import { log } from "@payforlink/lib/logger";
+import { createCheckoutSession } from "@unseallink/app/actions/checkout";
+import { log } from "@unseallink/lib/logger";
 import { PaywallCTA } from "./paywall-cta";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!link) return { title: "Not found" };
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://payfor.link";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
   const title = `${link.title} — $${link.price}`;
   const description = link.description ?? "Pay once and get instant access.";
 

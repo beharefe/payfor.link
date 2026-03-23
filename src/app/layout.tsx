@@ -3,7 +3,7 @@ import { DM_Sans } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import "./globals.css";
-import { cn } from "@payforlink/lib/utils";
+import { cn } from "@unseallink/lib/utils";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],

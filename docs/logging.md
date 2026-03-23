@@ -89,7 +89,7 @@ const logger = pino({
   }),
   base: {
     env: process.env.NODE_ENV,
-    service: 'payfor-link'
+    service: 'unseal-link'
   }
 })
 

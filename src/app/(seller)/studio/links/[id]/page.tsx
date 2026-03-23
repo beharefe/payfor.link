@@ -1,4 +1,4 @@
-import { createClient } from "@payforlink/lib/supabase/server";
+import { createClient } from "@unseallink/lib/supabase/server";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { InitiateStripeConnectButton } from "../../dashboard-actions";

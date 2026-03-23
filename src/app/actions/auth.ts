@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@payforlink/lib/supabase/server";
+import { createClient } from "@unseallink/lib/supabase/server";
 import { redirect } from "next/navigation";
 
 export type AuthResult = { error?: string };

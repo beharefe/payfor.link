@@ -17,8 +17,8 @@ Copy [`.env.example`](../.env.example) to `.env.local` and fill in values.
 | `STRIPE_SECRET_KEY` | Same |
 | `STRIPE_WEBHOOK_SECRET` | From `stripe listen` (local) or Stripe Dashboard → Webhooks (production) |
 | `RESEND_API_KEY` | Resend dashboard |
-| `RESEND_FROM_EMAIL` | Your verified domain (e.g. noreply@payfor.link) |
-| `NEXT_PUBLIC_APP_URL` | Your app URL (e.g. http://localhost:3000 or https://payfor.link) |
+| `RESEND_FROM_EMAIL` | Your verified domain (e.g. noreply@unseal.link) |
+| `NEXT_PUBLIC_APP_URL` | Your app URL (e.g. http://localhost:3000 or https://unseal.link) |
 
 Optional:
 

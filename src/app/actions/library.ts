@@ -1,9 +1,9 @@
 "use server";
 
 import crypto from "node:crypto";
-import { createClient, createServiceClient } from "@payforlink/lib/supabase/server";
-import { resend, FROM_EMAIL } from "@payforlink/lib/resend";
-import { log } from "@payforlink/lib/logger";
+import { createClient, createServiceClient } from "@unseallink/lib/supabase/server";
+import { resend, FROM_EMAIL } from "@unseallink/lib/resend";
+import { log } from "@unseallink/lib/logger";
 
 export type LibraryActionResult = { error: string } | { ok: true };
 

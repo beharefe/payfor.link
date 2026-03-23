@@ -11,7 +11,7 @@ Core mechanic: Lock link → Pay → Unlock
 ## 1. Seller Onboarding
 
 ```
-Seller visits payfor.link
+Seller visits unseal.link
 → enters email → Supabase magic link sent
 → clicks link → authenticated
 → users row upserted (id = auth.uid())

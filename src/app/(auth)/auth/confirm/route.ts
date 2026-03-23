@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { createClient } from "@payforlink/lib/supabase/server";
+import { createClient } from "@unseallink/lib/supabase/server";
 
 /** Handles Magic Link callback. Supports both PKCE code exchange and token_hash (per Supabase docs). */
 export async function GET(request: NextRequest) {

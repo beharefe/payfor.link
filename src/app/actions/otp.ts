@@ -1,8 +1,8 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { createServiceClient } from "@payforlink/lib/supabase/server";
-import { log } from "@payforlink/lib/logger";
+import { createServiceClient } from "@unseallink/lib/supabase/server";
+import { log } from "@unseallink/lib/logger";
 
 type ActionResult = { success: true } | { error: string };
 

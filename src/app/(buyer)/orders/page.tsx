@@ -1,4 +1,4 @@
-import { createClient, createServiceClient } from "@payforlink/lib/supabase/server";
+import { createClient, createServiceClient } from "@unseallink/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
