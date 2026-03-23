@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
+import { TABLES } from "@unseallink/lib/db";
 
 const VALID_REASONS = ["scam", "malware", "copyright", "other"] as const;
 
@@ -25,7 +26,7 @@ export async function POST(request: Request) {
 
   // Verify product exists
   const { data: product } = await supabase
-    .from("products")
+    .from(TABLES.PRODUCTS)
     .select("id")
     .eq("id", product_id)
     .single();
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Product not found" }, { status: 404 });
   }
 
-  const { error } = await supabase.from("reports").insert({
+  const { error } = await supabase.from(TABLES.REPORTS).insert({
     product_id,
     reason,
     description: description?.trim().slice(0, 500) || null,

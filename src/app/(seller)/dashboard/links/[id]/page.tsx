@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { InitiateStripeConnectButton } from "../../dashboard-actions";
 import { CopyLinkButton } from "./copy-link-button";
+import { TABLES } from "@unseallink/lib/db";
 
 export default async function LinkDetailPage({
   params,
@@ -17,7 +18,7 @@ export default async function LinkDetailPage({
   if (!user) redirect("/auth");
 
   const { data: link } = await supabase
-    .from("products")
+    .from(TABLES.PRODUCTS)
     .select("id, title, slug, status, seller_id")
     .eq("id", id)
     .single();
@@ -25,7 +26,7 @@ export default async function LinkDetailPage({
   if (!link || link.seller_id !== user.id) notFound();
 
   const { data: seller } = await supabase
-    .from("sellers")
+    .from(TABLES.SELLERS)
     .select("stripe_connected")
     .eq("id", user.id)
     .single();

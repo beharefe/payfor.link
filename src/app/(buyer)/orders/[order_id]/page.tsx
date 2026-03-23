@@ -22,7 +22,7 @@ export default async function OrderPage({ params }: Props) {
 
   const service = createServiceClient();
   const { data: order } = await service
-    .from("orders")
+    .from(TABLES.ORDERS)
     .select("id, buyer_email, product_title, price_paid, currency, created_at, status, seller_id")
     .eq("id", order_id)
     .single();
@@ -52,7 +52,7 @@ export default async function OrderPage({ params }: Props) {
   }
 
   const { data: seller } = await service
-    .from("sellers")
+    .from(TABLES.SELLERS)
     .select("name")
     .eq("id", order.seller_id)
     .single();

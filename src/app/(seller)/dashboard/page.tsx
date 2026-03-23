@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { InitiateStripeConnectButton, WithdrawButton } from "./dashboard-actions";
 import { CopyLinkButtons } from "./copy-link-buttons";
 import { SellerRealtimeNotifier } from "./realtime-notifier";
+import { TABLES } from "@unseallink/lib/db";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -13,7 +14,7 @@ export default async function DashboardPage() {
   if (!user) redirect("/auth");
 
   const { data: seller } = await supabase
-    .from("sellers")
+    .from(TABLES.SELLERS)
     .select(
       "stripe_connected, total_earned, total_fees",
     )
@@ -21,7 +22,7 @@ export default async function DashboardPage() {
     .single();
 
   const { data: links } = await supabase
-    .from("products")
+    .from(TABLES.PRODUCTS)
     .select("id, title, slug, status, total_sales, total_revenue")
     .eq("seller_id", user.id)
     .order("created_at", { ascending: false });

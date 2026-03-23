@@ -2,6 +2,7 @@ import { createClient } from "@unseallink/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { SettingsForm } from "./settings-form";
+import { TABLES } from "@unseallink/lib/db";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -11,7 +12,7 @@ export default async function SettingsPage() {
   if (!user) redirect("/auth");
 
   const { data: seller } = await supabase
-    .from("sellers")
+    .from(TABLES.SELLERS)
     .select("name, email")
     .eq("id", user.id)
     .single();

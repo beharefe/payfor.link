@@ -8,6 +8,7 @@ import { log } from "@unseallink/lib/logger";
 import { checkUrlSafe } from "@unseallink/lib/safe-browsing";
 import { detectProductType, isValidUrl } from "@unseallink/lib/product-utils";
 import type { ProductType } from "@unseallink/types/database";
+import { TABLES } from "@unseallink/lib/db";
 
 const MIN_PRICE = 9.99;
 
@@ -54,7 +55,7 @@ export async function createProduct(
     const suffix = crypto.randomBytes(2).toString("hex");
     const candidate = `${baseSlug}-${suffix}`;
     const { data: existing } = await supabase
-      .from("products")
+      .from(TABLES.PRODUCTS)
       .select("id")
       .eq("slug", candidate)
       .maybeSingle();
@@ -71,7 +72,7 @@ export async function createProduct(
 
   // Detect status — active immediately if Stripe already connected
   const { data: seller } = await supabase
-    .from("sellers")
+    .from(TABLES.SELLERS)
     .select("stripe_connected")
     .eq("id", user.id)
     .single();
