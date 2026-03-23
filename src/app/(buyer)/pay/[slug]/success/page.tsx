@@ -1,7 +1,12 @@
 import { createServiceClient } from "@payforlink/lib/supabase/server";
 import { stripe } from "@payforlink/lib/stripe";
 import { redirect } from "next/navigation";
-import { SuccessPageClient } from "./success-page-client";
+import type { Metadata } from "next";
+import { SuccessPageClient, SuccessPoller } from "./success-page-client";
+
+export const metadata: Metadata = {
+  robots: { index: false },
+};
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -58,14 +63,14 @@ export default async function PaymentSuccessPage({ params, searchParams }: Props
   if (!purchase) {
     return (
       <main style={{ padding: "2rem", textAlign: "center" }}>
-        <h1>Processing...</h1>
-        <p>Your payment is being confirmed. Refresh in a moment or check your email for the verification code.</p>
+        <h1>Payment received</h1>
+        <SuccessPoller />
       </main>
     );
   }
 
   if (purchase.buyer_email_verified) {
-    redirect(`/delivery/${purchase.id}`);
+    redirect(`/orders/${purchase.id}`);
     return (
       <main style={{ padding: "2rem", maxWidth: "28rem", margin: "0 auto" }}>
         <h1>You&apos;re all set</h1>

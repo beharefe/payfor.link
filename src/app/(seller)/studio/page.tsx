@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { InitiateStripeConnectButton, WithdrawButton } from "./dashboard-actions";
 import { CopyLinkButtons } from "./copy-link-buttons";
+import { SellerRealtimeNotifier } from "./realtime-notifier";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -32,6 +33,7 @@ export default async function DashboardPage() {
 
   return (
     <main style={{ padding: "2rem", maxWidth: "48rem", margin: "0 auto" }}>
+      <SellerRealtimeNotifier sellerId={user.id} />
       <h1>Dashboard</h1>
       <p style={{ marginBottom: "1.5rem" }}>
         <Link href="/auth">Sign out</Link>

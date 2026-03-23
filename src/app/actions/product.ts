@@ -1,5 +1,6 @@
 "use server";
 
+import crypto from "node:crypto";
 import { redirect } from "next/navigation";
 import slugify from "slugify";
 import { createClient } from "@payforlink/lib/supabase/server";
@@ -42,22 +43,27 @@ export async function createProduct(
   const detectedType = detectProductType(input.destination_url);
   const productType = input.product_type ?? detectedType ?? null;
 
-  // Auto-generate slug from title + collision check
+  // Auto-generate slug: title + 4-char random hex suffix → globally unique + readable
   const baseSlug = slugify(input.title, { lower: true, strict: true });
-  let slug = baseSlug;
-  let attempt = 0;
+  let slug = "";
 
-  while (true) {
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const suffix = crypto.randomBytes(2).toString("hex");
+    const candidate = `${baseSlug}-${suffix}`;
     const { data: existing } = await supabase
       .from("links")
       .select("id")
-      .eq("seller_id", user.id)
-      .eq("slug", slug)
+      .eq("slug", candidate)
       .maybeSingle();
+    if (!existing) {
+      slug = candidate;
+      break;
+    }
+  }
 
-    if (!existing) break;
-    attempt++;
-    slug = `${baseSlug}-${attempt}`;
+  if (!slug) {
+    log.error("createProduct: could not generate unique slug", { title: input.title, user_id: user.id });
+    return { error: "Failed to generate URL. Please try again." };
   }
 
   // Detect status — active immediately if Stripe already connected

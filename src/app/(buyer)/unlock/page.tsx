@@ -2,6 +2,11 @@ import { createServiceClient } from "@payforlink/lib/supabase/server";
 import { redirect } from "next/navigation";
 import crypto from "node:crypto";
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  robots: { index: false },
+};
 
 type Props = { searchParams: Promise<{ token?: string }> };
 
@@ -14,7 +19,7 @@ export default async function UnlockPage({ searchParams }: Props) {
         <h1>Invalid link</h1>
         <p>No token provided.</p>
         <p>
-          <Link href="/unlock-request">Request a new access link</Link>
+          <Link href="/orders">View your orders</Link>
         </p>
       </main>
     );
@@ -35,7 +40,7 @@ export default async function UnlockPage({ searchParams }: Props) {
         <h1>Invalid link</h1>
         <p>This link is invalid or has already been used.</p>
         <p>
-          <Link href="/unlock-request">Request a new access link</Link>
+          <Link href="/orders">View your orders</Link>
         </p>
       </main>
     );
@@ -47,7 +52,7 @@ export default async function UnlockPage({ searchParams }: Props) {
         <h1>Already used</h1>
         <p>This link has already been used.</p>
         <p>
-          <Link href="/unlock-request">Request a new access link</Link>
+          <Link href="/orders">View your orders</Link>
         </p>
       </main>
     );
@@ -59,7 +64,7 @@ export default async function UnlockPage({ searchParams }: Props) {
         <h1>Link expired</h1>
         <p>This link has expired.</p>
         <p>
-          <Link href="/unlock-request">Request a new access link</Link>
+          <Link href="/orders">View your orders</Link>
         </p>
       </main>
     );
@@ -67,17 +72,17 @@ export default async function UnlockPage({ searchParams }: Props) {
 
   const { data: purchase } = await supabase
     .from("purchases")
-    .select("delivery_url, buyer_email_verified")
+    .select("delivery_url, status")
     .eq("id", unlockToken.purchase_id)
     .single();
 
-  if (!purchase || !purchase.buyer_email_verified) {
+  if (!purchase || purchase.status === "refunded") {
     return (
       <main style={{ padding: "2rem", textAlign: "center" }}>
         <h1>Access denied</h1>
-        <p>This link cannot be used yet.</p>
+        <p>This order is no longer valid.</p>
         <p>
-          <Link href="/unlock-request">Request a new access link</Link>
+          <Link href="/orders">View your orders</Link>
         </p>
       </main>
     );

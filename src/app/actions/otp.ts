@@ -21,7 +21,7 @@ export async function verifyOtp(
     .single();
 
   if (!purchase) return { error: "Purchase not found" };
-  if (purchase.buyer_email_verified) redirect(`/delivery/${purchaseId}`);
+  if (purchase.buyer_email_verified) redirect(`/orders/${purchaseId}`);
 
   const { error: verifyError } = await supabase.auth.verifyOtp({
     email: purchase.buyer_email,
@@ -43,7 +43,7 @@ export async function verifyOtp(
     .update({ buyer_email_verified: true })
     .eq("id", purchaseId);
 
-  redirect(`/delivery/${purchaseId}`);
+  redirect(`/orders/${purchaseId}`);
 }
 
 export async function resendOtp(purchaseId: string): Promise<ActionResult> {
