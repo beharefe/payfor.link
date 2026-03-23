@@ -1,4 +1,4 @@
-# payfor.link
+# unseal.link
 
 ## Product Summary
 
@@ -144,7 +144,7 @@ The platform doesn't care what the link is. It just gates it behind a payment.
 - Pay via Stripe Checkout
 - Receive unlock email instantly
 - Access the link
-- Re-access purchases via library
+- Re-access purchases via /orders (session-based) or /unlock email link (sessionless)
 
 ---
 
@@ -178,7 +178,7 @@ Share paywall link
 
 Example:
 
-payfor.link/pay/brand-identity-final-files
+unseal.link/pay/brand-identity-final-files
 
 ---
 
@@ -190,9 +190,13 @@ View product/service page
 ↓
 Pay via Stripe
 ↓
-Receive unlock email
+Verify email (6-digit OTP on success page)
 ↓
-Click link → access content
+Redirected to /orders/[id]
+↓
+Click "Access content" → server validates → redirect to destination
+
+Re-access (later): sign in at /orders → see all purchases → access any time
 
 ---
 
@@ -209,9 +213,9 @@ Click link → access content
 ## Seller
 
 /dashboard
-/create
-/product/[id]
-/settings
+/dashboard/links/new
+/dashboard/links/[id]
+/dashboard/settings
 
 ---
 
@@ -221,7 +225,8 @@ Click link → access content
 /pay/[slug]/success
 /unlock
 /unlock-request
-/library
+/orders
+/orders/[order_id]
 
 ---
 
@@ -409,7 +414,6 @@ token_expired
 
 ## Phase 3 — Polish
 
-- Buyer purchase library
 - Refund flow (seller-initiated)
 - Abuse reporting UI
 - SEO landing pages

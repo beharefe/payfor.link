@@ -1,4 +1,4 @@
-# payfor.link
+# unseal.link
 
 A minimal platform where sellers paste any link, set a price, and share a paywall URL. Buyers pay via Stripe and receive email-based access. No storefronts, no platform lock-in.
 
@@ -61,7 +61,7 @@ STRIPE_WEBHOOK_SECRET=        # from: stripe listen --forward-to localhost:3000/
 
 # Resend
 RESEND_API_KEY=
-RESEND_FROM_EMAIL=noreply@payfor.link
+RESEND_FROM_EMAIL=noreply@unseal.link
 
 # Axiom (logging)
 NEXT_PUBLIC_AXIOM_DATASET=

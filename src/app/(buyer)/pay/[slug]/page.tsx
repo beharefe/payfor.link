@@ -1,9 +1,10 @@
-import { createClient, createServiceClient } from "@payforlink/lib/supabase/server";
+import { createClient, createServiceClient } from "@unseallink/lib/supabase/server";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { createCheckoutSession } from "@payforlink/app/actions/checkout";
-import { log } from "@payforlink/lib/logger";
+import { createCheckoutSession } from "@unseallink/app/actions/checkout";
+import { log } from "@unseallink/lib/logger";
 import { PaywallCTA } from "./paywall-cta";
+import { AbuseReportForm } from "./abuse-report-form";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -19,9 +20,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!link) return { title: "Not found" };
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://payfor.link";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
   const title = `${link.title} — $${link.price}`;
   const description = link.description ?? "Pay once and get instant access.";
+  const ogImage = `${appUrl}/api/og/${slug}`;
 
   return {
     title,
@@ -31,13 +33,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description,
       url: `${appUrl}/pay/${slug}`,
-      images: link.preview_image_url ? [{ url: link.preview_image_url }] : [],
+      images: [{ url: ogImage, width: 1200, height: 630 }],
       type: "website",
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
+      images: [ogImage],
     },
     other: {
       "product:price:amount": String(link.price),
@@ -88,6 +91,9 @@ export default async function PaywallPage({ params }: Props) {
         <strong>${link.price.toFixed(2)}</strong> {link.currency.toUpperCase()}
       </p>
       <PaywallCTA linkId={link.id} />
+      <div style={{ marginTop: "2rem", textAlign: "center" }}>
+        <AbuseReportForm linkId={link.id} />
+      </div>
     </main>
   );
 }

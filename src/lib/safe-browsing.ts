@@ -9,7 +9,7 @@ export async function checkUrlSafe(url: string): Promise<{ safe: boolean; error?
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        client: { clientId: "payfor-link", clientVersion: "1.0" },
+        client: { clientId: "unseal-link", clientVersion: "1.0" },
         threatInfo: {
           threatTypes: ["MALWARE", "SOCIAL_ENGINEERING", "UNWANTED_SOFTWARE", "POTENTIALLY_HARMFUL_APPLICATION"],
           platformTypes: ["ANY_PLATFORM"],

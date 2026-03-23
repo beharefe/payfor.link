@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import crypto from "node:crypto";
-import { createServiceClient } from "@payforlink/lib/supabase/server";
-import { resend, FROM_EMAIL } from "@payforlink/lib/resend";
-import { log } from "@payforlink/lib/logger";
+import { createServiceClient } from "@unseallink/lib/supabase/server";
+import { resend, FROM_EMAIL } from "@unseallink/lib/resend";
+import { log } from "@unseallink/lib/logger";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 

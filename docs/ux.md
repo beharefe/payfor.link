@@ -1,4 +1,4 @@
-# payfor.link — UX Document
+# unseal.link — UX Document
 
 ## Design Philosophy
 
@@ -131,7 +131,7 @@ color: var(--text-primary)
 font-size: 13px
 color: var(--text-muted)
 text-align: center
-"Secured by Stripe · payfor.link takes 4.5%"
+"Secured by Stripe · unseal.link takes 4.5%"
 ```
 
 ---
@@ -196,7 +196,7 @@ Success checkmark: scale 0 → 1 at 350ms spring. Subtle only — no confetti, n
 Simple educational page. Three sections: Sellers, Buyers, Pricing.
 
 ```
-[H1: How payfor.link works]
+[H1: How unseal.link works]
 
 [For sellers]
   Step 1 — Create an account (magic link, no password)
@@ -344,7 +344,7 @@ This is the **activation moment** — seller must feel "I can use this right now
   [Description: one line preview]
 
   [Section: 🎉 Your paywall is ready]   ← celebratory, prominent
-  [URL display: payfor.link/pay/notion-crm-template  |  Copy]
+  [URL display: unseal.link/pay/notion-crm-template  |  Copy]
   [Share prompt: Share this on Twitter · Discord · Email · Anywhere]
 
   [Section: Stripe]
@@ -414,7 +414,7 @@ Zero distractions. One job: pay.
 ```
 [No navbar. No footer. Full page centered card.]
 
-[Top: "payfor.link" wordmark — small, centered, linked to homepage]
+[Top: "unseal.link" wordmark — small, centered, linked to homepage]
 
 [Card, max-width 480px, centered vertically on desktop]
 
@@ -473,11 +473,11 @@ export async function generateMetadata({ params }): Promise<Metadata> {
     openGraph: {
       title: `${link.title} — $${link.price}`,
       description: link.description ?? `Pay once and get instant access.`,
-      url: `https://payfor.link/pay/${link.slug}`,
-      siteName: 'payfor.link',
+      url: `https://unseal.link/pay/${link.slug}`,
+      siteName: 'unseal.link',
       images: link.preview_image_url
         ? [{ url: link.preview_image_url, width: 1200, height: 630 }]
-        : [{ url: 'https://payfor.link/og-default.png', width: 1200, height: 630 }],
+        : [{ url: 'https://unseal.link/og-default.png', width: 1200, height: 630 }],
       type: 'website',
     },
     twitter: {
@@ -486,7 +486,7 @@ export async function generateMetadata({ params }): Promise<Metadata> {
       description: link.description ?? `Pay once and get instant access.`,
       images: link.preview_image_url
         ? [link.preview_image_url]
-        : ['https://payfor.link/og-default.png'],
+        : ['https://unseal.link/og-default.png'],
     },
     other: {
       'product:price:amount': String(link.price),
@@ -496,7 +496,7 @@ export async function generateMetadata({ params }): Promise<Metadata> {
 }
 ```
 
-**Default OG image** (`/og-default.png`): static 1200×630 image with payfor.link branding.
+**Default OG image** (`/og-default.png`): static 1200×630 image with unseal.link branding.
 Used for links without a `preview_image_url`. Design it once, use everywhere.
 
 OG tags make shared links show rich previews on: Twitter/X, Slack, Discord, Telegram, iMessage, LinkedIn.
@@ -557,7 +557,7 @@ You purchased [Product Title] for $[price].
 [ Access your purchase → ]   ← large CTA button
 
 This link expires in 24 hours and can only be used once.
-If it expires, visit payfor.link/unlock-request to get a new one.
+If it expires, visit unseal.link/unlock-request to get a new one.
 
 ---
 Order: #[purchase_id]
@@ -566,7 +566,7 @@ Amount: $[amount]
 
 Questions? Reply to this email.
 
-payfor.link
+unseal.link
 ```
 
 ### Design Notes
@@ -620,7 +620,7 @@ After clicking the email link.
 
   [Body: This link doesn't exist or has already been used.]
 
-  [Link: Go to payfor.link/library to find your purchases]
+  [Link: Go to unseal.link/library to find your purchases]
 ```
 
 ---
@@ -700,7 +700,7 @@ Triggered from `/product/[id]` or `/dashboard` when Stripe is not connected.
 
   [ Continue to Stripe → ]
 
-  [Micro: You'll leave payfor.link temporarily. Come back here when done.]
+  [Micro: You'll leave unseal.link temporarily. Come back here when done.]
 ```
 
 ### Post-Return State (redirect back from Stripe)

@@ -2,10 +2,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createProduct } from "./product";
 
 // Mock dependencies
-vi.mock("@payforlink/lib/supabase/server", () => ({
+vi.mock("@unseallink/lib/supabase/server", () => ({
   createClient: vi.fn(),
 }));
-vi.mock("@payforlink/lib/logger", () => ({
+vi.mock("@unseallink/lib/logger", () => ({
   log: { error: vi.fn(), info: vi.fn() },
 }));
 vi.mock("slugify", () => ({
@@ -17,7 +17,7 @@ vi.mock("slugify", () => ({
   ),
 }));
 
-import { createClient } from "@payforlink/lib/supabase/server";
+import { createClient } from "@unseallink/lib/supabase/server";
 
 const mockUser = { id: "user-123", email: "seller@test.com" };
 
@@ -145,6 +145,6 @@ describe("createProduct — status", () => {
         destination_url: "https://notion.so/page",
         price: 10,
       }),
-    ).rejects.toThrow("NEXT_REDIRECT:/studio/links/link-abc");
+    ).rejects.toThrow("NEXT_REDIRECT:/dashboard/links/link-abc");
   });
 });

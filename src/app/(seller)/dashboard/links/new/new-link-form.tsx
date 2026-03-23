@@ -1,7 +1,7 @@
 "use client";
 
-import { createProductAction } from "@payforlink/app/actions/product";
-import type { ProductType } from "@payforlink/types/database";
+import { createProductAction } from "@unseallink/app/actions/product";
+import type { ProductType } from "@unseallink/types/database";
 import { useActionState, useRef } from "react";
 
 const PRICE_PRESETS = [9.99, 19, 29, 49];
@@ -99,6 +99,24 @@ export function NewLinkForm() {
           step={0.01}
           required
           defaultValue={9.99}
+          style={{
+            display: "block",
+            width: "100%",
+            padding: "0.5rem",
+            marginTop: "0.25rem",
+          }}
+        />
+      </div>
+      <div>
+        <label htmlFor="preview_image_url">Preview image URL</label>
+        <p style={{ color: "#6B6B6B", fontSize: "0.8125rem", margin: "0.1rem 0 0.25rem" }}>
+          Used on your paywall page and social shares. Paste a direct image link (https://).
+        </p>
+        <input
+          id="preview_image_url"
+          name="preview_image_url"
+          type="url"
+          placeholder="https://..."
           style={{
             display: "block",
             width: "100%",

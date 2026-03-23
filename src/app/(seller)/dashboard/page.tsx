@@ -1,8 +1,9 @@
-import { createClient } from "@payforlink/lib/supabase/server";
+import { createClient } from "@unseallink/lib/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { InitiateStripeConnectButton, WithdrawButton } from "./dashboard-actions";
 import { CopyLinkButtons } from "./copy-link-buttons";
+import { SellerRealtimeNotifier } from "./realtime-notifier";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -32,8 +33,10 @@ export default async function DashboardPage() {
 
   return (
     <main style={{ padding: "2rem", maxWidth: "48rem", margin: "0 auto" }}>
+      <SellerRealtimeNotifier sellerId={user.id} />
       <h1>Dashboard</h1>
-      <p style={{ marginBottom: "1.5rem" }}>
+      <p style={{ marginBottom: "1.5rem", display: "flex", gap: "1rem" }}>
+        <Link href="/dashboard/settings">Settings</Link>
         <Link href="/auth">Sign out</Link>
       </p>
 
@@ -59,7 +62,7 @@ export default async function DashboardPage() {
       <section style={{ marginBottom: "2rem" }}>
         <h2>Your links</h2>
         <p>
-          <Link href="/studio/links/new">+ Create link</Link>
+          <Link href="/dashboard/links/new">+ Create link</Link>
         </p>
         {!links?.length ? (
           <p>No links yet. Create one to get started.</p>
@@ -79,7 +82,7 @@ export default async function DashboardPage() {
                 <br />
                 <CopyLinkButtons url={`${appUrl}/pay/${link.slug}`} />
                 <Link
-                  href={`/studio/links/${link.id}`}
+                  href={`/dashboard/links/${link.id}`}
                   style={{ marginLeft: "0.5rem" }}
                 >
                   View

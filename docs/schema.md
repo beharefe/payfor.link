@@ -1,4 +1,4 @@
-# Database Schema — payfor.link
+# Database Schema — unseal.link
 
 Run this SQL in your Supabase project → SQL Editor.
 Run once. Do not alter production tables after deploy.

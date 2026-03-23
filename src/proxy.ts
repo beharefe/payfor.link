@@ -1,9 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const SELLER_ROUTES = ["/studio"];
+const PROTECTED_ROUTES = ["/dashboard", "/orders", "/onboarding"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -33,7 +33,7 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isSellerRoute = SELLER_ROUTES.some((route) =>
+  const isSellerRoute = PROTECTED_ROUTES.some((route) =>
     request.nextUrl.pathname.startsWith(route),
   );
 

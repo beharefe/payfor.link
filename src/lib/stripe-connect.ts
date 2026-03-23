@@ -1,6 +1,6 @@
-import { createClient } from "@payforlink/lib/supabase/server";
-import { stripe } from "@payforlink/lib/stripe";
-import { log } from "@payforlink/lib/logger";
+import { createClient } from "@unseallink/lib/supabase/server";
+import { stripe } from "@unseallink/lib/stripe";
+import { log } from "@unseallink/lib/logger";
 
 /** Returns the Stripe account onboarding URL for the current user. Throws if unauthorized or no user. */
 export async function getStripeConnectAccountLinkUrl(): Promise<string> {
@@ -83,8 +83,8 @@ export async function getStripeWithdrawUrl(): Promise<string | null> {
       account: seller.stripe_account_id,
       type: "account_onboarding",
       collection_options: { fields: "currently_due" },
-      return_url: `${appUrl}/studio`,
-      refresh_url: `${appUrl}/studio?withdraw=refresh`,
+      return_url: `${appUrl}/dashboard`,
+      refresh_url: `${appUrl}/dashboard?withdraw=refresh`,
     });
     return accountLink.url;
   }

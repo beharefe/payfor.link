@@ -1,6 +1,6 @@
 "use client";
 
-import { createCheckoutSession } from "@payforlink/app/actions/checkout";
+import { createCheckoutSession } from "@unseallink/app/actions/checkout";
 import { useActionState } from "react";
 
 async function submitCheckout(_prev: string | null, formData: FormData): Promise<string | null> {

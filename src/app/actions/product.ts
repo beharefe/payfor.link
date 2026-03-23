@@ -1,12 +1,13 @@
 "use server";
 
+import crypto from "node:crypto";
 import { redirect } from "next/navigation";
 import slugify from "slugify";
-import { createClient } from "@payforlink/lib/supabase/server";
-import { log } from "@payforlink/lib/logger";
-import { checkUrlSafe } from "@payforlink/lib/safe-browsing";
-import { detectProductType, isValidUrl } from "@payforlink/lib/product-utils";
-import type { ProductType } from "@payforlink/types/database";
+import { createClient } from "@unseallink/lib/supabase/server";
+import { log } from "@unseallink/lib/logger";
+import { checkUrlSafe } from "@unseallink/lib/safe-browsing";
+import { detectProductType, isValidUrl } from "@unseallink/lib/product-utils";
+import type { ProductType } from "@unseallink/types/database";
 
 const MIN_PRICE = 9.99;
 
@@ -16,6 +17,7 @@ type CreateProductInput = {
   destination_url: string;
   price: number;
   product_type?: ProductType;
+  preview_image_url?: string;
 };
 
 type ActionResult = { error: string } | { id: string };
@@ -33,6 +35,8 @@ export async function createProduct(
   if (!input.title?.trim()) return { error: "Title is required" };
   if (!input.destination_url?.trim()) return { error: "URL is required" };
   if (!isValidUrl(input.destination_url)) return { error: "URL must start with https://" };
+  if (input.preview_image_url && !isValidUrl(input.preview_image_url))
+    return { error: "Preview image URL must start with https://" };
   if (input.price < MIN_PRICE)
     return { error: `Minimum price is $${MIN_PRICE}` };
 
@@ -42,22 +46,27 @@ export async function createProduct(
   const detectedType = detectProductType(input.destination_url);
   const productType = input.product_type ?? detectedType ?? null;
 
-  // Auto-generate slug from title + collision check
+  // Auto-generate slug: title + 4-char random hex suffix → globally unique + readable
   const baseSlug = slugify(input.title, { lower: true, strict: true });
-  let slug = baseSlug;
-  let attempt = 0;
+  let slug = "";
 
-  while (true) {
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const suffix = crypto.randomBytes(2).toString("hex");
+    const candidate = `${baseSlug}-${suffix}`;
     const { data: existing } = await supabase
       .from("links")
       .select("id")
-      .eq("seller_id", user.id)
-      .eq("slug", slug)
+      .eq("slug", candidate)
       .maybeSingle();
+    if (!existing) {
+      slug = candidate;
+      break;
+    }
+  }
 
-    if (!existing) break;
-    attempt++;
-    slug = `${baseSlug}-${attempt}`;
+  if (!slug) {
+    log.error("createProduct: could not generate unique slug", { title: input.title, user_id: user.id });
+    return { error: "Failed to generate URL. Please try again." };
   }
 
   // Detect status — active immediately if Stripe already connected
@@ -79,6 +88,7 @@ export async function createProduct(
       destination_url: input.destination_url.trim(),
       price: input.price,
       product_type: productType,
+      preview_image_url: input.preview_image_url?.trim() || null,
       status,
     })
     .select("id")
@@ -92,7 +102,7 @@ export async function createProduct(
     return { error: "Failed to create product" };
   }
 
-  redirect(`/studio/links/${link.id}`);
+  redirect(`/dashboard/links/${link.id}`);
 }
 
 /** FormData-compatible wrapper for use with useActionState in Client Components. */
@@ -107,6 +117,7 @@ export async function createProductAction(
     destination_url: formData.get("destination_url")?.toString() ?? "",
     price: Number.isFinite(price) ? price : MIN_PRICE,
     product_type: (formData.get("product_type")?.toString() || undefined) as ProductType | undefined,
+    preview_image_url: formData.get("preview_image_url")?.toString() || undefined,
   });
   if ("error" in result) return result.error;
   return null; // createProduct redirects on success

@@ -11,7 +11,7 @@ Core mechanic: Lock link → Pay → Unlock
 ## 1. Seller Onboarding
 
 ```
-Seller visits payfor.link
+Seller visits unseal.link
 → enters email → Supabase magic link sent
 → clicks link → authenticated
 → users row upserted (id = auth.uid())
@@ -25,12 +25,12 @@ Seller visits payfor.link
 
 ```
 Seller fills form: title, description, destination URL, price
-→ POST /api/create-product
 → validate URL format
 → Google Safe Browsing check
 → detect platform (notion/figma/drive/github/other)
 → platform-specific validation (see product-validation.md)
-→ auto-generate slug from title + collision check
+→ auto-generate slug: slugify(title) + "-" + 4-char random hex  e.g. notion-crm-a3f2
+→ check slug globally unique → retry with new suffix if collision (max 5 attempts)
 → insert links row:
     status = 'draft' (if Stripe not connected)
     status = 'active' (if Stripe already connected)
@@ -53,7 +53,7 @@ Seller clicks "Connect Stripe"
   })
 → redirect to Stripe
 → seller authorizes (email only, no ID docs)
-→ returns to /connect/return
+→ returns to /api/connect-stripe/return
 → stripe.accounts.retrieve() → check charges_enabled
 → update users:
     stripe_connected = true
@@ -119,7 +119,7 @@ Stripe fires checkout.session.completed
 → check purchases.stripe_payment_id (idempotency — skip if exists)
 → fetch link by metadata.link_id
 → insert purchase:
-    delivery_url = links.destination_url (SNAPSHOT)
+    delivery_url = links.destination_url (SNAPSHOT — never read from links again)
     product_title = links.title (SNAPSHOT)
     price_paid = session.amount_total / 100 (SNAPSHOT)
     platform_fee = price_paid * 0.045
@@ -128,11 +128,9 @@ Stripe fires checkout.session.completed
     seller_id = links.seller_id
 → UPDATE links SET total_sales++, total_revenue += price_paid
 → UPDATE users SET total_earned += price_paid, total_fees += platform_fee
-→ generate unlock token:
-    raw = crypto.randomBytes(32).toString('hex')
-    hash = sha256(raw)
-    insert unlock_tokens: { purchase_id, token_hash, expires_at: now + 24h }
-→ send unlock email via Resend with raw token in URL
+→ supabase.auth.signInWithOtp({ email: buyer_email })
+    Supabase sends 6-digit OTP to buyer — this is the verification step
+    NOTE: unlock token is NOT generated here — only after OTP verified on success page
 → return 200 immediately
 ```
 
@@ -156,26 +154,59 @@ Stripe fires account.updated
 
 ---
 
-## 7. Unlock Flow
+## 7. Payment Success + OTP Verification
+
+```
+Buyer lands on /pay/[slug]/success?session_id=xxx
+→ server fetches Stripe session → gets buyer_email
+→ server looks up purchase by stripe_checkout_session_id
+→ if purchase not yet created (webhook in-flight):
+    → client polls every 2s via router.refresh() until purchase appears
+→ if purchase.buyer_email_verified = true:
+    → redirect immediately to /orders/[purchase_id]  (repeat visit)
+→ show OTP input: "Enter the 6-digit code sent to {email}"
+
+verifyOtp(purchase_id, code):
+→ supabase.auth.verifyOtp({ email: buyer_email, token: code, type: 'email' })
+→ if error: return error message
+→ set purchase.buyer_email_verified = true
+→ generate unlock token:
+    raw = crypto.randomBytes(32).toString('hex')
+    hash = sha256(raw)
+    insert unlock_tokens: { purchase_id, token_hash, expires_at: now + 24h }
+→ send unlock email via Resend with raw token in URL
+→ redirect to /orders/[purchase_id]
+
+resendOtp(purchase_id):
+→ supabase.auth.signInWithOtp({ email: purchase.buyer_email })
+→ Supabase enforces rate limits + expiry
+```
+
+---
+
+## 8. Unlock Flow (email link — sessionless re-access)
 
 ```
 Buyer clicks link in email: /unlock?token=abc123
-→ hash token: sha256(abc123)
-→ lookup unlock_tokens by token_hash
-→ validate:
-    exists? → else: show "invalid link"
-    expires_at > now()? → else: show "link expired" + resend option
-    used_at IS NULL? → else: show "already used" + library link
-→ mark used_at = now()
+→ server validates token on GET:
+    hash token → sha256(abc123)
+    lookup unlock_tokens by token_hash
+    check: exists / not used / not expired / purchase not refunded
+→ if invalid/used/expired: show error page
+→ if valid: show confirmation screen — "You're one click away"
+    DO NOT consume token on GET
+    Email scanners pre-fetch links and would burn the token silently
+
+Buyer clicks "Access content →" button (form POST via Server Action):
+→ re-validate token atomically
+→ mark used_at = now() WHERE used_at IS NULL  (race-condition guard)
 → fetch purchase.delivery_url
 → 302 redirect → delivery_url
 ```
 
-**Browser-side confirmation step**: Don't consume token on GET — show a "Click to access" button first. This prevents email scanners from pre-clicking and consuming the token.
-
 ---
 
-## 8. Token Resend / Expired Flow
+## 9. Token Resend / Expired Flow
 
 ```
 Buyer clicks "Resend" or visits /unlock-request
@@ -184,6 +215,7 @@ Buyer clicks "Resend" or visits /unlock-request
 → find purchases by buyer_email where status = 'paid'
 → rate limit: max 3 active tokens per purchase per hour
 → for each purchase:
+    invalidate unused tokens
     generate new token
     insert unlock_tokens
     send unlock email
@@ -192,21 +224,27 @@ Buyer clicks "Resend" or visits /unlock-request
 
 ---
 
-## 9. Buyer Library
+## 10. Buyer Orders (session-based re-access)
 
 ```
-Buyer visits /library
-→ enters email
-→ Supabase magic link sent (buyer-scoped session)
-→ buyer clicks link → authenticated
-→ fetch purchases by buyer_email
-→ show list: product title, date, amount, "Re-access" button
-→ "Re-access" → triggers resend flow for that purchase
+Buyer visits /orders
+→ middleware checks Supabase session
+→ if no session: redirect to /auth (magic link / OTP sign-in)
+→ fetch purchases WHERE buyer_email = user.email AND status = 'paid'
+→ show list: product title, date, amount, "View order →"
+
+Buyer visits /orders/[order_id]
+→ middleware guards route (session required)
+→ verify purchase.buyer_email = user.email (ownership check)
+→ show order detail — delivery_url NOT rendered in HTML
+→ "Access content →" button → GET /api/orders/[order_id]/access
+    server validates session + ownership
+    302 redirect → purchase.delivery_url
 ```
 
 ---
 
-## 10. Abuse Report
+## 11. Abuse Report
 
 ```
 Buyer clicks "Report" on /pay/[slug]

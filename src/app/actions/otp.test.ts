@@ -1,18 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { resendOtp, verifyOtp } from "./otp";
 
-vi.mock("@payforlink/lib/supabase/server", () => ({
+vi.mock("@unseallink/lib/supabase/server", () => ({
   createServiceClient: vi.fn(),
 }));
-vi.mock("@payforlink/lib/resend", () => ({
+vi.mock("@unseallink/lib/resend", () => ({
   resend: { emails: { send: vi.fn().mockResolvedValue({}) } },
-  FROM_EMAIL: "noreply@payfor.link",
+  FROM_EMAIL: "noreply@unseal.link",
 }));
-vi.mock("@payforlink/lib/logger", () => ({
+vi.mock("@unseallink/lib/logger", () => ({
   log: { error: vi.fn(), info: vi.fn() },
 }));
 
-import { createServiceClient } from "@payforlink/lib/supabase/server";
+import { createServiceClient } from "@unseallink/lib/supabase/server";
 
 function makePurchase(overrides: Record<string, unknown> = {}) {
   return {
@@ -106,7 +106,7 @@ describe("verifyOtp", () => {
     const mock = makeSupabaseMock(makePurchase());
     mock.auth.verifyOtp.mockResolvedValue({ data: {}, error: null });
     (createServiceClient as ReturnType<typeof vi.fn>).mockReturnValue(mock);
-    process.env.NEXT_PUBLIC_APP_URL = "https://payfor.link";
+    process.env.NEXT_PUBLIC_APP_URL = "https://unseal.link";
 
     const result = await verifyOtp("purchase-1", "123456");
     expect(result).toEqual({ success: true });
@@ -117,7 +117,7 @@ describe("verifyOtp", () => {
       type: "email",
     });
 
-    const { resend } = await import("@payforlink/lib/resend");
+    const { resend } = await import("@unseallink/lib/resend");
     expect(resend.emails.send).toHaveBeenCalledOnce();
   });
 });
@@ -161,7 +161,7 @@ describe("resendOtp", () => {
       options: { shouldCreateUser: true },
     });
     // Unlock email is not sent on resend — Supabase sends the OTP email
-    const { resend } = await import("@payforlink/lib/resend");
+    const { resend } = await import("@unseallink/lib/resend");
     expect(resend.emails.send).not.toHaveBeenCalled();
   });
 });

@@ -1,7 +1,21 @@
 "use client";
 
-import { verifyOtp, resendOtp } from "@payforlink/app/actions/otp";
-import { useActionState, useState } from "react";
+import { verifyOtp, resendOtp } from "@unseallink/app/actions/otp";
+import { useActionState, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
+export function SuccessPoller() {
+  const router = useRouter();
+  useEffect(() => {
+    const id = setInterval(() => router.refresh(), 2000);
+    return () => clearInterval(id);
+  }, [router]);
+  return (
+    <p style={{ color: "#666", marginTop: "1rem" }}>
+      Confirming your payment, please wait…
+    </p>
+  );
+}
 
 export function SuccessPageClient({ purchaseId }: { purchaseId: string }) {
   const [resendMessage, setResendMessage] = useState<string | null>(null);

@@ -8,7 +8,7 @@ export default function UnlockRequestPage() {
       <p>Enter the email you used to purchase. We&apos;ll send you a new access link.</p>
       <ResendUnlockForm />
       <p style={{ marginTop: "1rem" }}>
-        <Link href="/library">View your library</Link>
+        <Link href="/orders">View your orders</Link>
       </p>
     </main>
   );

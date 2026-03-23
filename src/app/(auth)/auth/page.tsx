@@ -1,4 +1,4 @@
-import { signInWithOtp, verifySellerOtp } from "@payforlink/app/actions/auth";
+import { signInWithOtp, verifySellerOtp } from "@unseallink/app/actions/auth";
 
 export default async function AuthPage({
   searchParams,

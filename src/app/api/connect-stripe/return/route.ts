@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@payforlink/lib/supabase/server";
-import { stripe } from "@payforlink/lib/stripe";
-import { log } from "@payforlink/lib/logger";
+import { createClient } from "@unseallink/lib/supabase/server";
+import { stripe } from "@unseallink/lib/stripe";
+import { log } from "@unseallink/lib/logger";
 
 export async function GET() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
@@ -21,7 +21,7 @@ export async function GET() {
     .single();
 
   if (!seller?.stripe_account_id) {
-    return NextResponse.redirect(new URL("/studio", appUrl));
+    return NextResponse.redirect(new URL("/dashboard", appUrl));
   }
 
   try {
@@ -46,5 +46,5 @@ export async function GET() {
     log.error("connect-stripe return failed", { user_id: user.id, error: String(err) });
   }
 
-  return NextResponse.redirect(new URL("/studio", appUrl));
+  return NextResponse.redirect(new URL("/dashboard", appUrl));
 }

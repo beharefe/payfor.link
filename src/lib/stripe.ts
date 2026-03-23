@@ -1,6 +1,8 @@
 import Stripe from "stripe";
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+// The key is validated by Stripe only when making API calls, not at init time.
+// A non-empty fallback prevents module init errors in build/test environments.
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "sk_build_placeholder");
 
 export const PLATFORM_FEE_PERCENT = 0.045;
 

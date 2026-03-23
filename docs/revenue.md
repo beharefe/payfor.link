@@ -48,7 +48,7 @@ Minimum price: $9.99 (enforced by DB constraint + UI validation)
 | Lemon Squeezy | 5% |
 | Paddle | ~5% |
 | Ko-fi | 5% |
-| **payfor.link** | **4.5%** |
+| **unseal.link** | **4.5%** |
 
 Cheapest in market. Simple positioning: "We only take 4.5%."
 
