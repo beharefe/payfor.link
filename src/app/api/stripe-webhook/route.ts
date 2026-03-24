@@ -10,7 +10,6 @@ import { serializeError } from "@unseallink/lib/utils";
 import { TABLES } from "@unseallink/lib/db";
 import { OtpCodeEmail } from "@unseallink/emails/otp-code";
 import { SaleNotificationEmail } from "@unseallink/emails/sale-notification";
-import { KycCompleteEmail } from "@unseallink/emails/kyc-complete";
 
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
 
@@ -180,8 +179,6 @@ async function handleAccountUpdated(account: Stripe.Account) {
     .single();
   if (!seller) return;
 
-  const payoutsJustEnabled = !seller.stripe_payouts_enabled && account.payouts_enabled;
-
   await supabase
     .from(TABLES.SELLERS)
     .update({
@@ -190,17 +187,4 @@ async function handleAccountUpdated(account: Stripe.Account) {
       stripe_details_submitted: account.details_submitted ?? false,
     })
     .eq("id", seller.id);
-
-  if (payoutsJustEnabled) {
-    const { data: updated } = await supabase.from(TABLES.SELLERS).select("email").eq("id", seller.id).single();
-    if (updated?.email) {
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
-      await resend.emails.send({
-        from: FROM_EMAIL,
-        to: updated.email,
-        subject: "You can now withdraw your earnings",
-        html: await render(KycCompleteEmail({ dashboardUrl: appUrl })),
-      });
-    }
-  }
 }
