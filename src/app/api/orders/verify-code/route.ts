@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { cookies } from "next/headers";
+import { setOrdersSession } from "@unseallink/lib/buyer-session";
 
 const SIGNING_KEY = process.env.STRIPE_SECRET_KEY ?? "dev-secret";
 
@@ -76,19 +77,7 @@ export async function POST(request: Request) {
   }
 
   cookieStore.delete("orders_otp");
-
-  // Set verified session cookie (1 hour)
-  const sessionExpiry = Date.now() + 60 * 60 * 1000;
-  const sessionPayload = `${email}|${sessionExpiry}`;
-  const sessionCookie = `${sessionPayload}|${sign(sessionPayload)}`;
-
-  cookieStore.set("orders_session", sessionCookie, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    maxAge: 60 * 60,
-    path: "/",
-  });
+  await setOrdersSession(email);
 
   return NextResponse.json({ success: true, email });
 }

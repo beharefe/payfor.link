@@ -7,6 +7,7 @@ import { resend, FROM_EMAIL } from "@unseallink/lib/resend";
 import { log } from "@unseallink/lib/logger";
 import { serializeError } from "@unseallink/lib/utils";
 import { TABLES } from "@unseallink/lib/db";
+import { setOrdersSession } from "@unseallink/lib/buyer-session";
 
 type ActionResult = { success: true } | { error: string };
 
@@ -44,6 +45,9 @@ export async function verifyOtp(
     .from(TABLES.ORDERS)
     .update({ buyer_email_verified: true, otp_hash: null, otp_expires_at: null })
     .eq("id", orderId);
+
+  // Grant orders session so buyer can view all their orders without re-verifying
+  await setOrdersSession(order.buyer_email);
 
   // Generate access token and send access email
   const rawToken = crypto.randomBytes(32).toString("hex");

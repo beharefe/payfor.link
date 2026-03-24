@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
 type Order = {
@@ -14,13 +14,29 @@ type Order = {
 
 type Step = "email" | "code" | "orders";
 
-export function OrdersLookup() {
-  const [step, setStep] = useState<Step>("email");
-  const [email, setEmail] = useState("");
+export function OrdersLookup({ verifiedEmail }: { verifiedEmail: string | null }) {
+  const [step, setStep] = useState<Step>(verifiedEmail ? "orders" : "email");
+  const [email, setEmail] = useState(verifiedEmail ?? "");
   const [code, setCode] = useState("");
   const [orders, setOrders] = useState<Order[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Auto-load orders when session is already valid (e.g. right after purchase OTP)
+  useEffect(() => {
+    if (verifiedEmail && step === "orders" && orders === null) {
+      setLoading(true);
+      fetch(`/api/orders/lookup?email=${encodeURIComponent(verifiedEmail)}`)
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.error) setError(data.error);
+          else setOrders(data.orders ?? []);
+        })
+        .catch(() => setError("Failed to load orders."))
+        .finally(() => setLoading(false));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function handleSendCode(e: React.FormEvent) {
     e.preventDefault();
