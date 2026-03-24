@@ -18,7 +18,7 @@ export async function verifyOtp(
   const { data: order } = await supabase
     .from(TABLES.ORDERS)
     .select(
-      "id, buyer_email, buyer_email_verified, delivery_url, product_title",
+      "id, buyer_email, buyer_email_verified, delivery_url, product_title, otp_hash, otp_expires_at",
     )
     .eq("id", orderId)
     .single();
@@ -26,24 +26,22 @@ export async function verifyOtp(
   if (!order) return { error: "Order not found" };
   if (order.buyer_email_verified) redirect(`/orders/${orderId}`);
 
-  const { error: verifyError } = await supabase.auth.verifyOtp({
-    email: order.buyer_email,
-    token: code.trim(),
-    type: "email",
-  });
+  if (!order.otp_hash || !order.otp_expires_at) {
+    return { error: "No verification code found. Request a new one." };
+  }
 
-  if (verifyError) {
-    if (verifyError.message?.toLowerCase().includes("expired")) {
-      return { error: "Code expired. Request a new one." };
-    }
-    return {
-      error: verifyError.message ?? "Invalid or expired code. Request a new one.",
-    };
+  if (new Date(order.otp_expires_at) < new Date()) {
+    return { error: "Code expired. Request a new one." };
+  }
+
+  const inputHash = crypto.createHash("sha256").update(code.trim()).digest("hex");
+  if (inputHash !== order.otp_hash) {
+    return { error: "Invalid code. Check your email and try again." };
   }
 
   await supabase
     .from(TABLES.ORDERS)
-    .update({ buyer_email_verified: true })
+    .update({ buyer_email_verified: true, otp_hash: null, otp_expires_at: null })
     .eq("id", orderId);
 
   // Generate access token and send access email
@@ -81,7 +79,7 @@ export async function verifyOtp(
           <hr style="border:none;border-top:1px solid #eee;margin:20px 0;">
           <p style="color:#aaa;font-size:12px;margin:0;">
             Purchased via <a href="${appUrl}" style="color:#aaa;">unseal.link</a> ·
-            <a href="${appUrl}/orders" style="color:#aaa;">View your orders</a>
+            <a href="${appUrl}/orders/${orderId}" style="color:#aaa;">View your order</a>
           </p>
         </div>
       `,
@@ -103,21 +101,37 @@ export async function resendOtp(orderId: string): Promise<ActionResult> {
   if (!order) return { error: "Order not found" };
   if (order.buyer_email_verified) return { success: true };
 
-  const { error } = await supabase.auth.signInWithOtp({
-    email: order.buyer_email,
-    options: {
-      shouldCreateUser: true,
-    },
+  const otpCode = String(Math.floor(100000 + Math.random() * 900000));
+  const otpHash = crypto.createHash("sha256").update(otpCode).digest("hex");
+  const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+
+  const { error: updateError } = await supabase
+    .from(TABLES.ORDERS)
+    .update({ otp_hash: otpHash, otp_expires_at: otpExpiresAt })
+    .eq("id", order.id);
+
+  if (updateError) {
+    log.error("resendOtp: update failed", { order_id: orderId, error: updateError.message });
+    return { error: "Failed to send code. Please try again." };
+  }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
+  const { error: emailError } = await resend.emails.send({
+    from: FROM_EMAIL,
+    to: order.buyer_email,
+    subject: `Your verification code — ${order.product_title}`,
+    html: `
+      <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px;">
+        <h2 style="font-size:20px;font-weight:500;margin:0 0 8px;">Verify your email</h2>
+        <p style="color:#666;margin:0 0 20px;">Enter this code to access your purchase:</p>
+        <p style="font-size:36px;font-weight:700;letter-spacing:8px;margin:0 0 20px;">${otpCode}</p>
+        <p style="color:#aaa;font-size:13px;margin:0;">Expires in 15 minutes. Purchased via <a href="${appUrl}" style="color:#aaa;">unseal.link</a></p>
+      </div>
+    `,
   });
 
-  if (error) {
-    if (error.message?.toLowerCase().includes("rate") ?? false) {
-      return { error: "Too many attempts. Please try again later." };
-    }
-    log.error("resendOtp signInWithOtp failed", {
-      order_id: orderId,
-      error: error.message,
-    });
+  if (emailError) {
+    log.error("resendOtp: email send failed", { order_id: orderId, error: String(emailError) });
     return { error: "Failed to send code. Please try again." };
   }
 

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
+import { Amplitude } from "@unseallink/lib/amplitude";
 import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -21,6 +22,7 @@ export default async function RootLayout({
 
   return (
     <html lang={locale}>
+      <Amplitude />
       <body className="antialiased">
         <NextIntlClientProvider messages={messages}>
           {children}
