@@ -1,6 +1,7 @@
 import { createClient } from "@unseallink/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { saveOnboardingName } from "@unseallink/app/actions/onboarding";
+import { TABLES } from "@unseallink/lib/db";
 
 export default async function OnboardingNamePage() {
   const supabase = await createClient();
@@ -11,7 +12,7 @@ export default async function OnboardingNamePage() {
 
   // Already has a name — skip onboarding
   const { data: seller } = await supabase
-    .from("users")
+    .from(TABLES.SELLERS)
     .select("name")
     .eq("id", user.id)
     .single();

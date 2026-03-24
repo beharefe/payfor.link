@@ -3,6 +3,7 @@ import { stripe } from "@unseallink/lib/stripe";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { SuccessPageClient, SuccessPoller } from "./success-page-client";
+import { TABLES } from "@unseallink/lib/db";
 
 export const metadata: Metadata = {
   robots: { index: false },
@@ -55,7 +56,7 @@ export default async function PaymentSuccessPage({ params, searchParams }: Props
 
   const supabase = createServiceClient();
   const { data: purchase } = await supabase
-    .from("purchases")
+    .from(TABLES.ORDERS)
     .select("id, buyer_email, buyer_email_verified, product_title, price_paid, currency")
     .eq("stripe_checkout_session_id", session.id)
     .single();
@@ -90,7 +91,7 @@ export default async function PaymentSuccessPage({ params, searchParams }: Props
       <p style={{ margin: "0 0 0.75rem" }}>
         Enter the 6-digit code we sent to <strong>{customerEmail}</strong>
       </p>
-      <SuccessPageClient purchaseId={purchase.id} />
+      <SuccessPageClient orderId={purchase.id} />
     </main>
   );
 }

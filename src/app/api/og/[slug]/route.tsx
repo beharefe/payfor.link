@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
+import { TABLES } from "@unseallink/lib/db";
 
 export async function GET(
   _request: Request,
@@ -9,7 +10,7 @@ export async function GET(
 
   const supabase = createServiceClient();
   const { data: link } = await supabase
-    .from("links")
+    .from(TABLES.PRODUCTS)
     .select("title, description, price, currency, preview_image_url, seller_id")
     .eq("slug", slug)
     .eq("status", "active")
@@ -20,7 +21,7 @@ export async function GET(
   }
 
   const { data: seller } = await supabase
-    .from("users")
+    .from(TABLES.SELLERS)
     .select("name")
     .eq("id", link.seller_id)
     .single();

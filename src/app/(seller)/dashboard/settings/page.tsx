@@ -2,6 +2,7 @@ import { createClient } from "@unseallink/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { SettingsForm } from "./settings-form";
+import { TABLES } from "@unseallink/lib/db";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -11,8 +12,8 @@ export default async function SettingsPage() {
   if (!user) redirect("/auth");
 
   const { data: seller } = await supabase
-    .from("users")
-    .select("name, email")
+    .from(TABLES.SELLERS)
+    .select("name, email, bio, avatar_url")
     .eq("id", user.id)
     .single();
 
@@ -23,7 +24,11 @@ export default async function SettingsPage() {
       </p>
       <h1 style={{ marginBottom: "0.25rem" }}>Settings</h1>
       <p style={{ color: "#6B6B6B", marginBottom: "2rem" }}>{seller?.email}</p>
-      <SettingsForm currentName={seller?.name ?? ""} />
+      <SettingsForm
+        currentName={seller?.name ?? ""}
+        currentBio={seller?.bio ?? ""}
+        currentAvatarUrl={seller?.avatar_url ?? null}
+      />
     </main>
   );
 }

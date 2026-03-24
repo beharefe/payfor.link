@@ -1,20 +1,21 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
+import { TABLES } from "@unseallink/lib/db";
 
 const VALID_REASONS = ["scam", "malware", "copyright", "other"] as const;
 
 export async function POST(request: Request) {
-  let body: { link_id?: string; reason?: string; description?: string };
+  let body: { product_id?: string; reason?: string; description?: string };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 
-  const { link_id, reason, description } = body;
+  const { product_id, reason, description } = body;
 
-  if (!link_id || typeof link_id !== "string") {
-    return NextResponse.json({ error: "Missing link_id" }, { status: 400 });
+  if (!product_id || typeof product_id !== "string") {
+    return NextResponse.json({ error: "Missing product_id" }, { status: 400 });
   }
 
   if (!reason || !VALID_REASONS.includes(reason as (typeof VALID_REASONS)[number])) {
@@ -23,21 +24,26 @@ export async function POST(request: Request) {
 
   const supabase = createServiceClient();
 
-  // Verify link exists
-  const { data: link } = await supabase
-    .from("links")
+  // Verify product exists
+  const { data: product } = await supabase
+    .from(TABLES.PRODUCTS)
     .select("id")
-    .eq("id", link_id)
+    .eq("id", product_id)
     .single();
 
-  if (!link) {
-    return NextResponse.json({ error: "Link not found" }, { status: 404 });
+  if (!product) {
+    return NextResponse.json({ error: "Product not found" }, { status: 404 });
   }
 
-  const { error } = await supabase.from("abuse_reports").insert({
-    link_id,
+  const trimmedDescription = description?.trim() || null;
+  if (trimmedDescription && trimmedDescription.length > 500) {
+    return NextResponse.json({ error: "Description must be 500 characters or less" }, { status: 400 });
+  }
+
+  const { error } = await supabase.from(TABLES.REPORTS).insert({
+    product_id,
     reason,
-    description: description?.trim().slice(0, 500) || null,
+    description: trimmedDescription,
   });
 
   if (error) {

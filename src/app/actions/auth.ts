@@ -2,6 +2,7 @@
 
 import { createClient } from "@unseallink/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { TABLES } from "@unseallink/lib/db";
 
 export async function signInWithOtp(formData: FormData): Promise<void> {
   const email = formData.get("email")?.toString()?.trim();
@@ -51,14 +52,14 @@ export async function verifySellerOtp(formData: FormData): Promise<void> {
   let needsName = false;
   if (user) {
     const { data: existing } = await supabase
-      .from("users")
+      .from(TABLES.SELLERS)
       .select("name")
       .eq("id", user.id)
       .maybeSingle();
 
     needsName = !existing?.name;
 
-    await supabase.from("users").upsert(
+    await supabase.from(TABLES.SELLERS).upsert(
       { id: user.id, email: user.email ?? "", name: user.user_metadata?.name ?? null },
       { onConflict: "id" },
     );
@@ -67,3 +68,8 @@ export async function verifySellerOtp(formData: FormData): Promise<void> {
   redirect(needsName ? "/onboarding/name" : "/dashboard");
 }
 
+export async function signOut(): Promise<void> {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  redirect("/auth");
+}

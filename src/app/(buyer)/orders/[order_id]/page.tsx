@@ -2,6 +2,7 @@ import { createClient, createServiceClient } from "@unseallink/lib/supabase/serv
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { TABLES } from "@unseallink/lib/db";
 
 export const metadata: Metadata = {
   robots: { index: false },
@@ -21,7 +22,7 @@ export default async function OrderPage({ params }: Props) {
 
   const service = createServiceClient();
   const { data: order } = await service
-    .from("purchases")
+    .from(TABLES.ORDERS)
     .select("id, buyer_email, product_title, price_paid, currency, created_at, status, seller_id")
     .eq("id", order_id)
     .single();
@@ -51,7 +52,7 @@ export default async function OrderPage({ params }: Props) {
   }
 
   const { data: seller } = await service
-    .from("users")
+    .from(TABLES.SELLERS)
     .select("name")
     .eq("id", order.seller_id)
     .single();
