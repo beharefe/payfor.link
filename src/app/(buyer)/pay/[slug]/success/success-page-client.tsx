@@ -17,20 +17,20 @@ export function SuccessPoller() {
   );
 }
 
-export function SuccessPageClient({ purchaseId }: { purchaseId: string }) {
+export function SuccessPageClient({ orderId }: { orderId: string }) {
   const [resendMessage, setResendMessage] = useState<string | null>(null);
 
   async function handleVerify(_prev: string | null, formData: FormData): Promise<string | null> {
     const code = formData.get("code")?.toString()?.trim() ?? "";
     if (!code) return "Enter the 6-digit code.";
-    const result = await verifyOtp(purchaseId, code);
+    const result = await verifyOtp(orderId, code);
     if ("error" in result) return result.error;
     return null;
   }
 
   async function handleResend() {
     setResendMessage(null);
-    const result = await resendOtp(purchaseId);
+    const result = await resendOtp(orderId);
     if ("error" in result) {
       setResendMessage(result.error);
     } else {

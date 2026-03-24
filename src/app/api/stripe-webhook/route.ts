@@ -4,6 +4,7 @@ import { stripe, platformFeeCents } from "@unseallink/lib/stripe";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { resend, FROM_EMAIL } from "@unseallink/lib/resend";
 import { log } from "@unseallink/lib/logger";
+import { TABLES } from "@unseallink/lib/db";
 
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
 
@@ -56,25 +57,25 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
   }
 
   const { data: existing } = await supabase
-    .from("purchases")
+    .from(TABLES.ORDERS)
     .select("id")
     .eq("stripe_payment_id", paymentIntentId)
     .maybeSingle();
   if (existing) return;
 
-  const linkId = session.metadata?.link_id;
-  if (!linkId) {
-    log.error("checkout.session.completed: no link_id in metadata");
+  const productId = session.metadata?.product_id;
+  if (!productId) {
+    log.error("checkout.session.completed: no product_id in metadata");
     return;
   }
 
-  const { data: link } = await supabase
-    .from("links")
+  const { data: product } = await supabase
+    .from(TABLES.PRODUCTS)
     .select("id, seller_id, destination_url, title, price, version, total_sales, total_revenue")
-    .eq("id", linkId)
+    .eq("id", productId)
     .single();
-  if (!link) {
-    log.error("checkout.session.completed: link not found", { link_id: linkId });
+  if (!product) {
+    log.error("checkout.session.completed: product not found", { product_id: productId });
     return;
   }
 
@@ -88,29 +89,29 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
   const pricePaid = amountTotal / 100;
   const platformFee = platformFeeCents(pricePaid) / 100;
 
-  const { error: insertError } = await supabase.from("purchases").insert({
-    link_id: link.id,
-    seller_id: link.seller_id,
+  const { error: insertError } = await supabase.from(TABLES.ORDERS).insert({
+    product_id: product.id,
+    seller_id: product.seller_id,
     buyer_email: customerEmail,
     stripe_payment_id: paymentIntentId,
     stripe_checkout_session_id: session.id,
-    delivery_url: link.destination_url,
-    product_title: link.title,
+    delivery_url: product.destination_url,
+    product_title: product.title,
     price_paid: pricePaid,
     platform_fee: platformFee,
-    link_version: link.version,
+    product_version: product.version,
     currency: (session.currency ?? "usd").toLowerCase(),
   });
 
   if (insertError) {
-    log.error("checkout.session.completed: insert purchase failed", { error: insertError.message });
+    log.error("checkout.session.completed: insert order failed", { error: insertError.message });
     return;
   }
 
-  // Atomic increments via RPC — avoids read-modify-write races on concurrent purchases.
+  // Atomic increments via RPC — avoids read-modify-write races on concurrent orders.
   await Promise.all([
-    supabase.rpc("increment_link_stats", { p_link_id: link.id, p_revenue: pricePaid }),
-    supabase.rpc("increment_seller_stats", { p_seller_id: link.seller_id, p_earned: pricePaid, p_fees: platformFee }),
+    supabase.rpc("increment_product_stats", { p_product_id: product.id, p_revenue: pricePaid }),
+    supabase.rpc("increment_seller_stats", { p_seller_id: product.seller_id, p_earned: pricePaid, p_fees: platformFee }),
   ]);
 
   // Send OTP to buyer for email verification on the success page
@@ -121,9 +122,9 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
   // Notify seller of the new sale
   const { data: seller } = await supabase
-    .from("users")
+    .from(TABLES.SELLERS)
     .select("email, name")
-    .eq("id", link.seller_id)
+    .eq("id", product.seller_id)
     .single();
 
   if (seller?.email) {
@@ -131,11 +132,11 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
     await resend.emails.send({
       from: FROM_EMAIL,
       to: seller.email,
-      subject: `New sale — ${link.title}`,
+      subject: `New sale — ${product.title}`,
       html: `
         <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px;">
           <h2 style="font-size:20px;font-weight:500;margin:0 0 8px;">You just made a sale 🎉</h2>
-          <p style="font-size:16px;margin:0 0 4px;"><strong>${link.title}</strong></p>
+          <p style="font-size:16px;margin:0 0 4px;"><strong>${product.title}</strong></p>
           <p style="font-size:24px;font-weight:500;margin:0 0 20px;">$${pricePaid.toFixed(2)}</p>
           <a href="${appUrl}/dashboard" style="display:inline-block;background:#111;color:#fff;padding:12px 24px;border-radius:100px;text-decoration:none;font-weight:500;">
             View dashboard →
@@ -149,30 +150,30 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
 async function handleAccountUpdated(account: Stripe.Account) {
   const supabase = createServiceClient();
-  const { data: user } = await supabase
-    .from("users")
+  const { data: seller } = await supabase
+    .from(TABLES.SELLERS)
     .select("id, stripe_payouts_enabled")
     .eq("stripe_account_id", account.id)
     .single();
-  if (!user) return;
+  if (!seller) return;
 
-  const payoutsJustEnabled = !user.stripe_payouts_enabled && account.payouts_enabled;
+  const payoutsJustEnabled = !seller.stripe_payouts_enabled && account.payouts_enabled;
 
   await supabase
-    .from("users")
+    .from(TABLES.SELLERS)
     .update({
       stripe_charges_enabled: account.charges_enabled ?? false,
       stripe_payouts_enabled: account.payouts_enabled ?? false,
       stripe_details_submitted: account.details_submitted ?? false,
     })
-    .eq("id", user.id);
+    .eq("id", seller.id);
 
   if (payoutsJustEnabled) {
-    const { data: seller } = await supabase.from("users").select("email").eq("id", user.id).single();
-    if (seller?.email) {
+    const { data: updated } = await supabase.from(TABLES.SELLERS).select("email").eq("id", seller.id).single();
+    if (updated?.email) {
       await resend.emails.send({
         from: FROM_EMAIL,
-        to: seller.email,
+        to: updated.email,
         subject: "You can now withdraw your earnings",
         html: "<p>Identity verification is complete. You can now withdraw your earnings from the dashboard.</p>",
       });

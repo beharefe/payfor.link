@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@unseallink/lib/supabase/server";
 import { stripe } from "@unseallink/lib/stripe";
 import { log } from "@unseallink/lib/logger";
+import { TABLES } from "@unseallink/lib/db";
 
 export async function GET() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
@@ -15,7 +16,7 @@ export async function GET() {
   }
 
   const { data: seller } = await supabase
-    .from("users")
+    .from(TABLES.SELLERS)
     .select("stripe_account_id")
     .eq("id", user.id)
     .single();
@@ -28,7 +29,7 @@ export async function GET() {
     const account = await stripe.accounts.retrieve(seller.stripe_account_id);
 
     await supabase
-      .from("users")
+      .from(TABLES.SELLERS)
       .update({
         stripe_connected: true,
         stripe_charges_enabled: account.charges_enabled ?? false,
@@ -38,7 +39,7 @@ export async function GET() {
       .eq("id", user.id);
 
     await supabase
-      .from("links")
+      .from(TABLES.PRODUCTS)
       .update({ status: "active" })
       .eq("seller_id", user.id)
       .eq("status", "draft");

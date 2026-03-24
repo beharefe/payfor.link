@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@unseallink/lib/supabase/server";
+import { TABLES } from "@unseallink/lib/db";
 
 /** Handles Magic Link callback. Supports both PKCE code exchange and token_hash (per Supabase docs). */
 export async function GET(request: NextRequest) {
@@ -30,14 +31,14 @@ export async function GET(request: NextRequest) {
   let needsName = false;
   if (user) {
     const { data: existing } = await supabase
-      .from("users")
+      .from(TABLES.SELLERS)
       .select("name")
       .eq("id", user.id)
       .maybeSingle();
 
     needsName = !existing?.name;
 
-    await supabase.from("users").upsert(
+    await supabase.from(TABLES.SELLERS).upsert(
       {
         id: user.id,
         email: user.email ?? "",

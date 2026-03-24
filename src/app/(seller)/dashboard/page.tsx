@@ -1,9 +1,10 @@
 import { createClient } from "@unseallink/lib/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { InitiateStripeConnectButton, WithdrawButton } from "./dashboard-actions";
+import { InitiateStripeConnectButton, WithdrawButton, SignOutButton } from "./dashboard-actions";
 import { CopyLinkButtons } from "./copy-link-buttons";
 import { SellerRealtimeNotifier } from "./realtime-notifier";
+import { TABLES } from "@unseallink/lib/db";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -13,7 +14,7 @@ export default async function DashboardPage() {
   if (!user) redirect("/auth");
 
   const { data: seller } = await supabase
-    .from("users")
+    .from(TABLES.SELLERS)
     .select(
       "stripe_connected, total_earned, total_fees",
     )
@@ -21,7 +22,7 @@ export default async function DashboardPage() {
     .single();
 
   const { data: links } = await supabase
-    .from("links")
+    .from(TABLES.PRODUCTS)
     .select("id, title, slug, status, total_sales, total_revenue")
     .eq("seller_id", user.id)
     .order("created_at", { ascending: false });
@@ -37,7 +38,7 @@ export default async function DashboardPage() {
       <h1>Dashboard</h1>
       <p style={{ marginBottom: "1.5rem", display: "flex", gap: "1rem" }}>
         <Link href="/dashboard/settings">Settings</Link>
-        <Link href="/auth">Sign out</Link>
+        <SignOutButton />
       </p>
 
       {!seller?.stripe_connected && (

@@ -5,6 +5,7 @@ import { createCheckoutSession } from "@unseallink/app/actions/checkout";
 import { log } from "@unseallink/lib/logger";
 import { PaywallCTA } from "./paywall-cta";
 import { AbuseReportForm } from "./abuse-report-form";
+import { TABLES } from "@unseallink/lib/db";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -12,7 +13,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const supabase = await createClient();
   const { data: link } = await supabase
-    .from("links")
+    .from(TABLES.PRODUCTS)
     .select("title, description, price, preview_image_url")
     .eq("slug", slug)
     .eq("status", "active")
@@ -54,7 +55,7 @@ export default async function PaywallPage({ params }: Props) {
   const supabase = await createClient();
 
   const { data: link } = await supabase
-    .from("links")
+    .from(TABLES.PRODUCTS)
     .select("id, title, description, price, currency, seller_id, status")
     .eq("slug", slug)
     .single();
@@ -71,7 +72,7 @@ export default async function PaywallPage({ params }: Props) {
 
   const service = createServiceClient();
   const { data: seller } = await service
-    .from("users")
+    .from(TABLES.SELLERS)
     .select("name, email")
     .eq("id", link.seller_id)
     .single();
@@ -92,7 +93,7 @@ export default async function PaywallPage({ params }: Props) {
       </p>
       <PaywallCTA linkId={link.id} />
       <div style={{ marginTop: "2rem", textAlign: "center" }}>
-        <AbuseReportForm linkId={link.id} />
+        <AbuseReportForm productId={link.id} />
       </div>
     </main>
   );

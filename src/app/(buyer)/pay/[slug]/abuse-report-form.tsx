@@ -4,14 +4,14 @@ import { useActionState, useState } from "react";
 
 type State = { ok: true } | { error: string } | null;
 
-export function AbuseReportForm({ linkId }: { linkId: string }) {
+export function AbuseReportForm({ productId }: { productId: string }) {
   const [open, setOpen] = useState(false);
 
   async function submit(_prev: State, formData: FormData): Promise<State> {
     const res = await fetch("/api/report-abuse", {
       method: "POST",
       body: JSON.stringify({
-        link_id: linkId,
+        product_id: productId,
         reason: formData.get("reason"),
         description: formData.get("description"),
       }),

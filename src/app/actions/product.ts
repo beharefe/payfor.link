@@ -8,6 +8,7 @@ import { log } from "@unseallink/lib/logger";
 import { checkUrlSafe } from "@unseallink/lib/safe-browsing";
 import { detectProductType, isValidUrl } from "@unseallink/lib/product-utils";
 import type { ProductType } from "@unseallink/types/database";
+import { TABLES } from "@unseallink/lib/db";
 
 const MIN_PRICE = 9.99;
 
@@ -33,6 +34,9 @@ export async function createProduct(
   if (!user) return { error: "Unauthorized" };
 
   if (!input.title?.trim()) return { error: "Title is required" };
+  if (input.title.trim().length > 200) return { error: "Title must be 200 characters or less" };
+  if (input.description && input.description.length > 2000)
+    return { error: "Description must be 2000 characters or less" };
   if (!input.destination_url?.trim()) return { error: "URL is required" };
   if (!isValidUrl(input.destination_url)) return { error: "URL must start with https://" };
   if (input.preview_image_url && !isValidUrl(input.preview_image_url))
@@ -54,7 +58,7 @@ export async function createProduct(
     const suffix = crypto.randomBytes(2).toString("hex");
     const candidate = `${baseSlug}-${suffix}`;
     const { data: existing } = await supabase
-      .from("links")
+      .from(TABLES.PRODUCTS)
       .select("id")
       .eq("slug", candidate)
       .maybeSingle();
@@ -71,7 +75,7 @@ export async function createProduct(
 
   // Detect status — active immediately if Stripe already connected
   const { data: seller } = await supabase
-    .from("users")
+    .from(TABLES.SELLERS)
     .select("stripe_connected")
     .eq("id", user.id)
     .single();
@@ -79,7 +83,7 @@ export async function createProduct(
   const status = seller?.stripe_connected ? "active" : "draft";
 
   const { data: link, error } = await supabase
-    .from("links")
+    .from(TABLES.PRODUCTS)
     .insert({
       seller_id: user.id,
       slug,

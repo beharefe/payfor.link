@@ -2,6 +2,7 @@
 
 import { createClient } from "@unseallink/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { TABLES } from "@unseallink/lib/db";
 
 export async function saveOnboardingName(formData: FormData) {
   const name = formData.get("name")?.toString()?.trim();
@@ -14,7 +15,7 @@ export async function saveOnboardingName(formData: FormData) {
   if (!user) redirect("/auth");
 
   await supabase
-    .from("users")
+    .from(TABLES.SELLERS)
     .update({ name: name.slice(0, 60) })
     .eq("id", user.id);
 

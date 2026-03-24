@@ -1,6 +1,7 @@
 import { createClient } from "@unseallink/lib/supabase/server";
 import { stripe } from "@unseallink/lib/stripe";
 import { log } from "@unseallink/lib/logger";
+import { TABLES } from "@unseallink/lib/db";
 
 /** Returns the Stripe account onboarding URL for the current user. Throws if unauthorized or no user. */
 export async function getStripeConnectAccountLinkUrl(): Promise<string> {
@@ -11,7 +12,7 @@ export async function getStripeConnectAccountLinkUrl(): Promise<string> {
   if (!user) throw new Error("Unauthorized");
 
   const { data: seller } = await supabase
-    .from("users")
+    .from(TABLES.SELLERS)
     .select("stripe_account_id, email")
     .eq("id", user.id)
     .single();
@@ -28,14 +29,13 @@ export async function getStripeConnectAccountLinkUrl(): Promise<string> {
     });
     stripeAccountId = account.id;
     const { error } = await supabase
-      .from("users")
+      .from(TABLES.SELLERS)
       .update({ stripe_account_id: stripeAccountId })
       .eq("id", user.id);
     if (error) {
       // Log the Stripe account ID so it can be manually linked if needed.
       log.error("Failed to save stripe_account_id — orphaned Stripe account created", {
         user_id: user.id,
-        stripe_account_id: stripeAccountId,
       });
       throw new Error("Failed to connect Stripe");
     }
@@ -66,7 +66,7 @@ export async function getStripeWithdrawUrl(): Promise<string | null> {
   if (!user) throw new Error("Unauthorized");
 
   const { data: seller } = await supabase
-    .from("users")
+    .from(TABLES.SELLERS)
     .select("stripe_account_id")
     .eq("id", user.id)
     .single();
