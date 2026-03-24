@@ -89,7 +89,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - Magic link only (Supabase) — no passwords ever
 - Sellers = Supabase users with row in `users` table
 - Buyers = email only, no account required
-- Middleware protects: `/dashboard` and all `/dashboard/*` routes (e.g. `/dashboard/links/new`, `/dashboard/links/[id]`, `/dashboard/settings`)
+- `src/proxy.ts` protects: `/dashboard` and `/onboarding` routes — redirects unauthenticated users to `/auth`
 
 ### Stripe Connect — Deferred Onboarding
 - Sellers connect Stripe with `collect: 'eventually_due'` — no KYC upfront
