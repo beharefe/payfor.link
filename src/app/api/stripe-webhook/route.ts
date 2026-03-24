@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
+import crypto from "node:crypto";
 import { stripe, platformFeeCents } from "@unseallink/lib/stripe";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { resend, FROM_EMAIL } from "@unseallink/lib/resend";
@@ -114,11 +115,38 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
     supabase.rpc("increment_seller_stats", { p_seller_id: product.seller_id, p_earned: pricePaid, p_fees: platformFee }),
   ]);
 
-  // Send OTP to buyer for email verification on the success page
-  await supabase.auth.signInWithOtp({
-    email: customerEmail,
-    options: { shouldCreateUser: true },
-  });
+  // Generate custom OTP for buyer email verification — no Supabase auth session created
+  const otpCode = String(Math.floor(100000 + Math.random() * 900000));
+  const otpHash = crypto.createHash("sha256").update(otpCode).digest("hex");
+  const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 min
+
+  const { data: insertedOrder } = await supabase
+    .from(TABLES.ORDERS)
+    .select("id")
+    .eq("stripe_payment_id", paymentIntentId)
+    .single();
+
+  if (insertedOrder) {
+    await supabase
+      .from(TABLES.ORDERS)
+      .update({ otp_hash: otpHash, otp_expires_at: otpExpiresAt })
+      .eq("id", insertedOrder.id);
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: customerEmail,
+      subject: `Your verification code — ${product.title}`,
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px;">
+          <h2 style="font-size:20px;font-weight:500;margin:0 0 8px;">Verify your email</h2>
+          <p style="color:#666;margin:0 0 20px;">Enter this code to access your purchase:</p>
+          <p style="font-size:36px;font-weight:700;letter-spacing:8px;margin:0 0 20px;">${otpCode}</p>
+          <p style="color:#aaa;font-size:13px;margin:0;">Expires in 15 minutes. Purchased via <a href="${appUrl}" style="color:#aaa;">unseal.link</a></p>
+        </div>
+      `,
+    });
+  }
 
   // Notify seller of the new sale
   const { data: seller } = await supabase
