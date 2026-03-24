@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import crypto from "node:crypto";
+import { render } from "@react-email/render";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { resend, FROM_EMAIL } from "@unseallink/lib/resend";
 import { log } from "@unseallink/lib/logger";
 import { TABLES } from "@unseallink/lib/db";
+import { AccessLinkEmail } from "@unseallink/emails/access-link";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
@@ -83,9 +85,9 @@ export async function POST(request: Request) {
       from: FROM_EMAIL,
       to: order.buyer_email,
       subject: `Your access link — ${order.product_title}`,
-      html: `<p>Here is your access link. It expires in 24 hours and can only be used once.</p>
-             <p><a href="${unlockUrl}">Access your purchase →</a></p>
-             <p>If you didn't request this, ignore this email.</p>`,
+      html: await render(
+        AccessLinkEmail({ unlockUrl, productTitle: order.product_title })
+      ),
     });
   }
 

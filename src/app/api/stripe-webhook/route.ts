@@ -1,12 +1,16 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import crypto from "node:crypto";
+import { render } from "@react-email/render";
 import { stripe, platformFeeCents } from "@unseallink/lib/stripe";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { resend, FROM_EMAIL } from "@unseallink/lib/resend";
 import { log } from "@unseallink/lib/logger";
 import { serializeError } from "@unseallink/lib/utils";
 import { TABLES } from "@unseallink/lib/db";
+import { OtpCodeEmail } from "@unseallink/emails/otp-code";
+import { SaleNotificationEmail } from "@unseallink/emails/sale-notification";
+import { KycCompleteEmail } from "@unseallink/emails/kyc-complete";
 
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
 
@@ -133,19 +137,11 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
       .update({ otp_hash: otpHash, otp_expires_at: otpExpiresAt })
       .eq("id", insertedOrder.id);
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
     await resend.emails.send({
       from: FROM_EMAIL,
       to: customerEmail,
       subject: `Your verification code — ${product.title}`,
-      html: `
-        <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px;">
-          <h2 style="font-size:20px;font-weight:500;margin:0 0 8px;">Verify your email</h2>
-          <p style="color:#666;margin:0 0 20px;">Enter this code to access your purchase:</p>
-          <p style="font-size:36px;font-weight:700;letter-spacing:8px;margin:0 0 20px;">${otpCode}</p>
-          <p style="color:#aaa;font-size:13px;margin:0;">Expires in 15 minutes. Purchased via <a href="${appUrl}" style="color:#aaa;">unseal.link</a></p>
-        </div>
-      `,
+      html: await render(OtpCodeEmail({ otpCode, productTitle: product.title })),
     });
   }
 
@@ -154,7 +150,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
     .from(TABLES.SELLERS)
     .select("email, name")
     .eq("id", product.seller_id)
-    .single();
+    .maybeSingle();
 
   if (seller?.email) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
@@ -162,17 +158,15 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
       from: FROM_EMAIL,
       to: seller.email,
       subject: `New sale — ${product.title}`,
-      html: `
-        <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px;">
-          <h2 style="font-size:20px;font-weight:500;margin:0 0 8px;">You just made a sale 🎉</h2>
-          <p style="font-size:16px;margin:0 0 4px;"><strong>${product.title}</strong></p>
-          <p style="font-size:24px;font-weight:500;margin:0 0 20px;">$${pricePaid.toFixed(2)}</p>
-          <a href="${appUrl}/dashboard" style="display:inline-block;background:#111;color:#fff;padding:12px 24px;border-radius:100px;text-decoration:none;font-weight:500;">
-            View dashboard →
-          </a>
-          <p style="color:#aaa;font-size:12px;margin-top:24px;">unseal.link · Platform fee: $${platformFee.toFixed(2)} (4.5%)</p>
-        </div>
-      `,
+      html: await render(
+        SaleNotificationEmail({
+          sellerName: seller.name ?? "",
+          productTitle: product.title,
+          pricePaid,
+          platformFee,
+          dashboardUrl: `${appUrl}/dashboard`,
+        })
+      ),
     });
   }
 }
@@ -200,11 +194,12 @@ async function handleAccountUpdated(account: Stripe.Account) {
   if (payoutsJustEnabled) {
     const { data: updated } = await supabase.from(TABLES.SELLERS).select("email").eq("id", seller.id).single();
     if (updated?.email) {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
       await resend.emails.send({
         from: FROM_EMAIL,
         to: updated.email,
         subject: "You can now withdraw your earnings",
-        html: "<p>Identity verification is complete. You can now withdraw your earnings from the dashboard.</p>",
+        html: await render(KycCompleteEmail({ dashboardUrl: appUrl })),
       });
     }
   }
