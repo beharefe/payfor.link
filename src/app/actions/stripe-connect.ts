@@ -7,23 +7,29 @@ import {
 } from "@unseallink/lib/stripe-connect";
 
 export async function initiateStripeConnect(_formData?: FormData): Promise<void> {
-  let url: string;
+  let url: string | undefined;
+  let errorMsg: string | undefined;
   try {
     url = await getStripeConnectAccountLinkUrl();
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Failed to connect Stripe";
-    redirect(`/dashboard?error=${encodeURIComponent(msg)}`);
+    errorMsg = err instanceof Error ? err.message : "Failed to connect Stripe";
   }
-  redirect(url);
+  if (errorMsg || !url) {
+    redirect(`/dashboard?error=${encodeURIComponent(errorMsg ?? "Failed to connect Stripe")}`);
+  }
+  redirect(url!);
 }
 
 export async function requestWithdraw(_formData?: FormData): Promise<void> {
-  let url: string | null;
+  let url: string | null | undefined;
+  let errorMsg: string | undefined;
   try {
     url = await getStripeWithdrawUrl();
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Failed to start withdraw";
-    redirect(`/dashboard?error=${encodeURIComponent(msg)}`);
+    errorMsg = err instanceof Error ? err.message : "Failed to start withdraw";
+  }
+  if (errorMsg) {
+    redirect(`/dashboard?error=${encodeURIComponent(errorMsg)}`);
   }
   redirect(url ?? "/dashboard");
 }
