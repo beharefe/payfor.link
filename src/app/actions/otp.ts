@@ -131,7 +131,13 @@ export async function resendOtp(orderId: string): Promise<ActionResult> {
   });
 
   if (emailError) {
-    log.error("resendOtp: email send failed", { order_id: orderId, error: String(emailError) });
+    log.error("resendOtp: email send failed", {
+      order_id: orderId,
+      error_name: (emailError as { name?: string }).name,
+      error_message: (emailError as { message?: string }).message,
+      error_status: (emailError as { statusCode?: number }).statusCode,
+      error_raw: JSON.stringify(emailError),
+    });
     return { error: "Failed to send code. Please try again." };
   }
 
