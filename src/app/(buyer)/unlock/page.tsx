@@ -91,7 +91,7 @@ export default async function UnlockPage({ searchParams }: Props) {
       .single();
 
     if (!t || t.used_at || new Date(t.expires_at) < new Date()) {
-      redirect("/orders");
+      redirect(`/unlock?token=${token}`);
     }
 
     // Mark used only if still unused (race-condition guard)
@@ -103,7 +103,7 @@ export default async function UnlockPage({ searchParams }: Props) {
       .select("id");
 
     // If 0 rows updated, another request already consumed the token
-    if (!consumed || consumed.length === 0) redirect("/orders");
+    if (!consumed || consumed.length === 0) redirect(`/unlock?token=${token}`);
 
     const { data: o } = await svc
       .from(TABLES.ORDERS)
@@ -111,7 +111,7 @@ export default async function UnlockPage({ searchParams }: Props) {
       .eq("id", t.order_id)
       .single();
 
-    if (!o || o.status === "refunded") redirect("/orders");
+    if (!o || o.status === "refunded") redirect(`/unlock?token=${token}`);
     redirect(o.delivery_url);
   }
 
