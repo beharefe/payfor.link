@@ -1,4 +1,4 @@
-import { createClient, createServiceClient } from "@unseallink/lib/supabase/server";
+import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -13,27 +13,29 @@ type Props = { params: Promise<{ order_id: string }> };
 export default async function OrderPage({ params }: Props) {
   const { order_id } = await params;
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) redirect("/auth");
-
   const service = createServiceClient();
   const { data: order } = await service
     .from(TABLES.ORDERS)
-    .select("id, buyer_email, product_title, price_paid, currency, created_at, status, seller_id")
+    .select("id, buyer_email, buyer_email_verified, product_title, price_paid, currency, created_at, status, seller_id")
     .eq("id", order_id)
     .single();
 
-  if (!order || order.buyer_email !== user.email) {
+  if (!order) {
     return (
       <main style={{ padding: "2rem", textAlign: "center" }}>
         <h1>Order not found</h1>
         <p>
           <Link href="/orders">Back to your orders</Link>
         </p>
+      </main>
+    );
+  }
+
+  if (!order.buyer_email_verified) {
+    return (
+      <main style={{ padding: "2rem", textAlign: "center" }}>
+        <h1>Email not verified</h1>
+        <p>Check your inbox and enter the 6-digit code to access your order.</p>
       </main>
     );
   }
