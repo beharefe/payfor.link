@@ -1,18 +1,9 @@
 "use client";
 
 import { updateProductAction } from "@unseallink/app/actions/product";
-import type { ProductType } from "@unseallink/types/database";
 import { useTransition, useRef, useState } from "react";
 
 const PRICE_PRESETS = [9.99, 19, 29, 49];
-const PRODUCT_TYPES: { value: ProductType; label: string }[] = [
-  { value: "template", label: "Template" },
-  { value: "file", label: "File" },
-  { value: "access", label: "Access" },
-  { value: "service", label: "Service" },
-  { value: "dataset", label: "Dataset" },
-  { value: "other", label: "Other" },
-];
 
 const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -42,7 +33,6 @@ type Props = {
     description: string;
     destination_url: string;
     price: number;
-    product_type: ProductType | null;
     preview_image_url: string | null;
   };
 };
@@ -239,23 +229,6 @@ export function EditLinkForm({ id, defaultValues }: Props) {
         {imageError && (
           <p style={{ color: "red", fontSize: "0.8125rem", marginTop: "0.25rem" }}>{imageError}</p>
         )}
-      </div>
-
-      <div>
-        <label htmlFor="product_type">Product type</label>
-        <select
-          id="product_type"
-          name="product_type"
-          defaultValue={defaultValues.product_type ?? ""}
-          style={{ display: "block", width: "100%", padding: "0.5rem", marginTop: "0.25rem" }}
-        >
-          <option value="">Auto-detect</option>
-          {PRODUCT_TYPES.map(({ value, label }) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
       </div>
 
       {error && <p style={{ color: "red" }}>{error}</p>}

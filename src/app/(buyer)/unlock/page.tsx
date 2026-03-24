@@ -4,6 +4,7 @@ import crypto from "node:crypto";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { TABLES } from "@unseallink/lib/db";
+import { getPlatformLabel } from "@unseallink/lib/product-utils";
 
 export const metadata: Metadata = {
   robots: { index: false },
@@ -47,13 +48,15 @@ export default async function UnlockPage({ searchParams }: Props) {
 
   const { data: order } = await supabase
     .from(TABLES.ORDERS)
-    .select("product_title, status")
+    .select("product_title, delivery_url, status")
     .eq("id", accessToken.order_id)
     .single();
 
   if (!order || order.status === "refunded") {
     return <UnlockError title="Access denied" body="This order is no longer valid." />;
   }
+
+  const ctaLabel = getPlatformLabel(order.delivery_url);
 
   // Token is valid — show confirmation screen.
   // Do NOT consume it here on GET. Email scanners pre-fetch links and would burn the token.
@@ -125,7 +128,7 @@ export default async function UnlockPage({ searchParams }: Props) {
             cursor: "pointer",
           }}
         >
-          Access content →
+          {ctaLabel} →
         </button>
       </form>
 

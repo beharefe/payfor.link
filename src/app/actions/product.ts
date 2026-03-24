@@ -7,7 +7,6 @@ import { createClient } from "@unseallink/lib/supabase/server";
 import { log } from "@unseallink/lib/logger";
 import { checkUrlSafe } from "@unseallink/lib/safe-browsing";
 import { detectProductType, isValidUrl } from "@unseallink/lib/product-utils";
-import type { ProductType } from "@unseallink/types/database";
 import { TABLES } from "@unseallink/lib/db";
 
 const MIN_PRICE = 9.99;
@@ -17,7 +16,6 @@ type CreateProductInput = {
   description: string;
   destination_url: string;
   price: number;
-  product_type?: ProductType;
   preview_image_url?: string;
 };
 
@@ -47,8 +45,7 @@ export async function createProduct(
   const { safe } = await checkUrlSafe(input.destination_url);
   if (!safe) return { error: "This link was flagged. Use a different URL." };
 
-  const detectedType = detectProductType(input.destination_url);
-  const productType = input.product_type ?? detectedType ?? null;
+  const productType = detectProductType(input.destination_url);
 
   // Auto-generate slug: title + 4-char random hex suffix → globally unique + readable
   const baseSlug = slugify(input.title, { lower: true, strict: true });
@@ -120,7 +117,6 @@ export async function createProductAction(
     description: formData.get("description")?.toString() ?? "",
     destination_url: formData.get("destination_url")?.toString() ?? "",
     price: Number.isFinite(price) ? price : MIN_PRICE,
-    product_type: (formData.get("product_type")?.toString() || undefined) as ProductType | undefined,
     preview_image_url: formData.get("preview_image_url")?.toString() || undefined,
   });
   if ("error" in result) return result.error;
@@ -133,7 +129,6 @@ type UpdateProductInput = {
   description: string;
   destination_url: string;
   price: number;
-  product_type?: ProductType;
   preview_image_url?: string;
 };
 
@@ -167,8 +162,7 @@ export async function updateProduct(input: UpdateProductInput): Promise<ActionRe
   const { safe } = await checkUrlSafe(input.destination_url);
   if (!safe) return { error: "This link was flagged. Use a different URL." };
 
-  const detectedType = detectProductType(input.destination_url);
-  const productType = input.product_type ?? detectedType ?? null;
+  const productType = detectProductType(input.destination_url);
 
   const { error } = await supabase
     .from(TABLES.PRODUCTS)
@@ -202,7 +196,6 @@ export async function updateProductAction(
     description: formData.get("description")?.toString() ?? "",
     destination_url: formData.get("destination_url")?.toString() ?? "",
     price: Number.isFinite(price) ? price : MIN_PRICE,
-    product_type: (formData.get("product_type")?.toString() || undefined) as ProductType | undefined,
     preview_image_url: formData.get("preview_image_url")?.toString() || undefined,
   });
   if ("error" in result) return result.error;
