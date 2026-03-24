@@ -1,7 +1,9 @@
 import { createServiceClient } from "@unseallink/lib/supabase/server";
+import { cookies } from "next/headers";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { TABLES } from "@unseallink/lib/db";
+import { getVerifiedEmail } from "@unseallink/lib/buyer-session";
 import { SuccessPageClient } from "@unseallink/app/(buyer)/pay/[slug]/success/success-page-client";
 
 export const metadata: Metadata = {
@@ -45,6 +47,35 @@ export default async function OrderPage({ params }: Props) {
             ← All orders
           </Link>
         </p>
+      </main>
+    );
+  }
+
+  // For verified orders, confirm the visitor owns this order via session cookie.
+  const cookieStore = await cookies();
+  const verifiedEmail = getVerifiedEmail(cookieStore.get("orders_session")?.value);
+  if (!verifiedEmail || verifiedEmail !== order.buyer_email) {
+    return (
+      <main style={{ padding: "2rem", maxWidth: "28rem", margin: "0 auto", textAlign: "center" }}>
+        <p style={{ fontSize: "2rem", margin: "0 0 0.5rem" }}>🔒</p>
+        <h1 style={{ fontSize: "1.4rem", fontWeight: 500, margin: "0 0 0.5rem" }}>Session expired</h1>
+        <p style={{ color: "#6B6B6B", margin: "0 0 1.5rem" }}>
+          Please verify your email to view this order.
+        </p>
+        <Link
+          href="/orders"
+          style={{
+            display: "inline-block",
+            padding: "0.625rem 1.25rem",
+            background: "#111111",
+            color: "#ffffff",
+            textDecoration: "none",
+            borderRadius: "100px",
+            fontWeight: 500,
+          }}
+        >
+          Verify email
+        </Link>
       </main>
     );
   }

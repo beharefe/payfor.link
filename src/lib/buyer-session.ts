@@ -9,7 +9,11 @@
 import crypto from "node:crypto";
 import { cookies } from "next/headers";
 
-const SIGNING_KEY = process.env.STRIPE_SECRET_KEY ?? "dev-secret";
+const SIGNING_KEY =
+  process.env.STRIPE_SECRET_KEY ??
+  // Fallback to a random key per process so dev environments still work,
+  // but the key is never a guessable hardcoded constant.
+  crypto.randomBytes(32).toString("hex");
 const SESSION_TTL_MS = 60 * 60 * 1000; // 1 hour
 const COOKIE_NAME = "orders_session";
 

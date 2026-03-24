@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
+import { getVerifiedEmail } from "@unseallink/lib/buyer-session";
 import { TABLES } from "@unseallink/lib/db";
 import { isValidUrl } from "@unseallink/lib/product-utils";
 
@@ -13,7 +15,7 @@ export async function GET(
   const service = createServiceClient();
   const { data: order } = await service
     .from(TABLES.ORDERS)
-    .select("buyer_email_verified, delivery_url, status")
+    .select("buyer_email, buyer_email_verified, delivery_url, status")
     .eq("id", order_id)
     .single();
 
@@ -27,6 +29,14 @@ export async function GET(
 
   if (order.status === "refunded") {
     return NextResponse.redirect(new URL(`/orders/${order_id}`, appUrl));
+  }
+
+  // Verify the requester owns this order via their session cookie.
+  const cookieStore = await cookies();
+  const verifiedEmail = getVerifiedEmail(cookieStore.get("orders_session")?.value);
+  if (!verifiedEmail || verifiedEmail !== order.buyer_email) {
+    // Session missing or expired — send buyer to re-authenticate.
+    return NextResponse.redirect(new URL(`/orders?next=/orders/${order_id}`, appUrl));
   }
 
   // Re-validate delivery_url at redirect time — defense against compromised DB records
