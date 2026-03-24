@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@unseallink/lib/supabase/server";
 
-const BUCKET = "avatars";
+const BUCKET = "preview-images";
 const MAX_SIZE = 2 * 1024 * 1024; // 2MB
 const ALLOWED_MIME = new Set(["image/jpeg", "image/png", "image/webp"]);
 const EXT_MAP: Record<string, string> = {
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
   const timestamp = Date.now();
   const rand = crypto.getRandomValues(new Uint32Array(1))[0].toString(36);
   // Use fixed path per user so old avatars get replaced
-  const path = `${user.id}/avatar-${timestamp}-${rand}.${ext}`;
+  const path = `avatars/${user.id}/avatar-${timestamp}-${rand}.${ext}`;
 
   const serviceClient = createServiceClient();
   const { error: uploadError } = await serviceClient.storage
