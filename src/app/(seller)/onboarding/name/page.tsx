@@ -1,7 +1,7 @@
-import { createClient } from "@unseallink/lib/supabase/server";
-import { redirect } from "next/navigation";
 import { saveOnboardingName } from "@unseallink/app/actions/onboarding";
 import { TABLES } from "@unseallink/lib/db";
+import { createClient } from "@unseallink/lib/supabase/server";
+import { redirect } from "next/navigation";
 
 export default async function OnboardingNamePage() {
   const supabase = await createClient();
@@ -24,14 +24,17 @@ export default async function OnboardingNamePage() {
         What should buyers call you?
       </h1>
       <p style={{ color: "#6B6B6B", margin: "0 0 1.5rem" }}>
-        This is shown on your paywall pages as "by [name]". You can change it later in settings.
+        This is shown on your paywall pages as "by [name]". You can change it
+        later in settings.
       </p>
-      <form action={saveOnboardingName} style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+      <form
+        action={saveOnboardingName}
+        style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}
+      >
         <input
           name="name"
           type="text"
           required
-          autoFocus
           maxLength={60}
           placeholder="Your name or brand"
           style={{

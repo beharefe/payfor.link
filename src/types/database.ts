@@ -13,11 +13,7 @@ export type ProductType =
   | "dataset"
   | "other";
 export type ReportReason = "scam" | "malware" | "copyright" | "other";
-export type ReportStatus =
-  | "pending"
-  | "reviewed"
-  | "actioned"
-  | "dismissed";
+export type ReportStatus = "pending" | "reviewed" | "actioned" | "dismissed";
 
 export interface Seller {
   id: string;

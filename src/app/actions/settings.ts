@@ -1,8 +1,8 @@
 "use server";
 
-import { createClient } from "@unseallink/lib/supabase/server";
 import { TABLES } from "@unseallink/lib/db";
 import { isValidUrl } from "@unseallink/lib/product-utils";
+import { createClient } from "@unseallink/lib/supabase/server";
 
 export type SettingsResult = { error: string } | { ok: true };
 
@@ -26,7 +26,9 @@ export async function updateName(formData: FormData): Promise<SettingsResult> {
   return { ok: true };
 }
 
-export async function updateProfile(formData: FormData): Promise<SettingsResult> {
+export async function updateProfile(
+  formData: FormData,
+): Promise<SettingsResult> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -39,8 +41,10 @@ export async function updateProfile(formData: FormData): Promise<SettingsResult>
 
   if (!name) return { error: "Name is required" };
   if (name.length > 60) return { error: "Name must be 60 characters or less" };
-  if (bio && bio.length > 300) return { error: "Bio must be 300 characters or less" };
-  if (avatar_url && !isValidUrl(avatar_url)) return { error: "Invalid avatar URL" };
+  if (bio && bio.length > 300)
+    return { error: "Bio must be 300 characters or less" };
+  if (avatar_url && !isValidUrl(avatar_url))
+    return { error: "Invalid avatar URL" };
 
   const { error } = await supabase
     .from(TABLES.SELLERS)

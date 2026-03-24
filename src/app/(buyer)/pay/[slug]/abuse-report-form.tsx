@@ -31,7 +31,14 @@ export function AbuseReportForm({ productId }: { productId: string }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        style={{ background: "none", border: "none", color: "#AAAAAA", fontSize: "12px", cursor: "pointer", padding: 0 }}
+        style={{
+          background: "none",
+          border: "none",
+          color: "#AAAAAA",
+          fontSize: "12px",
+          cursor: "pointer",
+          padding: 0,
+        }}
       >
         Report this link
       </button>
@@ -39,7 +46,11 @@ export function AbuseReportForm({ productId }: { productId: string }) {
   }
 
   if (state && "ok" in state) {
-    return <p style={{ color: "#6B6B6B", fontSize: "13px" }}>Report submitted. Thank you.</p>;
+    return (
+      <p style={{ color: "#6B6B6B", fontSize: "13px" }}>
+        Report submitted. Thank you.
+      </p>
+    );
   }
 
   return (
@@ -48,7 +59,14 @@ export function AbuseReportForm({ productId }: { productId: string }) {
       <select
         name="reason"
         required
-        style={{ display: "block", width: "100%", padding: "8px", marginBottom: "8px", border: "1px solid #E5E5E5", borderRadius: "8px" }}
+        style={{
+          display: "block",
+          width: "100%",
+          padding: "8px",
+          marginBottom: "8px",
+          border: "1px solid #E5E5E5",
+          borderRadius: "8px",
+        }}
       >
         <option value="">Select a reason</option>
         <option value="scam">Scam or fraud</option>
@@ -61,22 +79,48 @@ export function AbuseReportForm({ productId }: { productId: string }) {
         placeholder="Optional details"
         maxLength={500}
         rows={3}
-        style={{ display: "block", width: "100%", padding: "8px", marginBottom: "8px", border: "1px solid #E5E5E5", borderRadius: "8px", resize: "vertical", boxSizing: "border-box" }}
+        style={{
+          display: "block",
+          width: "100%",
+          padding: "8px",
+          marginBottom: "8px",
+          border: "1px solid #E5E5E5",
+          borderRadius: "8px",
+          resize: "vertical",
+          boxSizing: "border-box",
+        }}
       />
       {state && "error" in state && (
-        <p style={{ color: "#C0392B", margin: "0 0 8px", fontSize: "13px" }}>{state.error}</p>
+        <p style={{ color: "#C0392B", margin: "0 0 8px", fontSize: "13px" }}>
+          {state.error}
+        </p>
       )}
       <div style={{ display: "flex", gap: "8px" }}>
         <button
           type="submit"
-          style={{ padding: "8px 16px", background: "#111", color: "#fff", border: "none", borderRadius: "100px", cursor: "pointer", fontSize: "13px" }}
+          style={{
+            padding: "8px 16px",
+            background: "#111",
+            color: "#fff",
+            border: "none",
+            borderRadius: "100px",
+            cursor: "pointer",
+            fontSize: "13px",
+          }}
         >
           Submit report
         </button>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          style={{ padding: "8px 16px", background: "none", border: "1px solid #E5E5E5", borderRadius: "100px", cursor: "pointer", fontSize: "13px" }}
+          style={{
+            padding: "8px 16px",
+            background: "none",
+            border: "1px solid #E5E5E5",
+            borderRadius: "100px",
+            cursor: "pointer",
+            fontSize: "13px",
+          }}
         >
           Cancel
         </button>

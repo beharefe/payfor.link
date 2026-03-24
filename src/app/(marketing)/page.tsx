@@ -36,10 +36,18 @@ export default function HomePage() {
           maxWidth: "26rem",
         }}
       >
-        Paste a link, set a price, share your paywall. Buyers pay once and get instant access.
+        Paste a link, set a price, share your paywall. Buyers pay once and get
+        instant access.
       </p>
 
-      <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", justifyContent: "center" }}>
+      <div
+        style={{
+          display: "flex",
+          gap: "0.75rem",
+          flexWrap: "wrap",
+          justifyContent: "center",
+        }}
+      >
         <Link
           href="/auth"
           style={{

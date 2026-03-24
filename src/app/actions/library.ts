@@ -1,14 +1,19 @@
 "use server";
 
 import crypto from "node:crypto";
-import { createClient, createServiceClient } from "@unseallink/lib/supabase/server";
-import { resend, FROM_EMAIL } from "@unseallink/lib/resend";
-import { log } from "@unseallink/lib/logger";
 import { TABLES } from "@unseallink/lib/db";
+import { log } from "@unseallink/lib/logger";
+import { FROM_EMAIL, resend } from "@unseallink/lib/resend";
+import {
+  createClient,
+  createServiceClient,
+} from "@unseallink/lib/supabase/server";
 
 export type LibraryActionResult = { error: string } | { ok: true };
 
-export async function sendLibraryOtp(formData: FormData): Promise<LibraryActionResult> {
+export async function sendLibraryOtp(
+  formData: FormData,
+): Promise<LibraryActionResult> {
   const email = formData.get("email")?.toString()?.trim();
   if (!email) return { error: "Email is required" };
 
@@ -23,13 +28,19 @@ export async function sendLibraryOtp(formData: FormData): Promise<LibraryActionR
   return { ok: true };
 }
 
-export async function verifyLibraryOtp(formData: FormData): Promise<LibraryActionResult> {
+export async function verifyLibraryOtp(
+  formData: FormData,
+): Promise<LibraryActionResult> {
   const email = formData.get("email")?.toString()?.trim();
   const code = formData.get("code")?.toString()?.trim();
   if (!email || !code) return { error: "Email and code are required" };
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.verifyOtp({ email, token: code, type: "email" });
+  const { error } = await supabase.auth.verifyOtp({
+    email,
+    token: code,
+    type: "email",
+  });
 
   if (error) {
     const msg = error.message?.toLowerCase().includes("expired")
@@ -41,7 +52,9 @@ export async function verifyLibraryOtp(formData: FormData): Promise<LibraryActio
   return { ok: true };
 }
 
-export async function resendAccess(orderId: string): Promise<LibraryActionResult> {
+export async function resendAccess(
+  orderId: string,
+): Promise<LibraryActionResult> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -72,11 +85,13 @@ export async function resendAccess(orderId: string): Promise<LibraryActionResult
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   const unlockUrl = `${appUrl}/unlock?token=${rawToken}`;
 
-  const { error: insertError } = await service.from(TABLES.ACCESS_TOKENS).insert({
-    order_id: order.id,
-    token_hash: tokenHash,
-    expires_at: expiresAt,
-  });
+  const { error: insertError } = await service
+    .from(TABLES.ACCESS_TOKENS)
+    .insert({
+      order_id: order.id,
+      token_hash: tokenHash,
+      expires_at: expiresAt,
+    });
 
   if (insertError) {
     log.error("resendAccess: insert token failed", { order_id: orderId });

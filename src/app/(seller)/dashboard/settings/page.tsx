@@ -1,8 +1,8 @@
-import { createClient } from "@unseallink/lib/supabase/server";
-import { redirect } from "next/navigation";
-import Link from "next/link";
-import { SettingsForm } from "./settings-form";
 import { TABLES } from "@unseallink/lib/db";
+import { createClient } from "@unseallink/lib/supabase/server";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { SettingsForm } from "./settings-form";
 
 export default async function SettingsPage() {
   const supabase = await createClient();

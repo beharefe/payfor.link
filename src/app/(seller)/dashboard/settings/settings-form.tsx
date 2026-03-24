@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState, useState, useTransition } from "react";
 import { updateProfile } from "@unseallink/app/actions/settings";
+import { useActionState, useState, useTransition } from "react";
 
 const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -12,11 +12,17 @@ type Props = {
   currentAvatarUrl: string | null;
 };
 
-export function SettingsForm({ currentName, currentBio, currentAvatarUrl }: Props) {
+export function SettingsForm({
+  currentName,
+  currentBio,
+  currentAvatarUrl,
+}: Props) {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(currentAvatarUrl);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(
+    currentAvatarUrl,
+  );
   const [avatarError, setAvatarError] = useState<string | null>(null);
-  const [uploadPending, startUpload] = useTransition();
+  const [uploadPending, _startUpload] = useTransition();
 
   const [state, formAction, isPending] = useActionState(
     async (_prev: string | null, formData: FormData) => {
@@ -101,7 +107,9 @@ export function SettingsForm({ currentName, currentBio, currentAvatarUrl }: Prop
     <form action={formAction}>
       {/* Display name */}
       <div style={{ marginBottom: "1.5rem" }}>
-        <label htmlFor="name" style={labelStyle}>Display name</label>
+        <label htmlFor="name" style={labelStyle}>
+          Display name
+        </label>
         <p style={hintStyle}>Shown on your paywall pages as "by [name]"</p>
         <input
           id="name"
@@ -116,8 +124,12 @@ export function SettingsForm({ currentName, currentBio, currentAvatarUrl }: Prop
 
       {/* Bio */}
       <div style={{ marginBottom: "1.5rem" }}>
-        <label htmlFor="bio" style={labelStyle}>Short bio</label>
-        <p style={hintStyle}>One or two sentences about you or your work. Max 300 characters.</p>
+        <label htmlFor="bio" style={labelStyle}>
+          Short bio
+        </label>
+        <p style={hintStyle}>
+          One or two sentences about you or your work. Max 300 characters.
+        </p>
         <textarea
           id="bio"
           name="bio"
@@ -131,8 +143,17 @@ export function SettingsForm({ currentName, currentBio, currentAvatarUrl }: Prop
       {/* Avatar */}
       <div style={{ marginBottom: "1.75rem" }}>
         <label style={labelStyle}>Avatar</label>
-        <p style={hintStyle}>Square image recommended. Max 2MB — JPG, PNG, or WebP.</p>
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "0.5rem" }}>
+        <p style={hintStyle}>
+          Square image recommended. Max 2MB — JPG, PNG, or WebP.
+        </p>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "1rem",
+            marginBottom: "0.5rem",
+          }}
+        >
           {avatarPreview && (
             <img
               src={avatarPreview}
@@ -153,7 +174,15 @@ export function SettingsForm({ currentName, currentBio, currentAvatarUrl }: Prop
           />
         </div>
         {avatarError && (
-          <p style={{ color: "#C0392B", fontSize: "0.875rem", margin: "0.25rem 0 0" }}>{avatarError}</p>
+          <p
+            style={{
+              color: "#C0392B",
+              fontSize: "0.875rem",
+              margin: "0.25rem 0 0",
+            }}
+          >
+            {avatarError}
+          </p>
         )}
       </div>
 
@@ -174,10 +203,18 @@ export function SettingsForm({ currentName, currentBio, currentAvatarUrl }: Prop
       </button>
 
       {state === "saved" && (
-        <span style={{ marginLeft: "1rem", color: "#1A7A4A", fontSize: "0.9rem" }}>Saved ✓</span>
+        <span
+          style={{ marginLeft: "1rem", color: "#1A7A4A", fontSize: "0.9rem" }}
+        >
+          Saved ✓
+        </span>
       )}
       {state && state !== "saved" && (
-        <span style={{ marginLeft: "1rem", color: "#C0392B", fontSize: "0.9rem" }}>{state}</span>
+        <span
+          style={{ marginLeft: "1rem", color: "#C0392B", fontSize: "0.9rem" }}
+        >
+          {state}
+        </span>
       )}
     </form>
   );

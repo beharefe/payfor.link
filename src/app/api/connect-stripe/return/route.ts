@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
-import { createClient } from "@unseallink/lib/supabase/server";
-import { stripe } from "@unseallink/lib/stripe";
-import { log } from "@unseallink/lib/logger";
-import { serializeError } from "@unseallink/lib/utils";
 import { TABLES } from "@unseallink/lib/db";
+import { log } from "@unseallink/lib/logger";
+import { stripe } from "@unseallink/lib/stripe";
+import { createClient } from "@unseallink/lib/supabase/server";
+import { serializeError } from "@unseallink/lib/utils";
+import { NextResponse } from "next/server";
 
 export async function GET() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
@@ -45,7 +45,10 @@ export async function GET() {
       .eq("seller_id", user.id)
       .eq("status", "draft");
   } catch (err) {
-    log.error("connect-stripe return failed", { user_id: user.id, error: serializeError(err) });
+    log.error("connect-stripe return failed", {
+      user_id: user.id,
+      error: serializeError(err),
+    });
   }
 
   return NextResponse.redirect(new URL("/dashboard", appUrl));

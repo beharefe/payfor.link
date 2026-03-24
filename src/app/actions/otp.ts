@@ -1,13 +1,13 @@
 "use server";
 
 import crypto from "node:crypto";
-import { redirect } from "next/navigation";
-import { createServiceClient } from "@unseallink/lib/supabase/server";
-import { resend, FROM_EMAIL } from "@unseallink/lib/resend";
-import { log } from "@unseallink/lib/logger";
-import { serializeError } from "@unseallink/lib/utils";
-import { TABLES } from "@unseallink/lib/db";
 import { setOrdersSession } from "@unseallink/lib/buyer-session";
+import { TABLES } from "@unseallink/lib/db";
+import { log } from "@unseallink/lib/logger";
+import { FROM_EMAIL, resend } from "@unseallink/lib/resend";
+import { createServiceClient } from "@unseallink/lib/supabase/server";
+import { serializeError } from "@unseallink/lib/utils";
+import { redirect } from "next/navigation";
 
 type ActionResult = { success: true } | { error: string };
 
@@ -36,14 +36,21 @@ export async function verifyOtp(
     return { error: "Code expired. Request a new one." };
   }
 
-  const inputHash = crypto.createHash("sha256").update(code.trim()).digest("hex");
+  const inputHash = crypto
+    .createHash("sha256")
+    .update(code.trim())
+    .digest("hex");
   if (inputHash !== order.otp_hash) {
     return { error: "Invalid code. Check your email and try again." };
   }
 
   await supabase
     .from(TABLES.ORDERS)
-    .update({ buyer_email_verified: true, otp_hash: null, otp_expires_at: null })
+    .update({
+      buyer_email_verified: true,
+      otp_hash: null,
+      otp_expires_at: null,
+    })
     .eq("id", orderId);
 
   // Grant orders session so buyer can view all their orders without re-verifying
@@ -56,14 +63,19 @@ export async function verifyOtp(
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
   const unlockUrl = `${appUrl}/unlock?token=${rawToken}`;
 
-  const { error: tokenError } = await supabase.from(TABLES.ACCESS_TOKENS).insert({
-    order_id: orderId,
-    token_hash: tokenHash,
-    expires_at: expiresAt,
-  });
+  const { error: tokenError } = await supabase
+    .from(TABLES.ACCESS_TOKENS)
+    .insert({
+      order_id: orderId,
+      token_hash: tokenHash,
+      expires_at: expiresAt,
+    });
 
   if (tokenError) {
-    log.error("verifyOtp: insert access_token failed", { order_id: orderId, error: tokenError.message });
+    log.error("verifyOtp: insert access_token failed", {
+      order_id: orderId,
+      error: tokenError.message,
+    });
   } else {
     await resend.emails.send({
       from: FROM_EMAIL,
@@ -116,7 +128,10 @@ export async function resendOtp(orderId: string): Promise<ActionResult> {
     .eq("id", order.id);
 
   if (updateError) {
-    log.error("resendOtp: update failed", { order_id: orderId, error: updateError.message });
+    log.error("resendOtp: update failed", {
+      order_id: orderId,
+      error: updateError.message,
+    });
     return { error: "Failed to send code. Please try again." };
   }
 
@@ -136,7 +151,10 @@ export async function resendOtp(orderId: string): Promise<ActionResult> {
   });
 
   if (emailError) {
-    log.error("resendOtp: email send failed", { order_id: orderId, error: serializeError(emailError) });
+    log.error("resendOtp: email send failed", {
+      order_id: orderId,
+      error: serializeError(emailError),
+    });
     return { error: "Failed to send code. Please try again." };
   }
 

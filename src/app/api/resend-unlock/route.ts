@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { render } from "@react-email/render";
-import { createServiceClient } from "@unseallink/lib/supabase/server";
-import { resend, FROM_EMAIL } from "@unseallink/lib/resend";
-import { log } from "@unseallink/lib/logger";
-import { TABLES } from "@unseallink/lib/db";
 import { AccessLinkEmail } from "@unseallink/emails/access-link";
+import { TABLES } from "@unseallink/lib/db";
+import { log } from "@unseallink/lib/logger";
+import { FROM_EMAIL, resend } from "@unseallink/lib/resend";
+import { createServiceClient } from "@unseallink/lib/supabase/server";
+import { NextResponse } from "next/server";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
@@ -51,7 +51,10 @@ export async function POST(request: Request) {
     .eq("status", "paid");
 
   if (!orders?.length) {
-    return NextResponse.json({ ok: true, message: "No orders found for this email." });
+    return NextResponse.json({
+      ok: true,
+      message: "No orders found for this email.",
+    });
   }
 
   for (const order of orders) {
@@ -63,14 +66,19 @@ export async function POST(request: Request) {
       .is("used_at", null);
 
     const rawToken = crypto.randomBytes(32).toString("hex");
-    const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+    const tokenHash = crypto
+      .createHash("sha256")
+      .update(rawToken)
+      .digest("hex");
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
-    const { error: insertError } = await supabase.from(TABLES.ACCESS_TOKENS).insert({
-      order_id: order.id,
-      token_hash: tokenHash,
-      expires_at: expiresAt,
-    });
+    const { error: insertError } = await supabase
+      .from(TABLES.ACCESS_TOKENS)
+      .insert({
+        order_id: order.id,
+        token_hash: tokenHash,
+        expires_at: expiresAt,
+      });
 
     if (insertError) {
       log.error("resend-unlock: insert token failed", {
@@ -86,7 +94,7 @@ export async function POST(request: Request) {
       to: order.buyer_email,
       subject: `Your access link — ${order.product_title}`,
       html: await render(
-        AccessLinkEmail({ unlockUrl, productTitle: order.product_title })
+        AccessLinkEmail({ unlockUrl, productTitle: order.product_title }),
       ),
     });
   }

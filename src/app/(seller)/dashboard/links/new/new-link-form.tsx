@@ -1,7 +1,7 @@
 "use client";
 
 import { createProductAction } from "@unseallink/app/actions/product";
-import { useTransition, useRef, useState } from "react";
+import { useRef, useState, useTransition } from "react";
 
 const PRICE_PRESETS = [9.99, 19, 29, 49];
 
@@ -184,7 +184,8 @@ export function NewLinkForm() {
               key={p}
               type="button"
               onClick={() => {
-                if (priceInputRef.current) priceInputRef.current.value = String(p);
+                if (priceInputRef.current)
+                  priceInputRef.current.value = String(p);
               }}
               style={{ padding: "0.5rem 0.75rem" }}
             >
@@ -211,9 +212,15 @@ export function NewLinkForm() {
       </div>
       <div>
         <label htmlFor="preview_image">Preview image</label>
-        <p style={{ color: "#6B6B6B", fontSize: "0.8125rem", margin: "0.1rem 0 0.25rem" }}>
-          Shown on your paywall page and social shares. Recommended: 1200×630px (1.91:1).
-          Max 2MB — JPG, PNG, or WebP.
+        <p
+          style={{
+            color: "#6B6B6B",
+            fontSize: "0.8125rem",
+            margin: "0.1rem 0 0.25rem",
+          }}
+        >
+          Shown on your paywall page and social shares. Recommended: 1200×630px
+          (1.91:1). Max 2MB — JPG, PNG, or WebP.
         </p>
         <input
           id="preview_image"
@@ -237,7 +244,13 @@ export function NewLinkForm() {
           />
         )}
         {imageError && (
-          <p style={{ color: "red", fontSize: "0.8125rem", marginTop: "0.25rem" }}>
+          <p
+            style={{
+              color: "red",
+              fontSize: "0.8125rem",
+              marginTop: "0.25rem",
+            }}
+          >
             {imageError}
           </p>
         )}

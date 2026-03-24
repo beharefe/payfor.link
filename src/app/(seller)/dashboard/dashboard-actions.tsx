@@ -1,10 +1,10 @@
 "use client";
 
+import { signOut } from "@unseallink/app/actions/auth";
 import {
   initiateStripeConnect,
   requestWithdraw,
 } from "@unseallink/app/actions/stripe-connect";
-import { signOut } from "@unseallink/app/actions/auth";
 
 export function InitiateStripeConnectButton() {
   return (
@@ -25,7 +25,15 @@ export function WithdrawButton() {
 export function SignOutButton() {
   return (
     <form action={signOut}>
-      <button type="submit" style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}>
+      <button
+        type="submit"
+        style={{
+          background: "none",
+          border: "none",
+          padding: 0,
+          cursor: "pointer",
+        }}
+      >
         Sign out
       </button>
     </form>

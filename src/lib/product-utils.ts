@@ -4,18 +4,18 @@ import type { ProductType } from "@unseallink/types/database";
 // That way sellers/admins can add new platforms without a deploy, and we can
 // track which platforms are actually popular on the platform.
 const HOST_MAP: Record<string, { label: string; type: ProductType }> = {
-  "notion.so":      { label: "Open in Notion",       type: "template" },
-  "notion.site":    { label: "Open in Notion",        type: "template" },
-  "figma.com":      { label: "Open in Figma",         type: "template" },
-  "docs.google.com":{ label: "Open in Google Docs",   type: "template" },
-  "drive.google.com":{ label: "Open in Google Drive", type: "file" },
-  "sheets.google.com":{ label: "Open in Google Sheets", type: "template" },
-  "github.com":     { label: "Open on GitHub",        type: "other" },
-  "canva.com":      { label: "Open in Canva",         type: "template" },
-  "airtable.com":   { label: "Open in Airtable",      type: "dataset" },
-  "typeform.com":   { label: "Open in Typeform",      type: "other" },
-  "loom.com":       { label: "Watch on Loom",         type: "access" },
-  "gumroad.com":    { label: "Access content",        type: "other" },
+  "notion.so": { label: "Open in Notion", type: "template" },
+  "notion.site": { label: "Open in Notion", type: "template" },
+  "figma.com": { label: "Open in Figma", type: "template" },
+  "docs.google.com": { label: "Open in Google Docs", type: "template" },
+  "drive.google.com": { label: "Open in Google Drive", type: "file" },
+  "sheets.google.com": { label: "Open in Google Sheets", type: "template" },
+  "github.com": { label: "Open on GitHub", type: "other" },
+  "canva.com": { label: "Open in Canva", type: "template" },
+  "airtable.com": { label: "Open in Airtable", type: "dataset" },
+  "typeform.com": { label: "Open in Typeform", type: "other" },
+  "loom.com": { label: "Watch on Loom", type: "access" },
+  "gumroad.com": { label: "Access content", type: "other" },
 };
 
 function getHost(url: string): string | null {

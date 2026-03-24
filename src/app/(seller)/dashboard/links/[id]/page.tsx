@@ -1,10 +1,10 @@
+import { TABLES } from "@unseallink/lib/db";
 import { createClient } from "@unseallink/lib/supabase/server";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { InitiateStripeConnectButton } from "../../dashboard-actions";
 import { CopyLinkButton } from "./copy-link-button";
 import { ArchiveButton, DeleteButton, RefundButton } from "./link-actions";
-import { TABLES } from "@unseallink/lib/db";
 
 export default async function LinkDetailPage({
   params,
@@ -55,11 +55,21 @@ export default async function LinkDetailPage({
       </p>
 
       {/* Header */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem", marginBottom: "1.5rem", flexWrap: "wrap" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+          gap: "1rem",
+          marginBottom: "1.5rem",
+          flexWrap: "wrap",
+        }}
+      >
         <div>
           <h1 style={{ marginBottom: "0.25rem" }}>{link.title}</h1>
           <p style={{ color: "#6B6B6B", fontSize: "0.9rem", margin: 0 }}>
-            <StatusBadge status={link.status} /> · ${link.price.toFixed(2)} · v{link.version}
+            <StatusBadge status={link.status} /> · ${link.price.toFixed(2)} · v
+            {link.version}
           </p>
         </div>
         {canEdit && (
@@ -84,30 +94,73 @@ export default async function LinkDetailPage({
       </div>
 
       {link.description && (
-        <p style={{ color: "#6B6B6B", marginBottom: "1.5rem" }}>{link.description}</p>
+        <p style={{ color: "#6B6B6B", marginBottom: "1.5rem" }}>
+          {link.description}
+        </p>
       )}
 
       {/* Stripe connect prompt */}
       {!seller?.stripe_connected && (
-        <section style={{ marginBottom: "1.5rem", padding: "1rem", border: "1px solid #E5E5E5", borderRadius: "12px" }}>
-          <p style={{ margin: "0 0 0.75rem" }}>Connect Stripe to activate this link.</p>
+        <section
+          style={{
+            marginBottom: "1.5rem",
+            padding: "1rem",
+            border: "1px solid #E5E5E5",
+            borderRadius: "12px",
+          }}
+        >
+          <p style={{ margin: "0 0 0.75rem" }}>
+            Connect Stripe to activate this link.
+          </p>
           <InitiateStripeConnectButton />
         </section>
       )}
 
       {/* Paywall URL */}
       {!isDeleted && (
-        <section style={{ marginBottom: "2rem", padding: "1rem", background: "#F5F4EF", borderRadius: "12px" }}>
-          <label style={{ fontSize: "0.8125rem", color: "#6B6B6B", display: "block", marginBottom: "0.25rem" }}>
+        <section
+          style={{
+            marginBottom: "2rem",
+            padding: "1rem",
+            background: "#F5F4EF",
+            borderRadius: "12px",
+          }}
+        >
+          <label
+            style={{
+              fontSize: "0.8125rem",
+              color: "#6B6B6B",
+              display: "block",
+              marginBottom: "0.25rem",
+            }}
+          >
             Paywall URL
           </label>
-          <p style={{ wordBreak: "break-all", margin: "0 0 0.5rem", fontFamily: "monospace", fontSize: "0.9rem" }}>
+          <p
+            style={{
+              wordBreak: "break-all",
+              margin: "0 0 0.5rem",
+              fontFamily: "monospace",
+              fontSize: "0.9rem",
+            }}
+          >
             {paywallUrl}
           </p>
           <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
             <CopyLinkButton url={paywallUrl} />
-            <a href={paywallUrl} target="_blank" rel="noopener noreferrer"
-              style={{ padding: "0.4rem 0.75rem", fontSize: "0.875rem", border: "1px solid #E5E5E5", borderRadius: "8px", textDecoration: "none", color: "#111" }}>
+            <a
+              href={paywallUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                padding: "0.4rem 0.75rem",
+                fontSize: "0.875rem",
+                border: "1px solid #E5E5E5",
+                borderRadius: "8px",
+                textDecoration: "none",
+                color: "#111",
+              }}
+            >
               Preview ↗
             </a>
           </div>
@@ -115,14 +168,41 @@ export default async function LinkDetailPage({
       )}
 
       {/* Stats */}
-      <section style={{ display: "flex", gap: "2rem", marginBottom: "2rem", flexWrap: "wrap" }}>
+      <section
+        style={{
+          display: "flex",
+          gap: "2rem",
+          marginBottom: "2rem",
+          flexWrap: "wrap",
+        }}
+      >
         <div>
-          <p style={{ color: "#6B6B6B", fontSize: "0.8125rem", margin: "0 0 0.25rem" }}>Total sales</p>
-          <p style={{ fontWeight: 600, fontSize: "1.25rem", margin: 0 }}>{link.total_sales}</p>
+          <p
+            style={{
+              color: "#6B6B6B",
+              fontSize: "0.8125rem",
+              margin: "0 0 0.25rem",
+            }}
+          >
+            Total sales
+          </p>
+          <p style={{ fontWeight: 600, fontSize: "1.25rem", margin: 0 }}>
+            {link.total_sales}
+          </p>
         </div>
         <div>
-          <p style={{ color: "#6B6B6B", fontSize: "0.8125rem", margin: "0 0 0.25rem" }}>Revenue</p>
-          <p style={{ fontWeight: 600, fontSize: "1.25rem", margin: 0 }}>${link.total_revenue.toFixed(2)}</p>
+          <p
+            style={{
+              color: "#6B6B6B",
+              fontSize: "0.8125rem",
+              margin: "0 0 0.25rem",
+            }}
+          >
+            Revenue
+          </p>
+          <p style={{ fontWeight: 600, fontSize: "1.25rem", margin: 0 }}>
+            ${link.total_revenue.toFixed(2)}
+          </p>
         </div>
       </section>
 
@@ -133,22 +213,80 @@ export default async function LinkDetailPage({
           <p style={{ color: "#6B6B6B" }}>No sales yet.</p>
         ) : (
           <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.875rem" }}>
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                fontSize: "0.875rem",
+              }}
+            >
               <thead>
-                <tr style={{ borderBottom: "1px solid #E5E5E5", textAlign: "left" }}>
-                  <th style={{ padding: "0.5rem 0.75rem", fontWeight: 500, color: "#6B6B6B" }}>Buyer</th>
-                  <th style={{ padding: "0.5rem 0.75rem", fontWeight: 500, color: "#6B6B6B" }}>Amount</th>
-                  <th style={{ padding: "0.5rem 0.75rem", fontWeight: 500, color: "#6B6B6B" }}>Net</th>
-                  <th style={{ padding: "0.5rem 0.75rem", fontWeight: 500, color: "#6B6B6B" }}>Status</th>
-                  <th style={{ padding: "0.5rem 0.75rem", fontWeight: 500, color: "#6B6B6B" }}>Date</th>
+                <tr
+                  style={{
+                    borderBottom: "1px solid #E5E5E5",
+                    textAlign: "left",
+                  }}
+                >
+                  <th
+                    style={{
+                      padding: "0.5rem 0.75rem",
+                      fontWeight: 500,
+                      color: "#6B6B6B",
+                    }}
+                  >
+                    Buyer
+                  </th>
+                  <th
+                    style={{
+                      padding: "0.5rem 0.75rem",
+                      fontWeight: 500,
+                      color: "#6B6B6B",
+                    }}
+                  >
+                    Amount
+                  </th>
+                  <th
+                    style={{
+                      padding: "0.5rem 0.75rem",
+                      fontWeight: 500,
+                      color: "#6B6B6B",
+                    }}
+                  >
+                    Net
+                  </th>
+                  <th
+                    style={{
+                      padding: "0.5rem 0.75rem",
+                      fontWeight: 500,
+                      color: "#6B6B6B",
+                    }}
+                  >
+                    Status
+                  </th>
+                  <th
+                    style={{
+                      padding: "0.5rem 0.75rem",
+                      fontWeight: 500,
+                      color: "#6B6B6B",
+                    }}
+                  >
+                    Date
+                  </th>
                   <th style={{ padding: "0.5rem 0.75rem" }} />
                 </tr>
               </thead>
               <tbody>
                 {orders.map((order) => (
-                  <tr key={order.id} style={{ borderBottom: "1px solid #F5F4EF" }}>
-                    <td style={{ padding: "0.5rem 0.75rem" }}>{order.buyer_email}</td>
-                    <td style={{ padding: "0.5rem 0.75rem" }}>${order.price_paid.toFixed(2)}</td>
+                  <tr
+                    key={order.id}
+                    style={{ borderBottom: "1px solid #F5F4EF" }}
+                  >
+                    <td style={{ padding: "0.5rem 0.75rem" }}>
+                      {order.buyer_email}
+                    </td>
+                    <td style={{ padding: "0.5rem 0.75rem" }}>
+                      ${order.price_paid.toFixed(2)}
+                    </td>
                     <td style={{ padding: "0.5rem 0.75rem" }}>
                       ${(order.price_paid - order.platform_fee).toFixed(2)}
                     </td>
@@ -160,7 +298,10 @@ export default async function LinkDetailPage({
                     </td>
                     <td style={{ padding: "0.5rem 0.75rem" }}>
                       {order.status === "paid" && (
-                        <RefundButton orderId={order.id} buyerEmail={order.buyer_email} />
+                        <RefundButton
+                          orderId={order.id}
+                          buyerEmail={order.buyer_email}
+                        />
                       )}
                     </td>
                   </tr>

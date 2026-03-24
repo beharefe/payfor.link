@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
 import crypto from "node:crypto";
+import { FROM_EMAIL, resend } from "@unseallink/lib/resend";
 import { cookies } from "next/headers";
-import { resend, FROM_EMAIL } from "@unseallink/lib/resend";
+import { NextResponse } from "next/server";
 
 const SIGNING_KEY = process.env.STRIPE_SECRET_KEY ?? "dev-secret";
 
@@ -25,7 +25,10 @@ export async function POST(request: Request) {
 
   if (!email || !email.includes("@")) {
     console.error("[send-code] Invalid email:", raw);
-    return NextResponse.json({ error: "Valid email is required" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Valid email is required" },
+      { status: 400 },
+    );
   }
 
   const otp = String(Math.floor(100000 + Math.random() * 900000));
@@ -63,12 +66,21 @@ export async function POST(request: Request) {
     console.log("[send-code] Resend result:", JSON.stringify(result));
   } catch (err) {
     console.error("[send-code] Resend threw exception:", err);
-    return NextResponse.json({ error: "Failed to send code. Please try again." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to send code. Please try again." },
+      { status: 500 },
+    );
   }
 
   if (emailError) {
-    console.error("[send-code] Resend returned error:", JSON.stringify(emailError));
-    return NextResponse.json({ error: "Failed to send code. Please try again." }, { status: 500 });
+    console.error(
+      "[send-code] Resend returned error:",
+      JSON.stringify(emailError),
+    );
+    return NextResponse.json(
+      { error: "Failed to send code. Please try again." },
+      { status: 500 },
+    );
   }
 
   const cookieStore = await cookies();

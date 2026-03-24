@@ -1,10 +1,10 @@
 "use server";
 
-import { createClient } from "@unseallink/lib/supabase/server";
-import { stripe } from "@unseallink/lib/stripe";
-import { log } from "@unseallink/lib/logger";
-import { serializeError } from "@unseallink/lib/utils";
 import { TABLES } from "@unseallink/lib/db";
+import { log } from "@unseallink/lib/logger";
+import { stripe } from "@unseallink/lib/stripe";
+import { createClient } from "@unseallink/lib/supabase/server";
+import { serializeError } from "@unseallink/lib/utils";
 import { redirect } from "next/navigation";
 
 type ActionResult = { error: string } | { ok: true };
@@ -24,8 +24,10 @@ export async function refundPurchase(orderId: string): Promise<ActionResult> {
     .single();
 
   if (!order || order.seller_id !== user.id) return { error: "Not found" };
-  if (order.status !== "paid") return { error: "This order cannot be refunded" };
-  if (!order.stripe_payment_id) return { error: "No payment found for this order" };
+  if (order.status !== "paid")
+    return { error: "This order cannot be refunded" };
+  if (!order.stripe_payment_id)
+    return { error: "No payment found for this order" };
 
   try {
     await stripe.refunds.create({ payment_intent: order.stripe_payment_id });
@@ -49,10 +51,15 @@ export async function refundPurchase(orderId: string): Promise<ActionResult> {
       error: dbError.message,
     });
     // Refund succeeded in Stripe — don't fail silently, but don't double-refund
-    return { error: "Refund processed but failed to update record. Contact support." };
+    return {
+      error: "Refund processed but failed to update record. Contact support.",
+    };
   }
 
-  log.info("refundPurchase: success", { order_id: orderId, seller_id: user.id });
+  log.info("refundPurchase: success", {
+    order_id: orderId,
+    seller_id: user.id,
+  });
 
   redirect(`/dashboard/links/${order.link_id}`);
 }

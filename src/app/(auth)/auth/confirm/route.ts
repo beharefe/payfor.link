@@ -1,6 +1,6 @@
-import { NextResponse, type NextRequest } from "next/server";
-import { createClient } from "@unseallink/lib/supabase/server";
 import { TABLES } from "@unseallink/lib/db";
+import { createClient } from "@unseallink/lib/supabase/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 /** Handles Magic Link callback. Supports both PKCE code exchange and token_hash (per Supabase docs). */
 export async function GET(request: NextRequest) {
@@ -15,7 +15,8 @@ export async function GET(request: NextRequest) {
 
   const supabase = await createClient();
   const error = tokenHash
-    ? (await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "email" })).error
+    ? (await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "email" }))
+        .error
     : (await supabase.auth.exchangeCodeForSession(code!)).error;
 
   if (error) {
@@ -48,5 +49,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  return NextResponse.redirect(new URL(needsName ? "/onboarding/name" : "/dashboard", appUrl));
+  return NextResponse.redirect(
+    new URL(needsName ? "/onboarding/name" : "/dashboard", appUrl),
+  );
 }

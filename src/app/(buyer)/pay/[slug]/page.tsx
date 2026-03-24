@@ -1,11 +1,13 @@
-import { createClient, createServiceClient } from "@unseallink/lib/supabase/server";
-import { notFound } from "next/navigation";
-import type { Metadata } from "next";
-import { createCheckoutSession } from "@unseallink/app/actions/checkout";
-import { log } from "@unseallink/lib/logger";
-import { PaywallCTA } from "./paywall-cta";
-import { AbuseReportForm } from "./abuse-report-form";
 import { TABLES } from "@unseallink/lib/db";
+import { log } from "@unseallink/lib/logger";
+import {
+  createClient,
+  createServiceClient,
+} from "@unseallink/lib/supabase/server";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { AbuseReportForm } from "./abuse-report-form";
+import { PaywallCTA } from "./paywall-cta";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -82,11 +84,7 @@ export default async function PaywallPage({ params }: Props) {
   return (
     <main style={{ padding: "2rem", maxWidth: "28rem", margin: "0 auto" }}>
       <h1>{link.title}</h1>
-      {seller?.name && (
-        <p style={{ color: "#666" }}>
-          by {seller.name}
-        </p>
-      )}
+      {seller?.name && <p style={{ color: "#666" }}>by {seller.name}</p>}
       {link.description && <p>{link.description}</p>}
       <p>
         <strong>${link.price.toFixed(2)}</strong> {link.currency.toUpperCase()}

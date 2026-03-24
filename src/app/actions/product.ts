@@ -1,13 +1,13 @@
 "use server";
 
 import crypto from "node:crypto";
+import { TABLES } from "@unseallink/lib/db";
+import { log } from "@unseallink/lib/logger";
+import { detectProductType, isValidUrl } from "@unseallink/lib/product-utils";
+import { checkUrlSafe } from "@unseallink/lib/safe-browsing";
+import { createClient } from "@unseallink/lib/supabase/server";
 import { redirect } from "next/navigation";
 import slugify from "slugify";
-import { createClient } from "@unseallink/lib/supabase/server";
-import { log } from "@unseallink/lib/logger";
-import { checkUrlSafe } from "@unseallink/lib/safe-browsing";
-import { detectProductType, isValidUrl } from "@unseallink/lib/product-utils";
-import { TABLES } from "@unseallink/lib/db";
 
 const MIN_PRICE = 9.99;
 
@@ -32,11 +32,13 @@ export async function createProduct(
   if (!user) return { error: "Unauthorized" };
 
   if (!input.title?.trim()) return { error: "Title is required" };
-  if (input.title.trim().length > 200) return { error: "Title must be 200 characters or less" };
+  if (input.title.trim().length > 200)
+    return { error: "Title must be 200 characters or less" };
   if (input.description && input.description.length > 2000)
     return { error: "Description must be 2000 characters or less" };
   if (!input.destination_url?.trim()) return { error: "URL is required" };
-  if (!isValidUrl(input.destination_url)) return { error: "URL must start with https://" };
+  if (!isValidUrl(input.destination_url))
+    return { error: "URL must start with https://" };
   if (input.preview_image_url && !isValidUrl(input.preview_image_url))
     return { error: "Preview image URL must start with https://" };
   if (input.price < MIN_PRICE)
@@ -66,7 +68,10 @@ export async function createProduct(
   }
 
   if (!slug) {
-    log.error("createProduct: could not generate unique slug", { title: input.title, user_id: user.id });
+    log.error("createProduct: could not generate unique slug", {
+      title: input.title,
+      user_id: user.id,
+    });
     return { error: "Failed to generate URL. Please try again." };
   }
 
@@ -117,7 +122,8 @@ export async function createProductAction(
     description: formData.get("description")?.toString() ?? "",
     destination_url: formData.get("destination_url")?.toString() ?? "",
     price: Number.isFinite(price) ? price : MIN_PRICE,
-    preview_image_url: formData.get("preview_image_url")?.toString() || undefined,
+    preview_image_url:
+      formData.get("preview_image_url")?.toString() || undefined,
   });
   if ("error" in result) return result.error;
   return null; // createProduct redirects on success
@@ -132,7 +138,9 @@ type UpdateProductInput = {
   preview_image_url?: string;
 };
 
-export async function updateProduct(input: UpdateProductInput): Promise<ActionResult> {
+export async function updateProduct(
+  input: UpdateProductInput,
+): Promise<ActionResult> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -140,14 +148,17 @@ export async function updateProduct(input: UpdateProductInput): Promise<ActionRe
   if (!user) return { error: "Unauthorized" };
 
   if (!input.title?.trim()) return { error: "Title is required" };
-  if (input.title.trim().length > 200) return { error: "Title must be 200 characters or less" };
+  if (input.title.trim().length > 200)
+    return { error: "Title must be 200 characters or less" };
   if (input.description && input.description.length > 2000)
     return { error: "Description must be 2000 characters or less" };
   if (!input.destination_url?.trim()) return { error: "URL is required" };
-  if (!isValidUrl(input.destination_url)) return { error: "URL must start with https://" };
+  if (!isValidUrl(input.destination_url))
+    return { error: "URL must start with https://" };
   if (input.preview_image_url && !isValidUrl(input.preview_image_url))
     return { error: "Preview image URL must start with https://" };
-  if (input.price < MIN_PRICE) return { error: `Minimum price is $${MIN_PRICE}` };
+  if (input.price < MIN_PRICE)
+    return { error: `Minimum price is $${MIN_PRICE}` };
 
   // Verify ownership
   const { data: existing } = await supabase
@@ -155,7 +166,8 @@ export async function updateProduct(input: UpdateProductInput): Promise<ActionRe
     .select("id, seller_id, status")
     .eq("id", input.id)
     .single();
-  if (!existing || existing.seller_id !== user.id) return { error: "Not found" };
+  if (!existing || existing.seller_id !== user.id)
+    return { error: "Not found" };
   if (existing.status === "deleted" || existing.status === "suspended")
     return { error: "Cannot edit this link" };
 
@@ -178,7 +190,11 @@ export async function updateProduct(input: UpdateProductInput): Promise<ActionRe
     .eq("seller_id", user.id);
 
   if (error) {
-    log.error("updateProduct failed", { error: error.message, product_id: input.id, user_id: user.id });
+    log.error("updateProduct failed", {
+      error: error.message,
+      product_id: input.id,
+      user_id: user.id,
+    });
     return { error: "Failed to update product" };
   }
 
@@ -196,7 +212,8 @@ export async function updateProductAction(
     description: formData.get("description")?.toString() ?? "",
     destination_url: formData.get("destination_url")?.toString() ?? "",
     price: Number.isFinite(price) ? price : MIN_PRICE,
-    preview_image_url: formData.get("preview_image_url")?.toString() || undefined,
+    preview_image_url:
+      formData.get("preview_image_url")?.toString() || undefined,
   });
   if ("error" in result) return result.error;
   return null;
@@ -214,7 +231,8 @@ export async function archiveProduct(id: string): Promise<ActionResult> {
     .select("id, seller_id, status")
     .eq("id", id)
     .single();
-  if (!existing || existing.seller_id !== user.id) return { error: "Not found" };
+  if (!existing || existing.seller_id !== user.id)
+    return { error: "Not found" };
   if (existing.status === "deleted" || existing.status === "suspended")
     return { error: "Cannot archive this link" };
 
@@ -227,7 +245,11 @@ export async function archiveProduct(id: string): Promise<ActionResult> {
     .eq("seller_id", user.id);
 
   if (error) {
-    log.error("archiveProduct failed", { error: error.message, product_id: id, user_id: user.id });
+    log.error("archiveProduct failed", {
+      error: error.message,
+      product_id: id,
+      user_id: user.id,
+    });
     return { error: "Failed to update link" };
   }
 
@@ -246,8 +268,10 @@ export async function deleteProduct(id: string): Promise<ActionResult> {
     .select("id, seller_id, status")
     .eq("id", id)
     .single();
-  if (!existing || existing.seller_id !== user.id) return { error: "Not found" };
-  if (existing.status === "suspended") return { error: "Cannot delete a suspended link" };
+  if (!existing || existing.seller_id !== user.id)
+    return { error: "Not found" };
+  if (existing.status === "suspended")
+    return { error: "Cannot delete a suspended link" };
 
   const { error } = await supabase
     .from(TABLES.PRODUCTS)
@@ -256,7 +280,11 @@ export async function deleteProduct(id: string): Promise<ActionResult> {
     .eq("seller_id", user.id);
 
   if (error) {
-    log.error("deleteProduct failed", { error: error.message, product_id: id, user_id: user.id });
+    log.error("deleteProduct failed", {
+      error: error.message,
+      product_id: id,
+      user_id: user.id,
+    });
     return { error: "Failed to delete link" };
   }
 

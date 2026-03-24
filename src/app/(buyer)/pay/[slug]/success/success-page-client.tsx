@@ -1,8 +1,8 @@
 "use client";
 
-import { verifyOtp, resendOtp } from "@unseallink/app/actions/otp";
-import { useActionState, useEffect, useState } from "react";
+import { resendOtp, verifyOtp } from "@unseallink/app/actions/otp";
 import { useRouter } from "next/navigation";
+import { useActionState, useEffect, useState } from "react";
 
 export function SuccessPoller() {
   const router = useRouter();
@@ -20,7 +20,10 @@ export function SuccessPoller() {
 export function SuccessPageClient({ orderId }: { orderId: string }) {
   const [resendMessage, setResendMessage] = useState<string | null>(null);
 
-  async function handleVerify(_prev: string | null, formData: FormData): Promise<string | null> {
+  async function handleVerify(
+    _prev: string | null,
+    formData: FormData,
+  ): Promise<string | null> {
     const code = formData.get("code")?.toString()?.trim() ?? "";
     if (!code) return "Enter the 6-digit code.";
     const result = await verifyOtp(orderId, code);
@@ -52,13 +55,20 @@ export function SuccessPageClient({ orderId }: { orderId: string }) {
           maxLength={6}
           style={{ padding: "0.5rem", width: "8rem", fontSize: "1.25rem" }}
         />
-        <button type="submit" style={{ marginLeft: "0.5rem", padding: "0.5rem 1rem" }}>
+        <button
+          type="submit"
+          style={{ marginLeft: "0.5rem", padding: "0.5rem 1rem" }}
+        >
           Verify
         </button>
       </form>
       {error && <p style={{ color: "red", marginTop: "0.5rem" }}>{error}</p>}
       <p style={{ marginTop: "1rem" }}>
-        <button type="button" onClick={handleResend} style={{ padding: "0.25rem 0.5rem" }}>
+        <button
+          type="button"
+          onClick={handleResend}
+          style={{ padding: "0.25rem 0.5rem" }}
+        >
           Resend code
         </button>
       </p>

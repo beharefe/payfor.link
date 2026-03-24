@@ -13,7 +13,9 @@ const SIGNING_KEY =
   process.env.STRIPE_SECRET_KEY ??
   // Fallback to a random key per process so dev environments still work,
   // but the key is never a guessable hardcoded constant.
-  crypto.randomBytes(32).toString("hex");
+  crypto
+    .randomBytes(32)
+    .toString("hex");
 const SESSION_TTL_MS = 60 * 60 * 1000; // 1 hour
 const COOKIE_NAME = "orders_session";
 
@@ -43,7 +45,9 @@ export async function setOrdersSession(email: string): Promise<void> {
   });
 }
 
-export function getVerifiedEmail(cookieValue: string | undefined): string | null {
+export function getVerifiedEmail(
+  cookieValue: string | undefined,
+): string | null {
   if (!cookieValue) return null;
   const lastPipe = cookieValue.lastIndexOf("|");
   if (lastPipe === -1) return null;

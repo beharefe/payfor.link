@@ -1,8 +1,8 @@
+import { TABLES } from "@unseallink/lib/db";
 import { createClient } from "@unseallink/lib/supabase/server";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { EditLinkForm } from "./edit-link-form";
-import { TABLES } from "@unseallink/lib/db";
 
 export default async function EditLinkPage({
   params,
@@ -18,7 +18,9 @@ export default async function EditLinkPage({
 
   const { data: link } = await supabase
     .from(TABLES.PRODUCTS)
-    .select("id, title, description, destination_url, price, preview_image_url, status, seller_id")
+    .select(
+      "id, title, description, destination_url, price, preview_image_url, status, seller_id",
+    )
     .eq("id", id)
     .single();
 

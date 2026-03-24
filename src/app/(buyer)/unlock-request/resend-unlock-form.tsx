@@ -3,13 +3,17 @@
 import { useState } from "react";
 
 export function ResendUnlockForm() {
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [status, setStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
   const [message, setMessage] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
-    const email = (form.elements.namedItem("email") as HTMLInputElement)?.value?.trim();
+    const email = (
+      form.elements.namedItem("email") as HTMLInputElement
+    )?.value?.trim();
     if (!email) return;
 
     setStatus("loading");

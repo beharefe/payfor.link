@@ -1,9 +1,9 @@
-import { createServiceClient } from "@unseallink/lib/supabase/server";
-import { stripe } from "@unseallink/lib/stripe";
-import { redirect } from "next/navigation";
-import type { Metadata } from "next";
-import { SuccessPageClient, SuccessPoller } from "./success-page-client";
 import { TABLES } from "@unseallink/lib/db";
+import { stripe } from "@unseallink/lib/stripe";
+import { createServiceClient } from "@unseallink/lib/supabase/server";
+import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { SuccessPageClient, SuccessPoller } from "./success-page-client";
 
 export const metadata: Metadata = {
   robots: { index: false },
@@ -14,7 +14,10 @@ type Props = {
   searchParams: Promise<{ session_id?: string }>;
 };
 
-export default async function PaymentSuccessPage({ params, searchParams }: Props) {
+export default async function PaymentSuccessPage({
+  params,
+  searchParams,
+}: Props) {
   const { slug } = await params;
   const { session_id } = await searchParams;
 
@@ -43,7 +46,8 @@ export default async function PaymentSuccessPage({ params, searchParams }: Props
 
   const customerEmail =
     session.customer_email ??
-    (session as { customer_details?: { email?: string } }).customer_details?.email;
+    (session as { customer_details?: { email?: string } }).customer_details
+      ?.email;
 
   if (!customerEmail) {
     return (
@@ -57,7 +61,9 @@ export default async function PaymentSuccessPage({ params, searchParams }: Props
   const supabase = createServiceClient();
   const { data: purchase } = await supabase
     .from(TABLES.ORDERS)
-    .select("id, buyer_email, buyer_email_verified, product_title, price_paid, currency")
+    .select(
+      "id, buyer_email, buyer_email_verified, product_title, price_paid, currency",
+    )
     .eq("stripe_checkout_session_id", session.id)
     .single();
 
@@ -81,10 +87,23 @@ export default async function PaymentSuccessPage({ params, searchParams }: Props
   }
 
   return (
-    <main style={{ padding: "2rem", maxWidth: "28rem", margin: "0 auto", textAlign: "center" }}>
+    <main
+      style={{
+        padding: "2rem",
+        maxWidth: "28rem",
+        margin: "0 auto",
+        textAlign: "center",
+      }}
+    >
       <p style={{ fontSize: "2rem", margin: "0 0 0.5rem" }}>✅</p>
-      <h1 style={{ fontSize: "1.4rem", fontWeight: 500, margin: "0 0 0.25rem" }}>Payment confirmed</h1>
-      <p style={{ fontWeight: 500, margin: "0 0 0.25rem" }}>{purchase.product_title}</p>
+      <h1
+        style={{ fontSize: "1.4rem", fontWeight: 500, margin: "0 0 0.25rem" }}
+      >
+        Payment confirmed
+      </h1>
+      <p style={{ fontWeight: 500, margin: "0 0 0.25rem" }}>
+        {purchase.product_title}
+      </p>
       <p style={{ color: "#6B6B6B", margin: "0 0 1.5rem" }}>
         ${purchase.price_paid.toFixed(2)} {purchase.currency.toUpperCase()}
       </p>

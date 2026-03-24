@@ -2,7 +2,6 @@ import { createServerClient } from "@supabase/ssr";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
-
 /** Authenticated client — respects RLS, reads session from cookies. */
 export async function createClient() {
   const cookieStore = await cookies();

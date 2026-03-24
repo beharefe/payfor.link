@@ -1,7 +1,7 @@
 "use client";
 
 import { updateProductAction } from "@unseallink/app/actions/product";
-import { useTransition, useRef, useState } from "react";
+import { useRef, useState, useTransition } from "react";
 
 const PRICE_PRESETS = [9.99, 19, 29, 49];
 
@@ -122,7 +122,10 @@ export function EditLinkForm({ id, defaultValues }: Props) {
         formData.set("preview_image_url", url);
       } else {
         // Keep existing image if no new file selected
-        formData.set("preview_image_url", defaultValues.preview_image_url ?? "");
+        formData.set(
+          "preview_image_url",
+          defaultValues.preview_image_url ?? "",
+        );
       }
 
       const result = await updateProductAction(null, formData);
@@ -144,7 +147,12 @@ export function EditLinkForm({ id, defaultValues }: Props) {
           name="title"
           required
           defaultValue={defaultValues.title}
-          style={{ display: "block", width: "100%", padding: "0.5rem", marginTop: "0.25rem" }}
+          style={{
+            display: "block",
+            width: "100%",
+            padding: "0.5rem",
+            marginTop: "0.25rem",
+          }}
         />
       </div>
 
@@ -155,7 +163,12 @@ export function EditLinkForm({ id, defaultValues }: Props) {
           name="description"
           rows={3}
           defaultValue={defaultValues.description}
-          style={{ display: "block", width: "100%", padding: "0.5rem", marginTop: "0.25rem" }}
+          style={{
+            display: "block",
+            width: "100%",
+            padding: "0.5rem",
+            marginTop: "0.25rem",
+          }}
         />
       </div>
 
@@ -167,19 +180,32 @@ export function EditLinkForm({ id, defaultValues }: Props) {
           type="url"
           required
           defaultValue={defaultValues.destination_url}
-          style={{ display: "block", width: "100%", padding: "0.5rem", marginTop: "0.25rem" }}
+          style={{
+            display: "block",
+            width: "100%",
+            padding: "0.5rem",
+            marginTop: "0.25rem",
+          }}
         />
       </div>
 
       <div>
         <label>Price (USD) * — min $9.99</label>
-        <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.25rem", flexWrap: "wrap" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: "0.5rem",
+            marginTop: "0.25rem",
+            flexWrap: "wrap",
+          }}
+        >
           {PRICE_PRESETS.map((p) => (
             <button
               key={p}
               type="button"
               onClick={() => {
-                if (priceInputRef.current) priceInputRef.current.value = String(p);
+                if (priceInputRef.current)
+                  priceInputRef.current.value = String(p);
               }}
               style={{ padding: "0.5rem 0.75rem" }}
             >
@@ -196,13 +222,24 @@ export function EditLinkForm({ id, defaultValues }: Props) {
           step={0.01}
           required
           defaultValue={defaultValues.price}
-          style={{ display: "block", width: "100%", padding: "0.5rem", marginTop: "0.25rem" }}
+          style={{
+            display: "block",
+            width: "100%",
+            padding: "0.5rem",
+            marginTop: "0.25rem",
+          }}
         />
       </div>
 
       <div>
         <label htmlFor="preview_image">Preview image</label>
-        <p style={{ color: "#6B6B6B", fontSize: "0.8125rem", margin: "0.1rem 0 0.25rem" }}>
+        <p
+          style={{
+            color: "#6B6B6B",
+            fontSize: "0.8125rem",
+            margin: "0.1rem 0 0.25rem",
+          }}
+        >
           Recommended: 1200×630px (1.91:1). Max 2MB — JPG, PNG, or WebP.
         </p>
         <input
@@ -227,7 +264,15 @@ export function EditLinkForm({ id, defaultValues }: Props) {
           />
         )}
         {imageError && (
-          <p style={{ color: "red", fontSize: "0.8125rem", marginTop: "0.25rem" }}>{imageError}</p>
+          <p
+            style={{
+              color: "red",
+              fontSize: "0.8125rem",
+              marginTop: "0.25rem",
+            }}
+          >
+            {imageError}
+          </p>
         )}
       </div>
 

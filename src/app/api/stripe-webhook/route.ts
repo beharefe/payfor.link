@@ -1,15 +1,15 @@
-import { NextResponse } from "next/server";
-import Stripe from "stripe";
 import crypto from "node:crypto";
 import { render } from "@react-email/render";
-import { stripe, platformFeeCents } from "@unseallink/lib/stripe";
-import { createServiceClient } from "@unseallink/lib/supabase/server";
-import { resend, FROM_EMAIL } from "@unseallink/lib/resend";
-import { log } from "@unseallink/lib/logger";
-import { serializeError } from "@unseallink/lib/utils";
-import { TABLES } from "@unseallink/lib/db";
 import { OtpCodeEmail } from "@unseallink/emails/otp-code";
 import { SaleNotificationEmail } from "@unseallink/emails/sale-notification";
+import { TABLES } from "@unseallink/lib/db";
+import { log } from "@unseallink/lib/logger";
+import { FROM_EMAIL, resend } from "@unseallink/lib/resend";
+import { platformFeeCents, stripe } from "@unseallink/lib/stripe";
+import { createServiceClient } from "@unseallink/lib/supabase/server";
+import { serializeError } from "@unseallink/lib/utils";
+import { NextResponse } from "next/server";
+import type Stripe from "stripe";
 
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
 
@@ -36,26 +36,38 @@ export async function POST(request: Request) {
   try {
     event = stripe.webhooks.constructEvent(body, signature, WEBHOOK_SECRET);
   } catch (err) {
-    log.error("Stripe webhook signature verification failed", { error: serializeError(err) });
+    log.error("Stripe webhook signature verification failed", {
+      error: serializeError(err),
+    });
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
   try {
     if (event.type === "checkout.session.completed") {
-      await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session);
+      await handleCheckoutSessionCompleted(
+        event.data.object as Stripe.Checkout.Session,
+      );
     } else if (event.type === "account.updated") {
       await handleAccountUpdated(event.data.object as Stripe.Account);
     }
   } catch (err) {
-    log.error("Stripe webhook handler error", { type: event.type, error: serializeError(err) });
+    log.error("Stripe webhook handler error", {
+      type: event.type,
+      error: serializeError(err),
+    });
   }
 
   return NextResponse.json({ received: true }, { status: 200 });
 }
 
-async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
+async function handleCheckoutSessionCompleted(
+  session: Stripe.Checkout.Session,
+) {
   const supabase = createServiceClient();
-  const paymentIntentId = typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id;
+  const paymentIntentId =
+    typeof session.payment_intent === "string"
+      ? session.payment_intent
+      : session.payment_intent?.id;
   if (!paymentIntentId) {
     log.error("checkout.session.completed: no payment_intent");
     return;
@@ -76,15 +88,20 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
   const { data: product } = await supabase
     .from(TABLES.PRODUCTS)
-    .select("id, seller_id, destination_url, title, price, version, total_sales, total_revenue")
+    .select(
+      "id, seller_id, destination_url, title, price, version, total_sales, total_revenue",
+    )
     .eq("id", productId)
     .single();
   if (!product) {
-    log.error("checkout.session.completed: product not found", { product_id: productId });
+    log.error("checkout.session.completed: product not found", {
+      product_id: productId,
+    });
     return;
   }
 
-  const customerEmail = session.customer_email ?? session.customer_details?.email;
+  const customerEmail =
+    session.customer_email ?? session.customer_details?.email;
   if (!customerEmail) {
     log.error("checkout.session.completed: no customer email");
     return;
@@ -109,14 +126,23 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
   });
 
   if (insertError) {
-    log.error("checkout.session.completed: insert order failed", { error: insertError.message });
+    log.error("checkout.session.completed: insert order failed", {
+      error: insertError.message,
+    });
     return;
   }
 
   // Atomic increments via RPC — avoids read-modify-write races on concurrent orders.
   await Promise.all([
-    supabase.rpc("increment_product_stats", { p_product_id: product.id, p_revenue: pricePaid }),
-    supabase.rpc("increment_seller_stats", { p_seller_id: product.seller_id, p_earned: pricePaid, p_fees: platformFee }),
+    supabase.rpc("increment_product_stats", {
+      p_product_id: product.id,
+      p_revenue: pricePaid,
+    }),
+    supabase.rpc("increment_seller_stats", {
+      p_seller_id: product.seller_id,
+      p_earned: pricePaid,
+      p_fees: platformFee,
+    }),
   ]);
 
   // Generate custom OTP for buyer email verification — no Supabase auth session created
@@ -140,7 +166,9 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
       from: FROM_EMAIL,
       to: customerEmail,
       subject: `Your verification code — ${product.title}`,
-      html: await render(OtpCodeEmail({ otpCode, productTitle: product.title })),
+      html: await render(
+        OtpCodeEmail({ otpCode, productTitle: product.title }),
+      ),
     });
   }
 
@@ -164,7 +192,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
           pricePaid,
           platformFee,
           dashboardUrl: `${appUrl}/dashboard`,
-        })
+        }),
       ),
     });
   }

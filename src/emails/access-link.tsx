@@ -6,7 +6,10 @@ interface AccessLinkEmailProps {
   productTitle: string;
 }
 
-export function AccessLinkEmail({ unlockUrl, productTitle }: AccessLinkEmailProps) {
+export function AccessLinkEmail({
+  unlockUrl,
+  productTitle,
+}: AccessLinkEmailProps) {
   return (
     <EmailLayout preview={`Your access link for ${productTitle}`}>
       <Heading className="text-[#111111] text-xl font-medium m-0 mb-2">
@@ -25,8 +28,8 @@ export function AccessLinkEmail({ unlockUrl, productTitle }: AccessLinkEmailProp
         Access your purchase →
       </Button>
       <Text className="text-[#999999] text-xs m-0">
-        This link expires in 24 hours and can only be used once.
-        If you didn&apos;t request this, ignore this email.
+        This link expires in 24 hours and can only be used once. If you
+        didn&apos;t request this, ignore this email.
       </Text>
     </EmailLayout>
   );

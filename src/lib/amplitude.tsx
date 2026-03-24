@@ -2,7 +2,10 @@
 
 import * as amplitude from "@amplitude/unified";
 
-if (typeof window !== "undefined" && process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY) {
+if (
+  typeof window !== "undefined" &&
+  process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY
+) {
   amplitude.initAll(process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY, {
     serverZone: "EU",
     analytics: { autocapture: true },
@@ -18,19 +21,37 @@ if (typeof window !== "undefined" && process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY) 
 
 export type AnalyticsEvent =
   // Buyer funnel
-  | { name: "paywall_viewed";      props: { link_id: string; slug: string; price: number; currency: string } }
-  | { name: "checkout_started";    props: { link_id: string; slug: string; price: number; currency: string } }
-  | { name: "purchase_completed";  props: { link_id: string; order_id: string; price: number; currency: string; platform_fee: number } }
-  | { name: "otp_verified";        props: { order_id: string } }
-  | { name: "otp_resent";          props: { order_id: string } }
-  | { name: "content_accessed";    props: { order_id: string; link_id: string } }
+  | {
+      name: "paywall_viewed";
+      props: { link_id: string; slug: string; price: number; currency: string };
+    }
+  | {
+      name: "checkout_started";
+      props: { link_id: string; slug: string; price: number; currency: string };
+    }
+  | {
+      name: "purchase_completed";
+      props: {
+        link_id: string;
+        order_id: string;
+        price: number;
+        currency: string;
+        platform_fee: number;
+      };
+    }
+  | { name: "otp_verified"; props: { order_id: string } }
+  | { name: "otp_resent"; props: { order_id: string } }
+  | { name: "content_accessed"; props: { order_id: string; link_id: string } }
   // Seller funnel
-  | { name: "seller_signed_up";    props: { user_id: string } }
-  | { name: "stripe_connected";    props: { user_id: string } }
-  | { name: "link_created";        props: { link_id: string; price: number; product_type: string } }
-  | { name: "link_published";      props: { link_id: string } }
-  | { name: "link_archived";       props: { link_id: string } }
-  | { name: "payout_requested";    props: { user_id: string } };
+  | { name: "seller_signed_up"; props: { user_id: string } }
+  | { name: "stripe_connected"; props: { user_id: string } }
+  | {
+      name: "link_created";
+      props: { link_id: string; price: number; product_type: string };
+    }
+  | { name: "link_published"; props: { link_id: string } }
+  | { name: "link_archived"; props: { link_id: string } }
+  | { name: "payout_requested"; props: { user_id: string } };
 
 /**
  * Type-safe wrapper around amplitude.track().

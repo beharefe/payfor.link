@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { getVerifiedEmail } from "@unseallink/lib/buyer-session";
 import { TABLES } from "@unseallink/lib/db";
 import { isValidUrl } from "@unseallink/lib/product-utils";
+import { createServiceClient } from "@unseallink/lib/supabase/server";
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
 
 export async function GET(
   _request: Request,
@@ -33,15 +33,22 @@ export async function GET(
 
   // Verify the requester owns this order via their session cookie.
   const cookieStore = await cookies();
-  const verifiedEmail = getVerifiedEmail(cookieStore.get("orders_session")?.value);
+  const verifiedEmail = getVerifiedEmail(
+    cookieStore.get("orders_session")?.value,
+  );
   if (!verifiedEmail || verifiedEmail !== order.buyer_email) {
     // Session missing or expired — send buyer to re-authenticate.
-    return NextResponse.redirect(new URL(`/orders?next=/orders/${order_id}`, appUrl));
+    return NextResponse.redirect(
+      new URL(`/orders?next=/orders/${order_id}`, appUrl),
+    );
   }
 
   // Re-validate delivery_url at redirect time — defense against compromised DB records
   if (!isValidUrl(order.delivery_url)) {
-    return NextResponse.json({ error: "Invalid delivery URL" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Invalid delivery URL" },
+      { status: 500 },
+    );
   }
 
   return NextResponse.redirect(order.delivery_url);

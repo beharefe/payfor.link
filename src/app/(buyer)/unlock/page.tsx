@@ -1,10 +1,10 @@
-import { createServiceClient } from "@unseallink/lib/supabase/server";
-import { redirect } from "next/navigation";
 import crypto from "node:crypto";
-import Link from "next/link";
-import type { Metadata } from "next";
 import { TABLES } from "@unseallink/lib/db";
 import { getPlatformLabel } from "@unseallink/lib/product-utils";
+import { createServiceClient } from "@unseallink/lib/supabase/server";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   robots: { index: false },
@@ -20,7 +20,10 @@ export default async function UnlockPage({ searchParams }: Props) {
   }
 
   const supabase = createServiceClient();
-  const tokenHash = crypto.createHash("sha256").update(token.trim()).digest("hex");
+  const tokenHash = crypto
+    .createHash("sha256")
+    .update(token.trim())
+    .digest("hex");
 
   const { data: accessToken } = await supabase
     .from(TABLES.ACCESS_TOKENS)
@@ -29,11 +32,21 @@ export default async function UnlockPage({ searchParams }: Props) {
     .single();
 
   if (!accessToken) {
-    return <UnlockError title="Invalid link" body="This link is invalid or has already been used." />;
+    return (
+      <UnlockError
+        title="Invalid link"
+        body="This link is invalid or has already been used."
+      />
+    );
   }
 
   if (accessToken.used_at) {
-    return <UnlockError title="Already used" body="This link has already been used. Sign in to access your orders." />;
+    return (
+      <UnlockError
+        title="Already used"
+        body="This link has already been used. Sign in to access your orders."
+      />
+    );
   }
 
   if (new Date(accessToken.expires_at) < new Date()) {
@@ -53,7 +66,12 @@ export default async function UnlockPage({ searchParams }: Props) {
     .single();
 
   if (!order || order.status === "refunded") {
-    return <UnlockError title="Access denied" body="This order is no longer valid." />;
+    return (
+      <UnlockError
+        title="Access denied"
+        body="This order is no longer valid."
+      />
+    );
   }
 
   const ctaLabel = getPlatformLabel(order.delivery_url);
@@ -69,7 +87,7 @@ export default async function UnlockPage({ searchParams }: Props) {
     const { data: t } = await svc
       .from(TABLES.ACCESS_TOKENS)
       .select("order_id, used_at, expires_at")
-      .eq("id", accessToken!.id)
+      .eq("id", accessToken?.id)
       .single();
 
     if (!t || t.used_at || new Date(t.expires_at) < new Date()) {
@@ -80,7 +98,7 @@ export default async function UnlockPage({ searchParams }: Props) {
     await svc
       .from(TABLES.ACCESS_TOKENS)
       .update({ used_at: new Date().toISOString() })
-      .eq("id", accessToken!.id)
+      .eq("id", accessToken?.id)
       .is("used_at", null);
 
     const { data: o } = await svc
@@ -108,10 +126,14 @@ export default async function UnlockPage({ searchParams }: Props) {
       }}
     >
       <p style={{ fontSize: "2.5rem", marginBottom: "0.5rem" }}>🔓</p>
-      <h1 style={{ fontSize: "1.5rem", fontWeight: 500, marginBottom: "0.5rem" }}>
+      <h1
+        style={{ fontSize: "1.5rem", fontWeight: 500, marginBottom: "0.5rem" }}
+      >
         You&apos;re one click away
       </h1>
-      <p style={{ color: "#6B6B6B", marginBottom: "2rem" }}>{order.product_title}</p>
+      <p style={{ color: "#6B6B6B", marginBottom: "2rem" }}>
+        {order.product_title}
+      </p>
 
       <form action={consumeAndRedirect} style={{ width: "100%" }}>
         <button
@@ -149,11 +171,20 @@ function UnlockError({
   cta?: { label: string; href: string };
 }) {
   return (
-    <main style={{ padding: "2rem", textAlign: "center", maxWidth: "28rem", margin: "0 auto" }}>
+    <main
+      style={{
+        padding: "2rem",
+        textAlign: "center",
+        maxWidth: "28rem",
+        margin: "0 auto",
+      }}
+    >
       <h1>{title}</h1>
       <p style={{ color: "#6B6B6B" }}>{body}</p>
       <p style={{ marginTop: "1rem" }}>
-        <Link href={cta?.href ?? "/orders"}>{cta?.label ?? "View your orders"}</Link>
+        <Link href={cta?.href ?? "/orders"}>
+          {cta?.label ?? "View your orders"}
+        </Link>
       </p>
     </main>
   );

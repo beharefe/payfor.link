@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 type Order = {
   id: string;
@@ -14,7 +14,11 @@ type Order = {
 
 type Step = "email" | "code" | "orders";
 
-export function OrdersLookup({ verifiedEmail }: { verifiedEmail: string | null }) {
+export function OrdersLookup({
+  verifiedEmail,
+}: {
+  verifiedEmail: string | null;
+}) {
   const [step, setStep] = useState<Step>(verifiedEmail ? "orders" : "email");
   const [email, setEmail] = useState(verifiedEmail ?? "");
   const [code, setCode] = useState("");
@@ -35,8 +39,8 @@ export function OrdersLookup({ verifiedEmail }: { verifiedEmail: string | null }
         .catch(() => setError("Failed to load orders."))
         .finally(() => setLoading(false));
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orders, step, verifiedEmail]);
 
   async function handleSendCode(e: React.FormEvent) {
     e.preventDefault();
@@ -99,7 +103,12 @@ export function OrdersLookup({ verifiedEmail }: { verifiedEmail: string | null }
       <div>
         <form
           onSubmit={handleSendCode}
-          style={{ display: "flex", gap: "0.5rem", justifyContent: "center", flexWrap: "wrap" }}
+          style={{
+            display: "flex",
+            gap: "0.5rem",
+            justifyContent: "center",
+            flexWrap: "wrap",
+          }}
         >
           <input
             type="email"
@@ -135,7 +144,11 @@ export function OrdersLookup({ verifiedEmail }: { verifiedEmail: string | null }
           </button>
         </form>
         {error && (
-          <p style={{ color: "#C0392B", marginTop: "1rem", textAlign: "center" }}>{error}</p>
+          <p
+            style={{ color: "#C0392B", marginTop: "1rem", textAlign: "center" }}
+          >
+            {error}
+          </p>
         )}
       </div>
     );
@@ -149,7 +162,12 @@ export function OrdersLookup({ verifiedEmail }: { verifiedEmail: string | null }
         </p>
         <form
           onSubmit={handleVerifyCode}
-          style={{ display: "flex", gap: "0.5rem", justifyContent: "center", flexWrap: "wrap" }}
+          style={{
+            display: "flex",
+            gap: "0.5rem",
+            justifyContent: "center",
+            flexWrap: "wrap",
+          }}
         >
           <input
             type="text"
@@ -191,7 +209,11 @@ export function OrdersLookup({ verifiedEmail }: { verifiedEmail: string | null }
           </button>
         </form>
         {error && (
-          <p style={{ color: "#C0392B", marginTop: "1rem", textAlign: "center" }}>{error}</p>
+          <p
+            style={{ color: "#C0392B", marginTop: "1rem", textAlign: "center" }}
+          >
+            {error}
+          </p>
         )}
         <button
           onClick={() => {
@@ -218,11 +240,20 @@ export function OrdersLookup({ verifiedEmail }: { verifiedEmail: string | null }
   // orders step
   return (
     <div style={{ marginTop: "1rem" }}>
-      {orders!.length === 0 ? (
-        <p style={{ color: "#6B6B6B", textAlign: "center" }}>No orders found for that email.</p>
+      {orders?.length === 0 ? (
+        <p style={{ color: "#6B6B6B", textAlign: "center" }}>
+          No orders found for that email.
+        </p>
       ) : (
-        <ul style={{ listStyle: "none", padding: 0, margin: "0 auto", maxWidth: "28rem" }}>
-          {orders!.map((order) => (
+        <ul
+          style={{
+            listStyle: "none",
+            padding: 0,
+            margin: "0 auto",
+            maxWidth: "28rem",
+          }}
+        >
+          {orders?.map((order) => (
             <li
               key={order.id}
               style={{
@@ -237,8 +268,16 @@ export function OrdersLookup({ verifiedEmail }: { verifiedEmail: string | null }
               }}
             >
               <div style={{ textAlign: "left" }}>
-                <p style={{ margin: 0, fontWeight: 500 }}>{order.product_title}</p>
-                <p style={{ margin: "0.2rem 0 0", color: "#6B6B6B", fontSize: "0.85rem" }}>
+                <p style={{ margin: 0, fontWeight: 500 }}>
+                  {order.product_title}
+                </p>
+                <p
+                  style={{
+                    margin: "0.2rem 0 0",
+                    color: "#6B6B6B",
+                    fontSize: "0.85rem",
+                  }}
+                >
                   ${order.price_paid.toFixed(2)} ·{" "}
                   {new Date(order.created_at).toLocaleDateString("en-US", {
                     month: "short",

@@ -1,8 +1,8 @@
-import { notFound } from "next/navigation";
-import type { Metadata } from "next";
-import { MDXRemote } from "next-mdx-remote/rsc";
-import { getAllPageSlugs, getPageBySlug } from "@unseallink/lib/mdx";
 import { mdxComponents } from "@unseallink/components/mdx-components";
+import { getAllPageSlugs, getPageBySlug } from "@unseallink/lib/mdx";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { MDXRemote } from "next-mdx-remote/rsc";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
 

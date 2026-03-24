@@ -1,7 +1,7 @@
-import { createClient } from "@unseallink/lib/supabase/server";
-import { stripe } from "@unseallink/lib/stripe";
-import { log } from "@unseallink/lib/logger";
 import { TABLES } from "@unseallink/lib/db";
+import { log } from "@unseallink/lib/logger";
+import { stripe } from "@unseallink/lib/stripe";
+import { createClient } from "@unseallink/lib/supabase/server";
 
 /** Returns the Stripe account onboarding URL for the current user. Throws if unauthorized or no user. */
 export async function getStripeConnectAccountLinkUrl(): Promise<string> {
@@ -34,9 +34,12 @@ export async function getStripeConnectAccountLinkUrl(): Promise<string> {
       .eq("id", user.id);
     if (error) {
       // Log the Stripe account ID so it can be manually linked if needed.
-      log.error("Failed to save stripe_account_id — orphaned Stripe account created", {
-        user_id: user.id,
-      });
+      log.error(
+        "Failed to save stripe_account_id — orphaned Stripe account created",
+        {
+          user_id: user.id,
+        },
+      );
       throw new Error("Failed to connect Stripe");
     }
   }
@@ -90,6 +93,8 @@ export async function getStripeWithdrawUrl(): Promise<string | null> {
   }
 
   // Payouts already enabled — send seller to Stripe Express dashboard.
-  const loginLink = await stripe.accounts.createLoginLink(seller.stripe_account_id);
+  const loginLink = await stripe.accounts.createLoginLink(
+    seller.stripe_account_id,
+  );
   return loginLink.url;
 }

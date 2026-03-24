@@ -1,8 +1,8 @@
 "use server";
 
+import { TABLES } from "@unseallink/lib/db";
 import { createClient } from "@unseallink/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { TABLES } from "@unseallink/lib/db";
 
 export async function signInWithOtp(formData: FormData): Promise<void> {
   const email = formData.get("email")?.toString()?.trim();
@@ -27,7 +27,9 @@ export async function verifySellerOtp(formData: FormData): Promise<void> {
   const email = formData.get("email")?.toString()?.trim();
   const code = formData.get("code")?.toString()?.trim();
   if (!email || !code) {
-    redirect(`/auth?error=${encodeURIComponent("Email and code are required")}`);
+    redirect(
+      `/auth?error=${encodeURIComponent("Email and code are required")}`,
+    );
   }
 
   const supabase = await createClient();
@@ -42,7 +44,9 @@ export async function verifySellerOtp(formData: FormData): Promise<void> {
     const msg = error.message?.toLowerCase().includes("expired")
       ? "Code expired. Request a new one."
       : (error.message ?? "Invalid or expired code.");
-    redirect(`/auth?error=${encodeURIComponent(msg)}&sent=1&email=${encodeURIComponent(email)}`);
+    redirect(
+      `/auth?error=${encodeURIComponent(msg)}&sent=1&email=${encodeURIComponent(email)}`,
+    );
   }
 
   const {
@@ -60,7 +64,11 @@ export async function verifySellerOtp(formData: FormData): Promise<void> {
     needsName = !existing?.name;
 
     await supabase.from(TABLES.SELLERS).upsert(
-      { id: user.id, email: user.email ?? "", name: user.user_metadata?.name ?? null },
+      {
+        id: user.id,
+        email: user.email ?? "",
+        name: user.user_metadata?.name ?? null,
+      },
       { onConflict: "id" },
     );
   }

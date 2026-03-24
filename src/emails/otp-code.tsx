@@ -30,7 +30,8 @@ export function OtpCodeEmail({ otpCode, productTitle }: OtpCodeEmailProps) {
         </span>
       </div>
       <Text className="text-[#999999] text-xs m-0">
-        Expires in 15 minutes. If you didn&apos;t make a purchase, you can safely ignore this email.
+        Expires in 15 minutes. If you didn&apos;t make a purchase, you can
+        safely ignore this email.
       </Text>
     </EmailLayout>
   );

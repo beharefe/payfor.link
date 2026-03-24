@@ -14,9 +14,7 @@ export default async function AuthPage({
     <main style={{ padding: "2rem", maxWidth: "24rem", margin: "0 auto" }}>
       <h1>Sign in</h1>
 
-      {error && (
-        <p style={{ marginBottom: "1rem", color: "red" }}>{error}</p>
-      )}
+      {error && <p style={{ marginBottom: "1rem", color: "red" }}>{error}</p>}
 
       {!sent ? (
         <>
@@ -30,7 +28,12 @@ export default async function AuthPage({
                 type="email"
                 required
                 autoComplete="email"
-                style={{ display: "block", width: "100%", padding: "0.5rem", marginTop: "0.25rem" }}
+                style={{
+                  display: "block",
+                  width: "100%",
+                  padding: "0.5rem",
+                  marginTop: "0.25rem",
+                }}
               />
             </div>
             <button type="submit" style={{ padding: "0.5rem 1rem" }}>
@@ -56,7 +59,13 @@ export default async function AuthPage({
                 placeholder="000000"
                 maxLength={6}
                 required
-                style={{ display: "block", padding: "0.5rem", fontSize: "1.25rem", width: "8rem", marginTop: "0.25rem" }}
+                style={{
+                  display: "block",
+                  padding: "0.5rem",
+                  fontSize: "1.25rem",
+                  width: "8rem",
+                  marginTop: "0.25rem",
+                }}
               />
             </div>
             <button type="submit" style={{ padding: "0.5rem 1rem" }}>

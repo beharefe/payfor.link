@@ -1,8 +1,8 @@
 "use server";
 
+import { TABLES } from "@unseallink/lib/db";
 import { createClient } from "@unseallink/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { TABLES } from "@unseallink/lib/db";
 
 export async function saveOnboardingName(formData: FormData) {
   const name = formData.get("name")?.toString()?.trim();

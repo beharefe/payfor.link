@@ -1,12 +1,14 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import {
   getStripeConnectAccountLinkUrl,
   getStripeWithdrawUrl,
 } from "@unseallink/lib/stripe-connect";
+import { redirect } from "next/navigation";
 
-export async function initiateStripeConnect(_formData?: FormData): Promise<void> {
+export async function initiateStripeConnect(
+  _formData?: FormData,
+): Promise<void> {
   let url: string | undefined;
   let errorMsg: string | undefined;
   try {
@@ -15,7 +17,9 @@ export async function initiateStripeConnect(_formData?: FormData): Promise<void>
     errorMsg = err instanceof Error ? err.message : "Failed to connect Stripe";
   }
   if (errorMsg || !url) {
-    redirect(`/dashboard?error=${encodeURIComponent(errorMsg ?? "Failed to connect Stripe")}`);
+    redirect(
+      `/dashboard?error=${encodeURIComponent(errorMsg ?? "Failed to connect Stripe")}`,
+    );
   }
   redirect(url!);
 }

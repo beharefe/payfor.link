@@ -5,14 +5,18 @@ import { resendOtp, verifyOtp } from "./otp";
 // redirect() throws in Next.js — simulate that so execution stops as expected
 vi.mock("next/navigation", () => ({
   redirect: vi.fn().mockImplementation((url: string) => {
-    throw Object.assign(new Error(`NEXT_REDIRECT:${url}`), { digest: "NEXT_REDIRECT" });
+    throw Object.assign(new Error(`NEXT_REDIRECT:${url}`), {
+      digest: "NEXT_REDIRECT",
+    });
   }),
 }));
 vi.mock("@unseallink/lib/supabase/server", () => ({
   createServiceClient: vi.fn(),
 }));
 vi.mock("@unseallink/lib/resend", () => ({
-  resend: { emails: { send: vi.fn().mockResolvedValue({ data: {}, error: null }) } },
+  resend: {
+    emails: { send: vi.fn().mockResolvedValue({ data: {}, error: null }) },
+  },
   FROM_EMAIL: "noreply@unseal.link",
 }));
 vi.mock("@unseallink/lib/logger", () => ({
@@ -82,7 +86,9 @@ describe("verifyOtp", () => {
       makeSupabaseMock(makeOrder({ buyer_email_verified: true })),
     );
 
-    await expect(verifyOtp("order-1", VALID_CODE)).rejects.toThrow("NEXT_REDIRECT");
+    await expect(verifyOtp("order-1", VALID_CODE)).rejects.toThrow(
+      "NEXT_REDIRECT",
+    );
     expect(redirect).toHaveBeenCalledWith("/orders/order-1");
   });
 
@@ -92,7 +98,9 @@ describe("verifyOtp", () => {
     );
 
     const result = await verifyOtp("order-1", VALID_CODE);
-    expect(result).toEqual({ error: "No verification code found. Request a new one." });
+    expect(result).toEqual({
+      error: "No verification code found. Request a new one.",
+    });
   });
 
   it("returns error when code is expired", async () => {
@@ -110,7 +118,9 @@ describe("verifyOtp", () => {
     );
 
     const result = await verifyOtp("order-1", "000000");
-    expect(result).toEqual({ error: "Invalid code. Check your email and try again." });
+    expect(result).toEqual({
+      error: "Invalid code. Check your email and try again.",
+    });
   });
 
   it("trims whitespace from code before hashing", async () => {
@@ -119,14 +129,18 @@ describe("verifyOtp", () => {
     );
 
     // Should succeed — same code with leading/trailing spaces
-    await expect(verifyOtp("order-1", `  ${VALID_CODE}  `)).rejects.toThrow("NEXT_REDIRECT");
+    await expect(verifyOtp("order-1", `  ${VALID_CODE}  `)).rejects.toThrow(
+      "NEXT_REDIRECT",
+    );
   });
 
   it("marks order verified, clears OTP fields, inserts access token, sends email, redirects", async () => {
     const mock = makeSupabaseMock(makeOrder());
     (createServiceClient as ReturnType<typeof vi.fn>).mockReturnValue(mock);
 
-    await expect(verifyOtp("order-1", VALID_CODE)).rejects.toThrow("NEXT_REDIRECT");
+    await expect(verifyOtp("order-1", VALID_CODE)).rejects.toThrow(
+      "NEXT_REDIRECT",
+    );
 
     // Clears OTP and marks verified
     expect(mock._updateFn).toHaveBeenCalledWith({
@@ -160,7 +174,9 @@ describe("verifyOtp", () => {
     mock._insertFn.mockResolvedValue({ error: { message: "DB error" } });
     (createServiceClient as ReturnType<typeof vi.fn>).mockReturnValue(mock);
 
-    await expect(verifyOtp("order-1", VALID_CODE)).rejects.toThrow("NEXT_REDIRECT");
+    await expect(verifyOtp("order-1", VALID_CODE)).rejects.toThrow(
+      "NEXT_REDIRECT",
+    );
 
     const { resend } = await import("@unseallink/lib/resend");
     expect(resend.emails.send).not.toHaveBeenCalled();
