@@ -31,6 +31,13 @@ export async function POST(request: Request) {
   const payload = `${email}|${otpHash}|${expiresAt}`;
   const cookieValue = `${payload}|${sign(payload)}`;
 
+  console.log("[send-code] Attempting to send OTP", {
+    to: email,
+    from: FROM_EMAIL,
+    resend_api_key_set: !!process.env.RESEND_API_KEY,
+    resend_from_email_set: !!process.env.RESEND_FROM_EMAIL,
+  });
+
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
   const { error: emailError } = await resend.emails.send({
     from: FROM_EMAIL,
@@ -47,8 +54,10 @@ export async function POST(request: Request) {
   });
 
   if (emailError) {
+    console.error("[send-code] Resend failed:", JSON.stringify(emailError));
     return NextResponse.json({ error: "Failed to send code. Please try again." }, { status: 500 });
   }
+  console.log("[send-code] OTP email sent successfully to", email);
 
   const cookieStore = await cookies();
   cookieStore.set("orders_otp", cookieValue, {
