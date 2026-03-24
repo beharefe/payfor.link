@@ -1,0 +1,38 @@
+# unseal.link
+
+> A minimal paywall platform. Sellers paste any link, set a price, and share a paywall URL. Buyers pay via Stripe and receive email-based access.
+
+## What it does
+
+- Sellers paste any URL (Notion, Figma, Google Drive, GitHub, Discord invite, etc.)
+- Set a price ($9.99 minimum)
+- Get a shareable paywall link at unseal.link/pay/[slug]
+- Buyers pay via Stripe Checkout and receive an unlock email
+- One-time access, no buyer account required
+- Sellers keep 95.5% (4.5% platform fee)
+
+## Key pages
+
+- /                        → Homepage / product overview
+- /how-it-works            → Step-by-step explanation
+- /pricing                 → Transparent fee structure
+- /auth                    → Seller signup / login (magic link, no password)
+- /dashboard               → Seller dashboard (protected)
+- /pay/[slug]              → Public paywall page for buyers
+- /sell-notion-template    → Guide: sell Notion templates
+- /sell-figma-template     → Guide: sell Figma files
+- /sell-discord-access     → Guide: sell Discord community access
+- /sell-github-repo        → Guide: sell GitHub repo access
+- /sell-course             → Guide: sell online course content
+
+## Technical
+
+- Built with Next.js 15 App Router, Supabase, Stripe Connect, Resend
+- No content is hosted — platform controls access, sellers own their content
+- Purchases are immutable snapshots (delivery URL captured at purchase time)
+- Stripe is the source of truth for payouts
+
+## Contact / sitemap
+
+- Sitemap: https://unseal.link/sitemap.xml
+- Support: via the platform
