@@ -1,5 +1,8 @@
 import type { ProductType } from "@unseallink/types/database";
 
+// TODO: move to a `platforms` table in Supabase once we have real usage data.
+// That way sellers/admins can add new platforms without a deploy, and we can
+// track which platforms are actually popular on the platform.
 const HOST_MAP: Record<string, { label: string; type: ProductType }> = {
   "notion.so":      { label: "Open in Notion",       type: "template" },
   "notion.site":    { label: "Open in Notion",        type: "template" },
