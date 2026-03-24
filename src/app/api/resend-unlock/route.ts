@@ -27,16 +27,20 @@ export async function POST(request: Request) {
 
   // Rate limit: max 3 resend requests per email per hour via token count
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-  const { count } = await supabase
-    .from(TABLES.ACCESS_TOKENS)
-    .select("id", { count: "exact", head: true })
-    .gte("created_at", oneHourAgo)
-    .in(
-      "order_id",
-      supabase.from(TABLES.ORDERS).select("id").eq("buyer_email", email),
-    );
-  if ((count ?? 0) >= 3) {
-    return NextResponse.json({ ok: true }); // Silent: don't reveal throttle exists
+  const { data: emailOrders } = await supabase
+    .from(TABLES.ORDERS)
+    .select("id")
+    .eq("buyer_email", email);
+  const orderIds = (emailOrders ?? []).map((o) => o.id);
+  if (orderIds.length > 0) {
+    const { count } = await supabase
+      .from(TABLES.ACCESS_TOKENS)
+      .select("id", { count: "exact", head: true })
+      .gte("created_at", oneHourAgo)
+      .in("order_id", orderIds);
+    if ((count ?? 0) >= 3) {
+      return NextResponse.json({ ok: true }); // Silent: don't reveal throttle exists
+    }
   }
   const { data: orders } = await supabase
     .from(TABLES.ORDERS)

@@ -13,7 +13,7 @@ export default async function SettingsPage() {
 
   const { data: seller } = await supabase
     .from(TABLES.SELLERS)
-    .select("name, email")
+    .select("name, email, bio, avatar_url")
     .eq("id", user.id)
     .single();
 
@@ -24,7 +24,11 @@ export default async function SettingsPage() {
       </p>
       <h1 style={{ marginBottom: "0.25rem" }}>Settings</h1>
       <p style={{ color: "#6B6B6B", marginBottom: "2rem" }}>{seller?.email}</p>
-      <SettingsForm currentName={seller?.name ?? ""} />
+      <SettingsForm
+        currentName={seller?.name ?? ""}
+        currentBio={seller?.bio ?? ""}
+        currentAvatarUrl={seller?.avatar_url ?? null}
+      />
     </main>
   );
 }
