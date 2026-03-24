@@ -1,8 +1,8 @@
 import { createServiceClient } from "@unseallink/lib/supabase/server";
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { TABLES } from "@unseallink/lib/db";
+import { SuccessPageClient } from "@unseallink/app/(buyer)/pay/[slug]/success/success-page-client";
 
 export const metadata: Metadata = {
   robots: { index: false },
@@ -33,9 +33,18 @@ export default async function OrderPage({ params }: Props) {
 
   if (!order.buyer_email_verified) {
     return (
-      <main style={{ padding: "2rem", textAlign: "center" }}>
-        <h1>Email not verified</h1>
-        <p>Check your inbox and enter the 6-digit code to access your order.</p>
+      <main style={{ padding: "2rem", maxWidth: "28rem", margin: "0 auto", textAlign: "center" }}>
+        <p style={{ fontSize: "2rem", margin: "0 0 0.5rem" }}>✉️</p>
+        <h1 style={{ fontSize: "1.4rem", fontWeight: 500, margin: "0 0 0.5rem" }}>Verify your email</h1>
+        <p style={{ color: "#6B6B6B", margin: "0 0 1.5rem" }}>
+          Enter the 6-digit code sent to <strong>{order.buyer_email}</strong>
+        </p>
+        <SuccessPageClient orderId={order.id} />
+        <p style={{ marginTop: "1.5rem" }}>
+          <Link href="/orders" style={{ color: "#6B6B6B", fontSize: "0.9rem" }}>
+            ← All orders
+          </Link>
+        </p>
       </main>
     );
   }
