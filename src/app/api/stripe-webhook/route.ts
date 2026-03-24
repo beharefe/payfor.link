@@ -5,6 +5,7 @@ import { stripe, platformFeeCents } from "@unseallink/lib/stripe";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { resend, FROM_EMAIL } from "@unseallink/lib/resend";
 import { log } from "@unseallink/lib/logger";
+import { serializeError } from "@unseallink/lib/utils";
 import { TABLES } from "@unseallink/lib/db";
 
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
@@ -32,7 +33,7 @@ export async function POST(request: Request) {
   try {
     event = stripe.webhooks.constructEvent(body, signature, WEBHOOK_SECRET);
   } catch (err) {
-    log.error("Stripe webhook signature verification failed", { error: String(err) });
+    log.error("Stripe webhook signature verification failed", { error: serializeError(err) });
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
@@ -43,7 +44,7 @@ export async function POST(request: Request) {
       await handleAccountUpdated(event.data.object as Stripe.Account);
     }
   } catch (err) {
-    log.error("Stripe webhook handler error", { type: event.type, error: String(err) });
+    log.error("Stripe webhook handler error", { type: event.type, error: serializeError(err) });
   }
 
   return NextResponse.json({ received: true }, { status: 200 });

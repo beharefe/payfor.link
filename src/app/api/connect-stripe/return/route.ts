@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@unseallink/lib/supabase/server";
 import { stripe } from "@unseallink/lib/stripe";
 import { log } from "@unseallink/lib/logger";
+import { serializeError } from "@unseallink/lib/utils";
 import { TABLES } from "@unseallink/lib/db";
 
 export async function GET() {
@@ -44,7 +45,7 @@ export async function GET() {
       .eq("seller_id", user.id)
       .eq("status", "draft");
   } catch (err) {
-    log.error("connect-stripe return failed", { user_id: user.id, error: String(err) });
+    log.error("connect-stripe return failed", { user_id: user.id, error: serializeError(err) });
   }
 
   return NextResponse.redirect(new URL("/dashboard", appUrl));

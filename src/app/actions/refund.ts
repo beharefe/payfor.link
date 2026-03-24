@@ -3,6 +3,7 @@
 import { createClient } from "@unseallink/lib/supabase/server";
 import { stripe } from "@unseallink/lib/stripe";
 import { log } from "@unseallink/lib/logger";
+import { serializeError } from "@unseallink/lib/utils";
 import { TABLES } from "@unseallink/lib/db";
 import { redirect } from "next/navigation";
 
@@ -31,7 +32,7 @@ export async function refundPurchase(orderId: string): Promise<ActionResult> {
   } catch (err) {
     log.error("refundPurchase: Stripe refund failed", {
       order_id: orderId,
-      error: String(err),
+      error: serializeError(err),
     });
     return { error: "Refund failed. Please try again or contact support." };
   }

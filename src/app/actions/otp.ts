@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { resend, FROM_EMAIL } from "@unseallink/lib/resend";
 import { log } from "@unseallink/lib/logger";
+import { serializeError } from "@unseallink/lib/utils";
 import { TABLES } from "@unseallink/lib/db";
 
 type ActionResult = { success: true } | { error: string };
@@ -131,13 +132,7 @@ export async function resendOtp(orderId: string): Promise<ActionResult> {
   });
 
   if (emailError) {
-    log.error("resendOtp: email send failed", {
-      order_id: orderId,
-      error_name: (emailError as { name?: string }).name,
-      error_message: (emailError as { message?: string }).message,
-      error_status: (emailError as { statusCode?: number }).statusCode,
-      error_raw: JSON.stringify(emailError),
-    });
+    log.error("resendOtp: email send failed", { order_id: orderId, error: serializeError(emailError) });
     return { error: "Failed to send code. Please try again." };
   }
 
