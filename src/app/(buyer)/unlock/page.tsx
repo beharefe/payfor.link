@@ -95,11 +95,15 @@ export default async function UnlockPage({ searchParams }: Props) {
     }
 
     // Mark used only if still unused (race-condition guard)
-    await svc
+    const { data: consumed } = await svc
       .from(TABLES.ACCESS_TOKENS)
       .update({ used_at: new Date().toISOString() })
       .eq("id", accessToken?.id)
-      .is("used_at", null);
+      .is("used_at", null)
+      .select("id");
+
+    // If 0 rows updated, another request already consumed the token
+    if (!consumed || consumed.length === 0) redirect("/orders");
 
     const { data: o } = await svc
       .from(TABLES.ORDERS)
