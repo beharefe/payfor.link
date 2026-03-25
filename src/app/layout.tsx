@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
+import { Amplitude } from "@unseallink/lib/amplitude";
 import "./globals.css";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
