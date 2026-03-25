@@ -3,10 +3,7 @@
 import { TABLES } from "@unseallink/lib/db";
 import { log } from "@unseallink/lib/logger";
 import { platformFeeCents, stripe } from "@unseallink/lib/stripe";
-import {
-  createClient,
-  createServiceClient,
-} from "@unseallink/lib/supabase/server";
+import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { redirect } from "next/navigation";
 
 type ActionResult = { error: string };
@@ -14,7 +11,7 @@ type ActionResult = { error: string };
 export async function createCheckoutSession(
   linkId: string,
 ): Promise<ActionResult | never> {
-  const supabase = await createClient();
+  const supabase = createServiceClient();
 
   const { data: link } = await supabase
     .from(TABLES.PRODUCTS)

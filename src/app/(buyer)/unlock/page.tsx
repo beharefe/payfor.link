@@ -5,6 +5,7 @@ import { createServiceClient } from "@unseallink/lib/supabase/server";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { UnlockForm } from "./unlock-form";
 
 export const metadata: Metadata = {
   robots: { index: false },
@@ -139,24 +140,7 @@ export default async function UnlockPage({ searchParams }: Props) {
         {order.product_title}
       </p>
 
-      <form action={consumeAndRedirect} style={{ width: "100%" }}>
-        <button
-          type="submit"
-          style={{
-            width: "100%",
-            padding: "14px 28px",
-            background: "#111111",
-            color: "#FFFFFF",
-            border: "none",
-            borderRadius: "100px",
-            fontSize: "1rem",
-            fontWeight: 500,
-            cursor: "pointer",
-          }}
-        >
-          {ctaLabel} →
-        </button>
-      </form>
+      <UnlockForm action={consumeAndRedirect} label={ctaLabel} />
 
       <p style={{ marginTop: "1.5rem", fontSize: "0.85rem", color: "#AAAAAA" }}>
         Single-use link · expires 24h after purchase

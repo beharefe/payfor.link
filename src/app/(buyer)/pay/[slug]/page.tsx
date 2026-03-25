@@ -1,9 +1,6 @@
 import { TABLES } from "@unseallink/lib/db";
 import { log } from "@unseallink/lib/logger";
-import {
-  createClient,
-  createServiceClient,
-} from "@unseallink/lib/supabase/server";
+import { createServiceClient } from "@unseallink/lib/supabase/server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { AbuseReportForm } from "./abuse-report-form";
@@ -13,7 +10,7 @@ type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = await createClient();
+  const supabase = createServiceClient();
   const { data: link } = await supabase
     .from(TABLES.PRODUCTS)
     .select("title, description, price, preview_image_url")
@@ -54,7 +51,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PaywallPage({ params }: Props) {
   const { slug } = await params;
-  const supabase = await createClient();
+  const supabase = createServiceClient();
 
   const { data: link } = await supabase
     .from(TABLES.PRODUCTS)
