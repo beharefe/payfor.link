@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { OrdersLookup } from "./orders-lookup";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Your orders",
   robots: { index: false },

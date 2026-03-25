@@ -70,7 +70,7 @@ export default async function OrderPage({ params }: Props) {
   const verifiedEmail =
     getVerifiedEmail(cookieStore.get("orders_session")?.value) ??
     getVerifiedPurchaseEmail(cookieStore.get("purchase_session")?.value, order_id);
-  if (!verifiedEmail || verifiedEmail !== order.buyer_email) {
+  if (!verifiedEmail || verifiedEmail.toLowerCase() !== order.buyer_email.toLowerCase()) {
     return (
       <main
         style={{

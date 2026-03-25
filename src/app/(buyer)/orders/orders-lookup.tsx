@@ -31,8 +31,18 @@ export function OrdersLookup({
     if (verifiedEmail && step === "orders" && orders === null) {
       setLoading(true);
       fetch(`/api/orders/lookup?email=${encodeURIComponent(verifiedEmail)}`)
-        .then((r) => r.json())
+        .then((r) => {
+          if (r.status === 401) {
+            // Session expired — force back to email step
+            setStep("email");
+            setEmail("");
+            setOrders(null);
+            return null;
+          }
+          return r.json();
+        })
         .then((data) => {
+          if (!data) return;
           if (data.error) setError(data.error);
           else setOrders(data.orders ?? []);
         })
