@@ -1,7 +1,7 @@
 "use server";
 
 import crypto from "node:crypto";
-import { setOrdersSession } from "@unseallink/lib/buyer-session";
+import { setPurchaseSession } from "@unseallink/lib/buyer-session";
 import { TABLES } from "@unseallink/lib/db";
 import { log } from "@unseallink/lib/logger";
 import { FROM_EMAIL, resend } from "@unseallink/lib/resend";
@@ -53,8 +53,9 @@ export async function verifyOtp(
     })
     .eq("id", orderId);
 
-  // Grant orders session so buyer can view all their orders without re-verifying
-  await setOrdersSession(order.buyer_email);
+  // Grant a purchase-scoped session for this specific order only.
+  // Does NOT grant access to the full orders list — buyer must verify separately there.
+  await setPurchaseSession(order.buyer_email, orderId);
 
   // Generate access token and send access email
   const rawToken = crypto.randomBytes(32).toString("hex");

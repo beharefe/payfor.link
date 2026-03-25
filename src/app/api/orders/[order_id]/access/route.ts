@@ -1,4 +1,4 @@
-import { getVerifiedEmail } from "@unseallink/lib/buyer-session";
+import { getVerifiedEmail, getVerifiedPurchaseEmail } from "@unseallink/lib/buyer-session";
 import { TABLES } from "@unseallink/lib/db";
 import { isValidUrl } from "@unseallink/lib/product-utils";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
@@ -31,11 +31,12 @@ export async function GET(
     return NextResponse.redirect(new URL(`/orders/${order_id}`, appUrl));
   }
 
-  // Verify the requester owns this order via their session cookie.
+  // Verify the requester owns this order.
+  // Accept either a full orders_session OR a purchase_session scoped to this order.
   const cookieStore = await cookies();
-  const verifiedEmail = getVerifiedEmail(
-    cookieStore.get("orders_session")?.value,
-  );
+  const verifiedEmail =
+    getVerifiedEmail(cookieStore.get("orders_session")?.value) ??
+    getVerifiedPurchaseEmail(cookieStore.get("purchase_session")?.value, order_id);
   if (!verifiedEmail || verifiedEmail !== order.buyer_email) {
     // Session missing or expired — send buyer to re-authenticate.
     return NextResponse.redirect(

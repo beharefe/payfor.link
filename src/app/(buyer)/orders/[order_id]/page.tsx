@@ -1,5 +1,5 @@
 import { SuccessPageClient } from "@unseallink/app/(buyer)/pay/[slug]/success/success-page-client";
-import { getVerifiedEmail } from "@unseallink/lib/buyer-session";
+import { getVerifiedEmail, getVerifiedPurchaseEmail } from "@unseallink/lib/buyer-session";
 import { TABLES } from "@unseallink/lib/db";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import type { Metadata } from "next";
@@ -64,11 +64,12 @@ export default async function OrderPage({ params }: Props) {
     );
   }
 
-  // For verified orders, confirm the visitor owns this order via session cookie.
+  // For verified orders, confirm the visitor owns this order.
+  // Accept either a full orders_session OR a purchase_session scoped to this order.
   const cookieStore = await cookies();
-  const verifiedEmail = getVerifiedEmail(
-    cookieStore.get("orders_session")?.value,
-  );
+  const verifiedEmail =
+    getVerifiedEmail(cookieStore.get("orders_session")?.value) ??
+    getVerifiedPurchaseEmail(cookieStore.get("purchase_session")?.value, order_id);
   if (!verifiedEmail || verifiedEmail !== order.buyer_email) {
     return (
       <main
