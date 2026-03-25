@@ -240,7 +240,7 @@ click unlock again
 
 Database query:
 
-SELECT * FROM purchases WHERE buyer_email = ?
+SELECT * FROM orders WHERE buyer_email = ?
 
 This avoids forcing buyers to create accounts.
 

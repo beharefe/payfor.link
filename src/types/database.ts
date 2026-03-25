@@ -63,7 +63,7 @@ export interface Order {
   seller_id: string;
   buyer_email: string;
   buyer_email_verified: boolean;
-  otp_code_hash: string | null;
+  otp_hash: string | null;
   otp_expires_at: string | null;
   otp_attempts: number;
   stripe_payment_id: string;
