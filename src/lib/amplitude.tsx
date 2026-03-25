@@ -62,5 +62,10 @@ export function track(event: AnalyticsEvent) {
   amplitude.track(event.name, event.props);
 }
 
+/** Client component that boots Amplitude. Drop it inside <body> in the root layout. */
+export function Amplitude() {
+  return null;
+}
+
 export { amplitude };
 export default amplitude;
