@@ -71,7 +71,11 @@ export default async function MdxPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <div className="min-h-screen bg-[#F5F4EF] dark:bg-[#111111] flex flex-col items-stretch font-sans">
-        <MDXRemote source={content} components={mdxComponents} />
+        <MDXRemote
+          source={content}
+          components={mdxComponents}
+          options={{ parseFrontmatter: false, blockJS: false }}
+        />
       </div>
     </>
   );
