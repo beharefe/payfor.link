@@ -76,8 +76,8 @@ Add the DSN and auth token to your env.
 2. Connect Stripe via dashboard (Connect Stripe).
 3. Create a link at `/dashboard/links/new`.
 4. Open the paywall URL (`/pay/<slug>`), click Pay, complete checkout with test card `4242 4242 4242 4242`.
-5. On `/pay/<slug>/success` enter the OTP from email (or Supabase inbox), verify.
-6. Open the unlock link from the second email; confirm redirect to the destination URL.
+5. On `/pay/<slug>/success` confirm the "check your email" screen appears.
+6. Open the access link from the email; confirm redirect to the destination URL.
 7. Visit `/library`, sign in with the same buyer email, check “Re-access”.
 8. Visit `/unlock-request`, request a new access link by email.
 

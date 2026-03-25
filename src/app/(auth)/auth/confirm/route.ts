@@ -9,8 +9,19 @@ export async function GET(request: NextRequest) {
   const tokenHash = searchParams.get("token_hash");
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
+  // Handle Supabase error redirects (e.g. expired/invalid magic link)
+  const supabaseError =
+    searchParams.get("error_description") ?? searchParams.get("error");
+  if (supabaseError) {
+    return NextResponse.redirect(
+      new URL(`/auth?error=${encodeURIComponent(supabaseError)}`, appUrl),
+    );
+  }
+
   if (!code && !tokenHash) {
-    return NextResponse.redirect(new URL("/auth?error=missing_code", appUrl));
+    return NextResponse.redirect(
+      new URL("/auth?error=missing_code", appUrl),
+    );
   }
 
   const supabase = await createClient();

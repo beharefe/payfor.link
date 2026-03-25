@@ -2,8 +2,7 @@ import { TABLES } from "@unseallink/lib/db";
 import { stripe } from "@unseallink/lib/stripe";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
-import { SuccessPageClient, SuccessPoller } from "./success-page-client";
+import { SuccessPoller } from "./success-page-client";
 
 export const metadata: Metadata = {
   robots: { index: false },
@@ -20,6 +19,9 @@ export default async function PaymentSuccessPage({
 }: Props) {
   const { slug } = await params;
   const { session_id } = await searchParams;
+
+  // suppress unused warning — slug is part of route, not used in this handler
+  void slug;
 
   if (!session_id) {
     return (
@@ -59,29 +61,17 @@ export default async function PaymentSuccessPage({
   }
 
   const supabase = createServiceClient();
-  const { data: purchase } = await supabase
+  const { data: order } = await supabase
     .from(TABLES.ORDERS)
-    .select(
-      "id, buyer_email, buyer_email_verified, product_title, price_paid, currency",
-    )
+    .select("id, product_title, price_paid, currency")
     .eq("stripe_checkout_session_id", session.id)
     .single();
 
-  if (!purchase) {
+  if (!order) {
     return (
       <main style={{ padding: "2rem", textAlign: "center" }}>
         <h1>Payment received</h1>
         <SuccessPoller />
-      </main>
-    );
-  }
-
-  if (purchase.buyer_email_verified) {
-    redirect(`/orders/${purchase.id}`);
-    return (
-      <main style={{ padding: "2rem", maxWidth: "28rem", margin: "0 auto" }}>
-        <h1>You&apos;re all set</h1>
-        <p>Your purchase was already verified. Check your email for access.</p>
       </main>
     );
   }
@@ -102,15 +92,17 @@ export default async function PaymentSuccessPage({
         Payment confirmed
       </h1>
       <p style={{ fontWeight: 500, margin: "0 0 0.25rem" }}>
-        {purchase.product_title}
+        {order.product_title}
       </p>
       <p style={{ color: "#6B6B6B", margin: "0 0 1.5rem" }}>
-        ${purchase.price_paid.toFixed(2)} {purchase.currency.toUpperCase()}
+        ${order.price_paid.toFixed(2)} {order.currency.toUpperCase()}
       </p>
-      <p style={{ margin: "0 0 0.75rem" }}>
-        Enter the 6-digit code we sent to <strong>{customerEmail}</strong>
+      <p style={{ margin: "0 0 0.5rem" }}>
+        Your access link has been sent to <strong>{customerEmail}</strong>
       </p>
-      <SuccessPageClient orderId={purchase.id} />
+      <p style={{ color: "#6B6B6B", fontSize: "0.9rem", margin: 0 }}>
+        Check your inbox and click the link to access your purchase.
+      </p>
     </main>
   );
 }

@@ -1,5 +1,4 @@
-import { SuccessPageClient } from "@unseallink/app/(buyer)/pay/[slug]/success/success-page-client";
-import { getVerifiedEmail, getVerifiedPurchaseEmail } from "@unseallink/lib/buyer-session";
+import { verifySessionValue } from "@unseallink/lib/buyer-token";
 import { TABLES } from "@unseallink/lib/db";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import type { Metadata } from "next";
@@ -19,7 +18,7 @@ export default async function OrderPage({ params }: Props) {
   const { data: order } = await service
     .from(TABLES.ORDERS)
     .select(
-      "id, buyer_email, buyer_email_verified, product_title, price_paid, currency, created_at, status, seller_id",
+      "id, buyer_email, product_title, price_paid, currency, created_at, status, seller_id",
     )
     .eq("id", order_id)
     .single();
@@ -35,42 +34,10 @@ export default async function OrderPage({ params }: Props) {
     );
   }
 
-  if (!order.buyer_email_verified) {
-    return (
-      <main
-        style={{
-          padding: "2rem",
-          maxWidth: "28rem",
-          margin: "0 auto",
-          textAlign: "center",
-        }}
-      >
-        <p style={{ fontSize: "2rem", margin: "0 0 0.5rem" }}>✉️</p>
-        <h1
-          style={{ fontSize: "1.4rem", fontWeight: 500, margin: "0 0 0.5rem" }}
-        >
-          Verify your email
-        </h1>
-        <p style={{ color: "#6B6B6B", margin: "0 0 1.5rem" }}>
-          Enter the 6-digit code sent to <strong>{order.buyer_email}</strong>
-        </p>
-        <SuccessPageClient orderId={order.id} />
-        <p style={{ marginTop: "1.5rem" }}>
-          <Link href="/orders" style={{ color: "#6B6B6B", fontSize: "0.9rem" }}>
-            ← All orders
-          </Link>
-        </p>
-      </main>
-    );
-  }
-
-  // For verified orders, confirm the visitor owns this order.
-  // Accept either a full orders_session OR a purchase_session scoped to this order.
   const cookieStore = await cookies();
-  const verifiedEmail =
-    getVerifiedEmail(cookieStore.get("orders_session")?.value) ??
-    getVerifiedPurchaseEmail(cookieStore.get("purchase_session")?.value, order_id);
-  if (!verifiedEmail || verifiedEmail.toLowerCase() !== order.buyer_email.toLowerCase()) {
+  const session = verifySessionValue(cookieStore.get("buyer_session")?.value ?? "");
+
+  if (!session || session.email.toLowerCase() !== order.buyer_email.toLowerCase()) {
     return (
       <main
         style={{
@@ -81,13 +48,11 @@ export default async function OrderPage({ params }: Props) {
         }}
       >
         <p style={{ fontSize: "2rem", margin: "0 0 0.5rem" }}>🔒</p>
-        <h1
-          style={{ fontSize: "1.4rem", fontWeight: 500, margin: "0 0 0.5rem" }}
-        >
-          Session expired
+        <h1 style={{ fontSize: "1.4rem", fontWeight: 500, margin: "0 0 0.5rem" }}>
+          Sign in to view this order
         </h1>
         <p style={{ color: "#6B6B6B", margin: "0 0 1.5rem" }}>
-          Please verify your email to view this order.
+          Use the access link from your purchase email, or sign in at orders.
         </p>
         <Link
           href="/orders"
@@ -101,7 +66,7 @@ export default async function OrderPage({ params }: Props) {
             fontWeight: 500,
           }}
         >
-          Verify email
+          Go to orders
         </Link>
       </main>
     );
@@ -164,9 +129,7 @@ export default async function OrderPage({ params }: Props) {
         {order.product_title}
       </h2>
       {seller?.name && (
-        <p style={{ color: "#666", marginBottom: "1.5rem" }}>
-          by {seller.name}
-        </p>
+        <p style={{ color: "#666", marginBottom: "1.5rem" }}>by {seller.name}</p>
       )}
 
       <a

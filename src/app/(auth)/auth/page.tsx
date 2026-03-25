@@ -1,4 +1,8 @@
-import { signInWithOtp, verifySellerOtp } from "@unseallink/app/actions/auth";
+import { signInWithOtp } from "@unseallink/app/actions/auth";
+
+const ERROR_MESSAGES: Record<string, string> = {
+  missing_code: "That link is invalid or has expired.",
+};
 
 export default async function AuthPage({
   searchParams,
@@ -8,20 +12,44 @@ export default async function AuthPage({
   const params = await searchParams;
   const sent = params.sent === "1";
   const email = params.email ? decodeURIComponent(params.email) : "";
-  const error = params.error ? decodeURIComponent(params.error) : null;
+  const rawError = params.error ? decodeURIComponent(params.error) : null;
+  const error = rawError ? (ERROR_MESSAGES[rawError] ?? rawError) : null;
 
   return (
     <main style={{ padding: "2rem", maxWidth: "24rem", margin: "0 auto" }}>
-      <h1>Sign in</h1>
+      <h1 style={{ fontSize: "1.5rem", fontWeight: 500, marginBottom: "0.5rem" }}>
+        Sign in
+      </h1>
 
-      {error && <p style={{ marginBottom: "1rem", color: "red" }}>{error}</p>}
+      {error && (
+        <p style={{ marginBottom: "1rem", color: "#C0392B", fontSize: "0.9rem" }}>
+          {error}
+        </p>
+      )}
 
-      {!sent ? (
+      {sent ? (
         <>
-          <p>Enter your email and we&apos;ll send you a 6-digit code.</p>
+          <p style={{ fontSize: "2rem", margin: "0.5rem 0" }}>✉️</p>
+          <p style={{ fontWeight: 500, marginBottom: "0.25rem" }}>Check your inbox</p>
+          <p style={{ color: "#6B6B6B", fontSize: "0.9rem" }}>
+            We sent an access link to <strong>{email}</strong>. Click it to continue.
+          </p>
+          <p style={{ marginTop: "1.5rem" }}>
+            <a href="/auth" style={{ color: "#6B6B6B", fontSize: "0.9rem" }}>
+              Use a different email
+            </a>
+          </p>
+        </>
+      ) : (
+        <>
+          <p style={{ color: "#6B6B6B", marginBottom: "1.5rem" }}>
+            Enter your email and we&apos;ll send you an access link.
+          </p>
           <form action={signInWithOtp}>
             <div style={{ marginBottom: "1rem" }}>
-              <label htmlFor="email">Email</label>
+              <label htmlFor="email" style={{ display: "block", marginBottom: "0.25rem" }}>
+                Email
+              </label>
               <input
                 id="email"
                 name="email"
@@ -31,50 +59,30 @@ export default async function AuthPage({
                 style={{
                   display: "block",
                   width: "100%",
-                  padding: "0.5rem",
-                  marginTop: "0.25rem",
+                  padding: "0.625rem 1rem",
+                  border: "1px solid #E5E5E5",
+                  borderRadius: "12px",
+                  fontSize: "1rem",
+                  boxSizing: "border-box",
                 }}
               />
             </div>
-            <button type="submit" style={{ padding: "0.5rem 1rem" }}>
-              Send code
+            <button
+              type="submit"
+              style={{
+                padding: "0.625rem 1.25rem",
+                background: "#111111",
+                color: "#ffffff",
+                border: "none",
+                borderRadius: "100px",
+                fontWeight: 500,
+                fontSize: "1rem",
+                cursor: "pointer",
+              }}
+            >
+              Send access link
             </button>
           </form>
-        </>
-      ) : (
-        <>
-          <p>
-            Enter the 6-digit code we sent to <strong>{email}</strong>
-          </p>
-          <form action={verifySellerOtp}>
-            <input type="hidden" name="email" value={email} />
-            <div style={{ marginBottom: "1rem" }}>
-              <label htmlFor="code">Code</label>
-              <input
-                id="code"
-                name="code"
-                type="text"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                placeholder="000000"
-                maxLength={6}
-                required
-                style={{
-                  display: "block",
-                  padding: "0.5rem",
-                  fontSize: "1.25rem",
-                  width: "8rem",
-                  marginTop: "0.25rem",
-                }}
-              />
-            </div>
-            <button type="submit" style={{ padding: "0.5rem 1rem" }}>
-              Verify
-            </button>
-          </form>
-          <p style={{ marginTop: "1rem" }}>
-            <a href="/auth">Use a different email</a>
-          </p>
         </>
       )}
     </main>

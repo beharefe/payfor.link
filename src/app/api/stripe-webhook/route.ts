@@ -1,7 +1,6 @@
-import crypto from "node:crypto";
 import { render } from "@react-email/render";
-import { OtpCodeEmail } from "@unseallink/emails/otp-code";
 import { SaleNotificationEmail } from "@unseallink/emails/sale-notification";
+import { createBuyerToken } from "@unseallink/lib/buyer-token";
 import { TABLES } from "@unseallink/lib/db";
 import { log } from "@unseallink/lib/logger";
 import { FROM_EMAIL, resend } from "@unseallink/lib/resend";
@@ -111,23 +110,28 @@ async function handleCheckoutSessionCompleted(
   const pricePaid = amountTotal / 100;
   const platformFee = platformFeeCents(pricePaid) / 100;
 
-  const { error: insertError } = await supabase.from(TABLES.ORDERS).insert({
-    product_id: product.id,
-    seller_id: product.seller_id,
-    buyer_email: customerEmail,
-    stripe_payment_id: paymentIntentId,
-    stripe_checkout_session_id: session.id,
-    delivery_url: product.destination_url,
-    product_title: product.title,
-    price_paid: pricePaid,
-    platform_fee: platformFee,
-    product_version: product.version,
-    currency: (session.currency ?? "usd").toLowerCase(),
-  });
+  const { data: insertedOrder, error: insertError } = await supabase
+    .from(TABLES.ORDERS)
+    .insert({
+      product_id: product.id,
+      seller_id: product.seller_id,
+      buyer_email: customerEmail,
+      buyer_email_verified: true,
+      stripe_payment_id: paymentIntentId,
+      stripe_checkout_session_id: session.id,
+      delivery_url: product.destination_url,
+      product_title: product.title,
+      price_paid: pricePaid,
+      platform_fee: platformFee,
+      product_version: product.version,
+      currency: (session.currency ?? "usd").toLowerCase(),
+    })
+    .select("id")
+    .single();
 
-  if (insertError) {
+  if (insertError || !insertedOrder) {
     log.error("checkout.session.completed: insert order failed", {
-      error: insertError.message,
+      error: insertError?.message,
     });
     return;
   }
@@ -145,32 +149,32 @@ async function handleCheckoutSessionCompleted(
     }),
   ]);
 
-  // Generate custom OTP for buyer email verification — no Supabase auth session created
-  const otpCode = String(Math.floor(100000 + Math.random() * 900000));
-  const otpHash = crypto.createHash("sha256").update(otpCode).digest("hex");
-  const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 min
-
-  const { data: insertedOrder } = await supabase
-    .from(TABLES.ORDERS)
-    .select("id")
-    .eq("stripe_payment_id", paymentIntentId)
-    .single();
-
-  if (insertedOrder) {
-    await supabase
-      .from(TABLES.ORDERS)
-      .update({ otp_hash: otpHash, otp_expires_at: otpExpiresAt })
-      .eq("id", insertedOrder.id);
-
-    await resend.emails.send({
-      from: FROM_EMAIL,
-      to: customerEmail,
-      subject: `Your verification code — ${product.title}`,
-      html: await render(
-        OtpCodeEmail({ otpCode, productTitle: product.title }),
-      ),
-    });
-  }
+  // Send buyer a signed access link — no Supabase session involved
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
+  const accessLink = `${appUrl}/api/orders/verify?token=${createBuyerToken(customerEmail)}&oid=${insertedOrder.id}`;
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to: customerEmail,
+    subject: `Your access link — ${product.title}`,
+    html: `
+      <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px;">
+        <h2 style="font-size:20px;font-weight:500;margin:0 0 8px;">Your access is ready</h2>
+        <p style="color:#666;margin:0 0 20px;">${product.title}</p>
+        <a href="${accessLink}" style="display:inline-block;background:#111111;color:#ffffff;padding:14px 28px;border-radius:100px;text-decoration:none;font-weight:500;font-size:16px;">
+          Access content →
+        </a>
+        <p style="color:#aaa;font-size:13px;margin-top:20px;">
+          This link expires in 7 days. Can't click the button? Copy this link:<br>
+          <span style="color:#666;">${accessLink}</span>
+        </p>
+        <hr style="border:none;border-top:1px solid #eee;margin:20px 0;">
+        <p style="color:#aaa;font-size:12px;margin:0;">
+          Purchased via <a href="${appUrl}" style="color:#aaa;">unseal.link</a> ·
+          <a href="${appUrl}/orders/${insertedOrder.id}" style="color:#aaa;">View your order</a>
+        </p>
+      </div>
+    `,
+  });
 
   // Notify seller of the new sale
   const { data: seller } = await supabase
@@ -180,7 +184,6 @@ async function handleCheckoutSessionCompleted(
     .maybeSingle();
 
   if (seller?.email) {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
     await resend.emails.send({
       from: FROM_EMAIL,
       to: seller.email,
