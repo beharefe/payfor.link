@@ -6,7 +6,7 @@
   "tailwind": {
     "config": "",
     "css": "src/app/globals.css",
-    "baseColor": "olive",
+    "baseColor": "neutral",
     "cssVariables": true,
     "prefix": ""
   },
@@ -19,7 +19,7 @@
     "lib": "@unseallink/lib",
     "hooks": "@unseallink/hooks"
   },
-  "menuColor": "inverted",
-  "menuAccent": "bold",
+  "menuColor": "default",
+  "menuAccent": "subtle",
   "registries": {}
 }

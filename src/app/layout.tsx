@@ -3,6 +3,12 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { Amplitude } from "@unseallink/lib/amplitude";
 import "./globals.css";
+import { Inter, Source_Sans_3 } from "next/font/google";
+import { cn } from "@unseallink/lib/utils";
+
+const sourceSans3Heading = Source_Sans_3({subsets:['latin'],variable:'--font-heading'});
+
+const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
 
@@ -52,7 +58,7 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale}>
+    <html lang={locale} className={cn("font-sans", inter.variable, sourceSans3Heading.variable)}>
       <body className="antialiased">
         <NextIntlClientProvider messages={messages}>
           <Amplitude />
