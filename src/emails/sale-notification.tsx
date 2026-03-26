@@ -42,7 +42,11 @@ export function SaleNotificationEmail({
               <td style={{ fontSize: "14px", color: "#6B6B6B", textAlign: "right", paddingBottom: "16px" }}>−${platformFee.toFixed(2)}</td>
             </tr>
           </table>
+<<<<<<< HEAD
           <div style={{ borderTop: "1px solid #E3E1DC", paddingTop: "16px" }}>
+=======
+          <div style={{ borderTop: "1px solid #E3E1DC", paddingTop: "16px", display: "flex" }}>
+>>>>>>> 84f4f8d (refactor: email templates)
             <table width="100%" cellPadding="0" cellSpacing="0">
               <tr>
                 <td style={{ fontSize: "15px", fontWeight: 600, color: "#3D3530" }}>You earn</td>

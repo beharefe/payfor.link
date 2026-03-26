@@ -21,7 +21,11 @@ export function EmailLayout({ preview, children }: EmailLayoutProps) {
         <Body className="bg-[#F0EDE8] font-sans m-0 py-10 px-4">
           <Container className="bg-white max-w-[560px] mx-auto rounded-2xl" style={{ padding: "48px" }}>
             {/* Wordmark */}
+<<<<<<< HEAD
             <div style={{ marginBottom: "40px" }}>
+=======
+            <div className="mb-10">
+>>>>>>> 84f4f8d (refactor: email templates)
               <span style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 600, color: "#3D3530", letterSpacing: "-0.3px" }}>
                 unseal.link
               </span>
