@@ -1,34 +1,30 @@
-import { Heading, Text } from "@react-email/components";
+import { Button, Heading, Text } from "@react-email/components";
 import { EmailLayout } from "./layout";
 
 interface MagicLinkEmailProps {
-  otpCode: string;
+  link: string;
 }
 
-export function MagicLinkEmail({ otpCode }: MagicLinkEmailProps) {
+export function MagicLinkEmail({ link }: MagicLinkEmailProps) {
   return (
-    <EmailLayout preview={`${otpCode} is your sign-in code for unseal.link`}>
-      <Heading className="text-[#111111] text-xl font-medium m-0 mb-2">
-        Sign in to unseal.link
+    <EmailLayout preview="Sign in to view your orders on unseal.link">
+      <Heading className="text-[#111111] text-xl font-medium m-0 mb-1">
+        Sign in to your orders
       </Heading>
       <Text className="text-[#6B6B6B] text-sm m-0 mb-6">
-        Enter this code to sign in. It expires in 10 minutes.
+        Click below to view all your purchases. No password needed.
       </Text>
-      <div className="bg-[#F5F4EF] rounded-xl px-6 py-5 text-center mb-6">
-        <span
-          style={{
-            fontFamily: "monospace",
-            fontSize: "40px",
-            fontWeight: 700,
-            letterSpacing: "12px",
-            color: "#111111",
-          }}
-        >
-          {otpCode}
-        </span>
-      </div>
+
+      <Button
+        href={link}
+        className="bg-[#111111] text-white text-sm font-medium px-6 py-3 rounded-[100px] no-underline inline-block mb-6"
+      >
+        View my orders →
+      </Button>
+
       <Text className="text-[#999999] text-xs m-0">
-        If you didn&apos;t request this, you can safely ignore this email.
+        This link expires in 7 days. If you didn&apos;t request this, you can
+        safely ignore this email.
       </Text>
     </EmailLayout>
   );

@@ -1,4 +1,5 @@
 import { render } from "@react-email/render";
+import { AccessLinkEmail } from "@unseallink/emails/access-link";
 import { SaleNotificationEmail } from "@unseallink/emails/sale-notification";
 import { createBuyerToken } from "@unseallink/lib/buyer-token";
 import { TABLES } from "@unseallink/lib/db";
@@ -157,24 +158,13 @@ async function handleCheckoutSessionCompleted(
     from: FROM_EMAIL,
     to: customerEmail,
     subject: `Your access link — ${product.title}`,
-    html: `
-      <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px;">
-        <h2 style="font-size:20px;font-weight:500;margin:0 0 8px;">Your access is ready</h2>
-        <p style="color:#666;margin:0 0 20px;">${product.title}</p>
-        <a href="${accessLink}" style="display:inline-block;background:#111111;color:#ffffff;padding:14px 28px;border-radius:100px;text-decoration:none;font-weight:500;font-size:16px;">
-          Access content →
-        </a>
-        <p style="color:#aaa;font-size:13px;margin-top:20px;">
-          This link expires in 7 days. Can't click the button? Copy this link:<br>
-          <span style="color:#666;">${accessLink}</span>
-        </p>
-        <hr style="border:none;border-top:1px solid #eee;margin:20px 0;">
-        <p style="color:#aaa;font-size:12px;margin:0;">
-          Purchased via <a href="${appUrl}" style="color:#aaa;">unseal.link</a> ·
-          <a href="${appUrl}/orders/${insertedOrder.id}" style="color:#aaa;">View your order</a>
-        </p>
-      </div>
-    `,
+    html: await render(
+      AccessLinkEmail({
+        accessLink,
+        productTitle: product.title,
+        orderUrl: `${appUrl}/orders/${insertedOrder.id}`,
+      }),
+    ),
   });
 
   // Notify seller of the new sale
