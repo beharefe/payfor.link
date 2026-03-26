@@ -22,12 +22,12 @@ export async function GET(
 
   const { data: seller } = await supabase
     .from(TABLES.SELLERS)
-    .select("name")
+    .select("name, username")
     .eq("id", link.seller_id)
     .single();
 
   const title = link.title;
-  const sellerName = seller?.name ?? null;
+  const sellerName = seller?.username ? `@${seller.username}` : (seller?.name ?? null);
   const price = `$${Number(link.price).toFixed(2)} ${(link.currency ?? "usd").toUpperCase()}`;
   const hasImage = Boolean(link.preview_image_url);
 

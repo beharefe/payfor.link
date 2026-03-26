@@ -78,9 +78,13 @@ export default async function PaywallPage({ params }: Props) {
 
   log.info("paywall_viewed", { link_id: link.id, slug });
 
+  const salesCount = link.total_sales ?? 0;
+  const sellerHandle = seller?.username ? `@${seller.username}` : seller?.name ?? null;
+  const sellerProfileHref = seller?.username ? `/s/${seller.username}` : null;
+
   return (
     <main className="max-w-sm mx-auto">
-      {/* Preview image */}
+      {/* Preview image — full width, flush top */}
       {link.preview_image_url && (
         <div className="aspect-video w-full overflow-hidden rounded-t-2xl bg-muted">
           <img
@@ -91,45 +95,51 @@ export default async function PaywallPage({ params }: Props) {
         </div>
       )}
 
-      <div className={`p-8 ${link.preview_image_url ? "" : "pt-8"}`}>
+      <div className={`px-8 pb-8 ${link.preview_image_url ? "pt-6" : "pt-10"}`}>
         {/* Seller */}
-        {seller?.name && (
-          <p className="text-sm text-muted-foreground mb-3">
+        {sellerHandle && (
+          <p className="text-sm text-muted-foreground mb-2">
             by{" "}
-            {seller.username ? (
-              <Link href={`/s/${seller.username}`} className="hover:underline font-medium text-foreground">
-                {seller.name}
+            {sellerProfileHref ? (
+              <Link href={sellerProfileHref} className="hover:underline font-medium text-foreground">
+                {sellerHandle}
               </Link>
             ) : (
-              <span className="font-medium text-foreground">{seller.name}</span>
+              <span className="font-medium text-foreground">{sellerHandle}</span>
             )}
           </p>
         )}
 
+        {/* Title */}
         <h1 className="text-2xl font-semibold mb-3">{link.title}</h1>
 
+        {/* Description */}
         {link.description && (
-          <p className="text-muted-foreground mb-4">{link.description}</p>
+          <p className="text-muted-foreground text-sm mb-6 leading-relaxed">{link.description}</p>
         )}
 
-        {/* Price + social proof */}
-        <div className="flex items-baseline gap-3 mb-6">
-          <p className="text-2xl font-bold">
-            ${link.price.toFixed(2)}{" "}
-            <span className="text-sm font-normal text-muted-foreground">
-              {link.currency.toUpperCase()}
-            </span>
-          </p>
-          {(link.total_sales ?? 0) > 0 && (
-            <p className="text-sm text-muted-foreground">
-              {link.total_sales} purchases
-            </p>
+        {/* Price */}
+        <p className="text-3xl font-bold mb-4">
+          ${link.price.toFixed(2)}{" "}
+          <span className="text-base font-normal text-muted-foreground">
+            {link.currency.toUpperCase()}
+          </span>
+        </p>
+
+        {/* CTA */}
+        <PaywallCTA linkId={link.id} />
+
+        {/* Trust signals */}
+        <div className="mt-4 flex flex-col gap-1">
+          <p className="text-xs text-muted-foreground">✓ Secure payment via Stripe</p>
+          <p className="text-xs text-muted-foreground">✓ Instant delivery after payment</p>
+          {salesCount > 0 && (
+            <p className="text-xs text-muted-foreground">✓ {salesCount} purchases</p>
           )}
         </div>
 
-        <PaywallCTA linkId={link.id} />
-
-        <div className="mt-8 text-center">
+        {/* Report abuse */}
+        <div className="mt-8 pt-6 border-t border-border text-center">
           <AbuseReportForm productId={link.id} />
         </div>
       </div>

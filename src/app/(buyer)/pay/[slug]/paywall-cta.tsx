@@ -22,11 +22,11 @@ export function PaywallCTA({ linkId }: { linkId: string }) {
       <input type="hidden" name="linkId" value={linkId} />
       <button
         type="submit"
-        className="px-6 py-3 text-base cursor-pointer"
+        className="w-full px-6 py-3.5 bg-primary text-primary-foreground rounded-full text-base font-medium cursor-pointer hover:opacity-90 transition-opacity border-none"
       >
-        Pay & get access
+        Pay &amp; unseal
       </button>
-      {error && <p className="text-destructive mt-2">{error}</p>}
+      {error && <p className="text-destructive mt-2 text-sm">{error}</p>}
     </form>
   );
 }
