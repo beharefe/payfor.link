@@ -13,6 +13,11 @@ function sign(payload: string): string {
   return crypto.createHmac("sha256", secret()).update(payload).digest("hex");
 }
 
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b));
+}
+
 function encode(email: string, expiresInSeconds: number): string {
   const exp = Math.floor(Date.now() / 1000) + expiresInSeconds;
   const payload = Buffer.from(JSON.stringify({ email, exp })).toString("base64url");
@@ -25,7 +30,7 @@ function decode(token: string): { email: string } | null {
     if (dot === -1) return null;
     const payload = token.slice(0, dot);
     const sig = token.slice(dot + 1);
-    if (sign(payload) !== sig) return null;
+    if (!timingSafeEqual(sign(payload), sig)) return null;
     const { email, exp } = JSON.parse(Buffer.from(payload, "base64url").toString());
     if (!email || !exp) return null;
     if (Math.floor(Date.now() / 1000) > exp) return null;

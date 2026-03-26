@@ -99,12 +99,13 @@ async function handleCheckoutSessionCompleted(
     return;
   }
 
-  const customerEmail =
-    session.customer_email ?? session.customer_details?.email;
-  if (!customerEmail) {
+  const rawEmail = session.customer_email ?? session.customer_details?.email;
+  if (!rawEmail) {
     log.error("checkout.session.completed: no customer email");
     return;
   }
+  // Normalize to lowercase so all downstream queries and session comparisons are consistent.
+  const customerEmail = rawEmail.toLowerCase();
 
   const amountTotal = session.amount_total ?? 0;
   const pricePaid = amountTotal / 100;
