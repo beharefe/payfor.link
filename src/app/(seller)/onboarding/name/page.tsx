@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 
 const ERROR_MESSAGES: Record<string, string> = {
   name_required: "Name is required.",
-  name_invalid: "2–30 characters: lowercase letters, numbers, _ and - only.",
+  name_invalid: "1–30 characters: letters, numbers, and hyphens only. No consecutive hyphens.",
   name_taken: "That name is already taken. Please choose another.",
 };
 
@@ -47,14 +47,17 @@ export default async function OnboardingNamePage({
             name="name"
             type="text"
             required
-            minLength={2}
+            minLength={1}
             maxLength={30}
             placeholder="yourname"
-            className="w-full pl-8 pr-4 py-2.5 border border-input rounded-xl text-base outline-none bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring box-border"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            className="w-full pl-8 pr-4 py-2.5 border border-input rounded-xl text-base outline-none bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring box-border lowercase"
           />
         </div>
         <p className="text-xs text-muted-foreground">
-          unseal.link/@yourname — 2–30 chars, lowercase letters, numbers, _ and -
+          unseal.link/@yourname — letters, numbers and hyphens
         </p>
         <button
           type="submit"

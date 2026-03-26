@@ -4,8 +4,10 @@ import { TABLES } from "@unseallink/lib/db";
 import { createClient } from "@unseallink/lib/supabase/server";
 import { redirect } from "next/navigation";
 
-// name doubles as URL handle: 2–30 chars, lowercase alphanumeric + _ and -
-const NAME_RE = /^[a-z0-9][a-z0-9_-]{0,28}[a-z0-9]$|^[a-z0-9]{1,2}$/;
+// name = URL handle: 1–30 chars, lowercase alphanumeric + hyphens
+// no leading/trailing hyphens, no consecutive hyphens
+const NAME_RE = /^[a-z0-9][a-z0-9-]{0,28}[a-z0-9]$|^[a-z0-9]$/;
+const CONSECUTIVE_HYPHENS = /--/;
 
 export async function saveOnboardingName(formData: FormData) {
   const raw = formData.get("name")?.toString()?.trim()?.toLowerCase();
@@ -13,7 +15,7 @@ export async function saveOnboardingName(formData: FormData) {
   if (!raw) redirect("/onboarding/name?error=name_required");
 
   const name = raw ?? "";
-  if (!NAME_RE.test(name)) {
+  if (!NAME_RE.test(name) || CONSECUTIVE_HYPHENS.test(name)) {
     redirect("/onboarding/name?error=name_invalid");
   }
 
