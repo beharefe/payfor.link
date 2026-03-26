@@ -3,7 +3,7 @@ import { NewLinkForm } from "./new-link-form";
 
 export default function NewLinkPage() {
   return (
-    <main style={{ padding: "2rem", maxWidth: "32rem", margin: "0 auto" }}>
+    <main className="p-8 max-w-xl mx-auto">
       <h1>Create link</h1>
       <p>
         <Link href="/dashboard">← Dashboard</Link>

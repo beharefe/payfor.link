@@ -35,28 +35,22 @@ export default async function DashboardPage() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
   return (
-    <main style={{ padding: "2rem", maxWidth: "48rem", margin: "0 auto" }}>
+    <main className="p-8 max-w-3xl mx-auto">
       <SellerRealtimeNotifier sellerId={user.id} />
       <h1>Dashboard</h1>
-      <p style={{ marginBottom: "1.5rem", display: "flex", gap: "1rem" }}>
+      <p className="mb-6 flex gap-4">
         <Link href="/dashboard/settings">Settings</Link>
         <SignOutButton />
       </p>
 
       {!seller?.stripe_connected && (
-        <section
-          style={{
-            marginBottom: "2rem",
-            padding: "1rem",
-            border: "1px solid #ccc",
-          }}
-        >
+        <section className="mb-8 p-4 border border-border">
           <p>Connect Stripe to start selling.</p>
           <InitiateStripeConnectButton />
         </section>
       )}
 
-      <section style={{ marginBottom: "2rem" }}>
+      <section className="mb-8">
         <h2>Earnings</h2>
         <p>Total earned: ${totalEarned.toFixed(2)}</p>
         <p>Platform fees (4.5%): -${totalFees.toFixed(2)}</p>
@@ -66,7 +60,7 @@ export default async function DashboardPage() {
         {seller?.stripe_connected && <WithdrawButton />}
       </section>
 
-      <section style={{ marginBottom: "2rem" }}>
+      <section className="mb-8">
         <h2>Your links</h2>
         <p>
           <Link href="/dashboard/links/new">+ Create link</Link>
@@ -74,15 +68,11 @@ export default async function DashboardPage() {
         {!links?.length ? (
           <p>No links yet. Create one to get started.</p>
         ) : (
-          <ul style={{ listStyle: "none", padding: 0 }}>
+          <ul className="list-none p-0">
             {links.map((link) => (
               <li
                 key={link.id}
-                style={{
-                  padding: "0.75rem",
-                  border: "1px solid #eee",
-                  marginBottom: "0.5rem",
-                }}
+                className="px-3 py-3 border border-border mb-2"
               >
                 <strong>{link.title}</strong> — {link.status} —{" "}
                 {link.total_sales} sales — ${link.total_revenue.toFixed(2)}
@@ -90,7 +80,7 @@ export default async function DashboardPage() {
                 <CopyLinkButtons url={`${appUrl}/pay/${link.slug}`} />
                 <Link
                   href={`/dashboard/links/${link.id}`}
-                  style={{ marginLeft: "0.5rem" }}
+                  className="ml-2"
                 >
                   View
                 </Link>

@@ -1,4 +1,4 @@
-import { Button, Heading, Hr, Text } from "@react-email/components";
+import { Text } from "@react-email/components";
 import { EmailLayout } from "./layout";
 
 interface SaleNotificationEmailProps {
@@ -19,51 +19,55 @@ export function SaleNotificationEmail({
   const net = (pricePaid - platformFee).toFixed(2);
 
   return (
-    <EmailLayout
-      preview={`New sale — ${productTitle} — $${pricePaid.toFixed(2)}`}
-    >
-      <Heading className="text-[#111111] text-xl font-medium m-0 mb-1">
+    <EmailLayout preview={`New sale — ${productTitle} — $${pricePaid.toFixed(2)}`}>
+      <Text style={{ fontSize: "24px", fontWeight: 700, color: "#3D3530", margin: "0 0 8px" }}>
         You just made a sale
-      </Heading>
-      <Text className="text-[#6B6B6B] text-sm m-0 mb-6">
-        {sellerName ? `Hey ${sellerName}, ` : ""}someone just bought your
-        product.
+      </Text>
+      <Text style={{ fontSize: "15px", color: "#6B6B6B", margin: "0 0 32px" }}>
+        {sellerName ? `Hey ${sellerName}, ` : ""}someone just bought your product.
       </Text>
 
-      <div className="bg-[#F5F4EF] rounded-xl px-5 py-4 mb-6">
-        <Text className="text-[#111111] font-medium text-base m-0 mb-3">
+      <div style={{ background: "#F5F3EE", borderRadius: "12px", padding: "24px", marginBottom: "32px" }}>
+        <Text style={{ fontSize: "15px", fontWeight: 600, color: "#3D3530", margin: "0 0 16px" }}>
           {productTitle}
         </Text>
-        <Hr className="border-[#E5E5E5] my-3" />
-        <div className="flex justify-between">
-          <Text className="text-[#6B6B6B] text-sm m-0">Sale price</Text>
-          <Text className="text-[#111111] text-sm font-medium m-0">
-            ${pricePaid.toFixed(2)}
-          </Text>
-        </div>
-        <div className="flex justify-between mt-1">
-          <Text className="text-[#6B6B6B] text-sm m-0">
-            Platform fee (4.5%)
-          </Text>
-          <Text className="text-[#6B6B6B] text-sm m-0">
-            −${platformFee.toFixed(2)}
-          </Text>
-        </div>
-        <Hr className="border-[#E5E5E5] my-3" />
-        <div className="flex justify-between">
-          <Text className="text-[#111111] text-sm font-medium m-0">
-            You earn
-          </Text>
-          <Text className="text-[#1A7A4A] text-sm font-medium m-0">${net}</Text>
+        <div style={{ borderTop: "1px solid #E3E1DC", paddingTop: "16px" }}>
+          <table width="100%" cellPadding="0" cellSpacing="0">
+            <tr>
+              <td style={{ fontSize: "14px", color: "#6B6B6B", paddingBottom: "8px" }}>Sale price</td>
+              <td style={{ fontSize: "14px", color: "#3D3530", fontWeight: 500, textAlign: "right", paddingBottom: "8px" }}>${pricePaid.toFixed(2)}</td>
+            </tr>
+            <tr>
+              <td style={{ fontSize: "14px", color: "#6B6B6B", paddingBottom: "16px" }}>Platform fee (4.5%)</td>
+              <td style={{ fontSize: "14px", color: "#6B6B6B", textAlign: "right", paddingBottom: "16px" }}>−${platformFee.toFixed(2)}</td>
+            </tr>
+          </table>
+          <div style={{ borderTop: "1px solid #E3E1DC", paddingTop: "16px" }}>
+            <table width="100%" cellPadding="0" cellSpacing="0">
+              <tr>
+                <td style={{ fontSize: "15px", fontWeight: 600, color: "#3D3530" }}>You earn</td>
+                <td style={{ fontSize: "15px", fontWeight: 700, color: "#D1A054", textAlign: "right" }}>${net}</td>
+              </tr>
+            </table>
+          </div>
         </div>
       </div>
 
-      <Button
+      <a
         href={dashboardUrl}
-        className="bg-[#111111] text-white text-sm font-medium px-6 py-3 rounded-[100px] no-underline inline-block"
+        style={{
+          display: "inline-block",
+          background: "#3D3530",
+          color: "#ffffff",
+          fontSize: "15px",
+          fontWeight: 600,
+          padding: "14px 28px",
+          borderRadius: "100px",
+          textDecoration: "none",
+        }}
       >
         View dashboard →
-      </Button>
+      </a>
     </EmailLayout>
   );
 }

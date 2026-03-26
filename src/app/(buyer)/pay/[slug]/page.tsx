@@ -62,7 +62,7 @@ export default async function PaywallPage({ params }: Props) {
   if (!link) notFound();
   if (link.status !== "active") {
     return (
-      <main style={{ padding: "2rem", textAlign: "center" }}>
+      <main className="p-8 text-center">
         <h1>Unavailable</h1>
         <p>This product is not available for purchase.</p>
       </main>
@@ -79,15 +79,15 @@ export default async function PaywallPage({ params }: Props) {
   log.info("paywall_viewed", { link_id: link.id, slug });
 
   return (
-    <main style={{ padding: "2rem", maxWidth: "28rem", margin: "0 auto" }}>
+    <main className="p-8 max-w-[28rem] mx-auto">
       <h1>{link.title}</h1>
-      {seller?.name && <p style={{ color: "#666" }}>by {seller.name}</p>}
+      {seller?.name && <p className="text-muted-foreground">by {seller.name}</p>}
       {link.description && <p>{link.description}</p>}
       <p>
         <strong>${link.price.toFixed(2)}</strong> {link.currency.toUpperCase()}
       </p>
       <PaywallCTA linkId={link.id} />
-      <div style={{ marginTop: "2rem", textAlign: "center" }}>
+      <div className="mt-8 text-center">
         <AbuseReportForm productId={link.id} />
       </div>
     </main>

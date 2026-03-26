@@ -25,7 +25,7 @@ export default async function PaymentSuccessPage({
 
   if (!session_id) {
     return (
-      <main style={{ padding: "2rem", textAlign: "center" }}>
+      <main className="p-8 text-center">
         <h1>Invalid session</h1>
         <p>Missing session. Return to the paywall and try again.</p>
       </main>
@@ -39,7 +39,7 @@ export default async function PaymentSuccessPage({
     });
   } catch {
     return (
-      <main style={{ padding: "2rem", textAlign: "center" }}>
+      <main className="p-8 text-center">
         <h1>Invalid session</h1>
         <p>Could not load session.</p>
       </main>
@@ -53,7 +53,7 @@ export default async function PaymentSuccessPage({
 
   if (!customerEmail) {
     return (
-      <main style={{ padding: "2rem", textAlign: "center" }}>
+      <main className="p-8 text-center">
         <h1>Invalid session</h1>
         <p>No customer email found.</p>
       </main>
@@ -69,7 +69,7 @@ export default async function PaymentSuccessPage({
 
   if (!order) {
     return (
-      <main style={{ padding: "2rem", textAlign: "center" }}>
+      <main className="p-8 text-center">
         <h1>Payment received</h1>
         <SuccessPoller />
       </main>
@@ -77,30 +77,21 @@ export default async function PaymentSuccessPage({
   }
 
   return (
-    <main
-      style={{
-        padding: "2rem",
-        maxWidth: "28rem",
-        margin: "0 auto",
-        textAlign: "center",
-      }}
-    >
-      <p style={{ fontSize: "2rem", margin: "0 0 0.5rem" }}>✅</p>
-      <h1
-        style={{ fontSize: "1.4rem", fontWeight: 500, margin: "0 0 0.25rem" }}
-      >
+    <main className="p-8 max-w-[28rem] mx-auto text-center">
+      <p className="text-3xl mb-2">✅</p>
+      <h1 className="text-2xl font-medium mb-1">
         Payment confirmed
       </h1>
-      <p style={{ fontWeight: 500, margin: "0 0 0.25rem" }}>
+      <p className="font-medium mb-1">
         {order.product_title}
       </p>
-      <p style={{ color: "#6B6B6B", margin: "0 0 1.5rem" }}>
+      <p className="text-muted-foreground mb-6">
         ${order.price_paid.toFixed(2)} {order.currency.toUpperCase()}
       </p>
-      <p style={{ margin: "0 0 0.5rem" }}>
+      <p className="mb-2">
         Your access link has been sent to <strong>{customerEmail}</strong>
       </p>
-      <p style={{ color: "#6B6B6B", fontSize: "0.9rem", margin: 0 }}>
+      <p className="text-muted-foreground text-sm m-0">
         Check your inbox and click the link to access your purchase.
       </p>
     </main>

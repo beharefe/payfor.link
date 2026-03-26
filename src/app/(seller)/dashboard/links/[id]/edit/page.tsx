@@ -28,11 +28,11 @@ export default async function EditLinkPage({
   if (link.status === "deleted" || link.status === "suspended") notFound();
 
   return (
-    <main style={{ padding: "2rem", maxWidth: "36rem", margin: "0 auto" }}>
-      <p style={{ marginBottom: "1.5rem" }}>
+    <main className="p-8 max-w-2xl mx-auto">
+      <p className="mb-6">
         <Link href={`/dashboard/links/${id}`}>← Back</Link>
       </p>
-      <h1 style={{ marginBottom: "2rem" }}>Edit link</h1>
+      <h1 className="mb-8">Edit link</h1>
       <EditLinkForm
         id={id}
         defaultValues={{

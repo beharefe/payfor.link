@@ -25,7 +25,7 @@ export default async function OrderPage({ params }: Props) {
 
   if (!order) {
     return (
-      <main style={{ padding: "2rem", textAlign: "center" }}>
+      <main className="p-8 text-center">
         <h1>Order not found</h1>
         <p>
           <Link href="/orders">Back to your orders</Link>
@@ -39,22 +39,16 @@ export default async function OrderPage({ params }: Props) {
 
   if (!session || session.email.toLowerCase() !== order.buyer_email.toLowerCase()) {
     return (
-      <main
-        style={{
-          padding: "2rem",
-          maxWidth: "28rem",
-          margin: "0 auto",
-          textAlign: "center",
-        }}
-      >
-        <p style={{ fontSize: "2rem", margin: "0 0 0.5rem" }}>🔒</p>
-        <h1 style={{ fontSize: "1.4rem", fontWeight: 500, margin: "0 0 0.5rem" }}>
+      <main className="p-8 max-w-[28rem] mx-auto text-center">
+        <p className="text-3xl mb-2">🔒</p>
+        <h1 className="text-2xl font-medium mb-2">
           Sign in to view this order
         </h1>
-        <p style={{ color: "#6B6B6B", margin: "0 0 1.5rem" }}>
+        <p className="text-muted-foreground mb-6">
           Use the access link from your purchase email, or sign in at orders.
         </p>
         <Link
+<<<<<<< HEAD
           href={`/orders?oid=${order_id}`}
           style={{
             display: "inline-block",
@@ -65,6 +59,10 @@ export default async function OrderPage({ params }: Props) {
             borderRadius: "100px",
             fontWeight: 500,
           }}
+=======
+          href="/orders"
+          className="inline-block px-5 py-2.5 bg-primary text-primary-foreground no-underline rounded-full font-medium hover:opacity-90 transition-opacity"
+>>>>>>> 8387bd1 (refactor: migrate to shadcn theme system with dark mode + buyer token auth)
         >
           Sign in →
         </Link>
@@ -74,17 +72,10 @@ export default async function OrderPage({ params }: Props) {
 
   if (order.status === "refunded") {
     return (
-      <main
-        style={{
-          padding: "2rem",
-          maxWidth: "30rem",
-          margin: "0 auto",
-          textAlign: "center",
-        }}
-      >
+      <main className="p-8 max-w-lg mx-auto text-center">
         <h1>Order refunded</h1>
         <p>{order.product_title}</p>
-        <p style={{ color: "#666" }}>
+        <p className="text-muted-foreground">
           This order was refunded and access is no longer available.
         </p>
         <p>
@@ -109,53 +100,30 @@ export default async function OrderPage({ params }: Props) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
 
   return (
-    <main
-      style={{
-        padding: "2rem",
-        maxWidth: "30rem",
-        margin: "0 auto",
-        textAlign: "center",
-      }}
-    >
-      <p style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>✅</p>
-      <h1 style={{ marginBottom: "0.25rem" }}>Order confirmed</h1>
-      <h2
-        style={{
-          fontWeight: "normal",
-          fontSize: "1.1rem",
-          marginBottom: "0.25rem",
-        }}
-      >
+    <main className="p-8 max-w-lg mx-auto text-center">
+      <p className="text-3xl mb-2">✅</p>
+      <h1 className="mb-1">Order confirmed</h1>
+      <h2 className="font-normal text-lg mb-1">
         {order.product_title}
       </h2>
       {seller?.name && (
-        <p style={{ color: "#666", marginBottom: "1.5rem" }}>by {seller.name}</p>
+        <p className="text-muted-foreground mb-6">by {seller.name}</p>
       )}
 
       <a
         href={`${appUrl}/api/orders/${order.id}/access`}
-        style={{
-          display: "inline-block",
-          padding: "0.75rem 1.5rem",
-          background: "#111",
-          color: "#fff",
-          textDecoration: "none",
-          borderRadius: "100px",
-          fontWeight: 500,
-          fontSize: "1rem",
-          marginBottom: "1rem",
-        }}
+        className="inline-block px-6 py-3 bg-primary text-primary-foreground no-underline rounded-full font-medium text-base mb-4 hover:opacity-90 transition-opacity"
       >
         Access content →
       </a>
 
-      <hr style={{ margin: "1.5rem 0", borderColor: "#eee" }} />
+      <hr className="border-t border-border my-6" />
 
-      <p style={{ color: "#999", fontSize: "0.85rem" }}>
+      <p className="text-muted-foreground text-sm">
         Purchased on {purchasedOn} &middot; Order #{shortId}
       </p>
-      <p style={{ marginTop: "0.75rem" }}>
-        <Link href="/orders" style={{ color: "#666", fontSize: "0.9rem" }}>
+      <p className="mt-3">
+        <Link href="/orders" className="text-muted-foreground text-sm">
           ← All orders
         </Link>
       </p>

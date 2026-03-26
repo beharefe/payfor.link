@@ -43,119 +43,50 @@ const buyerSteps = [
 
 export default function HowItWorksPage() {
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background: "#F5F4EF",
-        fontFamily: "'DM Sans', sans-serif",
-      }}
-    >
+    <main className="min-h-screen bg-background">
       {/* Nav */}
-      <nav
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "1.25rem 2rem",
-          maxWidth: "64rem",
-          margin: "0 auto",
-        }}
-      >
+      <nav className="flex justify-between items-center py-5 px-8 max-w-[64rem] mx-auto">
         <Link
           href="/"
-          style={{ fontWeight: 500, color: "#111111", textDecoration: "none", fontSize: "1rem" }}
+          className="font-medium text-foreground no-underline text-base"
         >
           unseal.link
         </Link>
         <Link
           href="/auth"
-          style={{
-            padding: "0.5rem 1.25rem",
-            background: "#111111",
-            color: "#ffffff",
-            textDecoration: "none",
-            borderRadius: "100px",
-            fontWeight: 500,
-            fontSize: "0.875rem",
-          }}
+          className="px-5 py-2 bg-primary text-primary-foreground no-underline rounded-full font-medium text-sm hover:opacity-90 transition-opacity"
         >
           Start selling
         </Link>
       </nav>
 
       {/* Hero */}
-      <section
-        style={{
-          textAlign: "center",
-          padding: "5rem 2rem 4rem",
-          maxWidth: "40rem",
-          margin: "0 auto",
-        }}
-      >
-        <h1
-          style={{
-            fontSize: "clamp(2rem, 5vw, 3rem)",
-            fontWeight: 500,
-            letterSpacing: "-0.02em",
-            color: "#111111",
-            lineHeight: 1.15,
-            margin: "0 0 1rem",
-          }}
-        >
+      <section className="text-center py-20 px-8 pb-16 max-w-[40rem] mx-auto">
+        <h1 className="text-[clamp(2rem,5vw,3rem)] font-medium tracking-tight text-foreground leading-tight mb-4">
           How unseal.link works
         </h1>
-        <p style={{ fontSize: "1.1rem", color: "#6B6B6B", margin: 0 }}>
+        <p className="text-lg text-muted-foreground m-0">
           Lock link → Pay → Unlock. Three steps for sellers. Four for buyers.
         </p>
       </section>
 
       {/* For sellers */}
-      <section
-        style={{
-          background: "#ffffff",
-          padding: "3rem 2rem",
-        }}
-      >
-        <div style={{ maxWidth: "40rem", margin: "0 auto" }}>
-          <p
-            style={{
-              fontSize: "0.75rem",
-              fontWeight: 500,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              color: "#AAAAAA",
-              marginBottom: "2rem",
-            }}
-          >
+      <section className="bg-card py-12 px-8">
+        <div className="max-w-[40rem] mx-auto">
+          <p className="text-xs font-medium tracking-[0.08em] uppercase text-[#AAAAAA] mb-8">
             For sellers
           </p>
           {sellerSteps.map((step, i) => (
             <div
               key={step.n}
-              style={{
-                display: "flex",
-                gap: "1.5rem",
-                padding: "1.5rem 0",
-                borderBottom: i < sellerSteps.length - 1 ? "1px solid #E5E5E5" : "none",
-              }}
+              className={`flex gap-6 py-6 ${i < sellerSteps.length - 1 ? "border-b border-border" : ""}`}
             >
-              <span
-                style={{
-                  fontSize: "0.8rem",
-                  fontWeight: 500,
-                  color: "#AAAAAA",
-                  minWidth: "1.75rem",
-                  marginTop: "0.2rem",
-                  fontVariantNumeric: "tabular-nums",
-                }}
-              >
+              <span className="text-[0.8rem] font-medium text-[#AAAAAA] min-w-[1.75rem] mt-[0.2rem] tabular-nums">
                 {step.n}
               </span>
               <div>
-                <p style={{ fontWeight: 500, color: "#111111", margin: "0 0 0.25rem" }}>
-                  {step.title}
-                </p>
-                <p style={{ fontSize: "0.9rem", color: "#6B6B6B", margin: 0 }}>{step.body}</p>
+                <p className="font-medium text-foreground mb-1">{step.title}</p>
+                <p className="text-sm text-muted-foreground m-0">{step.body}</p>
               </div>
             </div>
           ))}
@@ -163,47 +94,22 @@ export default function HowItWorksPage() {
       </section>
 
       {/* For buyers */}
-      <section style={{ padding: "3rem 2rem" }}>
-        <div style={{ maxWidth: "40rem", margin: "0 auto" }}>
-          <p
-            style={{
-              fontSize: "0.75rem",
-              fontWeight: 500,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              color: "#AAAAAA",
-              marginBottom: "2rem",
-            }}
-          >
+      <section className="py-12 px-8">
+        <div className="max-w-[40rem] mx-auto">
+          <p className="text-xs font-medium tracking-[0.08em] uppercase text-[#AAAAAA] mb-8">
             For buyers
           </p>
           {buyerSteps.map((step, i) => (
             <div
               key={step.n}
-              style={{
-                display: "flex",
-                gap: "1.5rem",
-                padding: "1.5rem 0",
-                borderBottom: i < buyerSteps.length - 1 ? "1px solid #E5E5E5" : "none",
-              }}
+              className={`flex gap-6 py-6 ${i < buyerSteps.length - 1 ? "border-b border-border" : ""}`}
             >
-              <span
-                style={{
-                  fontSize: "0.8rem",
-                  fontWeight: 500,
-                  color: "#AAAAAA",
-                  minWidth: "1.75rem",
-                  marginTop: "0.2rem",
-                  fontVariantNumeric: "tabular-nums",
-                }}
-              >
+              <span className="text-[0.8rem] font-medium text-[#AAAAAA] min-w-[1.75rem] mt-[0.2rem] tabular-nums">
                 {step.n}
               </span>
               <div>
-                <p style={{ fontWeight: 500, color: "#111111", margin: "0 0 0.25rem" }}>
-                  {step.title}
-                </p>
-                <p style={{ fontSize: "0.9rem", color: "#6B6B6B", margin: 0 }}>{step.body}</p>
+                <p className="font-medium text-foreground mb-1">{step.title}</p>
+                <p className="text-sm text-muted-foreground m-0">{step.body}</p>
               </div>
             </div>
           ))}
@@ -211,82 +117,43 @@ export default function HowItWorksPage() {
       </section>
 
       {/* Pricing summary */}
-      <section
-        style={{
-          background: "#ffffff",
-          padding: "3rem 2rem",
-        }}
-      >
-        <div style={{ maxWidth: "40rem", margin: "0 auto" }}>
-          <p
-            style={{
-              fontSize: "0.75rem",
-              fontWeight: 500,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              color: "#AAAAAA",
-              marginBottom: "2rem",
-            }}
-          >
+      <section className="bg-card py-12 px-8">
+        <div className="max-w-[40rem] mx-auto">
+          <p className="text-xs font-medium tracking-[0.08em] uppercase text-[#AAAAAA] mb-8">
             Pricing
           </p>
-          <p style={{ fontWeight: 500, color: "#111111", fontSize: "1.1rem", marginBottom: "0.5rem" }}>
+          <p className="font-medium text-foreground text-lg mb-2">
             We take 4.5% per sale.
           </p>
-          <p style={{ color: "#6B6B6B", fontSize: "0.9rem", marginBottom: "0.25rem" }}>
+          <p className="text-muted-foreground text-sm mb-1">
             Stripe processing fees apply (~2.9% + $0.30).
           </p>
-          <p style={{ color: "#6B6B6B", fontSize: "0.9rem", marginBottom: "0.25rem" }}>
+          <p className="text-muted-foreground text-sm mb-1">
             No monthly fees. No setup costs.
           </p>
-          <p style={{ color: "#6B6B6B", fontSize: "0.9rem" }}>You only pay when you earn.</p>
+          <p className="text-muted-foreground text-sm">You only pay when you earn.</p>
         </div>
       </section>
 
       {/* CTA */}
-      <section
-        style={{
-          textAlign: "center",
-          padding: "5rem 2rem",
-        }}
-      >
+      <section className="text-center py-20 px-8">
         <Link
           href="/auth"
-          style={{
-            display: "inline-block",
-            padding: "0.875rem 2.5rem",
-            background: "#111111",
-            color: "#ffffff",
-            textDecoration: "none",
-            borderRadius: "100px",
-            fontWeight: 500,
-            fontSize: "1rem",
-          }}
+          className="inline-block px-10 py-3.5 bg-primary text-primary-foreground no-underline rounded-full font-medium text-base hover:opacity-90 transition-opacity"
         >
           Start selling free →
         </Link>
-        <p style={{ marginTop: "1rem", fontSize: "0.8rem", color: "#AAAAAA" }}>
+        <p className="mt-4 text-[0.8rem] text-[#AAAAAA]">
           No credit card required to list.
         </p>
       </section>
 
       {/* Footer */}
-      <footer
-        style={{
-          borderTop: "1px solid #E5E5E5",
-          padding: "1.5rem 2rem",
-          textAlign: "center",
-          fontSize: "0.8rem",
-          color: "#AAAAAA",
-          display: "flex",
-          gap: "1.5rem",
-          justifyContent: "center",
-        }}
-      >
-        <Link href="/pricing" style={{ color: "#AAAAAA", textDecoration: "none" }}>
+      <footer className="border-t border-border py-6 px-8 text-center text-[0.8rem] text-[#AAAAAA] flex gap-6 justify-center">
+        <Link href="/pricing" className="text-[#AAAAAA] no-underline">
           Pricing
         </Link>
-        <Link href="/how-it-works" style={{ color: "#AAAAAA", textDecoration: "none" }}>
+        <Link href="/how-it-works" className="text-[#AAAAAA] no-underline">
           How it works
         </Link>
       </footer>

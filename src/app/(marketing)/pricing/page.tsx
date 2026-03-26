@@ -25,112 +25,50 @@ const competitors = [
 
 export default function PricingPage() {
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background: "#F5F4EF",
-        fontFamily: "'DM Sans', sans-serif",
-      }}
-    >
+    <main className="min-h-screen bg-background">
       {/* Nav */}
-      <nav
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "1.25rem 2rem",
-          maxWidth: "64rem",
-          margin: "0 auto",
-        }}
-      >
+      <nav className="flex justify-between items-center py-5 px-8 max-w-[64rem] mx-auto">
         <Link
           href="/"
-          style={{ fontWeight: 500, color: "#111111", textDecoration: "none", fontSize: "1rem" }}
+          className="font-medium text-foreground no-underline text-base"
         >
           unseal.link
         </Link>
         <Link
           href="/auth"
-          style={{
-            padding: "0.5rem 1.25rem",
-            background: "#111111",
-            color: "#ffffff",
-            textDecoration: "none",
-            borderRadius: "100px",
-            fontWeight: 500,
-            fontSize: "0.875rem",
-          }}
+          className="px-5 py-2 bg-primary text-primary-foreground no-underline rounded-full font-medium text-sm hover:opacity-90 transition-opacity"
         >
           Start selling
         </Link>
       </nav>
 
       {/* Hero */}
-      <section
-        style={{
-          textAlign: "center",
-          padding: "5rem 2rem 3rem",
-          maxWidth: "36rem",
-          margin: "0 auto",
-        }}
-      >
-        <h1
-          style={{
-            fontSize: "clamp(2rem, 5vw, 3rem)",
-            fontWeight: 500,
-            letterSpacing: "-0.02em",
-            color: "#111111",
-            lineHeight: 1.15,
-            margin: "0 0 0.5rem",
-          }}
-        >
+      <section className="text-center py-20 px-8 pb-12 max-w-2xl mx-auto">
+        <h1 className="text-[clamp(2rem,5vw,3rem)] font-medium tracking-tight text-foreground leading-tight mb-2">
           Simple pricing
         </h1>
-        <p
-          style={{
-            fontSize: "clamp(2.5rem, 8vw, 4rem)",
-            fontWeight: 500,
-            color: "#111111",
-            margin: "1.5rem 0 1rem",
-            letterSpacing: "-0.02em",
-          }}
-        >
+        <p className="text-[clamp(2.5rem,8vw,4rem)] font-medium text-foreground mt-6 mb-4 tracking-tight">
           4.5% per sale
         </p>
-        <p style={{ fontSize: "1rem", color: "#6B6B6B", margin: "0 0 0.5rem" }}>
+        <p className="text-base text-muted-foreground mb-2">
           No monthly fees. No setup. No surprises.
         </p>
-        <p style={{ fontSize: "1rem", color: "#6B6B6B", margin: 0 }}>
+        <p className="text-base text-muted-foreground m-0">
           You keep 95.5% of every sale, minus Stripe&apos;s payment processing fee (~2.9% + $0.30
           per transaction).
         </p>
       </section>
 
       {/* Earnings table */}
-      <section style={{ padding: "2rem", maxWidth: "36rem", margin: "0 auto" }}>
-        <div
-          style={{
-            background: "#ffffff",
-            border: "1px solid #E5E5E5",
-            borderRadius: "16px",
-            overflow: "hidden",
-          }}
-        >
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+      <section className="p-8 max-w-2xl mx-auto">
+        <div className="bg-card border border-border rounded-2xl overflow-hidden">
+          <table className="w-full border-collapse">
             <thead>
-              <tr style={{ borderBottom: "1px solid #E5E5E5" }}>
+              <tr className="border-b border-border">
                 {["Sale price", "Platform fee", "Stripe fee", "You receive"].map((h) => (
                   <th
                     key={h}
-                    style={{
-                      padding: "0.875rem 1rem",
-                      textAlign: "left",
-                      fontSize: "0.75rem",
-                      fontWeight: 500,
-                      color: "#AAAAAA",
-                      letterSpacing: "0.04em",
-                      textTransform: "uppercase",
-                    }}
+                    className="px-4 py-3.5 text-left text-xs font-medium text-[#AAAAAA] tracking-[0.04em] uppercase"
                   >
                     {h}
                   </th>
@@ -141,18 +79,18 @@ export default function PricingPage() {
               {rows.map((row, i) => (
                 <tr
                   key={row.price}
-                  style={{ borderBottom: i < rows.length - 1 ? "1px solid #E5E5E5" : "none" }}
+                  className={i < rows.length - 1 ? "border-b border-border" : ""}
                 >
-                  <td style={{ padding: "0.875rem 1rem", fontWeight: 500, color: "#111111", fontSize: "0.9rem" }}>
+                  <td className="px-4 py-3.5 font-medium text-foreground text-sm">
                     {row.price}
                   </td>
-                  <td style={{ padding: "0.875rem 1rem", color: "#6B6B6B", fontSize: "0.9rem" }}>
+                  <td className="px-4 py-3.5 text-muted-foreground text-sm">
                     {row.fee}
                   </td>
-                  <td style={{ padding: "0.875rem 1rem", color: "#6B6B6B", fontSize: "0.9rem" }}>
+                  <td className="px-4 py-3.5 text-muted-foreground text-sm">
                     {row.stripe}
                   </td>
-                  <td style={{ padding: "0.875rem 1rem", fontWeight: 500, color: "#111111", fontSize: "0.9rem" }}>
+                  <td className="px-4 py-3.5 font-medium text-foreground text-sm">
                     {row.receive}
                   </td>
                 </tr>
@@ -163,110 +101,53 @@ export default function PricingPage() {
       </section>
 
       {/* Competitor comparison */}
-      <section style={{ padding: "1rem 2rem 2rem", maxWidth: "36rem", margin: "0 auto" }}>
-        <p
-          style={{
-            fontSize: "0.75rem",
-            fontWeight: 500,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            color: "#AAAAAA",
-            marginBottom: "1rem",
-            textAlign: "center",
-          }}
-        >
+      <section className="px-8 pb-8 pt-4 max-w-2xl mx-auto">
+        <p className="text-xs font-medium tracking-[0.08em] uppercase text-[#AAAAAA] mb-4 text-center">
           vs the competition
         </p>
-        <div
-          style={{
-            background: "#ffffff",
-            border: "1px solid #E5E5E5",
-            borderRadius: "16px",
-            overflow: "hidden",
-          }}
-        >
+        <div className="bg-card border border-border rounded-2xl overflow-hidden">
           {competitors.map((c, i) => (
             <div
               key={c.name}
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "0.875rem 1.25rem",
-                borderBottom: i < competitors.length - 1 ? "1px solid #E5E5E5" : "none",
-                background: c.highlight ? "#111111" : "transparent",
-              }}
+              className={`flex justify-between items-center px-5 py-3.5 ${i < competitors.length - 1 ? "border-b border-border" : ""} ${c.highlight ? "bg-primary" : ""}`}
             >
               <span
-                style={{
-                  fontWeight: c.highlight ? 500 : 400,
-                  color: c.highlight ? "#ffffff" : "#6B6B6B",
-                  fontSize: "0.9rem",
-                }}
+                className={`${c.highlight ? "font-medium text-primary-foreground" : "text-muted-foreground"} text-sm`}
               >
                 {c.name}
               </span>
               <span
-                style={{
-                  fontWeight: 500,
-                  color: c.highlight ? "#ffffff" : "#111111",
-                  fontSize: "0.9rem",
-                }}
+                className={`font-medium ${c.highlight ? "text-primary-foreground" : "text-foreground"} text-sm`}
               >
                 {c.fee}
               </span>
             </div>
           ))}
         </div>
-        <p style={{ textAlign: "center", fontSize: "0.8rem", color: "#AAAAAA", marginTop: "1rem" }}>
+        <p className="text-center text-[0.8rem] text-[#AAAAAA] mt-4">
           Cheapest in market.
         </p>
       </section>
 
       {/* CTA */}
-      <section
-        style={{
-          textAlign: "center",
-          padding: "4rem 2rem",
-        }}
-      >
+      <section className="text-center py-16 px-8">
         <Link
           href="/auth"
-          style={{
-            display: "inline-block",
-            padding: "0.875rem 2.5rem",
-            background: "#111111",
-            color: "#ffffff",
-            textDecoration: "none",
-            borderRadius: "100px",
-            fontWeight: 500,
-            fontSize: "1rem",
-          }}
+          className="inline-block px-10 py-3.5 bg-primary text-primary-foreground no-underline rounded-full font-medium text-base hover:opacity-90 transition-opacity"
         >
           Start selling →
         </Link>
-        <p style={{ marginTop: "1rem", fontSize: "0.8rem", color: "#AAAAAA" }}>
+        <p className="mt-4 text-[0.8rem] text-[#AAAAAA]">
           Platform earns only when sellers earn.
         </p>
       </section>
 
       {/* Footer */}
-      <footer
-        style={{
-          borderTop: "1px solid #E5E5E5",
-          padding: "1.5rem 2rem",
-          textAlign: "center",
-          fontSize: "0.8rem",
-          color: "#AAAAAA",
-          display: "flex",
-          gap: "1.5rem",
-          justifyContent: "center",
-        }}
-      >
-        <Link href="/pricing" style={{ color: "#AAAAAA", textDecoration: "none" }}>
+      <footer className="border-t border-border py-6 px-8 text-center text-[0.8rem] text-[#AAAAAA] flex gap-6 justify-center">
+        <Link href="/pricing" className="text-[#AAAAAA] no-underline">
           Pricing
         </Link>
-        <Link href="/how-it-works" style={{ color: "#AAAAAA", textDecoration: "none" }}>
+        <Link href="/how-it-works" className="text-[#AAAAAA] no-underline">
           How it works
         </Link>
       </footer>

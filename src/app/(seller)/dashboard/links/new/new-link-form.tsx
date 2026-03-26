@@ -123,7 +123,7 @@ export function NewLinkForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
+      className="flex flex-col gap-4"
     >
       <div>
         <label htmlFor="title">Title *</label>
@@ -131,12 +131,7 @@ export function NewLinkForm() {
           id="title"
           name="title"
           required
-          style={{
-            display: "block",
-            width: "100%",
-            padding: "0.5rem",
-            marginTop: "0.25rem",
-          }}
+          className="block w-full px-2 py-2 mt-1 border border-input bg-background text-foreground rounded"
         />
       </div>
       <div>
@@ -145,12 +140,7 @@ export function NewLinkForm() {
           id="description"
           name="description"
           rows={3}
-          style={{
-            display: "block",
-            width: "100%",
-            padding: "0.5rem",
-            marginTop: "0.25rem",
-          }}
+          className="block w-full px-2 py-2 mt-1 border border-input bg-background text-foreground rounded"
         />
       </div>
       <div>
@@ -161,24 +151,12 @@ export function NewLinkForm() {
           type="url"
           required
           placeholder="https://..."
-          style={{
-            display: "block",
-            width: "100%",
-            padding: "0.5rem",
-            marginTop: "0.25rem",
-          }}
+          className="block w-full px-2 py-2 mt-1 border border-input bg-background text-foreground rounded"
         />
       </div>
       <div>
         <label>Price (USD) * — min $9.99</label>
-        <div
-          style={{
-            display: "flex",
-            gap: "0.5rem",
-            marginTop: "0.25rem",
-            flexWrap: "wrap",
-          }}
-        >
+        <div className="flex gap-2 mt-1 flex-wrap">
           {PRICE_PRESETS.map((p) => (
             <button
               key={p}
@@ -187,7 +165,7 @@ export function NewLinkForm() {
                 if (priceInputRef.current)
                   priceInputRef.current.value = String(p);
               }}
-              style={{ padding: "0.5rem 0.75rem" }}
+              className="px-3 py-2 cursor-pointer"
             >
               ${p}
             </button>
@@ -202,23 +180,12 @@ export function NewLinkForm() {
           step={0.01}
           required
           defaultValue={9.99}
-          style={{
-            display: "block",
-            width: "100%",
-            padding: "0.5rem",
-            marginTop: "0.25rem",
-          }}
+          className="block w-full px-2 py-2 mt-1 border border-input bg-background text-foreground rounded"
         />
       </div>
       <div>
         <label htmlFor="preview_image">Preview image</label>
-        <p
-          style={{
-            color: "#6B6B6B",
-            fontSize: "0.8125rem",
-            margin: "0.1rem 0 0.25rem",
-          }}
-        >
+        <p className="text-muted-foreground text-[0.8125rem] mt-[0.1rem] mb-1">
           Shown on your paywall page and social shares. Recommended: 1200×630px
           (1.91:1). Max 2MB — JPG, PNG, or WebP.
         </p>
@@ -227,39 +194,26 @@ export function NewLinkForm() {
           type="file"
           accept="image/jpeg,image/png,image/webp"
           onChange={handleImageChange}
-          style={{ display: "block", marginTop: "0.25rem" }}
+          className="block mt-1"
         />
         {imagePreviewUrl && (
           <img
             src={imagePreviewUrl}
             alt="Preview"
-            style={{
-              display: "block",
-              marginTop: "0.5rem",
-              maxWidth: "300px",
-              borderRadius: "8px",
-              aspectRatio: "1.91 / 1",
-              objectFit: "cover",
-            }}
+            className="block mt-2 max-w-[300px] rounded-lg object-cover [aspect-ratio:1.91/1]"
           />
         )}
         {imageError && (
-          <p
-            style={{
-              color: "red",
-              fontSize: "0.8125rem",
-              marginTop: "0.25rem",
-            }}
-          >
+          <p className="text-destructive text-[0.8125rem] mt-1">
             {imageError}
           </p>
         )}
       </div>
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p className="text-destructive">{error}</p>}
       <button
         type="submit"
         disabled={isPending}
-        style={{ padding: "0.5rem 1rem", alignSelf: "flex-start" }}
+        className="px-4 py-2 self-start cursor-pointer"
       >
         {isPending ? "Creating..." : "Create link"}
       </button>

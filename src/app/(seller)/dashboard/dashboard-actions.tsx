@@ -27,12 +27,7 @@ export function SignOutButton() {
     <form action={signOut}>
       <button
         type="submit"
-        style={{
-          background: "none",
-          border: "none",
-          padding: 0,
-          cursor: "pointer",
-        }}
+        className="bg-transparent border-none p-0 cursor-pointer"
       >
         Sign out
       </button>

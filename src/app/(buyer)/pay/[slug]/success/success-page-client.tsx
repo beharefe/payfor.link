@@ -10,7 +10,7 @@ export function SuccessPoller() {
     return () => clearInterval(id);
   }, [router]);
   return (
-    <p style={{ color: "#666", marginTop: "1rem" }}>
+    <p className="text-muted-foreground mt-4">
       Confirming your payment, please wait…
     </p>
   );

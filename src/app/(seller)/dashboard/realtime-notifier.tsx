@@ -40,21 +40,7 @@ export function SellerRealtimeNotifier({ sellerId }: { sellerId: string }) {
   if (!toast) return null;
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        bottom: "2rem",
-        right: "2rem",
-        background: "#111111",
-        color: "#F5F4EF",
-        padding: "0.75rem 1.25rem",
-        borderRadius: "12px",
-        fontSize: "0.95rem",
-        fontWeight: 500,
-        zIndex: 1000,
-        boxShadow: "0 4px 16px rgba(0,0,0,0.2)",
-      }}
-    >
+    <div className="fixed bottom-8 right-8 bg-primary text-primary-foreground px-5 py-3 rounded-xl text-[0.95rem] font-medium z-[1000] shadow-[0_4px_16px_rgba(0,0,0,0.2)]">
       🎉 {toast}
     </div>
   );

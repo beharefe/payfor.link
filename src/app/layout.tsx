@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { Amplitude } from "@unseallink/lib/amplitude";
+import { ThemeProvider } from "@unseallink/components/theme-provider";
 import "./globals.css";
 import { Inter, Source_Sans_3 } from "next/font/google";
 import { cn } from "@unseallink/lib/utils";
@@ -58,12 +59,14 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className={cn("font-sans", inter.variable, sourceSans3Heading.variable)}>
-      <body className="antialiased">
-        <NextIntlClientProvider messages={messages}>
-          <Amplitude />
-          {children}
-        </NextIntlClientProvider>
+    <html lang={locale} className={cn(inter.variable, sourceSans3Heading.variable)} suppressHydrationWarning>
+      <body className="bg-background text-foreground antialiased">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <NextIntlClientProvider messages={messages}>
+            <Amplitude />
+            {children}
+          </NextIntlClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

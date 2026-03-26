@@ -7,7 +7,7 @@ export function CopyLinkButtons({ url }: { url: string }) {
       onClick={() => {
         navigator.clipboard.writeText(url);
       }}
-      style={{ marginRight: "0.5rem" }}
+      className="mr-2"
     >
       Copy URL
     </button>

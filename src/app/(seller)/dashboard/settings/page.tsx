@@ -18,12 +18,12 @@ export default async function SettingsPage() {
     .single();
 
   return (
-    <main style={{ padding: "2rem", maxWidth: "28rem", margin: "0 auto" }}>
-      <p style={{ marginBottom: "1.5rem" }}>
+    <main className="p-8 max-w-[28rem] mx-auto">
+      <p className="mb-6">
         <Link href="/dashboard">← Dashboard</Link>
       </p>
-      <h1 style={{ marginBottom: "0.25rem" }}>Settings</h1>
-      <p style={{ color: "#6B6B6B", marginBottom: "2rem" }}>{seller?.email}</p>
+      <h1 className="mb-1">Settings</h1>
+      <p className="text-muted-foreground mb-8">{seller?.email}</p>
       <SettingsForm
         currentName={seller?.name ?? ""}
         currentBio={seller?.bio ?? ""}

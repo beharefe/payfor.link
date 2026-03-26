@@ -27,14 +27,12 @@ export function ArchiveButton({
         type="button"
         onClick={handleClick}
         disabled={isPending}
-        style={{ padding: "0.4rem 0.75rem", cursor: "pointer" }}
+        className="px-3 py-1.5 cursor-pointer"
       >
         {isPending ? "..." : isArchived ? "Reactivate" : "Archive"}
       </button>
       {error && (
-        <span
-          style={{ color: "red", marginLeft: "0.5rem", fontSize: "0.85rem" }}
-        >
+        <span className="text-destructive ml-2 text-[0.85rem]">
           {error}
         </span>
       )}
@@ -65,18 +63,12 @@ export function DeleteButton({ id }: { id: string }) {
         type="button"
         onClick={handleClick}
         disabled={isPending}
-        style={{
-          padding: "0.4rem 0.75rem",
-          cursor: "pointer",
-          color: "#C0392B",
-        }}
+        className="px-3 py-1.5 cursor-pointer text-destructive"
       >
         {isPending ? "..." : "Delete"}
       </button>
       {error && (
-        <span
-          style={{ color: "red", marginLeft: "0.5rem", fontSize: "0.85rem" }}
-        >
+        <span className="text-destructive ml-2 text-[0.85rem]">
           {error}
         </span>
       )}
@@ -109,18 +101,12 @@ export function RefundButton({
         type="button"
         onClick={handleClick}
         disabled={isPending}
-        style={{
-          padding: "0.25rem 0.5rem",
-          fontSize: "0.8125rem",
-          cursor: "pointer",
-        }}
+        className="px-2 py-1 text-[0.8125rem] cursor-pointer"
       >
         {isPending ? "..." : "Refund"}
       </button>
       {error && (
-        <span
-          style={{ color: "red", marginLeft: "0.5rem", fontSize: "0.8rem" }}
-        >
+        <span className="text-destructive ml-2 text-[0.8rem]">
           {error}
         </span>
       )}

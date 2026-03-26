@@ -24,23 +24,16 @@ export default async function OrdersPage({
 
   if (!session) {
     return (
-      <main
-        style={{
-          padding: "2rem",
-          maxWidth: "24rem",
-          margin: "0 auto",
-          textAlign: "center",
-        }}
-      >
-        <h1 style={{ fontSize: "1.5rem", fontWeight: 500, marginBottom: "0.5rem" }}>
+      <main className="p-8 max-w-sm mx-auto text-center">
+        <h1 className="text-2xl font-medium mb-2">
           Your orders
         </h1>
         {error === "link_expired" && (
-          <p style={{ color: "#C0392B", marginBottom: "1rem", fontSize: "0.9rem" }}>
+          <p className="text-destructive mb-4 text-sm">
             That link has expired. Enter your email to get a new one.
           </p>
         )}
-        <p style={{ color: "#6B6B6B", marginBottom: "2rem" }}>
+        <p className="text-muted-foreground mb-8">
           Enter the email you used at checkout to access your orders.
         </p>
         <OrdersSignIn oid={oid} />
@@ -56,42 +49,25 @@ export default async function OrdersPage({
     .order("created_at", { ascending: false });
 
   return (
-    <main style={{ padding: "2rem", maxWidth: "36rem", margin: "0 auto" }}>
-      <h1 style={{ fontSize: "1.5rem", fontWeight: 500, marginBottom: "1.5rem" }}>
+    <main className="p-8 max-w-2xl mx-auto">
+      <h1 className="text-2xl font-medium mb-6">
         Your orders
       </h1>
 
       {!orders?.length ? (
-        <p style={{ color: "#6B6B6B" }}>No orders found for {session.email}.</p>
+        <p className="text-muted-foreground">No orders found for {session.email}.</p>
       ) : (
-        <ul
-          style={{
-            listStyle: "none",
-            padding: 0,
-            margin: 0,
-            display: "flex",
-            flexDirection: "column",
-            gap: "1rem",
-          }}
-        >
+        <ul className="list-none p-0 m-0 flex flex-col gap-4">
           {orders.map((order) => (
             <li
               key={order.id}
-              style={{
-                border: "1px solid #E5E5E5",
-                borderRadius: "16px",
-                padding: "1rem 1.25rem",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                gap: "1rem",
-              }}
+              className="border border-border rounded-2xl px-5 py-4 flex justify-between items-center gap-4"
             >
               <div>
-                <p style={{ fontWeight: 500, margin: "0 0 0.25rem" }}>
+                <p className="font-medium mb-1">
                   {order.product_title}
                 </p>
-                <p style={{ color: "#6B6B6B", fontSize: "0.875rem", margin: 0 }}>
+                <p className="text-muted-foreground text-sm m-0">
                   ${order.price_paid.toFixed(2)} {order.currency.toUpperCase()} ·{" "}
                   {new Date(order.created_at).toLocaleDateString("en-US", {
                     month: "short",
@@ -102,16 +78,7 @@ export default async function OrdersPage({
               </div>
               <Link
                 href={`/orders/${order.id}`}
-                style={{
-                  padding: "0.5rem 1rem",
-                  background: "#111111",
-                  color: "#ffffff",
-                  textDecoration: "none",
-                  borderRadius: "100px",
-                  fontWeight: 500,
-                  fontSize: "0.875rem",
-                  whiteSpace: "nowrap",
-                }}
+                className="px-4 py-2 bg-primary text-primary-foreground no-underline rounded-full font-medium text-sm whitespace-nowrap hover:opacity-90 transition-opacity"
               >
                 View →
               </Link>

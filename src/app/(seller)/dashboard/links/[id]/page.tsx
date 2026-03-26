@@ -49,41 +49,25 @@ export default async function LinkDetailPage({
   const canEdit = !isDeleted && !isSuspended;
 
   return (
-    <main style={{ padding: "2rem", maxWidth: "48rem", margin: "0 auto" }}>
-      <p style={{ marginBottom: "1.5rem" }}>
+    <main className="p-8 max-w-3xl mx-auto">
+      <p className="mb-6">
         <Link href="/dashboard">← Dashboard</Link>
       </p>
 
       {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-          gap: "1rem",
-          marginBottom: "1.5rem",
-          flexWrap: "wrap",
-        }}
-      >
+      <div className="flex items-start justify-between gap-4 mb-6 flex-wrap">
         <div>
-          <h1 style={{ marginBottom: "0.25rem" }}>{link.title}</h1>
-          <p style={{ color: "#6B6B6B", fontSize: "0.9rem", margin: 0 }}>
+          <h1 className="mb-1">{link.title}</h1>
+          <p className="text-muted-foreground text-sm m-0">
             <StatusBadge status={link.status} /> · ${link.price.toFixed(2)} · v
             {link.version}
           </p>
         </div>
         {canEdit && (
-          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+          <div className="flex gap-2 flex-wrap">
             <Link
               href={`/dashboard/links/${id}/edit`}
-              style={{
-                padding: "0.4rem 0.75rem",
-                border: "1px solid #E5E5E5",
-                borderRadius: "8px",
-                fontSize: "0.9rem",
-                textDecoration: "none",
-                color: "#111",
-              }}
+              className="px-3 py-1.5 border border-border rounded-lg text-sm no-underline text-foreground"
             >
               Edit
             </Link>
@@ -94,22 +78,15 @@ export default async function LinkDetailPage({
       </div>
 
       {link.description && (
-        <p style={{ color: "#6B6B6B", marginBottom: "1.5rem" }}>
+        <p className="text-muted-foreground mb-6">
           {link.description}
         </p>
       )}
 
       {/* Stripe connect prompt */}
       {!seller?.stripe_connected && (
-        <section
-          style={{
-            marginBottom: "1.5rem",
-            padding: "1rem",
-            border: "1px solid #E5E5E5",
-            borderRadius: "12px",
-          }}
-        >
-          <p style={{ margin: "0 0 0.75rem" }}>
+        <section className="mb-6 p-4 border border-border rounded-xl">
+          <p className="mb-3">
             Connect Stripe to activate this link.
           </p>
           <InitiateStripeConnectButton />
@@ -118,48 +95,20 @@ export default async function LinkDetailPage({
 
       {/* Paywall URL */}
       {!isDeleted && (
-        <section
-          style={{
-            marginBottom: "2rem",
-            padding: "1rem",
-            background: "#F5F4EF",
-            borderRadius: "12px",
-          }}
-        >
-          <label
-            style={{
-              fontSize: "0.8125rem",
-              color: "#6B6B6B",
-              display: "block",
-              marginBottom: "0.25rem",
-            }}
-          >
+        <section className="mb-8 p-4 bg-background rounded-xl">
+          <label className="text-[0.8125rem] text-muted-foreground block mb-1">
             Paywall URL
           </label>
-          <p
-            style={{
-              wordBreak: "break-all",
-              margin: "0 0 0.5rem",
-              fontFamily: "monospace",
-              fontSize: "0.9rem",
-            }}
-          >
+          <p className="break-all mb-2 font-mono text-sm">
             {paywallUrl}
           </p>
-          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+          <div className="flex gap-2 flex-wrap">
             <CopyLinkButton url={paywallUrl} />
             <a
               href={paywallUrl}
               target="_blank"
               rel="noopener noreferrer"
-              style={{
-                padding: "0.4rem 0.75rem",
-                fontSize: "0.875rem",
-                border: "1px solid #E5E5E5",
-                borderRadius: "8px",
-                textDecoration: "none",
-                color: "#111",
-              }}
+              className="px-3 py-1.5 text-sm border border-border rounded-lg no-underline text-foreground"
             >
               Preview ↗
             </a>
@@ -168,39 +117,20 @@ export default async function LinkDetailPage({
       )}
 
       {/* Stats */}
-      <section
-        style={{
-          display: "flex",
-          gap: "2rem",
-          marginBottom: "2rem",
-          flexWrap: "wrap",
-        }}
-      >
+      <section className="flex gap-8 mb-8 flex-wrap">
         <div>
-          <p
-            style={{
-              color: "#6B6B6B",
-              fontSize: "0.8125rem",
-              margin: "0 0 0.25rem",
-            }}
-          >
+          <p className="text-muted-foreground text-[0.8125rem] mb-1">
             Total sales
           </p>
-          <p style={{ fontWeight: 600, fontSize: "1.25rem", margin: 0 }}>
+          <p className="font-semibold text-xl m-0">
             {link.total_sales}
           </p>
         </div>
         <div>
-          <p
-            style={{
-              color: "#6B6B6B",
-              fontSize: "0.8125rem",
-              margin: "0 0 0.25rem",
-            }}
-          >
+          <p className="text-muted-foreground text-[0.8125rem] mb-1">
             Revenue
           </p>
-          <p style={{ fontWeight: 600, fontSize: "1.25rem", margin: 0 }}>
+          <p className="font-semibold text-xl m-0">
             ${link.total_revenue.toFixed(2)}
           </p>
         </div>
@@ -208,95 +138,54 @@ export default async function LinkDetailPage({
 
       {/* Sales table */}
       <section>
-        <h2 style={{ marginBottom: "1rem" }}>Sales</h2>
+        <h2 className="mb-4">Sales</h2>
         {!orders?.length ? (
-          <p style={{ color: "#6B6B6B" }}>No sales yet.</p>
+          <p className="text-muted-foreground">No sales yet.</p>
         ) : (
-          <div style={{ overflowX: "auto" }}>
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                fontSize: "0.875rem",
-              }}
-            >
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-sm">
               <thead>
-                <tr
-                  style={{
-                    borderBottom: "1px solid #E5E5E5",
-                    textAlign: "left",
-                  }}
-                >
-                  <th
-                    style={{
-                      padding: "0.5rem 0.75rem",
-                      fontWeight: 500,
-                      color: "#6B6B6B",
-                    }}
-                  >
+                <tr className="border-b border-border text-left">
+                  <th className="px-3 py-2 font-medium text-muted-foreground">
                     Buyer
                   </th>
-                  <th
-                    style={{
-                      padding: "0.5rem 0.75rem",
-                      fontWeight: 500,
-                      color: "#6B6B6B",
-                    }}
-                  >
+                  <th className="px-3 py-2 font-medium text-muted-foreground">
                     Amount
                   </th>
-                  <th
-                    style={{
-                      padding: "0.5rem 0.75rem",
-                      fontWeight: 500,
-                      color: "#6B6B6B",
-                    }}
-                  >
+                  <th className="px-3 py-2 font-medium text-muted-foreground">
                     Net
                   </th>
-                  <th
-                    style={{
-                      padding: "0.5rem 0.75rem",
-                      fontWeight: 500,
-                      color: "#6B6B6B",
-                    }}
-                  >
+                  <th className="px-3 py-2 font-medium text-muted-foreground">
                     Status
                   </th>
-                  <th
-                    style={{
-                      padding: "0.5rem 0.75rem",
-                      fontWeight: 500,
-                      color: "#6B6B6B",
-                    }}
-                  >
+                  <th className="px-3 py-2 font-medium text-muted-foreground">
                     Date
                   </th>
-                  <th style={{ padding: "0.5rem 0.75rem" }} />
+                  <th className="px-3 py-2" />
                 </tr>
               </thead>
               <tbody>
                 {orders.map((order) => (
                   <tr
                     key={order.id}
-                    style={{ borderBottom: "1px solid #F5F4EF" }}
+                    className="border-b border-border"
                   >
-                    <td style={{ padding: "0.5rem 0.75rem" }}>
+                    <td className="px-3 py-2">
                       {order.buyer_email}
                     </td>
-                    <td style={{ padding: "0.5rem 0.75rem" }}>
+                    <td className="px-3 py-2">
                       ${order.price_paid.toFixed(2)}
                     </td>
-                    <td style={{ padding: "0.5rem 0.75rem" }}>
+                    <td className="px-3 py-2">
                       ${(order.price_paid - order.platform_fee).toFixed(2)}
                     </td>
-                    <td style={{ padding: "0.5rem 0.75rem" }}>
+                    <td className="px-3 py-2">
                       <OrderStatusBadge status={order.status} />
                     </td>
-                    <td style={{ padding: "0.5rem 0.75rem", color: "#6B6B6B" }}>
+                    <td className="px-3 py-2 text-muted-foreground">
                       {new Date(order.created_at).toLocaleDateString()}
                     </td>
-                    <td style={{ padding: "0.5rem 0.75rem" }}>
+                    <td className="px-3 py-2">
                       {order.status === "paid" && (
                         <RefundButton
                           orderId={order.id}
@@ -316,29 +205,31 @@ export default async function LinkDetailPage({
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const colors: Record<string, string> = {
-    active: "#1A7A4A",
-    draft: "#6B6B6B",
-    archived: "#6B6B6B",
-    suspended: "#C0392B",
-    deleted: "#C0392B",
+  const colorMap: Record<string, string> = {
+    active: "text-green-700 dark:text-green-400",
+    draft: "text-muted-foreground",
+    archived: "text-muted-foreground",
+    suspended: "text-destructive",
+    deleted: "text-destructive",
   };
+  const colorClass = colorMap[status] ?? "text-muted-foreground";
   return (
-    <span style={{ color: colors[status] ?? "#6B6B6B", fontWeight: 500 }}>
+    <span className={`${colorClass} font-medium`}>
       {status.charAt(0).toUpperCase() + status.slice(1)}
     </span>
   );
 }
 
 function OrderStatusBadge({ status }: { status: string }) {
-  const colors: Record<string, string> = {
-    paid: "#1A7A4A",
-    refunded: "#6B6B6B",
-    disputed: "#C0392B",
-    fraud: "#C0392B",
+  const colorMap: Record<string, string> = {
+    paid: "text-green-700 dark:text-green-400",
+    refunded: "text-muted-foreground",
+    disputed: "text-destructive",
+    fraud: "text-destructive",
   };
+  const colorClass = colorMap[status] ?? "text-muted-foreground";
   return (
-    <span style={{ color: colors[status] ?? "#6B6B6B", fontSize: "0.8125rem" }}>
+    <span className={`${colorClass} text-[0.8125rem]`}>
       {status.charAt(0).toUpperCase() + status.slice(1)}
     </span>
   );

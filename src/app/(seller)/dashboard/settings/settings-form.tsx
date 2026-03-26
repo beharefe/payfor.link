@@ -80,37 +80,14 @@ export function SettingsForm({
     setAvatarPreview(URL.createObjectURL(file));
   }
 
-  const inputStyle = {
-    display: "block",
-    width: "100%",
-    padding: "10px 14px",
-    border: "1.5px solid #E5E5E5",
-    borderRadius: "12px",
-    fontSize: "1rem",
-    marginBottom: "0.75rem",
-    boxSizing: "border-box" as const,
-  };
-
-  const labelStyle = {
-    display: "block",
-    fontWeight: 500,
-    marginBottom: "0.25rem",
-  };
-
-  const hintStyle = {
-    color: "#6B6B6B",
-    fontSize: "0.875rem",
-    margin: "0 0 0.5rem",
-  };
-
   return (
     <form action={formAction}>
       {/* Display name */}
-      <div style={{ marginBottom: "1.5rem" }}>
-        <label htmlFor="name" style={labelStyle}>
+      <div className="mb-6">
+        <label htmlFor="name" className="block font-medium mb-1">
           Display name
         </label>
-        <p style={hintStyle}>Shown on your paywall pages as "by [name]"</p>
+        <p className="text-muted-foreground text-sm mb-2">Shown on your paywall pages as "by [name]"</p>
         <input
           id="name"
           name="name"
@@ -118,16 +95,16 @@ export function SettingsForm({
           defaultValue={currentName}
           maxLength={60}
           required
-          style={inputStyle}
+          className="block w-full px-4 py-2.5 border border-input rounded-xl text-base mb-3 bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring outline-none box-border"
         />
       </div>
 
       {/* Bio */}
-      <div style={{ marginBottom: "1.5rem" }}>
-        <label htmlFor="bio" style={labelStyle}>
+      <div className="mb-6">
+        <label htmlFor="bio" className="block font-medium mb-1">
           Short bio
         </label>
-        <p style={hintStyle}>
+        <p className="text-muted-foreground text-sm mb-2">
           One or two sentences about you or your work. Max 300 characters.
         </p>
         <textarea
@@ -136,35 +113,22 @@ export function SettingsForm({
           defaultValue={currentBio}
           maxLength={300}
           rows={3}
-          style={{ ...inputStyle, resize: "vertical" as const }}
+          className="block w-full px-4 py-2.5 border border-input rounded-xl text-base mb-3 bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring outline-none box-border resize-y"
         />
       </div>
 
       {/* Avatar */}
-      <div style={{ marginBottom: "1.75rem" }}>
-        <label style={labelStyle}>Avatar</label>
-        <p style={hintStyle}>
+      <div className="mb-7">
+        <label className="block font-medium mb-1">Avatar</label>
+        <p className="text-muted-foreground text-sm mb-2">
           Square image recommended. Max 2MB — JPG, PNG, or WebP.
         </p>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "1rem",
-            marginBottom: "0.5rem",
-          }}
-        >
+        <div className="flex items-center gap-4 mb-2">
           {avatarPreview && (
             <img
               src={avatarPreview}
               alt="Avatar"
-              style={{
-                width: "56px",
-                height: "56px",
-                borderRadius: "50%",
-                objectFit: "cover",
-                border: "1.5px solid #E5E5E5",
-              }}
+              className="w-14 h-14 rounded-full object-cover border border-border"
             />
           )}
           <input
@@ -174,13 +138,7 @@ export function SettingsForm({
           />
         </div>
         {avatarError && (
-          <p
-            style={{
-              color: "#C0392B",
-              fontSize: "0.875rem",
-              margin: "0.25rem 0 0",
-            }}
-          >
+          <p className="text-destructive text-sm mt-1">
             {avatarError}
           </p>
         )}
@@ -189,30 +147,18 @@ export function SettingsForm({
       <button
         type="submit"
         disabled={isPending || uploadPending}
-        style={{
-          padding: "10px 24px",
-          background: "#111",
-          color: "#fff",
-          border: "none",
-          borderRadius: "100px",
-          fontWeight: 500,
-          cursor: "pointer",
-        }}
+        className="px-6 py-2.5 bg-primary text-primary-foreground border-none rounded-full font-medium cursor-pointer hover:opacity-90 transition-opacity"
       >
         {isPending ? "Saving..." : "Save"}
       </button>
 
       {state === "saved" && (
-        <span
-          style={{ marginLeft: "1rem", color: "#1A7A4A", fontSize: "0.9rem" }}
-        >
+        <span className="ml-4 text-green-700 dark:text-green-400 text-sm">
           Saved ✓
         </span>
       )}
       {state && state !== "saved" && (
-        <span
-          style={{ marginLeft: "1rem", color: "#C0392B", fontSize: "0.9rem" }}
-        >
+        <span className="ml-4 text-destructive text-sm">
           {state}
         </span>
       )}

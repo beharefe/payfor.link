@@ -29,10 +29,10 @@ export function OrdersSignIn({ oid }: { oid?: string }) {
 
   if (sent) {
     return (
-      <div style={{ textAlign: "center" }}>
-        <p style={{ fontSize: "2rem", margin: "0 0 0.5rem" }}>✉️</p>
-        <p style={{ fontWeight: 500, margin: "0 0 0.5rem" }}>Check your inbox</p>
-        <p style={{ color: "#6B6B6B", fontSize: "0.9rem" }}>
+      <div className="text-center">
+        <p className="text-3xl mb-2">✉️</p>
+        <p className="font-medium mb-2">Check your inbox</p>
+        <p className="text-muted-foreground text-sm">
           If there are orders for <strong>{email}</strong>, we sent you a sign-in link.
         </p>
       </div>
@@ -42,7 +42,7 @@ export function OrdersSignIn({ oid }: { oid?: string }) {
   return (
     <form
       onSubmit={handleSubmit}
-      style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}
+      className="flex flex-col gap-3"
     >
       <input
         type="email"
@@ -50,32 +50,17 @@ export function OrdersSignIn({ oid }: { oid?: string }) {
         placeholder="you@example.com"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        style={{
-          padding: "0.625rem 1rem",
-          border: "1px solid #E5E5E5",
-          borderRadius: "12px",
-          fontSize: "1rem",
-          outline: "none",
-        }}
+        className="w-full px-4 py-2.5 border border-input rounded-xl text-base outline-none bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring"
       />
       <button
         type="submit"
         disabled={loading}
-        style={{
-          padding: "0.625rem 1.25rem",
-          background: "#111111",
-          color: "#ffffff",
-          border: "none",
-          borderRadius: "100px",
-          fontWeight: 500,
-          fontSize: "1rem",
-          cursor: loading ? "wait" : "pointer",
-        }}
+        className={`px-5 py-2.5 bg-primary text-primary-foreground border-none rounded-full font-medium text-base ${loading ? "cursor-wait" : "cursor-pointer"} hover:opacity-90 transition-opacity`}
       >
         {loading ? "Sending…" : "Send sign-in link"}
       </button>
       {error && (
-        <p style={{ color: "#C0392B", fontSize: "0.875rem", margin: 0 }}>{error}</p>
+        <p className="text-destructive text-sm m-0">{error}</p>
       )}
     </form>
   );
