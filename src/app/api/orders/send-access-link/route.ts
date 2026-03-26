@@ -1,8 +1,6 @@
-import { render } from "@react-email/render";
-import { MagicLinkEmail } from "@unseallink/emails/magic-link";
 import { createBuyerToken } from "@unseallink/lib/buyer-token";
 import { TABLES } from "@unseallink/lib/db";
-import { FROM_EMAIL, resend } from "@unseallink/lib/resend";
+import { sendBuyerSignInEmail } from "@unseallink/lib/email";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -35,12 +33,7 @@ export async function POST(request: NextRequest) {
     const token = createBuyerToken(email);
     const next = oid ? `&next=/orders/${oid}` : "";
     const link = `${appUrl}/api/orders/verify?token=${token}${next}`;
-    await resend.emails.send({
-      from: FROM_EMAIL,
-      to: email,
-      subject: "Your orders sign-in link",
-      html: await render(MagicLinkEmail({ link })),
-    });
+    await sendBuyerSignInEmail({ to: email, link });
   }
 
   return NextResponse.json({ ok: true });

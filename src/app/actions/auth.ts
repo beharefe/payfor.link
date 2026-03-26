@@ -1,5 +1,7 @@
 "use server";
 
+import { sendSellerSignInEmail } from "@unseallink/lib/email";
+import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { createClient } from "@unseallink/lib/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -9,23 +11,27 @@ export async function signInWithOtp(formData: FormData): Promise<void> {
     redirect(`/auth?error=${encodeURIComponent("Email is required")}`);
   }
 
-  const supabase = await createClient();
-
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const { error } = await supabase.auth.signInWithOtp({
+
+  // Generate the magic link server-side so we can send it via our own template
+  // instead of Supabase's default email.
+  const service = createServiceClient();
+  const { data, error } = await service.auth.admin.generateLink({
+    type: "magiclink",
     email,
-    options: {
-      shouldCreateUser: true,
-      emailRedirectTo: `${appUrl}/auth/confirm`,
-    },
+    options: { redirectTo: `${appUrl}/auth/confirm` },
   });
 
-  if (error) {
-    redirect(`/auth?error=${encodeURIComponent(error.message)}`);
+  if (error || !data.properties.action_link) {
+    redirect(
+      `/auth?error=${encodeURIComponent(error?.message ?? "Could not send sign-in link")}`,
+    );
   }
+
+  await sendSellerSignInEmail({ to: email, link: data.properties.action_link });
+
   redirect(`/auth?sent=1&email=${encodeURIComponent(email)}`);
 }
-
 
 export async function signOut(): Promise<void> {
   const supabase = await createClient();

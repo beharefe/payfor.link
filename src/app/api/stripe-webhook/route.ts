@@ -1,10 +1,7 @@
-import { render } from "@react-email/render";
-import { AccessLinkEmail } from "@unseallink/emails/access-link";
-import { SaleNotificationEmail } from "@unseallink/emails/sale-notification";
+import { sendBuyerAccessEmail, sendSaleNotificationEmail } from "@unseallink/lib/email";
 import { createBuyerToken } from "@unseallink/lib/buyer-token";
 import { TABLES } from "@unseallink/lib/db";
 import { log } from "@unseallink/lib/logger";
-import { FROM_EMAIL, resend } from "@unseallink/lib/resend";
 import { platformFeeCents, stripe } from "@unseallink/lib/stripe";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { serializeError } from "@unseallink/lib/utils";
@@ -154,17 +151,11 @@ async function handleCheckoutSessionCompleted(
   // Send buyer a signed access link — no Supabase session involved
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
   const accessLink = `${appUrl}/api/orders/verify?token=${createBuyerToken(customerEmail)}&oid=${insertedOrder.id}`;
-  await resend.emails.send({
-    from: FROM_EMAIL,
+  await sendBuyerAccessEmail({
     to: customerEmail,
-    subject: `Your access link — ${product.title}`,
-    html: await render(
-      AccessLinkEmail({
-        accessLink,
-        productTitle: product.title,
-        orderUrl: `${appUrl}/orders/${insertedOrder.id}`,
-      }),
-    ),
+    accessLink,
+    productTitle: product.title,
+    orderUrl: `${appUrl}/orders/${insertedOrder.id}`,
   });
 
   // Notify seller of the new sale
@@ -175,19 +166,13 @@ async function handleCheckoutSessionCompleted(
     .maybeSingle();
 
   if (seller?.email) {
-    await resend.emails.send({
-      from: FROM_EMAIL,
+    await sendSaleNotificationEmail({
       to: seller.email,
-      subject: `New sale — ${product.title}`,
-      html: await render(
-        SaleNotificationEmail({
-          sellerName: seller.name ?? "",
-          productTitle: product.title,
-          pricePaid,
-          platformFee,
-          dashboardUrl: `${appUrl}/dashboard`,
-        }),
-      ),
+      sellerName: seller.name ?? "",
+      productTitle: product.title,
+      pricePaid,
+      platformFee,
+      dashboardUrl: `${appUrl}/dashboard`,
     });
   }
 }

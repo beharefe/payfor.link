@@ -5,12 +5,14 @@ interface AccessLinkEmailProps {
   accessLink: string;
   productTitle: string;
   orderUrl: string;
+  expiresIn: string;
 }
 
 export function AccessLinkEmail({
   accessLink,
   productTitle,
   orderUrl,
+  expiresIn,
 }: AccessLinkEmailProps) {
   return (
     <EmailLayout preview={`Your access link — ${productTitle}`}>
@@ -34,8 +36,10 @@ export function AccessLinkEmail({
         Access content →
       </Button>
 
+      <Hr className="border-[#E5E5E5] my-4" />
+
       <Text className="text-[#999999] text-xs m-0 mb-1">
-        This link expires in 7 days.
+        This link expires in {expiresIn}.
       </Text>
       <Text className="text-[#999999] text-xs m-0">
         <Link href={orderUrl} className="text-[#999999]">

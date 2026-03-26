@@ -1,7 +1,10 @@
 import crypto from "node:crypto";
 
-const ACCESS_TOKEN_TTL = 7 * 24 * 60 * 60; // 7 days (email link)
-const SESSION_TTL = 30 * 24 * 60 * 60; // 30 days (cookie)
+export const ACCESS_TOKEN_DAYS = 7;
+export const SESSION_DAYS = 30;
+
+const ACCESS_TOKEN_TTL = ACCESS_TOKEN_DAYS * 24 * 60 * 60;
+const SESSION_TTL = SESSION_DAYS * 24 * 60 * 60;
 
 function secret() {
   const s = process.env.BUYER_SESSION_SECRET;
