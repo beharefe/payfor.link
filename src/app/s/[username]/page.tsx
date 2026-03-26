@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { data: seller } = await service
     .from(TABLES.SELLERS)
     .select("name, bio")
-    .eq("name", username)
+    .eq("username", username)
     .single();
 
   if (!seller) return { title: "Not found" };
@@ -29,8 +29,8 @@ export default async function SellerProfilePage({ params }: Props) {
 
   const { data: seller } = await service
     .from(TABLES.SELLERS)
-    .select("id, name, bio, avatar_url")
-    .eq("name", username)
+    .select("id, name, username, bio, avatar_url")
+    .eq("username", username)
     .single();
 
   if (!seller) notFound();

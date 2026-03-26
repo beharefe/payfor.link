@@ -3,21 +3,34 @@
 import { TABLES } from "@unseallink/lib/db";
 import { createClient } from "@unseallink/lib/supabase/server";
 import { redirect } from "next/navigation";
+import slugify from "slugify";
 
-// name = URL handle: 1–30 chars, lowercase alphanumeric + hyphens
-// no leading/trailing hyphens, no consecutive hyphens
-const NAME_RE = /^[a-z0-9][a-z0-9-]{0,28}[a-z0-9]$|^[a-z0-9]$/;
-const CONSECUTIVE_HYPHENS = /--/;
+async function generateHandle(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  displayName: string,
+  sellerId: string,
+): Promise<string> {
+  const base = slugify(displayName, { lower: true, strict: true }).slice(0, 28) || "seller";
+
+  // Check if base is available
+  const { data: existing } = await supabase
+    .from(TABLES.SELLERS)
+    .select("username")
+    .ilike("username", `${base}%`)
+    .neq("id", sellerId);
+
+  const taken = new Set((existing ?? []).map((r) => r.username));
+  if (!taken.has(base)) return base;
+
+  let n = 2;
+  while (taken.has(`${base}-${n}`)) n++;
+  return `${base}-${n}`;
+}
 
 export async function saveOnboardingName(formData: FormData) {
-  const raw = formData.get("name")?.toString()?.trim()?.toLowerCase();
-
-  if (!raw) redirect("/onboarding/name?error=name_required");
-
-  const name = raw ?? "";
-  if (!NAME_RE.test(name) || CONSECUTIVE_HYPHENS.test(name)) {
-    redirect("/onboarding/name?error=name_invalid");
-  }
+  const name = formData.get("name")?.toString()?.trim();
+  if (!name || name.length < 1) redirect("/onboarding/name?error=name_required");
+  if (name.length > 60) redirect("/onboarding/name?error=name_too_long");
 
   const supabase = await createClient();
   const {
@@ -25,21 +38,11 @@ export async function saveOnboardingName(formData: FormData) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/auth");
 
-  // Check name uniqueness against other sellers
-  const { data: existing } = await supabase
-    .from(TABLES.SELLERS)
-    .select("id")
-    .eq("name", name)
-    .neq("id", user.id)
-    .maybeSingle();
-
-  if (existing) {
-    redirect("/onboarding/name?error=name_taken");
-  }
+  const username = await generateHandle(supabase, name, user.id);
 
   await supabase
     .from(TABLES.SELLERS)
-    .update({ name })
+    .update({ name: name.slice(0, 60), username })
     .eq("id", user.id);
 
   redirect("/dashboard");

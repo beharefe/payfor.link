@@ -65,7 +65,7 @@ export default async function PaywallPage({ params }: Props) {
       "id, title, description, price, currency, seller_id, status, preview_image_url, total_sales, sellers!inner(name, username)",
     )
     .eq("slug", slug)
-    .eq("sellers.name", username)
+    .eq("sellers.username", username)
     .single();
 
   if (!link) notFound();
@@ -103,7 +103,7 @@ export default async function PaywallPage({ params }: Props) {
             href={`/@${username}`}
             className="hover:underline font-medium text-foreground"
           >
-            @{username}
+            {seller?.name ?? username}
           </Link>
         </p>
 

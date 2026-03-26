@@ -27,7 +27,7 @@ export async function GET(
     .single();
 
   const title = link.title;
-  const sellerName = seller?.name ? `@${seller.name}` : null;
+  const sellerName = seller?.name ?? null;
   const price = `$${Number(link.price).toFixed(2)} ${(link.currency ?? "usd").toUpperCase()}`;
   const hasImage = Boolean(link.preview_image_url);
 
