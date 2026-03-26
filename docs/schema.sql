@@ -18,7 +18,7 @@ create table sellers (
   total_earned    numeric(10,2) not null default 0,
   total_fees      numeric(10,2) not null default 0,
 
-  username        text unique,
+  username        text not null unique,
   avatar_url      text,
   bio             text,
 

@@ -19,7 +19,7 @@ export default async function DashboardPage() {
 
   const { data: seller } = await supabase
     .from(TABLES.SELLERS)
-    .select("stripe_connected, total_earned, total_fees")
+    .select("stripe_connected, total_earned, total_fees, username")
     .eq("id", user.id)
     .single();
 
@@ -32,7 +32,12 @@ export default async function DashboardPage() {
   const totalEarned = seller?.total_earned ?? 0;
   const totalFees = seller?.total_fees ?? 0;
   const balance = totalEarned - totalFees;
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  // Build app URL from headers so it's correct in every environment
+  const { headers } = await import("next/headers");
+  const h = await headers();
+  const host = h.get("host") ?? "unseal.link";
+  const proto = h.get("x-forwarded-proto") ?? "https";
+  const appUrl = `${proto}://${host}`;
 
   return (
     <main className="p-8 max-w-3xl mx-auto">
@@ -77,7 +82,13 @@ export default async function DashboardPage() {
                 <strong>{link.title}</strong> — {link.status} —{" "}
                 {link.total_sales} sales — ${link.total_revenue.toFixed(2)}
                 <br />
-                <CopyLinkButtons url={`${appUrl}/pay/${link.slug}`} />
+                <CopyLinkButtons
+                  url={
+                    seller?.username
+                      ? `${appUrl}/@${seller.username}/${link.slug}`
+                      : `${appUrl}/pay/${link.slug}`
+                  }
+                />
                 <Link
                   href={`/dashboard/links/${link.id}`}
                   className="ml-2"
