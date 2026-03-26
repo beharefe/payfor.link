@@ -5,18 +5,21 @@ import { Amplitude } from "@unseallink/lib/amplitude";
 import { ThemeProvider } from "@unseallink/components/theme-provider";
 import "./globals.css";
 import { Inter, Source_Sans_3 } from "next/font/google";
+import { headers } from "next/headers";
 import { cn } from "@unseallink/lib/utils";
 
 const sourceSans3Heading = Source_Sans_3({subsets:['latin'],variable:'--font-heading'});
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
-
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("metadata");
+  const h = await headers();
+  const host = h.get("host") ?? "unseal.link";
+  const proto = h.get("x-forwarded-proto") ?? "https";
+  const appUrl = `${proto}://${host}`;
   return {
-    metadataBase: new URL(APP_URL),
+    metadataBase: new URL(appUrl),
     title: {
       default: t("title"),
       template: "%s | unseal.link",
@@ -25,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title: t("og_title"),
       description: t("og_description"),
-      url: APP_URL,
+      url: appUrl,
       siteName: "unseal.link",
       type: "website",
       images: [

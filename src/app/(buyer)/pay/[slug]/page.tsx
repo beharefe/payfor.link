@@ -2,12 +2,20 @@ import { TABLES } from "@unseallink/lib/db";
 import { log } from "@unseallink/lib/logger";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AbuseReportForm } from "./abuse-report-form";
 import { PaywallCTA } from "./paywall-cta";
 
 type Props = { params: Promise<{ slug: string }> };
+
+async function getBaseUrl() {
+  const h = await headers();
+  const host = h.get("host") ?? "unseal.link";
+  const proto = h.get("x-forwarded-proto") ?? "https";
+  return `${proto}://${host}`;
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -21,19 +29,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!link) return { title: "Not found" };
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
+  const baseUrl = await getBaseUrl();
   const title = `${link.title} — $${link.price}`;
   const description = link.description ?? "Pay once and get instant access.";
-  const ogImage = link.preview_image_url ?? `${appUrl}/api/og/${slug}`;
+  // Always use the dynamic OG route — it handles preview_image_url internally
+  const ogImage = `${baseUrl}/api/og/${slug}`;
 
   return {
     title,
     description,
-    metadataBase: new URL(appUrl),
+    metadataBase: new URL(baseUrl),
     openGraph: {
       title,
       description,
-      url: `${appUrl}/pay/${slug}`,
+      url: `${baseUrl}/pay/${slug}`,
       images: [{ url: ogImage, width: 1200, height: 630 }],
       type: "website",
     },
