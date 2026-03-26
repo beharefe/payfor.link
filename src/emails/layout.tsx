@@ -19,7 +19,7 @@ export function EmailLayout({ preview, children }: EmailLayoutProps) {
       <Preview>{preview}</Preview>
       <Tailwind>
         <Body className="bg-[#F0EDE8] font-sans m-0 py-10 px-4">
-          <Container className="bg-white max-w-[560px] mx-auto rounded-2xl" style={{ padding: "48px" }}>
+          <Container className="bg-white max-w-[560px] mx-auto rounded-2xl" style={{ padding: "40px 24px" }}>
             <div style={{ marginBottom: "40px" }}>
               <span style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 600, color: "#3D3530", letterSpacing: "-0.3px" }}>
                 unseal.link
