@@ -17,7 +17,10 @@ export async function GET(request: NextRequest) {
 
   const payload = verifyBuyerToken(token);
   if (!payload) {
-    return NextResponse.redirect(new URL("/orders?error=link_expired", appUrl));
+    const expiredUrl = new URL("/orders", appUrl);
+    expiredUrl.searchParams.set("error", "link_expired");
+    if (orderId) expiredUrl.searchParams.set("oid", orderId);
+    return NextResponse.redirect(expiredUrl);
   }
 
   // oid → direct content access (purchase email flow)
