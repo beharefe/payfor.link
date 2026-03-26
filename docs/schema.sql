@@ -7,7 +7,7 @@
 create table sellers (
   id              uuid primary key references auth.users(id) on delete cascade,
   email           text not null unique,
-  name            text,
+  name            text not null unique,  -- handle + display name, e.g. "alex" → /@alex
 
   stripe_account_id          text unique,
   stripe_connected           boolean not null default false,
@@ -18,7 +18,6 @@ create table sellers (
   total_earned    numeric(10,2) not null default 0,
   total_fees      numeric(10,2) not null default 0,
 
-  username        text not null unique,
   avatar_url      text,
   bio             text,
 

@@ -19,7 +19,7 @@ export default async function DashboardPage() {
 
   const { data: seller } = await supabase
     .from(TABLES.SELLERS)
-    .select("stripe_connected, total_earned, total_fees, username")
+    .select("stripe_connected, total_earned, total_fees, name")
     .eq("id", user.id)
     .single();
 
@@ -84,8 +84,8 @@ export default async function DashboardPage() {
                 <br />
                 <CopyLinkButtons
                   url={
-                    seller?.username
-                      ? `${appUrl}/@${seller.username}/${link.slug}`
+                    seller?.name
+                      ? `${appUrl}/@${seller.name}/${link.slug}`
                       : `${appUrl}/pay/${link.slug}`
                   }
                 />

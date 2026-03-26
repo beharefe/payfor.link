@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .select("title, description, price, sellers!inner(username)")
     .eq("slug", slug)
     .eq("status", "active")
-    .eq("sellers.username", username)
+    .eq("sellers.name", username)
     .single();
 
   if (!link) return { title: "Not found" };
@@ -65,7 +65,7 @@ export default async function PaywallPage({ params }: Props) {
       "id, title, description, price, currency, seller_id, status, preview_image_url, total_sales, sellers!inner(name, username)",
     )
     .eq("slug", slug)
-    .eq("sellers.username", username)
+    .eq("sellers.name", username)
     .single();
 
   if (!link) notFound();

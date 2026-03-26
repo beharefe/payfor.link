@@ -141,7 +141,7 @@ account.updated             → sync Stripe Connect status → notify seller on 
 -- sellers
 id uuid PK → auth.users.id
 email text UNIQUE
-name text
+name text NOT NULL UNIQUE                     -- handle + display name: "alex" → /@alex
 stripe_account_id text UNIQUE
 stripe_connected boolean DEFAULT false        -- OAuth complete → can sell
 stripe_charges_enabled boolean DEFAULT false  -- can accept payments
@@ -149,7 +149,6 @@ stripe_payouts_enabled boolean DEFAULT false  -- KYC complete → can withdraw
 stripe_details_submitted boolean DEFAULT false
 total_earned numeric(10,2) DEFAULT 0
 total_fees numeric(10,2) DEFAULT 0
-username text UNIQUE                          -- Phase 2
 avatar_url text                               -- Phase 2
 bio text                                      -- Phase 2
 created_at, updated_at timestamptz

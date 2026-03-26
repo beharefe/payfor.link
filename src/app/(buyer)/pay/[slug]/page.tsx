@@ -81,15 +81,15 @@ export default async function PaywallPage({ params }: Props) {
 
   const { data: seller } = await supabase
     .from(TABLES.SELLERS)
-    .select("name, username")
+    .select("name")
     .eq("id", link.seller_id)
     .single();
 
   log.info("paywall_viewed", { link_id: link.id, slug });
 
   const salesCount = link.total_sales ?? 0;
-  const sellerHandle = seller?.username ? `@${seller.username}` : seller?.name ?? null;
-  const sellerProfileHref = seller?.username ? `/s/${seller.username}` : null;
+  const sellerName = seller?.name ?? null;
+  const sellerProfileHref = sellerName ? `/@${sellerName}` : null;
 
   return (
     <main className="max-w-sm mx-auto">
@@ -106,15 +106,15 @@ export default async function PaywallPage({ params }: Props) {
 
       <div className={`px-8 pb-8 ${link.preview_image_url ? "pt-6" : "pt-10"}`}>
         {/* Seller */}
-        {sellerHandle && (
+        {sellerName && (
           <p className="text-sm text-muted-foreground mb-2">
             by{" "}
             {sellerProfileHref ? (
               <Link href={sellerProfileHref} className="hover:underline font-medium text-foreground">
-                {sellerHandle}
+                @{sellerName}
               </Link>
             ) : (
-              <span className="font-medium text-foreground">{sellerHandle}</span>
+              <span className="font-medium text-foreground">@{sellerName}</span>
             )}
           </p>
         )}

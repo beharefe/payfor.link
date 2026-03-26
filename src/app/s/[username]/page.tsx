@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { data: seller } = await service
     .from(TABLES.SELLERS)
     .select("name, bio")
-    .eq("username", username)
+    .eq("name", username)
     .single();
 
   if (!seller) return { title: "Not found" };
@@ -29,8 +29,8 @@ export default async function SellerProfilePage({ params }: Props) {
 
   const { data: seller } = await service
     .from(TABLES.SELLERS)
-    .select("id, name, bio, avatar_url, username")
-    .eq("username", username)
+    .select("id, name, bio, avatar_url")
+    .eq("name", username)
     .single();
 
   if (!seller) notFound();
@@ -75,7 +75,7 @@ export default async function SellerProfilePage({ params }: Props) {
           {products.map((product) => (
             <Link
               key={product.id}
-              href={`/pay/${product.slug}`}
+              href={`/@${seller.name}/${product.slug}`}
               className="border border-border rounded-2xl overflow-hidden no-underline text-foreground hover:border-foreground/30 transition-colors group"
             >
               {product.preview_image_url && (
