@@ -16,9 +16,9 @@ export const metadata: Metadata = {
 export default async function OrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; oid?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { error, oid } = await searchParams;
   const cookieStore = await cookies();
   const session = verifySessionValue(cookieStore.get("buyer_session")?.value ?? "");
 
@@ -43,7 +43,7 @@ export default async function OrdersPage({
         <p style={{ color: "#6B6B6B", marginBottom: "2rem" }}>
           Enter the email you used at checkout to access your orders.
         </p>
-        <OrdersSignIn />
+        <OrdersSignIn oid={oid} />
       </main>
     );
   }

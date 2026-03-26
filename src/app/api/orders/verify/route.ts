@@ -8,6 +8,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const token = searchParams.get("token");
   const orderId = searchParams.get("oid");
+  const next = searchParams.get("next");
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
   if (!token) {
@@ -19,8 +20,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/orders?error=link_expired", appUrl));
   }
 
+  // oid → direct content access (purchase email flow)
+  // next → return to a specific page (sign-in redirect flow); only relative paths allowed
+  const isRelative = next && next.startsWith("/") && !next.startsWith("//");
   const destination = orderId
     ? new URL(`/api/orders/${orderId}/access`, appUrl)
+    : isRelative
+    ? new URL(next, appUrl)
     : new URL("/orders", appUrl);
 
   const response = NextResponse.redirect(destination);

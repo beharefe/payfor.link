@@ -55,7 +55,7 @@ export default async function OrderPage({ params }: Props) {
           Use the access link from your purchase email, or sign in at orders.
         </p>
         <Link
-          href="/orders"
+          href={`/orders?oid=${order_id}`}
           style={{
             display: "inline-block",
             padding: "0.625rem 1.25rem",
@@ -66,7 +66,7 @@ export default async function OrderPage({ params }: Props) {
             fontWeight: 500,
           }}
         >
-          Go to orders
+          Sign in →
         </Link>
       </main>
     );

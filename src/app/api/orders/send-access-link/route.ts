@@ -6,9 +6,11 @@ import { type NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   let email: string;
+  let oid: string | undefined;
   try {
     const body = await request.json();
     email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+    oid = typeof body.oid === "string" && body.oid.trim() ? body.oid.trim() : undefined;
   } catch {
     return NextResponse.json({ error: "Invalid body" }, { status: 400 });
   }
@@ -29,7 +31,8 @@ export async function POST(request: NextRequest) {
 
   if (orders?.length) {
     const token = createBuyerToken(email);
-    const link = `${appUrl}/api/orders/verify?token=${token}`;
+    const next = oid ? `&next=/orders/${oid}` : "";
+    const link = `${appUrl}/api/orders/verify?token=${token}${next}`;
     await resend.emails.send({
       from: FROM_EMAIL,
       to: email,

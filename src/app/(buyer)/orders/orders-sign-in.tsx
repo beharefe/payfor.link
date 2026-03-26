@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export function OrdersSignIn() {
+export function OrdersSignIn({ oid }: { oid?: string }) {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -16,7 +16,7 @@ export function OrdersSignIn() {
       await fetch("/api/orders/send-access-link", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, ...(oid ? { oid } : {}) }),
       });
       // Always show success — don't reveal whether email exists
       setSent(true);
