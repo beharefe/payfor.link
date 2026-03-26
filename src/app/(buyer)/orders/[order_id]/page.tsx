@@ -48,21 +48,8 @@ export default async function OrderPage({ params }: Props) {
           Use the access link from your purchase email, or sign in at orders.
         </p>
         <Link
-<<<<<<< HEAD
-          href={`/orders?oid=${order_id}`}
-          style={{
-            display: "inline-block",
-            padding: "0.625rem 1.25rem",
-            background: "#111111",
-            color: "#ffffff",
-            textDecoration: "none",
-            borderRadius: "100px",
-            fontWeight: 500,
-          }}
-=======
           href="/orders"
           className="inline-block px-5 py-2.5 bg-primary text-primary-foreground no-underline rounded-full font-medium hover:opacity-90 transition-opacity"
->>>>>>> 8387bd1 (refactor: migrate to shadcn theme system with dark mode + buyer token auth)
         >
           Sign in →
         </Link>

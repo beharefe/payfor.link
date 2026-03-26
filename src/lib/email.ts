@@ -27,10 +27,8 @@ export async function sendBuyerAccessEmail(opts: {
     subject: `Your access link — ${opts.productTitle}`,
     html: await render(
       AccessLinkEmail({
-        accessLink: opts.accessLink,
+        unlockUrl: opts.accessLink,
         productTitle: opts.productTitle,
-        orderUrl: opts.orderUrl,
-        expiresIn: `${ACCESS_TOKEN_DAYS} days`,
       }),
     ),
   });
