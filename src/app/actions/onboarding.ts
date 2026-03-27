@@ -41,7 +41,7 @@ export async function saveOnboardingName(formData: FormData) {
 
   // Upsert — creates the sellers row if it doesn't exist yet (new users),
   // or updates name/username if they're changing it (returning users).
-  await supabase.from(TABLES.SELLERS).upsert(
+  const { error: upsertError } = await supabase.from(TABLES.SELLERS).upsert(
     {
       id: user.id,
       email: user.email ?? "",
@@ -50,6 +50,16 @@ export async function saveOnboardingName(formData: FormData) {
     },
     { onConflict: "id" },
   );
+
+  if (upsertError) {
+    // name UNIQUE violation → someone already has this display name
+    if (upsertError.code === "23505" && upsertError.message?.includes("name")) {
+      redirect("/onboarding/name?error=name_taken");
+    }
+    // Surface the raw error in dev so we can see exactly what's wrong
+    const detail = encodeURIComponent(upsertError.message ?? upsertError.code ?? "unknown");
+    redirect(`/onboarding/name?error=save_failed&detail=${detail}`);
+  }
 
   redirect("/dashboard");
 }

@@ -6,9 +6,9 @@ import { NameForm } from "./name-form";
 export default async function OnboardingNamePage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; detail?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { error, detail } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -37,7 +37,7 @@ export default async function OnboardingNamePage({
             brand, or anything buyers will recognise.
           </p>
         </div>
-        <NameForm defaultName={seller?.name ?? ""} error={error} />
+        <NameForm defaultName={seller?.name ?? ""} error={error} detail={detail} />
       </div>
     </main>
   );

@@ -15,23 +15,32 @@ function toHandle(name: string): string {
 const ERROR_MESSAGES: Record<string, string> = {
   name_required: "Name is required.",
   name_too_long: "Name must be 60 characters or less.",
+  name_taken: "That name is already taken. Try a different one.",
+  save_failed: "Could not save your name. Please try again.",
 };
 
 export function NameForm({
   defaultName,
   error,
+  detail,
 }: {
   defaultName?: string;
   error?: string;
+  detail?: string;
 }) {
   const [name, setName] = useState(defaultName ?? "");
   const handle = toHandle(name);
 
   return (
     <form action={saveOnboardingName} className="flex flex-col gap-4">
-      {error && ERROR_MESSAGES[error] && (
+      {error && (
         <p className="text-destructive text-sm bg-destructive/10 px-4 py-3 rounded-xl">
-          {ERROR_MESSAGES[error]}
+          {ERROR_MESSAGES[error] ?? "Something went wrong. Please try again."}
+          {detail && (
+            <span className="block mt-1 text-xs font-mono opacity-70 break-all">
+              {decodeURIComponent(detail)}
+            </span>
+          )}
         </p>
       )}
       <div>
