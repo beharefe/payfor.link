@@ -103,9 +103,14 @@ export async function createProduct(
   if (error) {
     log.error("createProduct failed", {
       error: error.message,
+      code: error.code,
       user_id: user.id,
     });
-    return { error: "Failed to create product" };
+    // Surface the actual error in dev so it's visible without Axiom
+    const msg = process.env.NODE_ENV === "development"
+      ? `Failed to create product: ${error.message}`
+      : "Failed to create product. Please try again.";
+    return { error: msg };
   }
 
   redirect(`/dashboard/links/${link.id}`);

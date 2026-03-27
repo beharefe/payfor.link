@@ -47,23 +47,26 @@ export async function verifySellerOtp(formData: FormData): Promise<void> {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  let needsName = false;
+  let needsOnboarding = false;
   if (user) {
     const { data: existing } = await supabase
       .from(TABLES.SELLERS)
-      .select("name")
+      .select("name, username")
       .eq("id", user.id)
       .maybeSingle();
 
-    needsName = !existing?.name;
+    needsOnboarding = !existing?.name || !existing?.username;
 
-    await supabase.from(TABLES.SELLERS).upsert(
-      { id: user.id, email: user.email ?? "", name: user.user_metadata?.name ?? null },
-      { onConflict: "id" },
-    );
+    // If row already exists, keep email in sync — but never insert without name
+    if (existing) {
+      await supabase
+        .from(TABLES.SELLERS)
+        .update({ email: user.email ?? "" })
+        .eq("id", user.id);
+    }
   }
 
-  redirect(needsName ? "/onboarding/name" : "/dashboard");
+  redirect(needsOnboarding ? "/onboarding/name" : "/dashboard");
 }
 
 export async function signOut(): Promise<void> {

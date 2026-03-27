@@ -12,7 +12,6 @@ async function generateHandle(
 ): Promise<string> {
   const base = slugify(displayName, { lower: true, strict: true }).slice(0, 28) || "seller";
 
-  // Check if base is available
   const { data: existing } = await supabase
     .from(TABLES.SELLERS)
     .select("username")
@@ -40,10 +39,17 @@ export async function saveOnboardingName(formData: FormData) {
 
   const username = await generateHandle(supabase, name, user.id);
 
-  await supabase
-    .from(TABLES.SELLERS)
-    .update({ name: name.slice(0, 60), username })
-    .eq("id", user.id);
+  // Upsert — creates the sellers row if it doesn't exist yet (new users),
+  // or updates name/username if they're changing it (returning users).
+  await supabase.from(TABLES.SELLERS).upsert(
+    {
+      id: user.id,
+      email: user.email ?? "",
+      name: name.slice(0, 60),
+      username,
+    },
+    { onConflict: "id" },
+  );
 
   redirect("/dashboard");
 }
