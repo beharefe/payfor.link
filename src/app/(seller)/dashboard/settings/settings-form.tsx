@@ -1,6 +1,7 @@
 "use client";
 
 import { updateProfile } from "@unseallink/app/actions/settings";
+import { Loader2 } from "lucide-react";
 import { useActionState, useState, useTransition } from "react";
 
 const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
@@ -81,13 +82,40 @@ export function SettingsForm({
   }
 
   return (
-    <form action={formAction}>
+    <form action={formAction} className="space-y-6">
+      {/* Avatar */}
+      <div className="flex items-center gap-5">
+        <div className="relative shrink-0">
+          {avatarPreview ? (
+            <img
+              src={avatarPreview}
+              alt="Avatar"
+              className="w-16 h-16 rounded-full object-cover border border-border"
+            />
+          ) : (
+            <div className="w-16 h-16 rounded-full bg-muted border border-border flex items-center justify-center text-xl font-medium text-foreground">
+              {currentName?.charAt(0).toUpperCase() ?? "?"}
+            </div>
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-foreground mb-1">Profile photo</p>
+          <p className="text-xs text-muted-foreground mb-2">Square image. Max 2MB — JPG, PNG, or WebP.</p>
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={handleAvatarChange}
+            className="text-sm text-muted-foreground file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border file:border-border file:text-xs file:font-medium file:text-foreground file:bg-background file:cursor-pointer"
+          />
+          {avatarError && <p className="text-destructive text-xs mt-1">{avatarError}</p>}
+        </div>
+      </div>
+
       {/* Display name */}
-      <div className="mb-6">
-        <label htmlFor="name" className="block font-medium mb-1">
+      <div>
+        <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1.5">
           Display name
         </label>
-        <p className="text-muted-foreground text-sm mb-2">Shown on your paywall pages as "by [name]"</p>
         <input
           id="name"
           name="name"
@@ -95,73 +123,45 @@ export function SettingsForm({
           defaultValue={currentName}
           maxLength={60}
           required
-          className="block w-full px-4 py-2.5 border border-input rounded-xl text-base mb-3 bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring outline-none box-border"
+          placeholder="Alex Templates"
+          className="block w-full px-4 py-3 border border-input rounded-xl text-sm bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring outline-none"
         />
+        <p className="text-xs text-muted-foreground mt-1.5">Shown on your paywall pages as "by [name]"</p>
       </div>
 
       {/* Bio */}
-      <div className="mb-6">
-        <label htmlFor="bio" className="block font-medium mb-1">
-          Short bio
+      <div>
+        <label htmlFor="bio" className="block text-sm font-medium text-foreground mb-1.5">
+          Short bio <span className="font-normal text-muted-foreground">(optional)</span>
         </label>
-        <p className="text-muted-foreground text-sm mb-2">
-          One or two sentences about you or your work. Max 300 characters.
-        </p>
         <textarea
           id="bio"
           name="bio"
           defaultValue={currentBio}
           maxLength={300}
           rows={3}
-          className="block w-full px-4 py-2.5 border border-input rounded-xl text-base mb-3 bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring outline-none box-border resize-y"
+          placeholder="I make templates and resources for…"
+          className="block w-full px-4 py-3 border border-input rounded-xl text-sm bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring outline-none resize-y"
         />
+        <p className="text-xs text-muted-foreground mt-1.5">Max 300 characters. Shown on your public profile.</p>
       </div>
 
-      {/* Avatar */}
-      <div className="mb-7">
-        <label className="block font-medium mb-1">Avatar</label>
-        <p className="text-muted-foreground text-sm mb-2">
-          Square image recommended. Max 2MB — JPG, PNG, or WebP.
-        </p>
-        <div className="flex items-center gap-4 mb-2">
-          {avatarPreview && (
-            <img
-              src={avatarPreview}
-              alt="Avatar"
-              className="w-14 h-14 rounded-full object-cover border border-border"
-            />
-          )}
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            onChange={handleAvatarChange}
-          />
-        </div>
-        {avatarError && (
-          <p className="text-destructive text-sm mt-1">
-            {avatarError}
-          </p>
+      <div className="flex items-center gap-4 pt-2">
+        <button
+          type="submit"
+          disabled={isPending || uploadPending}
+          className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground border-none rounded-full font-medium cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {isPending && <Loader2 className="animate-spin size-4 shrink-0" />}
+          {isPending ? "Saving…" : "Save changes"}
+        </button>
+        {state === "saved" && (
+          <span className="text-emerald-600 dark:text-emerald-400 text-sm font-medium">Saved ✓</span>
+        )}
+        {state && state !== "saved" && (
+          <span className="text-destructive text-sm">{state}</span>
         )}
       </div>
-
-      <button
-        type="submit"
-        disabled={isPending || uploadPending}
-        className="px-6 py-2.5 bg-primary text-primary-foreground border-none rounded-full font-medium cursor-pointer hover:opacity-90 transition-opacity"
-      >
-        {isPending ? "Saving..." : "Save"}
-      </button>
-
-      {state === "saved" && (
-        <span className="ml-4 text-green-700 dark:text-green-400 text-sm">
-          Saved ✓
-        </span>
-      )}
-      {state && state !== "saved" && (
-        <span className="ml-4 text-destructive text-sm">
-          {state}
-        </span>
-      )}
     </form>
   );
 }

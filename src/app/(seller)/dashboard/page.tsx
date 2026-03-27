@@ -1,5 +1,6 @@
 import { TABLES } from "@unseallink/lib/db";
 import { createClient } from "@unseallink/lib/supabase/server";
+import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { CopyLinkButtons } from "./copy-link-buttons";
@@ -19,28 +20,28 @@ export default async function DashboardPage() {
 
   const { data: seller } = await supabase
     .from(TABLES.SELLERS)
-    .select("stripe_connected, total_earned, total_fees, name, username")
+    .select("stripe_connected, total_earned, total_fees, name, username, avatar_url")
     .eq("id", user.id)
     .single();
 
-  // If the sellers row doesn't exist the user never finished onboarding.
   if (!seller) redirect("/onboarding/name");
 
   const { data: links } = await supabase
     .from(TABLES.PRODUCTS)
     .select("id, title, slug, status, total_sales, total_revenue")
     .eq("seller_id", user.id)
+    .neq("status", "deleted")
     .order("created_at", { ascending: false });
 
-  const totalEarned = seller?.total_earned ?? 0;
-  const totalFees = seller?.total_fees ?? 0;
-  const balance = totalEarned - totalFees;
-  // Build app URL from headers so it's correct in every environment
-  const { headers } = await import("next/headers");
+  const totalSales = links?.reduce((s, l) => s + (l.total_sales ?? 0), 0) ?? 0;
+  const totalEarned = seller.total_earned ?? 0;
+
   const h = await headers();
   const host = h.get("host") ?? "unseal.link";
   const proto = h.get("x-forwarded-proto") ?? "https";
   const appUrl = `${proto}://${host}`;
+
+  const initial = seller.name?.charAt(0).toUpperCase() ?? "?";
 
   return (
     <main className="min-h-screen bg-background">
@@ -50,50 +51,63 @@ export default async function DashboardPage() {
       <div className="border-b border-border">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
           <h1 className="text-base font-medium text-foreground">Dashboard</h1>
-          <div className="flex items-center gap-4">
-            <Link
-              href="/dashboard/settings"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors no-underline"
-            >
-              Settings
-            </Link>
+          <div className="flex items-center gap-3">
             <SignOutButton />
+            <Link href="/dashboard/settings" className="flex items-center gap-2 no-underline group">
+              <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors hidden sm:block">
+                {seller.name}
+              </span>
+              {seller.avatar_url ? (
+                <img
+                  src={seller.avatar_url}
+                  alt={seller.name ?? ""}
+                  className="w-8 h-8 rounded-full object-cover border border-border"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center text-sm font-medium text-foreground shrink-0">
+                  {initial}
+                </div>
+              )}
+            </Link>
           </div>
         </div>
       </div>
 
       <div className="max-w-5xl mx-auto px-6 py-10 space-y-10">
+
         {/* Stripe connect banner */}
-        {!seller?.stripe_connected && (
+        {!seller.stripe_connected && (
           <div className="border border-border rounded-2xl p-6 bg-card flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="flex-1">
               <p className="font-medium text-foreground mb-1">Connect Stripe to start selling</p>
-              <p className="text-sm text-muted-foreground">Takes about 2 minutes. Stripe handles identity verification and payouts.</p>
+              <p className="text-sm text-muted-foreground">Takes about 2 minutes. Stripe handles all payments and payouts.</p>
             </div>
             <InitiateStripeConnectButton />
           </div>
         )}
 
         {/* Stats */}
-        <div className="grid sm:grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div className="border border-border rounded-2xl p-5 bg-card">
+            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3">Total sales</p>
+            <p className="text-3xl font-medium text-foreground">{totalSales}</p>
+          </div>
           <div className="border border-border rounded-2xl p-5 bg-card">
             <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3">Total earned</p>
             <p className="text-3xl font-medium text-foreground">${totalEarned.toFixed(2)}</p>
           </div>
-          <div className="border border-border rounded-2xl p-5 bg-card">
-            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3">Platform fees</p>
-            <p className="text-3xl font-medium text-foreground">${totalFees.toFixed(2)}</p>
-          </div>
-          <div className="border border-border rounded-2xl p-5 bg-card">
-            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3">Available</p>
-            <p className="text-3xl font-medium text-foreground">${balance.toFixed(2)}</p>
-            {seller?.stripe_connected && (
-              <div className="mt-3">
-                <WithdrawButton />
-              </div>
-            )}
-          </div>
         </div>
+
+        {/* Payout CTA */}
+        {seller.stripe_connected && (
+          <div className="flex items-center justify-between border border-border rounded-2xl px-6 py-4 bg-card">
+            <div>
+              <p className="font-medium text-foreground text-sm">Ready to withdraw?</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Manage your Stripe payouts and bank account.</p>
+            </div>
+            <WithdrawButton />
+          </div>
+        )}
 
         {/* Links */}
         <div>
@@ -136,12 +150,12 @@ export default async function DashboardPage() {
                       </span>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {link.total_sales} sales · ${link.total_revenue.toFixed(2)} earned
+                      {link.total_sales} sales · ${(link.total_revenue ?? 0).toFixed(2)} earned
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <CopyLinkButtons
-                      url={`${appUrl}/@${seller?.username}/${link.slug}`}
+                      url={`${appUrl}/@${seller.username}/${link.slug}`}
                     />
                     <Link
                       href={`/dashboard/links/${link.id}`}
