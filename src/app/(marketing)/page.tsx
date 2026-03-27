@@ -50,6 +50,16 @@ export default function HomePage() {
               How it works →
             </Link>
           </div>
+
+          {/* Trust bar */}
+          <div className="flex flex-wrap gap-x-6 gap-y-2 mt-8">
+            <span className="text-xs text-muted-foreground">
+              Payments by <span className="font-semibold" style={{ color: "#635BFF" }}>Stripe</span>
+            </span>
+            <span className="text-xs text-muted-foreground">· No monthly fees</span>
+            <span className="text-xs text-muted-foreground">· Buyers need no account</span>
+            <span className="text-xs text-muted-foreground">· Instant delivery</span>
+          </div>
         </div>
       </section>
 

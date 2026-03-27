@@ -23,6 +23,21 @@ const competitors = [
   { name: "unseal.link",   fee: "4.5%", highlight: true },
 ];
 
+const benefits = [
+  {
+    title: "We never hold your money",
+    body: "Payments go directly into your Stripe account. We have no access to your funds — ever.",
+  },
+  {
+    title: "Buyers need no account",
+    body: "They pay and get their link by email in under 30 seconds. Less friction means more sales.",
+  },
+  {
+    title: "No platform lock-in",
+    body: "Your content lives wherever you put it. We just control who gets the link. Switch or leave any time.",
+  },
+];
+
 export default function PricingPage() {
   return (
     <>
@@ -41,17 +56,31 @@ export default function PricingPage() {
         </p>
       </section>
 
-      {/* Earnings table */}
+      {/* Benefits */}
       <section className="border-t border-border py-12">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="grid sm:grid-cols-3 gap-6">
+            {benefits.map((b) => (
+              <div key={b.title} className="border border-border rounded-2xl p-6 bg-card">
+                <p className="font-medium text-foreground mb-2">{b.title}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">{b.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Earnings table */}
+      <section className="border-t border-border py-12 bg-card">
         <div className="max-w-5xl mx-auto px-6">
           <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-8">
             Earnings breakdown
           </p>
-          <div className="bg-card border border-border rounded-2xl overflow-hidden max-w-2xl">
+          <div className="border border-border rounded-2xl overflow-hidden max-w-2xl">
             <table className="w-full border-collapse">
               <thead>
                 <tr className="border-b border-border">
-                  {["Sale price", "Platform fee", "Stripe fee", "You receive"].map((h) => (
+                  {["Sale price", "Our fee (4.5%)", "Stripe fee", "You receive"].map((h) => (
                     <th
                       key={h}
                       className="px-4 py-3.5 text-left text-xs font-medium text-muted-foreground tracking-widest uppercase"
@@ -85,35 +114,56 @@ export default function PricingPage() {
             </table>
           </div>
           <p className="mt-4 text-sm text-muted-foreground">
-            Stripe processing fee: ~2.9% + $0.30 per transaction.
+            Stripe fee: ~2.9% + $0.30 per transaction, billed by Stripe separately.
           </p>
         </div>
       </section>
 
       {/* Competitor comparison */}
-      <section className="border-t border-border py-12 bg-card">
+      <section className="border-t border-border py-12">
         <div className="max-w-5xl mx-auto px-6">
           <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-8">
             vs the competition
           </p>
-          <div className="border border-border rounded-2xl overflow-hidden max-w-sm">
+          <div className="border border-border rounded-2xl overflow-hidden max-w-xs">
             {competitors.map((c, i) => (
               <div
                 key={c.name}
                 className={`flex justify-between items-center px-5 py-3.5 ${i < competitors.length - 1 ? "border-b border-border" : ""} ${c.highlight ? "bg-primary" : ""}`}
               >
-                <span
-                  className={`${c.highlight ? "font-medium text-primary-foreground" : "text-muted-foreground"} text-sm`}
-                >
+                <span className={`${c.highlight ? "font-medium text-primary-foreground" : "text-muted-foreground"} text-sm`}>
                   {c.name}
                 </span>
-                <span
-                  className={`font-medium ${c.highlight ? "text-primary-foreground" : "text-foreground"} text-sm tabular-nums`}
-                >
+                <span className={`font-medium ${c.highlight ? "text-primary-foreground" : "text-foreground"} text-sm tabular-nums`}>
                   {c.fee}
                 </span>
               </div>
             ))}
+          </div>
+          <p className="mt-4 text-xs text-muted-foreground">Platform fee only. Stripe&apos;s processing fee applies on all platforms.</p>
+        </div>
+      </section>
+
+      {/* Trust bar */}
+      <section className="border-t border-border py-10 bg-card">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="flex flex-wrap gap-x-8 gap-y-3 items-center">
+            <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+              <span className="text-foreground">✓</span> Payments processed by{" "}
+              <span className="font-semibold" style={{ color: "#635BFF" }}>Stripe</span>
+            </span>
+            <span className="text-xs text-muted-foreground">
+              <span className="text-foreground">✓</span> We never touch your funds
+            </span>
+            <span className="text-xs text-muted-foreground">
+              <span className="text-foreground">✓</span> No monthly fees
+            </span>
+            <span className="text-xs text-muted-foreground">
+              <span className="text-foreground">✓</span> Cancel any time
+            </span>
+            <span className="text-xs text-muted-foreground">
+              <span className="text-foreground">✓</span> Buyers need no account
+            </span>
           </div>
         </div>
       </section>
@@ -127,7 +177,7 @@ export default function PricingPage() {
           Start selling free →
         </Link>
         <p className="mt-4 text-xs text-muted-foreground">
-          Platform earns only when you earn.
+          You earn only when you sell. So do we.
         </p>
       </section>
     </>
