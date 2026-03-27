@@ -26,14 +26,21 @@ export default async function AuthPage({
             {sent ? "Check your email" : "Sign in"}
           </h1>
           <p className="text-muted-foreground text-sm">
-            {sent
-              ? <>We sent a 6-digit code to <span className="font-medium text-foreground">{email}</span>.</>
-              : "Enter your email and we'll send you a sign-in code."}
+            {sent ? (
+              <>
+                We sent a 6-digit code to{" "}
+                <span className="font-medium text-foreground">{email}</span>.
+              </>
+            ) : (
+              "Enter your email and we'll send you a sign-in code."
+            )}
           </p>
         </div>
 
         {error && (
-          <p className="mb-4 text-destructive text-sm bg-destructive/10 px-4 py-3 rounded-xl">{error}</p>
+          <div className="mb-4 text-destructive text-sm bg-destructive/10 px-4 py-3 rounded-xl">
+            {error}
+          </div>
         )}
 
         {sent ? (
@@ -41,7 +48,10 @@ export default async function AuthPage({
             <form action={verifySellerOtp} className="flex flex-col gap-4">
               <input type="hidden" name="email" value={email} />
               <div>
-                <label htmlFor="code" className="block text-sm font-medium text-foreground mb-1.5">
+                <label
+                  htmlFor="code"
+                  className="block text-sm font-medium text-foreground mb-1.5"
+                >
                   Verification code
                 </label>
                 <input
@@ -52,6 +62,7 @@ export default async function AuthPage({
                   pattern="[0-9]{6}"
                   maxLength={6}
                   required
+                  autoFocus
                   autoComplete="one-time-code"
                   placeholder="000000"
                   className="w-full px-4 py-3 border border-input rounded-xl text-base outline-none bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring tracking-[0.4em] text-center font-mono"
@@ -64,16 +75,33 @@ export default async function AuthPage({
                 Verify code →
               </button>
             </form>
-            <p className="mt-5 text-center">
-              <a href="/auth" className="text-muted-foreground text-sm hover:text-foreground transition-colors">
+
+            {/* Resend + change email */}
+            <div className="mt-5 flex flex-col gap-2 items-center">
+              <form action={signInWithOtp}>
+                <input type="hidden" name="email" value={email} />
+                <button
+                  type="submit"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors bg-transparent border-none cursor-pointer p-0"
+                >
+                  Resend code
+                </button>
+              </form>
+              <a
+                href="/auth"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors no-underline"
+              >
                 Use a different email
               </a>
-            </p>
+            </div>
           </>
         ) : (
           <form action={signInWithOtp} className="flex flex-col gap-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1.5">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-foreground mb-1.5"
+              >
                 Email
               </label>
               <input
@@ -81,6 +109,7 @@ export default async function AuthPage({
                 name="email"
                 type="email"
                 required
+                autoFocus
                 autoComplete="email"
                 placeholder="you@example.com"
                 className="w-full px-4 py-3 border border-input rounded-xl text-base outline-none bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring"

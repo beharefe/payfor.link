@@ -23,12 +23,22 @@ export default async function OnboardingNamePage({
   if (seller?.name && seller?.username) redirect("/dashboard");
 
   return (
-    <main className="p-8 max-w-sm mx-auto">
-      <h1 className="text-2xl font-medium mb-2">What should we call you?</h1>
-      <p className="text-muted-foreground mb-6">
-        Shown on your paywall pages and public profile. Use your real name, brand, or anything buyers will recognise.
-      </p>
-      <NameForm defaultName={seller?.name ?? ""} error={error} />
+    <main className="min-h-screen flex flex-col items-center justify-center px-6 py-16 bg-background">
+      <div className="w-full max-w-sm">
+        <div className="mb-8">
+          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3">
+            One last thing
+          </p>
+          <h1 className="text-3xl font-medium tracking-tight text-foreground mb-2">
+            What should we call you?
+          </h1>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            Shown on your paywall pages and public profile. Use your real name,
+            brand, or anything buyers will recognise.
+          </p>
+        </div>
+        <NameForm defaultName={seller?.name ?? ""} error={error} />
+      </div>
     </main>
   );
 }
