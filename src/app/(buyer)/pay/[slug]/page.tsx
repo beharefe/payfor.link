@@ -92,63 +92,65 @@ export default async function PaywallPage({ params }: Props) {
   const sellerProfileHref = seller?.username ? `/@${seller.username}` : null;
 
   return (
-    <main className="max-w-sm mx-auto">
-      {/* Preview image — full width, flush top */}
-      {link.preview_image_url && (
-        <div className="aspect-video w-full overflow-hidden rounded-t-2xl bg-muted">
-          <img
-            src={link.preview_image_url}
-            alt={link.title}
-            className="w-full h-full object-cover"
-          />
-        </div>
-      )}
-
-      <div className={`px-8 pb-8 ${link.preview_image_url ? "pt-6" : "pt-10"}`}>
-        {/* Seller */}
-        {sellerName && (
-          <p className="text-sm text-muted-foreground mb-2">
-            by{" "}
-            {sellerProfileHref ? (
-              <Link href={sellerProfileHref} className="hover:underline font-medium text-foreground">
-                {sellerName}
-              </Link>
-            ) : (
-              <span className="font-medium text-foreground">{sellerName}</span>
-            )}
-          </p>
+    <main className="min-h-screen bg-background flex flex-col items-center justify-center px-6 py-16">
+      <div className="w-full max-w-sm">
+        {/* Preview image */}
+        {link.preview_image_url && (
+          <div className="aspect-video w-full overflow-hidden rounded-2xl bg-muted mb-6">
+            <img
+              src={link.preview_image_url}
+              alt={link.title}
+              className="w-full h-full object-cover"
+            />
+          </div>
         )}
 
-        {/* Title */}
-        <h1 className="text-2xl font-semibold mb-3">{link.title}</h1>
-
-        {/* Description */}
-        {link.description && (
-          <p className="text-muted-foreground text-sm mb-6 leading-relaxed">{link.description}</p>
-        )}
-
-        {/* Price */}
-        <p className="text-3xl font-bold mb-4">
-          ${link.price.toFixed(2)}{" "}
-          <span className="text-base font-normal text-muted-foreground">
-            {link.currency.toUpperCase()}
-          </span>
-        </p>
-
-        {/* CTA */}
-        <PaywallCTA linkId={link.id} />
-
-        {/* Trust signals */}
-        <div className="mt-4 flex flex-col gap-1">
-          <p className="text-xs text-muted-foreground">✓ Secure payment via Stripe</p>
-          <p className="text-xs text-muted-foreground">✓ Instant delivery after payment</p>
-          {salesCount > 0 && (
-            <p className="text-xs text-muted-foreground">✓ {salesCount} purchases</p>
+        <div className="border border-border rounded-2xl bg-card p-6">
+          {/* Seller */}
+          {sellerName && (
+            <p className="text-xs text-muted-foreground mb-4">
+              by{" "}
+              {sellerProfileHref ? (
+                <Link href={sellerProfileHref} className="hover:underline font-medium text-foreground">
+                  {sellerName}
+                </Link>
+              ) : (
+                <span className="font-medium text-foreground">{sellerName}</span>
+              )}
+            </p>
           )}
+
+          {/* Title */}
+          <h1 className="text-xl font-medium tracking-tight text-foreground mb-2">{link.title}</h1>
+
+          {/* Description */}
+          {link.description && (
+            <p className="text-sm text-muted-foreground mb-5 leading-relaxed">{link.description}</p>
+          )}
+
+          {/* Price */}
+          <p className="text-3xl font-medium text-foreground mb-5">
+            ${link.price.toFixed(2)}{" "}
+            <span className="text-base font-normal text-muted-foreground">
+              {link.currency.toUpperCase()}
+            </span>
+          </p>
+
+          {/* CTA */}
+          <PaywallCTA linkId={link.id} />
+
+          {/* Trust signals */}
+          <div className="mt-4 flex flex-col gap-1.5">
+            <p className="text-xs text-muted-foreground">✓ Secure payment via Stripe</p>
+            <p className="text-xs text-muted-foreground">✓ Instant delivery by email</p>
+            {salesCount > 0 && (
+              <p className="text-xs text-muted-foreground">✓ {salesCount} purchases</p>
+            )}
+          </div>
         </div>
 
         {/* Report abuse */}
-        <div className="mt-8 pt-6 border-t border-border text-center">
+        <div className="mt-6 text-center">
           <AbuseReportForm productId={link.id} />
         </div>
       </div>

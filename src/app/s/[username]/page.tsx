@@ -45,72 +45,86 @@ export default async function SellerProfilePage({ params }: Props) {
   const totalSales = products?.reduce((sum, p) => sum + (p.total_sales ?? 0), 0) ?? 0;
 
   return (
-    <main className="p-8 max-w-2xl mx-auto">
+    <main className="min-h-screen bg-background">
       {/* Seller header */}
-      <div className="flex items-center gap-4 mb-8">
-        {seller.avatar_url && (
-          <img
-            src={seller.avatar_url}
-            alt={seller.name ?? username}
-            className="w-16 h-16 rounded-full object-cover"
-          />
-        )}
-        <div>
-          <h1 className="text-2xl font-semibold mb-0.5">{seller.name ?? username}</h1>
-          <p className="text-sm text-muted-foreground">
-            {(products?.length ?? 0)} {(products?.length ?? 0) === 1 ? "product" : "products"}
-            {totalSales > 0 && ` · ${totalSales} sales`}
-          </p>
-          {seller.bio && (
-            <p className="text-sm text-muted-foreground mt-2 max-w-sm">{seller.bio}</p>
-          )}
+      <section className="pt-16 pb-12 border-b border-border">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="flex items-center gap-5">
+            {seller.avatar_url ? (
+              <img
+                src={seller.avatar_url}
+                alt={seller.name ?? username}
+                className="w-16 h-16 rounded-full object-cover shrink-0"
+              />
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center shrink-0">
+                <span className="text-xl font-medium text-muted-foreground">
+                  {(seller.name ?? username).charAt(0).toUpperCase()}
+                </span>
+              </div>
+            )}
+            <div>
+              <h1 className="text-2xl font-medium tracking-tight text-foreground mb-0.5">
+                {seller.name ?? username}
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                {(products?.length ?? 0)} {(products?.length ?? 0) === 1 ? "product" : "products"}
+                {totalSales > 0 && ` · ${totalSales} sales`}
+              </p>
+              {seller.bio && (
+                <p className="text-sm text-muted-foreground mt-2 max-w-md">{seller.bio}</p>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
 
       {/* Products */}
-      {!products?.length ? (
-        <p className="text-muted-foreground">No products available yet.</p>
-      ) : (
-        <div className="flex flex-col gap-4">
-          {products.map((product) => (
-            <Link
-              key={product.id}
-              href={`/@${seller.name}/${product.slug}`}
-              className="border border-border rounded-2xl overflow-hidden no-underline text-foreground hover:border-foreground/30 transition-colors group"
-            >
-              {product.preview_image_url && (
-                <div className="aspect-video w-full overflow-hidden bg-muted">
-                  <img
-                    src={product.preview_image_url}
-                    alt={product.title}
-                    className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
-                  />
-                </div>
-              )}
-              <div className="p-5">
-                <div className="flex justify-between items-start gap-4">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-base mb-1 truncate">{product.title}</p>
+      <section className="py-12">
+        <div className="max-w-5xl mx-auto px-6">
+          {!products?.length ? (
+            <p className="text-muted-foreground">No products available yet.</p>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {products.map((product) => (
+                <Link
+                  key={product.id}
+                  href={`/@${seller.username}/${product.slug}`}
+                  className="border border-border rounded-2xl overflow-hidden no-underline text-foreground hover:border-foreground/30 transition-colors group bg-card"
+                >
+                  {product.preview_image_url && (
+                    <div className="aspect-video w-full overflow-hidden bg-muted">
+                      <img
+                        src={product.preview_image_url}
+                        alt={product.title}
+                        className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+                      />
+                    </div>
+                  )}
+                  <div className="p-5">
+                    <p className="font-medium text-base mb-1 truncate">{product.title}</p>
                     {product.description && (
-                      <p className="text-sm text-muted-foreground line-clamp-2">
+                      <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
                         {product.description}
                       </p>
                     )}
-                    {(product.total_sales ?? 0) > 0 && (
-                      <p className="text-xs text-muted-foreground mt-2">
-                        {product.total_sales} purchases
+                    <div className="flex items-center justify-between">
+                      <p className="font-medium text-foreground">
+                        ${product.price.toFixed(2)}
                       </p>
-                    )}
+                      {(product.total_sales ?? 0) > 0 && (
+                        <p className="text-xs text-muted-foreground">
+                          {product.total_sales} sales
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <p className="font-semibold text-base shrink-0">
-                    ${product.price.toFixed(2)}
-                  </p>
-                </div>
-              </div>
-            </Link>
-          ))}
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
-      )}
+      </section>
     </main>
   );
 }

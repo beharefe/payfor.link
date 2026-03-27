@@ -41,122 +41,95 @@ const buyerSteps = [
   },
 ];
 
+function StepList({ steps }: { steps: { n: string; title: string; body: string }[] }) {
+  return (
+    <div className="divide-y divide-border">
+      {steps.map((step) => (
+        <div key={step.n} className="flex gap-6 py-6">
+          <span className="text-xs font-medium text-muted-foreground font-mono min-w-[2rem] mt-0.5 tabular-nums">
+            {step.n}
+          </span>
+          <div>
+            <p className="font-medium text-foreground mb-1">{step.title}</p>
+            <p className="text-sm text-muted-foreground leading-relaxed">{step.body}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function HowItWorksPage() {
   return (
-    <main className="min-h-screen bg-background">
-      {/* Nav */}
-      <nav className="flex justify-between items-center py-5 px-8 max-w-[64rem] mx-auto">
-        <Link
-          href="/"
-          className="font-medium text-foreground no-underline text-base"
-        >
-          unseal.link
-        </Link>
-        <Link
-          href="/auth"
-          className="px-5 py-2 bg-primary text-primary-foreground no-underline rounded-full font-medium text-sm hover:opacity-90 transition-opacity"
-        >
-          Start selling
-        </Link>
-      </nav>
-
+    <>
       {/* Hero */}
-      <section className="text-center py-20 px-8 pb-16 max-w-[40rem] mx-auto">
-        <h1 className="text-[clamp(2rem,5vw,3rem)] font-medium tracking-tight text-foreground leading-tight mb-4">
-          How unseal.link works
+      <section className="pt-16 pb-12 max-w-5xl mx-auto px-6">
+        <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-4">
+          Process
+        </p>
+        <h1 className="text-4xl md:text-5xl font-medium tracking-tight text-foreground mb-4">
+          How it works
         </h1>
-        <p className="text-lg text-muted-foreground m-0">
-          Lock link → Pay → Unlock. Three steps for sellers. Four for buyers.
+        <p className="text-lg text-muted-foreground max-w-lg">
+          Lock link → Pay → Unlock. Simple for sellers. Simple for buyers.
         </p>
       </section>
 
       {/* For sellers */}
-      <section className="bg-card py-12 px-8">
-        <div className="max-w-[40rem] mx-auto">
-          <p className="text-xs font-medium tracking-[0.08em] uppercase text-[#AAAAAA] mb-8">
+      <section className="border-t border-border py-12">
+        <div className="max-w-5xl mx-auto px-6 max-w-2xl">
+          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-8">
             For sellers
           </p>
-          {sellerSteps.map((step, i) => (
-            <div
-              key={step.n}
-              className={`flex gap-6 py-6 ${i < sellerSteps.length - 1 ? "border-b border-border" : ""}`}
-            >
-              <span className="text-[0.8rem] font-medium text-[#AAAAAA] min-w-[1.75rem] mt-[0.2rem] tabular-nums">
-                {step.n}
-              </span>
-              <div>
-                <p className="font-medium text-foreground mb-1">{step.title}</p>
-                <p className="text-sm text-muted-foreground m-0">{step.body}</p>
-              </div>
-            </div>
-          ))}
+          <StepList steps={sellerSteps} />
         </div>
       </section>
 
       {/* For buyers */}
-      <section className="py-12 px-8">
-        <div className="max-w-[40rem] mx-auto">
-          <p className="text-xs font-medium tracking-[0.08em] uppercase text-[#AAAAAA] mb-8">
+      <section className="border-t border-border py-12 bg-card">
+        <div className="max-w-5xl mx-auto px-6 max-w-2xl">
+          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-8">
             For buyers
           </p>
-          {buyerSteps.map((step, i) => (
-            <div
-              key={step.n}
-              className={`flex gap-6 py-6 ${i < buyerSteps.length - 1 ? "border-b border-border" : ""}`}
-            >
-              <span className="text-[0.8rem] font-medium text-[#AAAAAA] min-w-[1.75rem] mt-[0.2rem] tabular-nums">
-                {step.n}
-              </span>
-              <div>
-                <p className="font-medium text-foreground mb-1">{step.title}</p>
-                <p className="text-sm text-muted-foreground m-0">{step.body}</p>
-              </div>
-            </div>
-          ))}
+          <StepList steps={buyerSteps} />
         </div>
       </section>
 
-      {/* Pricing summary */}
-      <section className="bg-card py-12 px-8">
-        <div className="max-w-[40rem] mx-auto">
-          <p className="text-xs font-medium tracking-[0.08em] uppercase text-[#AAAAAA] mb-8">
+      {/* Pricing callout */}
+      <section className="border-t border-border py-12">
+        <div className="max-w-5xl mx-auto px-6">
+          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-6">
             Pricing
           </p>
-          <p className="font-medium text-foreground text-lg mb-2">
+          <p className="text-2xl font-medium text-foreground mb-3">
             We take 4.5% per sale.
           </p>
-          <p className="text-muted-foreground text-sm mb-1">
-            Stripe processing fees apply (~2.9% + $0.30).
-          </p>
-          <p className="text-muted-foreground text-sm mb-1">
-            No monthly fees. No setup costs.
-          </p>
-          <p className="text-muted-foreground text-sm">You only pay when you earn.</p>
+          <div className="space-y-1 text-sm text-muted-foreground">
+            <p>Stripe processing fees apply (~2.9% + $0.30).</p>
+            <p>No monthly fees. No setup costs.</p>
+            <p>You only pay when you earn.</p>
+          </div>
+          <Link
+            href="/pricing"
+            className="inline-flex items-center mt-6 text-sm font-medium text-foreground hover:text-muted-foreground transition-colors no-underline"
+          >
+            Full pricing breakdown →
+          </Link>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="text-center py-20 px-8">
+      <section className="border-t border-border py-20 text-center px-6">
         <Link
           href="/auth"
-          className="inline-block px-10 py-3.5 bg-primary text-primary-foreground no-underline rounded-full font-medium text-base hover:opacity-90 transition-opacity"
+          className="inline-flex items-center px-7 py-3.5 bg-primary text-primary-foreground no-underline rounded-full font-medium text-base hover:opacity-90 transition-opacity"
         >
           Start selling free →
         </Link>
-        <p className="mt-4 text-[0.8rem] text-[#AAAAAA]">
+        <p className="mt-4 text-xs text-muted-foreground">
           No credit card required to list.
         </p>
       </section>
-
-      {/* Footer */}
-      <footer className="border-t border-border py-6 px-8 text-center text-[0.8rem] text-[#AAAAAA] flex gap-6 justify-center">
-        <Link href="/pricing" className="text-[#AAAAAA] no-underline">
-          Pricing
-        </Link>
-        <Link href="/how-it-works" className="text-[#AAAAAA] no-underline">
-          How it works
-        </Link>
-      </footer>
-    </main>
+    </>
   );
 }

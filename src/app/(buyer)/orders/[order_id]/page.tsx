@@ -76,7 +76,11 @@ export default async function OrderPage({ params }: Props) {
     .eq("id", order.seller_id)
     .single();
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+  const { headers } = await import("next/headers");
+  const h = await headers();
+  const host = h.get("host") ?? "unseal.link";
+  const proto = h.get("x-forwarded-proto") ?? "https";
+  const appUrl = `${proto}://${host}`;
   const purchasedOn = new Date(order.created_at).toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",

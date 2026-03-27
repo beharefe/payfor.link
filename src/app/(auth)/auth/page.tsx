@@ -16,58 +16,64 @@ export default async function AuthPage({
   const error = rawError ? (ERROR_MESSAGES[rawError] ?? rawError) : null;
 
   return (
-    <main className="p-8 max-w-sm mx-auto">
-      <h1 className="text-2xl font-medium mb-2">Sign in</h1>
+    <main className="min-h-screen flex flex-col items-center justify-center px-6 py-16 bg-background">
+      <div className="w-full max-w-sm">
+        <div className="mb-8">
+          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3">
+            unseal.link
+          </p>
+          <h1 className="text-3xl font-medium tracking-tight text-foreground mb-2">
+            {sent ? "Check your email" : "Sign in"}
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            {sent
+              ? <>We sent a 6-digit code to <span className="font-medium text-foreground">{email}</span>.</>
+              : "Enter your email and we'll send you a sign-in code."}
+          </p>
+        </div>
 
-      {error && (
-        <p className="mb-4 text-destructive text-sm">{error}</p>
-      )}
+        {error && (
+          <p className="mb-4 text-destructive text-sm bg-destructive/10 px-4 py-3 rounded-xl">{error}</p>
+        )}
 
-      {sent ? (
-        <>
-          <p className="text-muted-foreground mb-6">
-            We sent a 6-digit code to <strong>{email}</strong>. Enter it below.
-          </p>
-          <form action={verifySellerOtp}>
-            <input type="hidden" name="email" value={email} />
-            <div className="mb-4">
-              <label htmlFor="code" className="block mb-1">
-                Verification code
-              </label>
-              <input
-                id="code"
-                name="code"
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]{6}"
-                maxLength={6}
-                required
-                autoComplete="one-time-code"
-                placeholder="000000"
-                className="w-full px-4 py-2.5 border border-input rounded-xl text-base outline-none bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring box-border tracking-widest text-center"
-              />
-            </div>
-            <button
-              type="submit"
-              className="px-5 py-2.5 bg-primary text-primary-foreground border-none rounded-full font-medium text-base cursor-pointer hover:opacity-90 transition-opacity"
-            >
-              Verify code
-            </button>
-          </form>
-          <p className="mt-6">
-            <a href="/auth" className="text-muted-foreground text-sm">
-              Use a different email
-            </a>
-          </p>
-        </>
-      ) : (
-        <>
-          <p className="text-muted-foreground mb-6">
-            Enter your email and we&apos;ll send you a sign-in code.
-          </p>
-          <form action={signInWithOtp}>
-            <div className="mb-4">
-              <label htmlFor="email" className="block mb-1">
+        {sent ? (
+          <>
+            <form action={verifySellerOtp} className="flex flex-col gap-4">
+              <input type="hidden" name="email" value={email} />
+              <div>
+                <label htmlFor="code" className="block text-sm font-medium text-foreground mb-1.5">
+                  Verification code
+                </label>
+                <input
+                  id="code"
+                  name="code"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]{6}"
+                  maxLength={6}
+                  required
+                  autoComplete="one-time-code"
+                  placeholder="000000"
+                  className="w-full px-4 py-3 border border-input rounded-xl text-base outline-none bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring tracking-[0.4em] text-center font-mono"
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full py-3 bg-primary text-primary-foreground border-none rounded-full font-medium text-sm cursor-pointer hover:opacity-90 transition-opacity"
+              >
+                Verify code →
+              </button>
+            </form>
+            <p className="mt-5 text-center">
+              <a href="/auth" className="text-muted-foreground text-sm hover:text-foreground transition-colors">
+                Use a different email
+              </a>
+            </p>
+          </>
+        ) : (
+          <form action={signInWithOtp} className="flex flex-col gap-4">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1.5">
                 Email
               </label>
               <input
@@ -76,18 +82,19 @@ export default async function AuthPage({
                 type="email"
                 required
                 autoComplete="email"
-                className="w-full px-4 py-2.5 border border-input rounded-xl text-base outline-none bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring box-border"
+                placeholder="you@example.com"
+                className="w-full px-4 py-3 border border-input rounded-xl text-base outline-none bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring"
               />
             </div>
             <button
               type="submit"
-              className="px-5 py-2.5 bg-primary text-primary-foreground border-none rounded-full font-medium text-base cursor-pointer hover:opacity-90 transition-opacity"
+              className="w-full py-3 bg-primary text-primary-foreground border-none rounded-full font-medium text-sm cursor-pointer hover:opacity-90 transition-opacity"
             >
-              Send code
+              Send code →
             </button>
           </form>
-        </>
-      )}
+        )}
+      </div>
     </main>
   );
 }

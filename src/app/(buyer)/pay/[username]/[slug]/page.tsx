@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .select("title, description, price, sellers!inner(username)")
     .eq("slug", slug)
     .eq("status", "active")
-    .eq("sellers.name", username)
+    .eq("sellers.username", username)
     .single();
 
   if (!link) return { title: "Not found" };
@@ -71,9 +71,11 @@ export default async function PaywallPage({ params }: Props) {
   if (!link) notFound();
   if (link.status !== "active") {
     return (
-      <main className="p-8 text-center">
-        <h1>Unavailable</h1>
-        <p>This product is not available for purchase.</p>
+      <main className="min-h-screen flex items-center justify-center px-6">
+        <div className="text-center">
+          <h1 className="text-xl font-medium text-foreground mb-2">Unavailable</h1>
+          <p className="text-muted-foreground text-sm">This product is not available for purchase.</p>
+        </div>
       </main>
     );
   }
@@ -85,54 +87,56 @@ export default async function PaywallPage({ params }: Props) {
   const salesCount = link.total_sales ?? 0;
 
   return (
-    <main className="max-w-sm mx-auto">
-      {link.preview_image_url && (
-        <div className="aspect-video w-full overflow-hidden rounded-t-2xl bg-muted">
-          <img
-            src={link.preview_image_url}
-            alt={link.title}
-            className="w-full h-full object-cover"
-          />
-        </div>
-      )}
-
-      <div className={`px-8 pb-8 ${link.preview_image_url ? "pt-6" : "pt-10"}`}>
-        <p className="text-sm text-muted-foreground mb-2">
-          by{" "}
-          <Link
-            href={`/@${username}`}
-            className="hover:underline font-medium text-foreground"
-          >
-            {seller?.name ?? username}
-          </Link>
-        </p>
-
-        <h1 className="text-2xl font-semibold mb-3">{link.title}</h1>
-
-        {link.description && (
-          <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
-            {link.description}
-          </p>
+    <main className="min-h-screen bg-background flex flex-col items-center justify-center px-6 py-16">
+      <div className="w-full max-w-sm">
+        {link.preview_image_url && (
+          <div className="aspect-video w-full overflow-hidden rounded-2xl bg-muted mb-6">
+            <img
+              src={link.preview_image_url}
+              alt={link.title}
+              className="w-full h-full object-cover"
+            />
+          </div>
         )}
 
-        <p className="text-3xl font-bold mb-4">
-          ${link.price.toFixed(2)}{" "}
-          <span className="text-base font-normal text-muted-foreground">
-            {link.currency.toUpperCase()}
-          </span>
-        </p>
+        <div className="border border-border rounded-2xl bg-card p-6">
+          <p className="text-xs text-muted-foreground mb-4">
+            by{" "}
+            <Link
+              href={`/@${username}`}
+              className="hover:underline font-medium text-foreground"
+            >
+              {seller?.name ?? username}
+            </Link>
+          </p>
 
-        <PaywallCTA linkId={link.id} />
+          <h1 className="text-xl font-medium tracking-tight text-foreground mb-2">{link.title}</h1>
 
-        <div className="mt-4 flex flex-col gap-1">
-          <p className="text-xs text-muted-foreground">✓ Secure payment via Stripe</p>
-          <p className="text-xs text-muted-foreground">✓ Instant delivery after payment</p>
-          {salesCount > 0 && (
-            <p className="text-xs text-muted-foreground">✓ {salesCount} purchases</p>
+          {link.description && (
+            <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
+              {link.description}
+            </p>
           )}
+
+          <p className="text-3xl font-medium text-foreground mb-5">
+            ${link.price.toFixed(2)}{" "}
+            <span className="text-base font-normal text-muted-foreground">
+              {link.currency.toUpperCase()}
+            </span>
+          </p>
+
+          <PaywallCTA linkId={link.id} />
+
+          <div className="mt-4 flex flex-col gap-1.5">
+            <p className="text-xs text-muted-foreground">✓ Secure payment via Stripe</p>
+            <p className="text-xs text-muted-foreground">✓ Instant delivery by email</p>
+            {salesCount > 0 && (
+              <p className="text-xs text-muted-foreground">✓ {salesCount} purchases</p>
+            )}
+          </div>
         </div>
 
-        <div className="mt-8 pt-6 border-t border-border text-center">
+        <div className="mt-6 text-center">
           <AbuseReportForm productId={link.id} />
         </div>
       </div>
