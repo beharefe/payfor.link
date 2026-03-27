@@ -115,8 +115,12 @@ export function NewLinkForm() {
         formData.set("preview_image_url", url);
       }
 
-      const result = await createProductAction(null, formData);
-      if (result) setError(result);
+      try {
+        const result = await createProductAction(null, formData);
+        if (result) setError(result);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      }
     });
   }
 

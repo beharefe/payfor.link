@@ -23,6 +23,9 @@ export default async function DashboardPage() {
     .eq("id", user.id)
     .single();
 
+  // If the sellers row doesn't exist the user never finished onboarding.
+  if (!seller) redirect("/onboarding/name");
+
   const { data: links } = await supabase
     .from(TABLES.PRODUCTS)
     .select("id, title, slug, status, total_sales, total_revenue")
