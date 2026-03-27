@@ -138,11 +138,7 @@ export default async function DashboardPage() {
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <CopyLinkButtons
-                      url={
-                        seller?.username
-                          ? `${appUrl}/@${seller.username}/${link.slug}`
-                          : `${appUrl}/pay/${link.slug}`
-                      }
+                      url={`${appUrl}/@${seller?.username}/${link.slug}`}
                     />
                     <Link
                       href={`/dashboard/links/${link.id}`}

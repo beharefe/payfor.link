@@ -23,6 +23,8 @@ const nextConfig: NextConfig = {
     return [
       // /@username  → seller profile page
       { source: "/@:username", destination: "/s/:username" },
+      // /@username/slug/success  → post-checkout success page
+      { source: "/@:username/:slug/success", destination: "/pay/:username/:slug/success" },
       // /@username/slug  → paywall with seller verification
       { source: "/@:username/:slug", destination: "/pay/:username/:slug" },
     ];

@@ -4,6 +4,7 @@ import { TABLES } from "@unseallink/lib/db";
 import { log } from "@unseallink/lib/logger";
 import { platformFeeCents, stripe } from "@unseallink/lib/stripe";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 type ActionResult = { error: string };
@@ -22,10 +23,9 @@ export async function createCheckoutSession(
 
   if (!link) return { error: "This product is no longer available" };
 
-  const service = createServiceClient();
-  const { data: seller } = await service
+  const { data: seller } = await supabase
     .from(TABLES.SELLERS)
-    .select("stripe_account_id, stripe_charges_enabled")
+    .select("stripe_account_id, stripe_charges_enabled, username")
     .eq("id", link.seller_id)
     .single();
 
@@ -33,8 +33,16 @@ export async function createCheckoutSession(
     return { error: "This product is not available for purchase" };
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
-  if (!appUrl) throw new Error("NEXT_PUBLIC_APP_URL is not set");
+  if (!seller.username) {
+    return { error: "Seller account is not fully set up" };
+  }
+
+  const h = await headers();
+  const host = h.get("host") ?? "unseal.link";
+  const proto = h.get("x-forwarded-proto") ?? "https";
+  const appUrl = `${proto}://${host}`;
+
+  const paywallUrl = `${appUrl}/@${seller.username}/${link.slug}`;
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
@@ -52,8 +60,8 @@ export async function createCheckoutSession(
       application_fee_amount: platformFeeCents(link.price),
       transfer_data: { destination: seller.stripe_account_id },
     },
-    success_url: `${appUrl}/pay/${link.slug}/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${appUrl}/pay/${link.slug}`,
+    success_url: `${paywallUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: paywallUrl,
     metadata: {
       product_id: link.id,
       product_version: String(link.version),

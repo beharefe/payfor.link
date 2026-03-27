@@ -30,7 +30,7 @@ export default async function LinkDetailPage({
 
   const { data: seller } = await supabase
     .from(TABLES.SELLERS)
-    .select("stripe_connected")
+    .select("stripe_connected, username")
     .eq("id", user.id)
     .single();
 
@@ -41,8 +41,14 @@ export default async function LinkDetailPage({
     .order("created_at", { ascending: false })
     .limit(50);
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const paywallUrl = `${appUrl}/pay/${link.slug}`;
+  const { headers } = await import("next/headers");
+  const h = await headers();
+  const host = h.get("host") ?? "unseal.link";
+  const proto = h.get("x-forwarded-proto") ?? "https";
+  const appUrl = `${proto}://${host}`;
+  const paywallUrl = seller?.username
+    ? `${appUrl}/@${seller.username}/${link.slug}`
+    : `${appUrl}/pay/${link.slug}`;
   const isDeleted = link.status === "deleted";
   const isArchived = link.status === "archived";
   const isSuspended = link.status === "suspended";
