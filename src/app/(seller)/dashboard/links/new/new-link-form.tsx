@@ -1,6 +1,7 @@
 "use client";
 
 import { createProductAction } from "@unseallink/app/actions/product";
+import { Loader2 } from "lucide-react";
 import { useRef, useState, useTransition } from "react";
 
 const PRICE_PRESETS = [9.99, 19, 29, 49];
@@ -217,9 +218,10 @@ export function NewLinkForm() {
       <button
         type="submit"
         disabled={isPending}
-        className="px-4 py-2 self-start cursor-pointer"
+        className="inline-flex items-center justify-center gap-2 w-full py-3.5 bg-primary text-primary-foreground rounded-full text-base font-medium cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-70 disabled:cursor-not-allowed border-none mt-2"
       >
-        {isPending ? "Creating..." : "Create link"}
+        {isPending && <Loader2 className="animate-spin size-4 shrink-0" />}
+        {isPending ? "Creating…" : "Create link →"}
       </button>
     </form>
   );

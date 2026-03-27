@@ -11,9 +11,9 @@ export async function GET(
   const supabase = createServiceClient();
   const { data: link } = await supabase
     .from(TABLES.PRODUCTS)
-    .select("title, description, price, currency, preview_image_url, seller_id")
+    .select("title, description, price, currency, preview_image_url, seller_id, status")
     .eq("slug", slug)
-    .eq("status", "active")
+    .not("status", "in", '("deleted","suspended")')
     .single();
 
   if (!link) {

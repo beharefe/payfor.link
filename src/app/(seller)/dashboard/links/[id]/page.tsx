@@ -1,5 +1,6 @@
 import { TABLES } from "@unseallink/lib/db";
 import { createClient } from "@unseallink/lib/supabase/server";
+import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { InitiateStripeConnectButton } from "../../dashboard-actions";
@@ -20,9 +21,7 @@ export default async function LinkDetailPage({
 
   const { data: link } = await supabase
     .from(TABLES.PRODUCTS)
-    .select(
-      "id, title, description, slug, status, price, total_sales, total_revenue, seller_id, version, preview_image_url",
-    )
+    .select("id, title, description, slug, status, price, total_sales, total_revenue, seller_id, version, preview_image_url")
     .eq("id", id)
     .single();
 
@@ -37,205 +36,171 @@ export default async function LinkDetailPage({
   const { data: orders } = await supabase
     .from(TABLES.ORDERS)
     .select("id, buyer_email, price_paid, platform_fee, status, created_at")
-    .eq("link_id", id)
+    .eq("product_id", id)
     .order("created_at", { ascending: false })
     .limit(50);
 
-  const { headers } = await import("next/headers");
   const h = await headers();
   const host = h.get("host") ?? "unseal.link";
   const proto = h.get("x-forwarded-proto") ?? "https";
   const appUrl = `${proto}://${host}`;
   const paywallUrl = seller?.username
     ? `${appUrl}/@${seller.username}/${link.slug}`
-    : `${appUrl}/pay/${link.slug}`;
+    : null;
+
   const isDeleted = link.status === "deleted";
   const isArchived = link.status === "archived";
   const isSuspended = link.status === "suspended";
   const canEdit = !isDeleted && !isSuspended;
 
-  return (
-    <main className="p-8 max-w-3xl mx-auto">
-      <p className="mb-6">
-        <Link href="/dashboard">← Dashboard</Link>
-      </p>
+  const statusStyles: Record<string, string> = {
+    active: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+    draft: "bg-muted text-muted-foreground",
+    archived: "bg-muted text-muted-foreground",
+    suspended: "bg-destructive/10 text-destructive",
+    deleted: "bg-destructive/10 text-destructive",
+  };
 
+  return (
+    <main className="min-h-screen bg-background">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 mb-6 flex-wrap">
-        <div>
-          <h1 className="mb-1">{link.title}</h1>
-          <p className="text-muted-foreground text-sm m-0">
-            <StatusBadge status={link.status} /> · ${link.price.toFixed(2)} · v
-            {link.version}
-          </p>
+      <div className="border-b border-border">
+        <div className="max-w-3xl mx-auto px-6 h-16 flex items-center gap-4">
+          <Link
+            href="/dashboard"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors no-underline"
+          >
+            ← Dashboard
+          </Link>
         </div>
-        {canEdit && (
-          <div className="flex gap-2 flex-wrap">
-            <Link
-              href={`/dashboard/links/${id}/edit`}
-              className="px-3 py-1.5 border border-border rounded-lg text-sm no-underline text-foreground"
-            >
-              Edit
-            </Link>
-            <ArchiveButton id={id} isArchived={isArchived} />
-            <DeleteButton id={id} />
-          </div>
-        )}
       </div>
 
-      {link.description && (
-        <p className="text-muted-foreground mb-6">
-          {link.description}
-        </p>
-      )}
+      <div className="max-w-3xl mx-auto px-6 py-10 space-y-8">
 
-      {/* Stripe connect prompt */}
-      {!seller?.stripe_connected && (
-        <section className="mb-6 p-4 border border-border rounded-xl">
-          <p className="mb-3">
-            Connect Stripe to activate this link.
-          </p>
-          <InitiateStripeConnectButton />
-        </section>
-      )}
-
-      {/* Paywall URL */}
-      {!isDeleted && (
-        <section className="mb-8 p-4 bg-background rounded-xl">
-          <label className="text-[0.8125rem] text-muted-foreground block mb-1">
-            Paywall URL
-          </label>
-          <p className="break-all mb-2 font-mono text-sm">
-            {paywallUrl}
-          </p>
-          <div className="flex gap-2 flex-wrap">
-            <CopyLinkButton url={paywallUrl} />
-            <a
-              href={paywallUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-3 py-1.5 text-sm border border-border rounded-lg no-underline text-foreground"
-            >
-              Preview ↗
-            </a>
+        {/* Title + actions */}
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-medium tracking-tight text-foreground mb-2">
+              {link.title}
+            </h1>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusStyles[link.status] ?? statusStyles.draft}`}>
+                {link.status.charAt(0).toUpperCase() + link.status.slice(1)}
+              </span>
+              <span className="text-sm text-muted-foreground">${link.price.toFixed(2)}</span>
+              <span className="text-muted-foreground/40">·</span>
+              <span className="text-xs text-muted-foreground">v{link.version}</span>
+            </div>
           </div>
-        </section>
-      )}
-
-      {/* Stats */}
-      <section className="flex gap-8 mb-8 flex-wrap">
-        <div>
-          <p className="text-muted-foreground text-[0.8125rem] mb-1">
-            Total sales
-          </p>
-          <p className="font-semibold text-xl m-0">
-            {link.total_sales}
-          </p>
+          {canEdit && (
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <Link
+                href={`/dashboard/links/${id}/edit`}
+                className="inline-flex items-center px-4 py-2 border border-border rounded-full text-sm font-medium text-foreground no-underline hover:bg-muted transition-colors"
+              >
+                Edit
+              </Link>
+              <ArchiveButton id={id} isArchived={isArchived} />
+              <DeleteButton id={id} />
+            </div>
+          )}
         </div>
-        <div>
-          <p className="text-muted-foreground text-[0.8125rem] mb-1">
-            Revenue
-          </p>
-          <p className="font-semibold text-xl m-0">
-            ${link.total_revenue.toFixed(2)}
-          </p>
-        </div>
-      </section>
 
-      {/* Sales table */}
-      <section>
-        <h2 className="mb-4">Sales</h2>
-        {!orders?.length ? (
-          <p className="text-muted-foreground">No sales yet.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-sm">
-              <thead>
-                <tr className="border-b border-border text-left">
-                  <th className="px-3 py-2 font-medium text-muted-foreground">
-                    Buyer
-                  </th>
-                  <th className="px-3 py-2 font-medium text-muted-foreground">
-                    Amount
-                  </th>
-                  <th className="px-3 py-2 font-medium text-muted-foreground">
-                    Net
-                  </th>
-                  <th className="px-3 py-2 font-medium text-muted-foreground">
-                    Status
-                  </th>
-                  <th className="px-3 py-2 font-medium text-muted-foreground">
-                    Date
-                  </th>
-                  <th className="px-3 py-2" />
-                </tr>
-              </thead>
-              <tbody>
-                {orders.map((order) => (
-                  <tr
-                    key={order.id}
-                    className="border-b border-border"
-                  >
-                    <td className="px-3 py-2">
-                      {order.buyer_email}
-                    </td>
-                    <td className="px-3 py-2">
-                      ${order.price_paid.toFixed(2)}
-                    </td>
-                    <td className="px-3 py-2">
-                      ${(order.price_paid - order.platform_fee).toFixed(2)}
-                    </td>
-                    <td className="px-3 py-2">
-                      <OrderStatusBadge status={order.status} />
-                    </td>
-                    <td className="px-3 py-2 text-muted-foreground">
-                      {new Date(order.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="px-3 py-2">
-                      {order.status === "paid" && (
-                        <RefundButton
-                          orderId={order.id}
-                          buyerEmail={order.buyer_email}
-                        />
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {link.description && (
+          <p className="text-muted-foreground text-sm leading-relaxed">{link.description}</p>
+        )}
+
+        {/* Stripe connect prompt */}
+        {!seller?.stripe_connected && (
+          <div className="border border-border rounded-2xl p-6 bg-card flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex-1">
+              <p className="font-medium text-foreground mb-1">Connect Stripe to activate this link</p>
+              <p className="text-sm text-muted-foreground">Takes about 2 minutes.</p>
+            </div>
+            <InitiateStripeConnectButton />
           </div>
         )}
-      </section>
+
+        {/* Paywall URL */}
+        {!isDeleted && paywallUrl && (
+          <div className="border border-border rounded-2xl p-6 bg-card space-y-3">
+            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Paywall URL</p>
+            <p className="break-all font-mono text-sm text-foreground">{paywallUrl}</p>
+            <div className="flex gap-2 flex-wrap pt-1">
+              <CopyLinkButton url={paywallUrl} />
+              <a
+                href={paywallUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-5 py-2.5 border border-border rounded-full text-sm font-medium text-foreground no-underline hover:bg-muted transition-colors"
+              >
+                Preview ↗
+              </a>
+            </div>
+          </div>
+        )}
+
+        {/* Stats */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="border border-border rounded-2xl p-5 bg-card">
+            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3">Total sales</p>
+            <p className="text-3xl font-medium text-foreground">{link.total_sales}</p>
+          </div>
+          <div className="border border-border rounded-2xl p-5 bg-card">
+            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3">Revenue</p>
+            <p className="text-3xl font-medium text-foreground">${link.total_revenue.toFixed(2)}</p>
+          </div>
+        </div>
+
+        {/* Sales */}
+        <div>
+          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-4">Sales</p>
+          {!orders?.length ? (
+            <div className="border border-dashed border-border rounded-2xl p-10 text-center">
+              <p className="text-muted-foreground text-sm">No sales yet.</p>
+            </div>
+          ) : (
+            <div className="border border-border rounded-2xl overflow-hidden bg-card">
+              {orders.map((order, i) => (
+                <div
+                  key={order.id}
+                  className={`flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-4 ${i < orders.length - 1 ? "border-b border-border" : ""}`}
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{order.buyer_email}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {new Date(order.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-4 shrink-0">
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-foreground">${order.price_paid.toFixed(2)}</p>
+                      <p className="text-xs text-muted-foreground">net ${(order.price_paid - order.platform_fee).toFixed(2)}</p>
+                    </div>
+                    <OrderStatusBadge status={order.status} />
+                    {order.status === "paid" && (
+                      <RefundButton orderId={order.id} buyerEmail={order.buyer_email} />
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </main>
   );
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const colorMap: Record<string, string> = {
-    active: "text-green-700 dark:text-green-400",
-    draft: "text-muted-foreground",
-    archived: "text-muted-foreground",
-    suspended: "text-destructive",
-    deleted: "text-destructive",
-  };
-  const colorClass = colorMap[status] ?? "text-muted-foreground";
-  return (
-    <span className={`${colorClass} font-medium`}>
-      {status.charAt(0).toUpperCase() + status.slice(1)}
-    </span>
-  );
-}
-
 function OrderStatusBadge({ status }: { status: string }) {
-  const colorMap: Record<string, string> = {
-    paid: "text-green-700 dark:text-green-400",
-    refunded: "text-muted-foreground",
-    disputed: "text-destructive",
-    fraud: "text-destructive",
+  const styles: Record<string, string> = {
+    paid: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+    refunded: "bg-muted text-muted-foreground",
+    disputed: "bg-destructive/10 text-destructive",
+    fraud: "bg-destructive/10 text-destructive",
   };
-  const colorClass = colorMap[status] ?? "text-muted-foreground";
   return (
-    <span className={`${colorClass} text-[0.8125rem]`}>
+    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${styles[status] ?? styles.refunded}`}>
       {status.charAt(0).toUpperCase() + status.slice(1)}
     </span>
   );

@@ -25,8 +25,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .from(TABLES.PRODUCTS)
     .select("title, description, price, sellers!inner(username)")
     .eq("slug", slug)
-    .eq("status", "active")
     .eq("sellers.username", username)
+    .not("status", "in", '("deleted","suspended")')
     .single();
 
   if (!link) return { title: "Not found" };

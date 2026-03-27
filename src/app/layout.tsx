@@ -16,7 +16,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("metadata");
   const h = await headers();
   const host = h.get("host") ?? "unseal.link";
-  const proto = h.get("x-forwarded-proto") ?? "https";
+  // x-forwarded-proto may be absent on some hosts; default to https in production
+  const proto = h.get("x-forwarded-proto") ?? (host.includes("localhost") ? "http" : "https");
   const appUrl = `${proto}://${host}`;
   return {
     metadataBase: new URL(appUrl),
@@ -33,7 +34,7 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "website",
       images: [
         {
-          url: "/og-default.png",
+          url: "/api/og",
           width: 1200,
           height: 630,
           alt: "unseal.link — Sell any link, instantly",
@@ -44,7 +45,7 @@ export async function generateMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       title: t("og_title"),
       description: t("og_description"),
-      images: ["/og-default.png"],
+      images: ["/api/og"],
     },
     robots: {
       index: true,

@@ -2,6 +2,7 @@
 
 import { archiveProduct, deleteProduct } from "@unseallink/app/actions/product";
 import { refundPurchase } from "@unseallink/app/actions/refund";
+import { Loader2 } from "lucide-react";
 import { useState, useTransition } from "react";
 
 export function ArchiveButton({
@@ -22,20 +23,17 @@ export function ArchiveButton({
   }
 
   return (
-    <span>
+    <span className="inline-flex items-center gap-2">
       <button
         type="button"
         onClick={handleClick}
         disabled={isPending}
-        className="px-3 py-1.5 cursor-pointer"
+        className="inline-flex items-center gap-1.5 px-4 py-2 border border-border rounded-full text-sm font-medium text-foreground cursor-pointer hover:bg-muted transition-colors disabled:opacity-60 disabled:cursor-not-allowed bg-transparent"
       >
-        {isPending ? "..." : isArchived ? "Reactivate" : "Archive"}
+        {isPending && <Loader2 className="animate-spin size-3.5 shrink-0" />}
+        {isPending ? "Saving…" : isArchived ? "Reactivate" : "Archive"}
       </button>
-      {error && (
-        <span className="text-destructive ml-2 text-[0.85rem]">
-          {error}
-        </span>
-      )}
+      {error && <span className="text-destructive text-sm">{error}</span>}
     </span>
   );
 }
@@ -45,12 +43,7 @@ export function DeleteButton({ id }: { id: string }) {
   const [error, setError] = useState<string | null>(null);
 
   function handleClick() {
-    if (
-      !confirm(
-        "Delete this link? Buyers who already purchased will still have access.",
-      )
-    )
-      return;
+    if (!confirm("Delete this link? Buyers who already purchased will still have access.")) return;
     startTransition(async () => {
       const result = await deleteProduct(id);
       if ("error" in result) setError(result.error);
@@ -58,20 +51,17 @@ export function DeleteButton({ id }: { id: string }) {
   }
 
   return (
-    <span>
+    <span className="inline-flex items-center gap-2">
       <button
         type="button"
         onClick={handleClick}
         disabled={isPending}
-        className="px-3 py-1.5 cursor-pointer text-destructive"
+        className="inline-flex items-center gap-1.5 px-4 py-2 border border-destructive/30 rounded-full text-sm font-medium text-destructive cursor-pointer hover:bg-destructive/10 transition-colors disabled:opacity-60 disabled:cursor-not-allowed bg-transparent"
       >
-        {isPending ? "..." : "Delete"}
+        {isPending && <Loader2 className="animate-spin size-3.5 shrink-0" />}
+        {isPending ? "Deleting…" : "Delete"}
       </button>
-      {error && (
-        <span className="text-destructive ml-2 text-[0.85rem]">
-          {error}
-        </span>
-      )}
+      {error && <span className="text-destructive text-sm">{error}</span>}
     </span>
   );
 }
@@ -87,8 +77,7 @@ export function RefundButton({
   const [error, setError] = useState<string | null>(null);
 
   function handleClick() {
-    if (!confirm(`Refund order for ${buyerEmail}? This cannot be undone.`))
-      return;
+    if (!confirm(`Refund order for ${buyerEmail}? This cannot be undone.`)) return;
     startTransition(async () => {
       const result = await refundPurchase(orderId);
       if ("error" in result) setError(result.error);
@@ -96,20 +85,17 @@ export function RefundButton({
   }
 
   return (
-    <span>
+    <span className="inline-flex items-center gap-2">
       <button
         type="button"
         onClick={handleClick}
         disabled={isPending}
-        className="px-2 py-1 text-[0.8125rem] cursor-pointer"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-full text-xs font-medium text-muted-foreground cursor-pointer hover:bg-muted transition-colors disabled:opacity-60 disabled:cursor-not-allowed bg-transparent"
       >
-        {isPending ? "..." : "Refund"}
+        {isPending && <Loader2 className="animate-spin size-3 shrink-0" />}
+        {isPending ? "Processing…" : "Refund"}
       </button>
-      {error && (
-        <span className="text-destructive ml-2 text-[0.8rem]">
-          {error}
-        </span>
-      )}
+      {error && <span className="text-destructive text-xs">{error}</span>}
     </span>
   );
 }
