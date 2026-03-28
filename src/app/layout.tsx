@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { Amplitude } from "@unseallink/lib/amplitude";
@@ -11,6 +11,13 @@ import { cn } from "@unseallink/lib/utils";
 const sourceSans3Heading = Source_Sans_3({subsets:['latin'],variable:'--font-heading'});
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("metadata");

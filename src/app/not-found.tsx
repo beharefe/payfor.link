@@ -13,7 +13,7 @@ export default function NotFound() {
         <p className="text-muted-foreground text-sm mb-8 leading-relaxed">
           This link doesn&apos;t exist or may have been removed.
         </p>
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+        <div className="flex flex-col items-center sm:flex-row gap-3 justify-center">
           <Link
             href="/"
             className="inline-flex items-center justify-center px-5 py-2.5 bg-primary text-primary-foreground no-underline rounded-full font-medium text-sm hover:opacity-90 transition-opacity"
