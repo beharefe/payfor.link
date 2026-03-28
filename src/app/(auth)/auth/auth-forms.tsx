@@ -11,7 +11,7 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 
-export function EmailForm({ defaultEmail }: { defaultEmail?: string }) {
+export function EmailForm({ defaultEmail, error }: { defaultEmail?: string; error?: string | null }) {
   const [isPending, startTransition] = useTransition();
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -52,6 +52,9 @@ export function EmailForm({ defaultEmail }: { defaultEmail?: string }) {
         {isPending && <Loader2 className="size-4 animate-spin shrink-0" />}
         {isPending ? "Sending…" : "Send code"}
       </button>
+      {error && (
+        <p className="text-destructive text-sm text-center">{error}</p>
+      )}
     </form>
   );
 }
@@ -59,9 +62,11 @@ export function EmailForm({ defaultEmail }: { defaultEmail?: string }) {
 export function OtpForm({
   email,
   resendEmail,
+  error,
 }: {
   email: string;
   resendEmail: string;
+  error?: string | null;
 }) {
   const router = useRouter();
   const [isVerifying, startVerify] = useTransition();
@@ -121,6 +126,9 @@ export function OtpForm({
               <Loader2 className="size-4 animate-spin" />
               Verifying…
             </div>
+          )}
+          {error && !isVerifying && (
+            <p className="text-destructive text-sm text-center">{error}</p>
           )}
         </div>
       </div>

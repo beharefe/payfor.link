@@ -48,16 +48,10 @@ export default async function AuthPage({
           )}
         </div>
 
-        {error && (
-          <div className="mb-6 text-destructive text-sm bg-destructive/10 px-4 py-3 rounded-xl">
-            {error}
-          </div>
-        )}
-
         {sent ? (
-          <OtpForm email={email} resendEmail={email} />
+          <OtpForm email={email} resendEmail={email} error={error} />
         ) : (
-          <EmailForm defaultEmail={email} />
+          <EmailForm defaultEmail={email} error={error} />
         )}
       </div>
     </main>
