@@ -9,7 +9,7 @@ import { revalidatePath } from "next/cache";
 
 type ActionResult = { error: string } | { ok: true };
 
-export async function refundPurchase(orderId: string): Promise<ActionResult> {
+export async function refundPurchase(orderId: string, note?: string): Promise<ActionResult> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -38,7 +38,11 @@ export async function refundPurchase(orderId: string): Promise<ActionResult> {
 
   const { error: dbError } = await supabase
     .from(TABLES.ORDERS)
-    .update({ status: "refunded", refunded_at: new Date().toISOString() })
+    .update({
+      status: "refunded",
+      refunded_at: new Date().toISOString(),
+      ...(note ? { refund_reason: note } : {}),
+    })
     .eq("id", orderId)
     .eq("seller_id", user.id);
 
