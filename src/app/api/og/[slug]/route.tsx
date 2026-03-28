@@ -2,6 +2,8 @@ import { TABLES } from "@unseallink/lib/db";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { ImageResponse } from "next/og";
 
+export const runtime = "edge";
+
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ slug: string }> },

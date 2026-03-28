@@ -1,38 +1,51 @@
 # unseal.link
 
-> A minimal paywall platform. Sellers paste any link, set a price, and share a paywall URL. Buyers pay via Stripe and receive email-based access.
+> A minimal paywall platform. Sellers paste any link, set a price, and share a paywall URL. Buyers pay via Stripe and receive email-based access. No storefront, no platform lock-in.
 
 ## What it does
 
-- Sellers paste any URL (Notion, Figma, Google Drive, GitHub, Discord invite, etc.)
+- Sellers paste any URL (Notion, Figma, Google Drive, GitHub, Discord, Airtable, Loom, etc.)
 - Set a price ($9.99 minimum)
-- Get a shareable paywall link at unseal.link/pay/[slug]
-- Buyers pay via Stripe Checkout and receive an unlock email
+- Get a shareable paywall at unseal.link/@username/slug
+- Buyers pay via Stripe Checkout and receive an access link by email
 - One-time access, no buyer account required
-- Sellers keep 95.5% (4.5% platform fee)
+- Sellers keep 95.5% (4.5% platform fee, no monthly costs)
+- Payment happens before delivery -- eliminates ghosting for freelancers
 
 ## Key pages
 
-- /                        → Homepage / product overview
-- /how-it-works            → Step-by-step explanation
-- /pricing                 → Transparent fee structure
-- /auth                    → Seller signup / login (magic link, no password)
-- /dashboard               → Seller dashboard (protected)
-- /pay/[slug]              → Public paywall page for buyers
-- /sell-notion-template    → Guide: sell Notion templates
-- /sell-figma-template     → Guide: sell Figma files
-- /sell-discord-access     → Guide: sell Discord community access
-- /sell-github-repo        → Guide: sell GitHub repo access
-- /sell-course             → Guide: sell online course content
+- /                                                   -> Homepage
+- /how-it-works                                       -> Step-by-step explanation
+- /pricing                                            -> Transparent fee structure (4.5%)
+- /auth                                               -> Seller signup / login (magic link, no password)
+
+## Guides and blog posts
+
+- /sell-notion-template                               -> How to sell Notion templates
+- /sell-figma-template                                -> How to sell Figma files
+- /sell-discord-access                                -> How to sell Discord community access
+- /sell-github-repo                                   -> How to sell GitHub repo access
+- /sell-course                                        -> How to sell course content
+- /how-to-paywall-any-link                            -> How to paywall any link and get paid instantly
+- /sell-notion-templates-without-gumroad-fees         -> Sell Notion templates without Gumroad fees
+- /stop-getting-ghosted-get-paid-before-delivering    -> Get paid before delivering files or commissions
+- /unseal-link-vs-gumroad-vs-payhip-2026              -> unseal.link vs Gumroad vs Payhip (2026)
+
+## Pricing
+
+- Platform fee: 4.5% per sale
+- Stripe processing: ~2.9% + $0.30 per transaction (separate, billed by Stripe)
+- No monthly fees, no setup costs, no contracts
+- Compared to: Gumroad (10%), Payhip (5%), Lemon Squeezy (5%)
 
 ## Technical
 
-- Built with Next.js 15 App Router, Supabase, Stripe Connect, Resend
-- No content is hosted — platform controls access, sellers own their content
+- Built with Next.js 15 App Router, Supabase, Stripe Connect Express, Resend
+- No content is hosted -- platform controls access, sellers own their content
 - Purchases are immutable snapshots (delivery URL captured at purchase time)
 - Stripe is the source of truth for payouts
+- Buyer auth via HMAC-signed tokens (no Supabase session for buyers)
 
-## Contact / sitemap
+## Sitemap
 
-- Sitemap: https://unseal.link/sitemap.xml
-- Support: via the platform
+https://unseal.link/sitemap.xml

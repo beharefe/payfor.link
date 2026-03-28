@@ -1,7 +1,26 @@
 import { Check } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { HeroCTA, HeroHeadline } from "./hero-ab";
 import { ProductScroll } from "./product-scroll";
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
+
+export const metadata: Metadata = {
+  title: "unseal.link -- Sell any link, instantly",
+  description:
+    "Paste a URL, set a price, share your paywall. Buyers pay once and get instant access by email. Keep 95.5% of every sale. No monthly fees.",
+  alternates: { canonical: APP_URL },
+  openGraph: {
+    title: "unseal.link -- Sell any link, instantly",
+    description:
+      "Paste a URL, set a price, share your paywall. Buyers pay once and get instant access by email. Keep 95.5% of every sale.",
+    url: APP_URL,
+    siteName: "unseal.link",
+    type: "website",
+    images: [{ url: `${APP_URL}/api/og`, width: 1200, height: 630 }],
+  },
+};
 
 const trustItems = [
   <>Payments by <span className="font-semibold" style={{ color: "#635BFF" }}>Stripe</span></>,
@@ -45,9 +64,35 @@ const painPoints = [
   },
 ];
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "unseal.link",
+  applicationCategory: "BusinessApplication",
+  url: APP_URL,
+  description:
+    "Paste any link, set a price, share your paywall. Buyers pay via Stripe and receive access by email. 4.5% per sale, no monthly fees.",
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "USD",
+    description: "Free to list. 4.5% platform fee per sale.",
+  },
+  publisher: {
+    "@type": "Organization",
+    name: "unseal.link",
+    url: APP_URL,
+  },
+};
+
 export default function HomePage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: controlled JSON-LD
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Hero */}
       <section className="pt-20 pb-16 px-6 max-w-5xl mx-auto">
         <div className="max-w-2xl">

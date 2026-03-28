@@ -36,14 +36,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = `${link.title} — $${link.price}`;
   const description = link.description ?? "Pay once and get instant access.";
 
+  const canonical = `${baseUrl}/@${username}/${slug}`;
   return {
     title,
     description,
     metadataBase: new URL(baseUrl),
+    alternates: { canonical },
     openGraph: {
       title,
       description,
-      url: `${baseUrl}/@${username}/${slug}`,
+      url: canonical,
       images: [{ url: `${baseUrl}/api/og/${slug}`, width: 1200, height: 630 }],
       type: "website",
     },
@@ -91,9 +93,35 @@ export default async function PaywallPage({ params }: Props) {
   log.info("paywall_viewed", { link_id: link.id, slug, username });
 
   const salesCount = link.total_sales ?? 0;
+  const baseUrl = await getBaseUrl();
+  const canonical = `${baseUrl}/@${username}/${slug}`;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: link.title,
+    description: link.description ?? undefined,
+    url: canonical,
+    offers: {
+      "@type": "Offer",
+      price: link.price.toFixed(2),
+      priceCurrency: link.currency.toUpperCase(),
+      availability: "https://schema.org/InStock",
+      url: canonical,
+      seller: {
+        "@type": "Person",
+        name: seller?.name ?? username,
+      },
+    },
+  };
 
   return (
     <main className="min-h-screen bg-background flex flex-col items-center justify-center px-6 py-16">
+      <script
+        type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: controlled JSON-LD
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="w-full max-w-sm space-y-3">
 
         {/* Preview image */}

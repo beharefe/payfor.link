@@ -1,10 +1,29 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
+
 export const metadata: Metadata = {
   title: "Pricing — unseal.link",
   description:
-    "4.5% per sale. No monthly fees. No setup costs. Half the fee of Gumroad — you only pay when you earn.",
+    "4.5% per sale. No monthly fees. No setup costs. Half the fee of Gumroad -- you only pay when you earn.",
+  alternates: { canonical: `${APP_URL}/pricing` },
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  name: "Pricing -- unseal.link",
+  description: "4.5% per sale. No monthly fees. No setup costs.",
+  url: `${APP_URL}/pricing`,
+  mainEntity: {
+    "@type": "Offer",
+    name: "unseal.link platform fee",
+    description: "4.5% per sale. No monthly fees.",
+    price: "0",
+    priceCurrency: "USD",
+    seller: { "@type": "Organization", name: "unseal.link", url: APP_URL },
+  },
 };
 
 const rows = [
@@ -55,6 +74,11 @@ const benefits = [
 export default function PricingPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: controlled JSON-LD
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Hero */}
       <section className="pt-16 pb-12 max-w-5xl mx-auto px-6">
         <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-4">
