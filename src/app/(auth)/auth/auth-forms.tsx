@@ -107,17 +107,17 @@ export function OtpForm({
             onComplete={handleOtpComplete}
           >
             <InputOTPGroup>
-              <InputOTPSlot index={0} className="size-12 text-lg rounded-l-xl" />
-              <InputOTPSlot index={1} className="size-12 text-lg" />
-              <InputOTPSlot index={2} className="size-12 text-lg rounded-r-xl" />
+              <InputOTPSlot index={0} className="size-9 rounded-l-xl" />
+              <InputOTPSlot index={1} className="size-9" />
+              <InputOTPSlot index={2} className="size-9 rounded-r-xl" />
             </InputOTPGroup>
 
             <span className="mx-3 text-muted-foreground text-sm select-none">·</span>
 
             <InputOTPGroup>
-              <InputOTPSlot index={3} className="size-12 text-lg rounded-l-xl" />
-              <InputOTPSlot index={4} className="size-12 text-lg" />
-              <InputOTPSlot index={5} className="size-12 text-lg rounded-r-xl" />
+              <InputOTPSlot index={3} className="size-9 rounded-l-xl" />
+              <InputOTPSlot index={4} className="size-9" />
+              <InputOTPSlot index={5} className="size-9 rounded-r-xl" />
             </InputOTPGroup>
           </InputOTP>
 
