@@ -1,6 +1,7 @@
 import { TABLES } from "@unseallink/lib/db";
 import { log } from "@unseallink/lib/logger";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
+import { LockKeyhole, Mail, ShieldCheck, Timer, Users } from "lucide-react";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import Link from "next/link";
@@ -132,24 +133,39 @@ export default async function PaywallPage({ params }: Props) {
 
           <PaywallCTA linkId={link.id} />
 
-          <div className="mt-4 flex flex-col gap-1.5">
-            <p className="text-xs text-muted-foreground">🔒 Secure payment via Stripe</p>
-            <p className="text-xs text-muted-foreground">✉️ Magic link sent to your email instantly</p>
-            <p className="text-xs text-muted-foreground">⏳ Access link expires in 24 hours</p>
+          <div className="mt-4 flex flex-col gap-2">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <LockKeyhole className="size-3.5 shrink-0" aria-hidden="true" />
+              <span>Secure payment via Stripe</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Mail className="size-3.5 shrink-0" aria-hidden="true" />
+              <span>Access link sent to your email instantly</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Timer className="size-3.5 shrink-0" aria-hidden="true" />
+              <span>Link expires in 24 hours</span>
+            </div>
             {salesCount > 0 && (
-              <p className="text-xs text-muted-foreground">✓ {salesCount} {salesCount === 1 ? "sale" : "sales"}</p>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Users className="size-3.5 shrink-0" aria-hidden="true" />
+                <span>{salesCount} {salesCount === 1 ? "sale" : "sales"}</span>
+              </div>
             )}
           </div>
         </div>
 
         {/* Trust footer */}
-        <p className="mt-4 text-center text-xs text-muted-foreground leading-relaxed">
-          Powered by{" "}
-          <Link href="/" className="hover:underline text-foreground">
-            unseal.link
-          </Link>
-          {" "}· Google Safe Browsing protected · Refund available if needed
-        </p>
+        <div className="mt-4 flex items-center justify-center gap-1.5 flex-wrap">
+          <ShieldCheck className="size-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
+          <p className="text-center text-xs text-muted-foreground">
+            Powered by{" "}
+            <Link href="/" className="hover:underline text-foreground">
+              unseal.link
+            </Link>
+            {" "}· Safe Browsing checked · Refund available if needed
+          </p>
+        </div>
 
         <div className="mt-4 text-center">
           <AbuseReportForm productId={link.id} />
