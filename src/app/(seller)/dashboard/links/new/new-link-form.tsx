@@ -28,11 +28,22 @@ function getImageRatio(file: File): Promise<number> {
   });
 }
 
+function formatExpiryPreview(value: string): string {
+  const ms = new Date(value).getTime() - Date.now();
+  if (ms <= 0) return "";
+  const hours = Math.floor(ms / 3600000);
+  if (hours >= 48) return `${Math.floor(hours / 24)} days`;
+  if (hours >= 24) return "1 day";
+  if (hours > 1) return `${hours} hours`;
+  return "less than an hour";
+}
+
 export function NewLinkForm() {
   const [error, setError] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
+  const [expiresAt, setExpiresAt] = useState<string>("");
   const [isPending, startTransition] = useTransition();
   const priceInputRef = useRef<HTMLInputElement>(null);
   const prevObjectUrl = useRef<string | null>(null);
@@ -223,8 +234,15 @@ export function NewLinkForm() {
           id="expires_at"
           name="expires_at"
           type="datetime-local"
+          value={expiresAt}
+          onChange={(e) => setExpiresAt(e.target.value)}
           className="block w-full px-2 py-2 mt-1 border border-input bg-background text-foreground rounded"
         />
+        {expiresAt && formatExpiryPreview(expiresAt) && (
+          <p className="text-xs text-amber-600 dark:text-amber-400 mt-1.5">
+            Your link will show a "Limited offer" badge with {formatExpiryPreview(expiresAt)} remaining.
+          </p>
+        )}
       </div>
       {error && <p className="text-destructive">{error}</p>}
       <button

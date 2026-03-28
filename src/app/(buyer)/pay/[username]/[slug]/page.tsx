@@ -1,7 +1,7 @@
 import { TABLES } from "@unseallink/lib/db";
 import { log } from "@unseallink/lib/logger";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
-import { LockKeyhole, Mail, Timer } from "lucide-react";
+import { Clock, LockKeyhole, Mail, Timer } from "lucide-react";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import Link from "next/link";
@@ -96,6 +96,17 @@ export default async function PaywallPage({ params }: Props) {
   const seller = link.sellers as any;
   log.info("paywall_viewed", { link_id: link.id, slug, username });
 
+  function formatTimeUntil(expiresAt: string): string {
+    const ms = new Date(expiresAt).getTime() - Date.now();
+    const hours = Math.floor(ms / 3600000);
+    if (hours >= 48) return `${Math.floor(hours / 24)} days`;
+    if (hours >= 24) return "1 day";
+    if (hours > 1) return `${hours} hours`;
+    return "less than an hour";
+  }
+
+  const expiresAt = link.expires_at as string | null;
+
   const salesCount = link.total_sales ?? 0;
   const baseUrl = await getBaseUrl();
   const canonical = `${baseUrl}/@${username}/${slug}`;
@@ -144,6 +155,15 @@ export default async function PaywallPage({ params }: Props) {
 
           {/* Title + description */}
           <div>
+            {expiresAt && (
+              <div
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 mb-3 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full text-xs font-medium cursor-default"
+                title={new Date(expiresAt).toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })}
+              >
+                <Clock className="w-3 h-3" aria-hidden="true" />
+                Limited offer · expires in {formatTimeUntil(expiresAt)}
+              </div>
+            )}
             <h1 className="text-2xl font-medium tracking-tight text-foreground leading-snug mb-2">
               {link.title}
             </h1>

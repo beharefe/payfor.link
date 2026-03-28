@@ -10,6 +10,7 @@ import {
   SignOutButton,
   WithdrawButton,
 } from "./dashboard-actions";
+import { DashboardTabs } from "./dashboard-tabs";
 import { SellerRealtimeNotifier } from "./realtime-notifier";
 import { type DayRevenue, RevenueChart } from "./revenue-chart";
 
@@ -26,13 +27,8 @@ function buildChartData(
       revenue: 0,
     });
   }
-  const cutoff = new Date(now);
-  cutoff.setDate(cutoff.getDate() - 29);
-  cutoff.setHours(0, 0, 0, 0);
-
   for (const order of orders) {
-    const orderDate = new Date(order.created_at);
-    const label = orderDate.toLocaleDateString("en-US", {
+    const label = new Date(order.created_at).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
     });
@@ -69,7 +65,6 @@ export default async function DashboardPage() {
     .neq("status", "deleted")
     .order("created_at", { ascending: false });
 
-  // Last 30 days of orders for the chart
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -81,7 +76,6 @@ export default async function DashboardPage() {
     .gte("created_at", thirtyDaysAgo.toISOString());
 
   const chartData = buildChartData(recentOrders ?? []);
-
   const totalSales = links?.reduce((s, l) => s + (l.total_sales ?? 0), 0) ?? 0;
   const totalEarned = seller.total_earned ?? 0;
 
@@ -99,26 +93,26 @@ export default async function DashboardPage() {
       {/* Header */}
       <div className="border-b border-border">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
-          <h1 className="text-base font-medium text-foreground">Dashboard</h1>
+          <Link href="/" className="text-sm font-medium text-foreground no-underline">
+            unseal.link
+          </Link>
           <div className="flex items-center gap-3">
             <SignOutButton />
-            <Link href="/dashboard/settings" className="flex items-center gap-2 no-underline group">
-              <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors hidden sm:block">
-                {seller.name}
-              </span>
-              {seller.avatar_url ? (
-                <img
-                  src={seller.avatar_url}
-                  alt={seller.name ?? ""}
-                  className="w-8 h-8 rounded-full object-cover border border-border"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center text-sm font-medium text-foreground shrink-0">
-                  {initial}
-                </div>
-              )}
-            </Link>
+            {seller.avatar_url ? (
+              <img
+                src={seller.avatar_url}
+                alt={seller.name ?? ""}
+                className="w-8 h-8 rounded-full object-cover border border-border shrink-0"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center text-sm font-medium text-foreground shrink-0">
+                {initial}
+              </div>
+            )}
           </div>
+        </div>
+        <div className="max-w-5xl mx-auto px-6 pb-0">
+          <DashboardTabs />
         </div>
       </div>
 
@@ -218,16 +212,25 @@ export default async function DashboardPage() {
                         }`}>
                           {effectiveStatus}
                         </span>
+                        {link.expires_at && !expired && (
+                          <span
+                            className="text-xs px-2 py-0.5 rounded-full font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 shrink-0 cursor-default"
+                            title={new Date(link.expires_at).toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })}
+                          >
+                            Limited
+                          </span>
+                        )}
                       </div>
                       <p className="text-sm text-muted-foreground">
                         {link.status === "draft" && !seller.stripe_connected
                           ? "Connect Stripe to activate"
                           : `${link.total_sales} sales · $${(link.total_revenue ?? 0).toFixed(2)} earned`}
-                        {link.expires_at && !expired && (
-                          <span className="ml-2 text-xs text-muted-foreground/70">
-                            · expires {new Date(link.expires_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                          </span>
-                        )}
+                        {link.expires_at && !expired && (() => {
+                          const ms = new Date(link.expires_at).getTime() - Date.now();
+                          const hours = Math.floor(ms / 3600000);
+                          const label = hours >= 24 ? `${Math.floor(hours / 24)}d` : `${hours}h`;
+                          return <span className="ml-2 text-xs text-amber-600 dark:text-amber-400">· expires in {label}</span>;
+                        })()}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
