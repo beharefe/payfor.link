@@ -1,7 +1,7 @@
 import { Check } from "lucide-react";
 import Link from "next/link";
-import { PRODUCTS } from "./brand-icons";
 import { HeroCTA, HeroHeadline } from "./hero-ab";
+import { ProductScroll } from "./product-scroll";
 
 const trustItems = [
   <>Payments by <span className="font-semibold" style={{ color: "#635BFF" }}>Stripe</span></>,
@@ -93,30 +93,21 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* What you can sell — horizontal scroll on mobile */}
-      <section className="border-t border-border py-14 bg-card">
+      {/* What you can sell — scrollable cards */}
+      <section className="border-t border-border py-14 bg-card overflow-hidden">
         <div className="max-w-5xl mx-auto">
-          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-8 px-6">
-            Sell anything with a URL
-          </p>
-
-          {/* Scroll container — full bleed on mobile, no padding so chips touch edge */}
-          <div className="flex gap-3 overflow-x-auto px-6 pb-1 scrollbar-none snap-x snap-mandatory md:flex-wrap">
-            {PRODUCTS.map((p) => (
-              <span
-                key={p.label}
-                className="inline-flex items-center gap-2 px-4 py-2.5 border border-border rounded-full text-sm text-foreground bg-background whitespace-nowrap shrink-0 snap-start"
-              >
-                {p.icon}
-                {p.label}
-              </span>
-            ))}
+          <div className="flex items-end justify-between px-6 mb-8">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-2">
+                Sell anything with a URL
+              </p>
+              <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
+                If it has a URL, you can paywall it. Your content stays where it
+                lives -- we just control who gets the link.
+              </p>
+            </div>
           </div>
-
-          <p className="mt-6 px-6 text-sm text-muted-foreground max-w-md leading-relaxed">
-            If it has a URL, you can paywall it. Your content stays where it
-            lives -- we just control who gets the link.
-          </p>
+          <ProductScroll />
         </div>
       </section>
 

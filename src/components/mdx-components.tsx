@@ -245,19 +245,19 @@ export const mdxComponents: MDXComponents = {
   ),
   ul: (props) => (
     <ul
-      className="list-disc list-outside pl-5 text-[#6B6B6B] dark:text-[#999999] mb-4 px-6 max-w-3xl mx-auto w-full space-y-1.5"
+      className="list-disc list-inside text-[#6B6B6B] dark:text-[#999999] mb-4 px-6 max-w-3xl mx-auto w-full space-y-2"
       {...props}
     />
   ),
   ol: (props) => (
     <ol
-      className="list-decimal list-outside pl-5 text-[#6B6B6B] dark:text-[#999999] mb-4 px-6 max-w-3xl mx-auto w-full space-y-1.5"
+      className="list-decimal list-inside text-[#6B6B6B] dark:text-[#999999] mb-4 px-6 max-w-3xl mx-auto w-full space-y-2"
       {...props}
     />
   ),
   li: (props) => (
     <li
-      className="text-base leading-relaxed"
+      className="text-base leading-relaxed pl-1"
       {...props}
     />
   ),
