@@ -1,4 +1,4 @@
-import { Check } from "lucide-react";
+import { TrustBar } from "@unseallink/components/trust-bar";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { HeroCTA, HeroHeadline } from "./hero-ab";
@@ -21,15 +21,6 @@ export const metadata: Metadata = {
     images: [{ url: `${APP_URL}/api/og`, width: 1200, height: 630 }],
   },
 };
-
-const trustItems = [
-  <>Payments by <span className="font-semibold" style={{ color: "#635BFF" }}>Stripe</span></>,
-  "No monthly fees",
-  "Buyers need no account",
-  "Instant delivery by email",
-  "4.5% per sale only",
-  "Cancel any time",
-];
 
 const steps = [
   {
@@ -123,18 +114,7 @@ export default function HomePage() {
             />
           </div>
 
-          {/* Trust bar — 3-col grid, 2 rows */}
-          <div className="grid grid-cols-3 gap-x-6 gap-y-2.5">
-            {trustItems.map((item, i) => (
-              <div key={i} className="flex items-center gap-1.5">
-                <Check
-                  className="size-3 shrink-0 text-foreground"
-                  aria-hidden="true"
-                />
-                <span className="text-xs text-muted-foreground">{item}</span>
-              </div>
-            ))}
-          </div>
+          <TrustBar />
         </div>
       </section>
 

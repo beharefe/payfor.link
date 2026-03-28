@@ -1,63 +1,13 @@
+import { TrustBar } from "@unseallink/components/trust-bar";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { StepsTabs } from "./steps-tabs";
 
 export const metadata: Metadata = {
   title: "How it works — unseal.link",
   description:
     "Paste a link, set a price, share your paywall. Buyers pay via Stripe and get instant access by email.",
 };
-
-const sellerSteps = [
-  {
-    n: "01",
-    title: "Create an account",
-    body: "Sign in with your email. No password. A magic link lands in your inbox.",
-  },
-  {
-    n: "02",
-    title: "Paste your link and set a price",
-    body: "Any URL works — Notion, Figma, Google Drive, GitHub, Discord invite, anything.",
-  },
-  {
-    n: "03",
-    title: "Connect Stripe to receive payouts",
-    body: "Takes about 2 minutes. Stripe handles identity verification and bank payouts.",
-  },
-  {
-    n: "04",
-    title: "Share your paywall link anywhere",
-    body: "Post it on Twitter, Discord, email, or wherever your audience is.",
-  },
-];
-
-const buyerSteps = [
-  { n: "01", title: "Open the link", body: "See the product title, description, and price." },
-  { n: "02", title: "Pay via Stripe", body: "Card, Apple Pay, or Google Pay. Secure checkout." },
-  { n: "03", title: "Check your email", body: "Your access link arrives within 30 seconds." },
-  {
-    n: "04",
-    title: "Click unlock",
-    body: "One click. Access the content instantly.",
-  },
-];
-
-function StepList({ steps }: { steps: { n: string; title: string; body: string }[] }) {
-  return (
-    <div className="divide-y divide-border">
-      {steps.map((step) => (
-        <div key={step.n} className="flex gap-6 py-6">
-          <span className="text-xs font-medium text-muted-foreground font-mono min-w-[2rem] mt-0.5 tabular-nums">
-            {step.n}
-          </span>
-          <div>
-            <p className="font-medium text-foreground mb-1">{step.title}</p>
-            <p className="text-sm text-muted-foreground leading-relaxed">{step.body}</p>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
 
 export default function HowItWorksPage() {
   return (
@@ -71,27 +21,14 @@ export default function HowItWorksPage() {
           How it works
         </h1>
         <p className="text-lg text-muted-foreground max-w-lg">
-          Lock link → Pay → Unlock. Simple for sellers. Simple for buyers.
+          Lock link. Pay. Unlock. Simple for sellers. Simple for buyers.
         </p>
       </section>
 
-      {/* For sellers */}
+      {/* Tabbed steps */}
       <section className="border-t border-border py-12">
-        <div className="max-w-5xl mx-auto px-6 max-w-2xl">
-          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-8">
-            For sellers
-          </p>
-          <StepList steps={sellerSteps} />
-        </div>
-      </section>
-
-      {/* For buyers */}
-      <section className="border-t border-border py-12 bg-card">
-        <div className="max-w-5xl mx-auto px-6 max-w-2xl">
-          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-8">
-            For buyers
-          </p>
-          <StepList steps={buyerSteps} />
+        <div className="max-w-2xl mx-auto px-6">
+          <StepsTabs />
         </div>
       </section>
 
@@ -115,6 +52,13 @@ export default function HowItWorksPage() {
           >
             Full pricing breakdown →
           </Link>
+        </div>
+      </section>
+
+      {/* Trust bar */}
+      <section className="border-t border-border py-10 bg-card">
+        <div className="max-w-5xl mx-auto px-6">
+          <TrustBar />
         </div>
       </section>
 

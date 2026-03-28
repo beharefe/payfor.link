@@ -1,3 +1,4 @@
+import { TrustBar } from "@unseallink/components/trust-bar";
 import Link from "next/link";
 import type { Metadata } from "next";
 
@@ -6,14 +7,14 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
 export const metadata: Metadata = {
   title: "Pricing — unseal.link",
   description:
-    "4.5% per sale. No monthly fees. No setup costs. Half the fee of Gumroad -- you only pay when you earn.",
+    "4.5% per sale. No monthly fees. No setup costs. Half the fee of Gumroad. You only pay when you earn.",
   alternates: { canonical: `${APP_URL}/pricing` },
 };
 
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "WebPage",
-  name: "Pricing -- unseal.link",
+  name: "Pricing · unseal.link",
   description: "4.5% per sale. No monthly fees. No setup costs.",
   url: `${APP_URL}/pricing`,
   mainEntity: {
@@ -218,20 +219,14 @@ export default function PricingPage() {
       {/* Trust bar */}
       <section className="border-t border-border py-10 bg-card">
         <div className="max-w-5xl mx-auto px-6">
-          <div className="flex flex-wrap gap-x-8 gap-y-3 items-center">
-            {[
-              <>Payments processed by <span className="font-semibold" style={{ color: "#635BFF" }}>Stripe</span></>,
-              "We never touch your funds",
-              "No monthly fees",
-              "No contracts",
-              "Buyers need no account",
-              "Cancel any time",
-            ].map((item, i) => (
-              <span key={i} className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <span className="text-foreground">✓</span> {item}
-              </span>
-            ))}
-          </div>
+          <TrustBar items={[
+            <>Payments processed by <span className="font-semibold" style={{ color: "#635BFF" }}>Stripe</span></>,
+            "We never touch your funds",
+            "No monthly fees",
+            "No contracts",
+            "Buyers need no account",
+            "Cancel any time",
+          ]} />
         </div>
       </section>
 
