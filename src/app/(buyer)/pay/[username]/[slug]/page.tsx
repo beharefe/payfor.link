@@ -1,6 +1,7 @@
 import { TABLES } from "@unseallink/lib/db";
 import { log } from "@unseallink/lib/logger";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
+import { LockKeyhole, Mail, ShieldCheck, Timer, Users } from "lucide-react";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import Link from "next/link";
@@ -89,8 +90,21 @@ export default async function PaywallPage({ params }: Props) {
   return (
     <main className="min-h-screen bg-background flex flex-col items-center justify-center px-6 py-16">
       <div className="w-full max-w-sm">
+        {/* Seller header */}
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center text-sm font-medium text-foreground shrink-0">
+            {(seller?.name ?? username).charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <p className="text-sm font-medium text-foreground leading-tight">
+              @{username}
+            </p>
+            <p className="text-xs text-muted-foreground">is selling this</p>
+          </div>
+        </div>
+
         {link.preview_image_url && (
-          <div className="aspect-video w-full overflow-hidden rounded-2xl bg-muted mb-6">
+          <div className="aspect-video w-full overflow-hidden rounded-2xl bg-muted mb-4">
             <img
               src={link.preview_image_url}
               alt={link.title}
@@ -100,16 +114,6 @@ export default async function PaywallPage({ params }: Props) {
         )}
 
         <div className="border border-border rounded-2xl bg-card p-6">
-          <p className="text-xs text-muted-foreground mb-4">
-            by{" "}
-            <Link
-              href={`/@${username}`}
-              className="hover:underline font-medium text-foreground"
-            >
-              {seller?.name ?? username}
-            </Link>
-          </p>
-
           <h1 className="text-xl font-medium tracking-tight text-foreground mb-2">{link.title}</h1>
 
           {link.description && (
@@ -118,25 +122,52 @@ export default async function PaywallPage({ params }: Props) {
             </p>
           )}
 
-          <p className="text-3xl font-medium text-foreground mb-5">
-            ${link.price.toFixed(2)}{" "}
-            <span className="text-base font-normal text-muted-foreground">
-              {link.currency.toUpperCase()}
+          <div className="flex items-baseline gap-2 mb-5">
+            <p className="text-3xl font-medium text-foreground">
+              ${link.price.toFixed(2)}
+            </p>
+            <span className="text-sm text-muted-foreground">
+              {link.currency.toUpperCase()} · one-time
             </span>
-          </p>
+          </div>
 
           <PaywallCTA linkId={link.id} />
 
-          <div className="mt-4 flex flex-col gap-1.5">
-            <p className="text-xs text-muted-foreground">✓ Secure payment via Stripe</p>
-            <p className="text-xs text-muted-foreground">✓ Instant delivery by email</p>
+          <div className="mt-4 flex flex-col gap-2">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <LockKeyhole className="size-3.5 shrink-0" aria-hidden="true" />
+              <span>Secure payment via Stripe</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Mail className="size-3.5 shrink-0" aria-hidden="true" />
+              <span>Access link sent to your email instantly</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Timer className="size-3.5 shrink-0" aria-hidden="true" />
+              <span>Link expires in 24 hours</span>
+            </div>
             {salesCount > 0 && (
-              <p className="text-xs text-muted-foreground">✓ {salesCount} sales</p>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Users className="size-3.5 shrink-0" aria-hidden="true" />
+                <span>{salesCount} {salesCount === 1 ? "sale" : "sales"}</span>
+              </div>
             )}
           </div>
         </div>
 
-        <div className="mt-6 text-center">
+        {/* Trust footer */}
+        <div className="mt-4 flex items-center justify-center gap-1.5 flex-wrap">
+          <ShieldCheck className="size-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
+          <p className="text-center text-xs text-muted-foreground">
+            Powered by{" "}
+            <Link href="/" className="hover:underline text-foreground">
+              unseal.link
+            </Link>
+            {" "}· Safe Browsing checked · Refund available if needed
+          </p>
+        </div>
+
+        <div className="mt-4 text-center">
           <AbuseReportForm productId={link.id} />
         </div>
       </div>
