@@ -2,7 +2,8 @@
 
 import { archiveProduct, deleteProduct } from "@unseallink/app/actions/product";
 import { refundPurchase } from "@unseallink/app/actions/refund";
-import { Loader2 } from "lucide-react";
+import { Loader2, RotateCcw } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 export function ArchiveButton({
@@ -73,6 +74,7 @@ export function RefundButton({
   orderId: string;
   buyerEmail: string;
 }) {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -80,7 +82,11 @@ export function RefundButton({
     if (!confirm(`Refund order for ${buyerEmail}? This cannot be undone.`)) return;
     startTransition(async () => {
       const result = await refundPurchase(orderId);
-      if ("error" in result) setError(result.error);
+      if ("error" in result) {
+        setError(result.error);
+      } else {
+        router.refresh();
+      }
     });
   }
 
@@ -90,10 +96,15 @@ export function RefundButton({
         type="button"
         onClick={handleClick}
         disabled={isPending}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-full text-xs font-medium text-muted-foreground cursor-pointer hover:bg-muted transition-colors disabled:opacity-60 disabled:cursor-not-allowed bg-transparent"
+        title="Refund this order"
+        className="inline-flex items-center gap-1.5 p-1.5 rounded-full text-muted-foreground cursor-pointer hover:text-foreground hover:bg-muted transition-colors disabled:opacity-60 disabled:cursor-not-allowed bg-transparent border-none"
       >
-        {isPending && <Loader2 className="animate-spin size-3 shrink-0" />}
-        {isPending ? "Processing…" : "Refund"}
+        {isPending ? (
+          <Loader2 className="animate-spin size-3.5 shrink-0" aria-hidden="true" />
+        ) : (
+          <RotateCcw className="size-3.5 shrink-0" aria-hidden="true" />
+        )}
+        <span className="sr-only">{isPending ? "Processing refund…" : "Refund"}</span>
       </button>
       {error && <span className="text-destructive text-xs">{error}</span>}
     </span>

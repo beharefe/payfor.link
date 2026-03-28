@@ -5,13 +5,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { SignOutButton } from "../dashboard-actions";
 import { DashboardTabs } from "../dashboard-tabs";
-
-function maskEmail(email: string): string {
-  const [local, domain] = email.split("@");
-  if (!local || !domain) return email;
-  const visible = local.slice(0, 2);
-  return `${visible}***@${domain}`;
-}
+import { RefundButton } from "../links/[id]/link-actions";
 
 export default async function DashboardOrdersPage() {
   const supabase = await createClient();
@@ -30,7 +24,7 @@ export default async function DashboardOrdersPage() {
 
   const { data: orders } = await supabase
     .from(TABLES.ORDERS)
-    .select("id, created_at, buyer_email, product_title, price_paid, currency, status")
+    .select("id, created_at, buyer_email, product_title, price_paid, currency, status, product_id")
     .eq("seller_id", user.id)
     .order("created_at", { ascending: false })
     .limit(200);
@@ -93,7 +87,7 @@ export default async function DashboardOrdersPage() {
                 >
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-foreground text-sm truncate">{order.product_title}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{maskEmail(order.buyer_email)}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{order.buyer_email}</p>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
                     <span className="text-sm font-medium text-foreground tabular-nums">
@@ -115,6 +109,9 @@ export default async function DashboardOrdersPage() {
                         year: "numeric",
                       })}
                     </span>
+                    {order.status === "paid" && (
+                      <RefundButton orderId={order.id} buyerEmail={order.buyer_email} />
+                    )}
                   </div>
                 </div>
               ))}

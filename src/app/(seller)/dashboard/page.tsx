@@ -8,7 +8,6 @@ import { CopyLinkButtons } from "./copy-link-buttons";
 import {
   InitiateStripeConnectButton,
   SignOutButton,
-  WithdrawButton,
 } from "./dashboard-actions";
 import { DashboardTabs } from "./dashboard-tabs";
 import { SellerRealtimeNotifier } from "./realtime-notifier";
@@ -129,36 +128,13 @@ export default async function DashboardPage() {
           </div>
         )}
 
-        {/* Stats */}
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div className="border border-border rounded-2xl p-5 bg-card">
-            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3">Total sales</p>
-            <p className="text-3xl font-medium text-foreground tabular-nums">{totalSales}</p>
-          </div>
-          <div className="border border-border rounded-2xl p-5 bg-card">
-            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3">Total earned</p>
-            <p className="text-3xl font-medium text-foreground tabular-nums">${totalEarned.toFixed(2)}</p>
-          </div>
-        </div>
-
-        {/* Revenue chart */}
-        {totalSales > 0 && (
-          <div className="border border-border rounded-2xl p-5 bg-card">
-            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-5">Revenue — last 30 days</p>
-            <RevenueChart data={chartData} />
-          </div>
-        )}
-
-        {/* Payout CTA */}
-        {seller.stripe_connected && (
-          <div className="flex items-center justify-between border border-border rounded-2xl px-6 py-4 bg-card">
-            <div>
-              <p className="font-medium text-foreground text-sm">Ready to withdraw?</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Manage your Stripe payouts and bank account.</p>
-            </div>
-            <WithdrawButton />
-          </div>
-        )}
+        {/* Revenue chart with stats */}
+        <RevenueChart
+          data={chartData}
+          totalSales={totalSales}
+          totalEarned={totalEarned}
+          stripeConnected={seller.stripe_connected ?? false}
+        />
 
         {/* Links */}
         <div>
