@@ -22,7 +22,10 @@ export async function updateName(formData: FormData): Promise<SettingsResult> {
     .update({ name })
     .eq("id", user.id);
 
-  if (error) return { error: "Failed to save. Please try again." };
+  if (error) {
+    if (error.code === "23505") return { error: "That display name is already taken. Try another." };
+    return { error: "Failed to save. Please try again." };
+  }
   return { ok: true };
 }
 
@@ -51,6 +54,9 @@ export async function updateProfile(
     .update({ name, bio, avatar_url })
     .eq("id", user.id);
 
-  if (error) return { error: "Failed to save. Please try again." };
+  if (error) {
+    if (error.code === "23505") return { error: "That display name is already taken. Try another." };
+    return { error: "Failed to save. Please try again." };
+  }
   return { ok: true };
 }
