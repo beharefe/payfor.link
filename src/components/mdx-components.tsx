@@ -1,5 +1,56 @@
+import {
+  Ban,
+  Banknote,
+  CreditCard,
+  Link2,
+  LockKeyhole,
+  Mail,
+  MailCheck,
+  Package,
+  Palette,
+  RefreshCw,
+  Rocket,
+  ShieldCheck,
+  Smile,
+  Target,
+  Video,
+  Zap,
+  type LucideProps,
+} from "lucide-react";
 import type { MDXComponents } from "mdx/types";
 import Link from "next/link";
+import type { ComponentType } from "react";
+
+// ---------- Icon map (MDX passes strings, we resolve to Lucide) ----------
+
+const ICON_MAP: Record<string, ComponentType<LucideProps>> = {
+  lock: LockKeyhole,
+  zap: Zap,
+  banknote: Banknote,
+  target: Target,
+  "credit-card": CreditCard,
+  refresh: RefreshCw,
+  shield: ShieldCheck,
+  mail: Mail,
+  "mail-check": MailCheck,
+  smile: Smile,
+  rocket: Rocket,
+  ban: Ban,
+  palette: Palette,
+  package: Package,
+  video: Video,
+  link: Link2,
+};
+
+function FeatureIcon({ name }: { name: string }) {
+  const Icon = ICON_MAP[name];
+  if (!Icon) return null;
+  return (
+    <div className="w-9 h-9 rounded-xl bg-[#F5F4EF] dark:bg-[#2C2C2C] flex items-center justify-center">
+      <Icon className="size-4 text-[#111111] dark:text-[#F5F4EF]" aria-hidden="true" />
+    </div>
+  );
+}
 
 // ---------- Layout primitives ----------
 
@@ -44,19 +95,21 @@ export function FeatureList({
 }) {
   return (
     <section className="px-6 py-16 max-w-4xl mx-auto w-full">
-      <div className="grid sm:grid-cols-3 gap-6">
+      <div className="grid sm:grid-cols-3 gap-5">
         {items.map((item) => (
           <div
             key={item.title}
-            className="bg-white dark:bg-[#1C1C1C] border border-[#E5E5E5] dark:border-[#2C2C2C] rounded-2xl p-6 flex flex-col gap-3"
+            className="bg-white dark:bg-[#1C1C1C] border border-[#E5E5E5] dark:border-[#2C2C2C] rounded-2xl p-6 flex flex-col gap-4"
           >
-            <span className="text-3xl">{item.icon}</span>
-            <h3 className="font-medium text-[#111111] dark:text-[#F5F4EF]">
-              {item.title}
-            </h3>
-            <p className="text-sm text-[#6B6B6B] dark:text-[#999999]">
-              {item.body}
-            </p>
+            <FeatureIcon name={item.icon} />
+            <div>
+              <h3 className="font-medium text-[#111111] dark:text-[#F5F4EF] mb-1.5">
+                {item.title}
+              </h3>
+              <p className="text-sm text-[#6B6B6B] dark:text-[#999999] leading-relaxed">
+                {item.body}
+              </p>
+            </div>
           </div>
         ))}
       </div>
@@ -168,19 +221,19 @@ export const mdxComponents: MDXComponents = {
   FAQ,
   h1: (props) => (
     <h1
-      className="text-3xl sm:text-4xl font-medium tracking-tight text-[#111111] dark:text-[#F5F4EF] mb-4 px-6 max-w-3xl mx-auto w-full"
+      className="text-3xl sm:text-4xl font-medium tracking-tight text-[#111111] dark:text-[#F5F4EF] mb-4 mt-2 px-6 max-w-3xl mx-auto w-full"
       {...props}
     />
   ),
   h2: (props) => (
     <h2
-      className="text-2xl font-medium text-[#111111] dark:text-[#F5F4EF] mb-3 px-6 max-w-3xl mx-auto w-full"
+      className="text-2xl font-medium text-[#111111] dark:text-[#F5F4EF] mb-3 mt-10 px-6 max-w-3xl mx-auto w-full"
       {...props}
     />
   ),
   h3: (props) => (
     <h3
-      className="text-lg font-medium text-[#111111] dark:text-[#F5F4EF] mb-2 px-6 max-w-3xl mx-auto w-full"
+      className="text-lg font-medium text-[#111111] dark:text-[#F5F4EF] mb-2 mt-6 px-6 max-w-3xl mx-auto w-full"
       {...props}
     />
   ),
@@ -192,7 +245,31 @@ export const mdxComponents: MDXComponents = {
   ),
   ul: (props) => (
     <ul
-      className="list-disc list-inside text-[#6B6B6B] dark:text-[#999999] mb-4 px-6 max-w-3xl mx-auto w-full space-y-1"
+      className="list-disc list-outside pl-5 text-[#6B6B6B] dark:text-[#999999] mb-4 px-6 max-w-3xl mx-auto w-full space-y-1.5"
+      {...props}
+    />
+  ),
+  ol: (props) => (
+    <ol
+      className="list-decimal list-outside pl-5 text-[#6B6B6B] dark:text-[#999999] mb-4 px-6 max-w-3xl mx-auto w-full space-y-1.5"
+      {...props}
+    />
+  ),
+  li: (props) => (
+    <li
+      className="text-base leading-relaxed"
+      {...props}
+    />
+  ),
+  code: (props) => (
+    <code
+      className="font-mono text-sm bg-[#F0EFE9] dark:bg-[#2C2C2C] text-[#111111] dark:text-[#F5F4EF] px-1.5 py-0.5 rounded"
+      {...props}
+    />
+  ),
+  strong: (props) => (
+    <strong
+      className="font-semibold text-[#111111] dark:text-[#F5F4EF]"
       {...props}
     />
   ),
