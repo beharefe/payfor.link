@@ -119,7 +119,7 @@ export default async function OrderPage({ params }: Props) {
                     {seller.name || seller.username}
                   </Link>
                 ) : (
-                  seller?.name || "—"
+                  seller?.name ?? seller?.username
                 )}
               </span>
             </div>
