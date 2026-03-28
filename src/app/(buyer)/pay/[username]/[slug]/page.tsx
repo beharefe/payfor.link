@@ -1,7 +1,7 @@
 import { TABLES } from "@unseallink/lib/db";
 import { log } from "@unseallink/lib/logger";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
-import { LockKeyhole, Mail, ShieldCheck, Timer, Users } from "lucide-react";
+import { LockKeyhole, Mail, Timer } from "lucide-react";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import Link from "next/link";
@@ -70,12 +70,17 @@ export default async function PaywallPage({ params }: Props) {
     .single();
 
   if (!link) notFound();
+
   if (link.status !== "active") {
     return (
       <main className="min-h-screen flex items-center justify-center px-6">
-        <div className="text-center">
-          <h1 className="text-xl font-medium text-foreground mb-2">Unavailable</h1>
-          <p className="text-muted-foreground text-sm">This product is not available for purchase.</p>
+        <div className="text-center max-w-xs">
+          <h1 className="text-xl font-medium text-foreground mb-2">
+            No longer available
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            This product has been removed or is paused.
+          </p>
         </div>
       </main>
     );
@@ -89,22 +94,11 @@ export default async function PaywallPage({ params }: Props) {
 
   return (
     <main className="min-h-screen bg-background flex flex-col items-center justify-center px-6 py-16">
-      <div className="w-full max-w-sm">
-        {/* Seller header */}
-        <div className="flex items-center gap-3 mb-5">
-          <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center text-sm font-medium text-foreground shrink-0">
-            {(seller?.name ?? username).charAt(0).toUpperCase()}
-          </div>
-          <div>
-            <p className="text-sm font-medium text-foreground leading-tight">
-              @{username}
-            </p>
-            <p className="text-xs text-muted-foreground">is selling this</p>
-          </div>
-        </div>
+      <div className="w-full max-w-sm space-y-3">
 
+        {/* Preview image */}
         {link.preview_image_url && (
-          <div className="aspect-video w-full overflow-hidden rounded-2xl bg-muted mb-4">
+          <div className="aspect-video w-full overflow-hidden rounded-2xl bg-muted">
             <img
               src={link.preview_image_url}
               alt={link.title}
@@ -113,61 +107,87 @@ export default async function PaywallPage({ params }: Props) {
           </div>
         )}
 
-        <div className="border border-border rounded-2xl bg-card p-6">
-          <h1 className="text-xl font-medium tracking-tight text-foreground mb-2">{link.title}</h1>
+        {/* Main card */}
+        <div className="border border-border rounded-2xl bg-card p-6 space-y-5">
 
-          {link.description && (
-            <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-              {link.description}
-            </p>
-          )}
+          {/* Title + description */}
+          <div>
+            <h1 className="text-2xl font-medium tracking-tight text-foreground leading-snug mb-2">
+              {link.title}
+            </h1>
+            {link.description && (
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {link.description}
+              </p>
+            )}
+          </div>
 
-          <div className="flex items-baseline gap-2 mb-5">
-            <p className="text-3xl font-medium text-foreground">
+          {/* Price */}
+          <div className="flex items-baseline gap-2">
+            <span className="text-4xl font-medium text-foreground tabular-nums">
               ${link.price.toFixed(2)}
-            </p>
+            </span>
             <span className="text-sm text-muted-foreground">
               {link.currency.toUpperCase()} · one-time
             </span>
-          </div>
-
-          <PaywallCTA linkId={link.id} />
-
-          <div className="mt-4 flex flex-col gap-2">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <LockKeyhole className="size-3.5 shrink-0" aria-hidden="true" />
-              <span>Secure payment via Stripe</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Mail className="size-3.5 shrink-0" aria-hidden="true" />
-              <span>Access link sent to your email instantly</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Timer className="size-3.5 shrink-0" aria-hidden="true" />
-              <span>Link expires in 24 hours</span>
-            </div>
             {salesCount > 0 && (
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Users className="size-3.5 shrink-0" aria-hidden="true" />
-                <span>{salesCount} {salesCount === 1 ? "sale" : "sales"}</span>
-              </div>
+              <span className="ml-auto text-xs text-muted-foreground">
+                {salesCount} {salesCount === 1 ? "sale" : "sales"}
+              </span>
             )}
           </div>
+
+          {/* CTA */}
+          <PaywallCTA linkId={link.id} />
+
+          {/* Trust row */}
+          <div className="grid grid-cols-3 gap-2 pt-1">
+            {[
+              { icon: LockKeyhole, label: "Secure" },
+              { icon: Mail,        label: "By email" },
+              { icon: Timer,       label: "24h link" },
+            ].map(({ icon: Icon, label }) => (
+              <div
+                key={label}
+                className="flex flex-col items-center gap-1.5 py-2.5 rounded-xl bg-muted/50"
+              >
+                <Icon className="size-3.5 text-muted-foreground" aria-hidden="true" />
+                <span className="text-[11px] text-muted-foreground leading-none">
+                  {label}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Trust footer */}
-        <div className="mt-4 flex items-center justify-center gap-1.5 flex-wrap">
-          <ShieldCheck className="size-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
-          <p className="text-center text-xs text-muted-foreground">
-            Powered by{" "}
-            <Link href="/" className="hover:underline text-foreground">
-              unseal.link
-            </Link>
-            {" "}· Safe Browsing checked · Refund available if needed
-          </p>
+        {/* Seller card */}
+        <div className="border border-border rounded-2xl px-5 py-4 bg-card flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-full bg-muted border border-border flex items-center justify-center text-xs font-medium text-foreground shrink-0">
+              {(seller?.name ?? username).charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground leading-none mb-0.5">
+                Sold by
+              </p>
+              <Link
+                href={`/@${username}`}
+                className="text-sm font-medium text-foreground hover:underline"
+              >
+                {seller?.name ?? username}
+              </Link>
+            </div>
+          </div>
+          <Link
+            href="/"
+            className="text-[11px] text-muted-foreground hover:text-foreground transition-colors no-underline"
+          >
+            unseal.link
+          </Link>
         </div>
 
-        <div className="mt-4 text-center">
+        {/* Report */}
+        <div className="text-center">
           <AbuseReportForm productId={link.id} />
         </div>
       </div>
