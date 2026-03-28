@@ -26,9 +26,11 @@ export default async function OrderPage({ params }: Props) {
 
   if (!order) {
     return (
-      <main className="p-8 text-center">
-        <h1>Order not found</h1>
-        <p><Link href="/orders">Back to your orders</Link></p>
+      <main className="min-h-screen flex items-center justify-center px-6">
+        <div className="text-center max-w-sm">
+          <h1 className="text-xl font-medium text-foreground mb-2">Order not found</h1>
+          <Link href="/orders" className="text-sm text-muted-foreground hover:text-foreground transition-colors">← All purchases</Link>
+        </div>
       </main>
     );
   }
@@ -38,25 +40,26 @@ export default async function OrderPage({ params }: Props) {
 
   if (!session || session.email.toLowerCase() !== order.buyer_email.toLowerCase()) {
     return (
-      <main className="p-8 max-w-sm mx-auto text-center">
-        <p className="text-3xl mb-2">🔒</p>
-        <h1 className="text-2xl font-medium mb-2">Sign in to view this order</h1>
-        <p className="text-muted-foreground mb-6">
-          Use the access link from your purchase email, or sign in at orders.
-        </p>
-        <Link
-          href={`/orders?oid=${order_id}`}
-          className="inline-block px-5 py-2.5 bg-primary text-primary-foreground no-underline rounded-full font-medium hover:opacity-90 transition-opacity"
-        >
-          Sign in →
-        </Link>
+      <main className="min-h-screen flex flex-col items-center justify-center px-6 py-16 bg-background">
+        <div className="w-full max-w-sm text-center">
+          <p className="text-3xl mb-4">🔒</p>
+          <h1 className="text-2xl font-medium tracking-tight text-foreground mb-2">Sign in to view this</h1>
+          <p className="text-muted-foreground text-sm mb-8">Use the access link from your purchase email, or enter your email below.</p>
+          <Link
+            href={`/orders?oid=${order_id}`}
+            className="inline-flex items-center px-6 py-3 bg-primary text-primary-foreground no-underline rounded-full font-medium hover:opacity-90 transition-opacity"
+          >
+            Sign in →
+          </Link>
+        </div>
       </main>
     );
   }
 
   if (order.status === "refunded") {
     return (
-      <main className="p-8 max-w-lg mx-auto text-center">
+      <main className="min-h-screen flex items-center justify-center px-6">
+        <div className="text-center max-w-sm">
         <p className="text-3xl mb-2">↩️</p>
         <h1 className="text-xl font-medium mb-2">Order refunded</h1>
         <p className="text-muted-foreground mb-1">{order.product_title}</p>
@@ -64,8 +67,9 @@ export default async function OrderPage({ params }: Props) {
           This order was refunded and access is no longer available.
         </p>
         <Link href="/orders" className="text-sm text-muted-foreground hover:text-foreground">
-          ← All orders
+          ← All purchases
         </Link>
+      </div>
       </main>
     );
   }
@@ -89,104 +93,83 @@ export default async function OrderPage({ params }: Props) {
   const shortId = order.id.slice(0, 8).toUpperCase();
 
   return (
-    <main className="p-8 max-w-md mx-auto">
-      {/* Header */}
-      <div className="text-center mb-6">
-        <p className="text-3xl mb-2">✅</p>
-        <h1 className="text-2xl font-medium mb-1">Access ready</h1>
-        <p className="text-muted-foreground text-sm">
-          Delivered instantly after payment
-        </p>
-      </div>
-
-      {/* Main card */}
-      <div className="border border-border rounded-2xl p-6 mb-4">
-        <p className="font-semibold text-lg mb-4">{order.product_title}</p>
-
-        <div className="flex flex-col gap-2 text-sm mb-6">
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Delivered to</span>
-            <span className="font-medium">{order.buyer_email}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Sold by</span>
-            <span className="font-medium">
-              {seller?.username ? (
-                <Link
-                  href={`/s/${seller.username}`}
-                  className="hover:underline"
-                >
-                  {seller.name || seller.username}
-                </Link>
-              ) : (
-                seller?.name || "—"
-              )}
-            </span>
-          </div>
+    <main className="min-h-screen bg-background flex flex-col items-center justify-center px-6 py-16">
+      <div className="w-full max-w-sm space-y-4">
+        {/* Header */}
+        <div className="text-center mb-2">
+          <p className="text-4xl mb-3">✓</p>
+          <h1 className="text-2xl font-medium tracking-tight text-foreground mb-1">Access ready</h1>
+          <p className="text-muted-foreground text-sm">Your sale is confirmed</p>
         </div>
 
-        <a
-          href={`${appUrl}/api/orders/${order.id}/access`}
-          className="block w-full text-center px-6 py-3 bg-primary text-primary-foreground no-underline rounded-full font-medium text-base hover:opacity-90 transition-opacity"
-        >
-          Open link →
-        </a>
-      </div>
+        {/* Main card */}
+        <div className="border border-border rounded-2xl p-6 bg-card space-y-5">
+          <p className="font-medium text-lg text-foreground leading-snug">{order.product_title}</p>
 
-      {/* Contact seller */}
-      {seller?.email && (
-        <div className="text-center mb-4">
-          <p className="text-sm text-muted-foreground mb-1">
-            Questions about this purchase?
-          </p>
+          <div className="flex flex-col gap-2 text-sm">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Delivered to</span>
+              <span className="font-medium text-foreground truncate max-w-[55%] text-right">{order.buyer_email}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Sold by</span>
+              <span className="font-medium text-foreground">
+                {seller?.username ? (
+                  <Link href={`/@${seller.username}`} className="hover:underline">
+                    {seller.name || seller.username}
+                  </Link>
+                ) : (
+                  seller?.name || "—"
+                )}
+              </span>
+            </div>
+          </div>
+
           <a
-            href={`mailto:${seller.email}?subject=${encodeURIComponent(`Question about my purchase — ${order.product_title}`)}`}
-            className="text-sm font-medium hover:underline"
+            href={`${appUrl}/api/orders/${order.id}/access`}
+            className="flex items-center justify-center w-full px-6 py-3.5 bg-primary text-primary-foreground no-underline rounded-full font-medium text-base hover:opacity-90 transition-opacity"
           >
-            Contact seller
+            Open link →
           </a>
         </div>
-      )}
 
-      {/* Order info */}
-      <div className="border-t border-border pt-4 mb-4">
-        <div className="flex flex-col gap-1 text-xs text-muted-foreground">
-          <div className="flex justify-between">
-            <span>Order ID</span>
-            <span className="font-mono">#{shortId}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Date</span>
-            <span>{purchasedOn}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Amount</span>
-            <span>${order.price_paid.toFixed(2)} {order.currency.toUpperCase()}</span>
+        {/* Order info */}
+        <div className="border border-border rounded-2xl px-5 py-4 bg-card">
+          <div className="flex flex-col gap-2 text-xs text-muted-foreground">
+            <div className="flex justify-between">
+              <span>Sale ID</span>
+              <span className="font-mono text-foreground">#{shortId}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Date</span>
+              <span>{purchasedOn}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Amount</span>
+              <span className="font-medium text-foreground">${order.price_paid.toFixed(2)} {order.currency.toUpperCase()}</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Dispute note + report */}
-      <div className="text-center text-xs text-muted-foreground mb-6 space-y-1">
-        <p>
-          Payments are processed by Stripe. For disputes, you may also contact
-          your payment provider.
-        </p>
-      </div>
-
-      <div className="text-center mb-6">
-        <ReportProblem
-          productId={order.product_id}
-          orderId={order.id}
-          reporterEmail={session.email}
-        />
-      </div>
-
-      {/* Back link */}
-      <div className="text-center">
-        <Link href="/orders" className="text-sm text-muted-foreground hover:text-foreground">
-          ← All orders
-        </Link>
+        {/* Contact + report */}
+        <div className="flex flex-col gap-3 text-center">
+          {seller?.email && (
+            <a
+              href={`mailto:${seller.email}?subject=${encodeURIComponent(`Question about my purchase — ${order.product_title}`)}`}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Questions? Contact seller →
+            </a>
+          )}
+          <ReportProblem
+            productId={order.product_id}
+            orderId={order.id}
+            reporterEmail={session.email}
+          />
+          <Link href="/orders" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            ← All purchases
+          </Link>
+        </div>
       </div>
     </main>
   );

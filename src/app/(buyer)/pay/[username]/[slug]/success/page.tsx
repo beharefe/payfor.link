@@ -104,7 +104,7 @@ export default async function PaymentSuccessPage({
             Access link sent to <span className="font-medium">{customerEmail}</span>
           </p>
           <p className="text-xs text-muted-foreground">
-            Check your inbox and click the link to access your purchase.
+            Check your inbox and click the link to access your content.
           </p>
         </div>
       </div>

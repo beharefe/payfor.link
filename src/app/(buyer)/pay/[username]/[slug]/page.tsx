@@ -131,7 +131,7 @@ export default async function PaywallPage({ params }: Props) {
             <p className="text-xs text-muted-foreground">✓ Secure payment via Stripe</p>
             <p className="text-xs text-muted-foreground">✓ Instant delivery by email</p>
             {salesCount > 0 && (
-              <p className="text-xs text-muted-foreground">✓ {salesCount} purchases</p>
+              <p className="text-xs text-muted-foreground">✓ {salesCount} sales</p>
             )}
           </div>
         </div>

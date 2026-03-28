@@ -5,11 +5,11 @@ import { type NextRequest, NextResponse } from "next/server";
  *  If `oid` (order id) is provided, redirects straight to the access route (→ delivery URL).
  *  Otherwise falls back to /orders. */
 export async function GET(request: NextRequest) {
-  const { searchParams } = request.nextUrl;
+  const { searchParams, protocol, host } = request.nextUrl;
+  const appUrl = `${protocol}//${host}`;
   const token = searchParams.get("token");
   const orderId = searchParams.get("oid");
   const next = searchParams.get("next");
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
   if (!token) {
     return NextResponse.redirect(new URL("/orders?error=missing_token", appUrl));

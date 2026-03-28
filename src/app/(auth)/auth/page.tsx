@@ -32,9 +32,17 @@ export default async function AuthPage({
                 <span className="font-medium text-foreground">{email}</span>.
               </>
             ) : (
-              "Enter your email and we'll send you a sign-in code."
+              "Seller sign-in. Enter your email and we'll send you a code."
             )}
           </p>
+          {!sent && (
+            <p className="text-xs text-muted-foreground mt-2">
+              Looking for something you bought?{" "}
+              <a href="/orders" className="underline underline-offset-2 hover:text-foreground transition-colors">
+                Access your orders →
+              </a>
+            </p>
+          )}
         </div>
 
         {error && (

@@ -39,10 +39,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
+  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "unseal.link";
+  const proto = request.headers.get("x-forwarded-proto") ?? "https";
+  const appUrl = `${proto}://${host}`;
+
   try {
     if (event.type === "checkout.session.completed") {
       await handleCheckoutSessionCompleted(
         event.data.object as Stripe.Checkout.Session,
+        appUrl,
       );
     } else if (event.type === "account.updated") {
       await handleAccountUpdated(event.data.object as Stripe.Account);
@@ -59,6 +64,7 @@ export async function POST(request: Request) {
 
 async function handleCheckoutSessionCompleted(
   session: Stripe.Checkout.Session,
+  appUrl: string,
 ) {
   const supabase = createServiceClient();
   const paymentIntentId =
@@ -149,7 +155,6 @@ async function handleCheckoutSessionCompleted(
   ]);
 
   // Send buyer a signed access link — no Supabase session involved
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
   const accessLink = `${appUrl}/api/orders/verify?token=${createBuyerToken(customerEmail)}&oid=${insertedOrder.id}`;
   await sendBuyerAccessEmail({
     to: customerEmail,

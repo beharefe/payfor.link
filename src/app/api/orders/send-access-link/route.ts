@@ -20,7 +20,8 @@ export async function POST(request: NextRequest) {
   }
 
   // Always return ok — don't reveal whether an account/orders exist for this email
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const reqUrl = new URL(request.url);
+  const appUrl = `${reqUrl.protocol}//${reqUrl.host}`;
 
   const service = createServiceClient();
   const { data: orders } = await service

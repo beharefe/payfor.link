@@ -2,14 +2,11 @@ import { TABLES } from "@unseallink/lib/db";
 import { createClient } from "@unseallink/lib/supabase/server";
 import { type NextRequest, NextResponse } from "next/server";
 
-/** Handles Magic Link callback. Supports both PKCE code exchange and token_hash (per Supabase docs). */
+/** Handles Magic Link callback (PKCE code exchange or token_hash). Seller-only. */
 export async function GET(request: NextRequest) {
-  const { searchParams } = request.nextUrl;
-  const code = searchParams.get("code");
-  const tokenHash = searchParams.get("token_hash");
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const { searchParams, protocol, host } = request.nextUrl;
+  const appUrl = `${protocol}//${host}`;
 
-  // Handle Supabase error redirects (e.g. expired/invalid magic link)
   const supabaseError =
     searchParams.get("error_description") ?? searchParams.get("error");
   if (supabaseError) {
@@ -18,16 +15,16 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  const code = searchParams.get("code");
+  const tokenHash = searchParams.get("token_hash");
+
   if (!code && !tokenHash) {
-    return NextResponse.redirect(
-      new URL("/auth?error=missing_code", appUrl),
-    );
+    return NextResponse.redirect(new URL("/auth?error=missing_code", appUrl));
   }
 
   const supabase = await createClient();
   const error = tokenHash
-    ? (await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "email" }))
-        .error
+    ? (await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "email" })).error
     : (await supabase.auth.exchangeCodeForSession(code!)).error;
 
   if (error) {
@@ -36,31 +33,21 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  let needsName = false;
-  if (user) {
-    const { data: existing } = await supabase
-      .from(TABLES.SELLERS)
-      .select("name")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    needsName = !existing?.name;
-
-    await supabase.from(TABLES.SELLERS).upsert(
-      {
-        id: user.id,
-        email: user.email ?? "",
-        name: user.user_metadata?.name ?? null,
-      },
-      { onConflict: "id" },
-    );
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.redirect(new URL("/auth?error=no_user", appUrl));
   }
 
+  // Check for existing sellers row — never auto-create here.
+  // New sellers are created in /onboarding/name via saveOnboardingName.
+  const { data: existing } = await supabase
+    .from(TABLES.SELLERS)
+    .select("name, username")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const needsOnboarding = !existing?.name || !existing?.username;
   return NextResponse.redirect(
-    new URL(needsName ? "/onboarding/name" : "/dashboard", appUrl),
+    new URL(needsOnboarding ? "/onboarding/name" : "/dashboard", appUrl),
   );
 }

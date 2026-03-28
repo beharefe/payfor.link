@@ -10,7 +10,8 @@ export async function GET(
   { params }: { params: Promise<{ order_id: string }> },
 ) {
   const { order_id } = await params;
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const url = new URL(_request.url);
+  const appUrl = `${url.protocol}//${url.host}`;
 
   const service = createServiceClient();
   const { data: order } = await service
