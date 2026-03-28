@@ -51,7 +51,20 @@ export type AnalyticsEvent =
     }
   | { name: "link_published"; props: { link_id: string } }
   | { name: "link_archived"; props: { link_id: string } }
-  | { name: "payout_requested"; props: { user_id: string } };
+  | { name: "payout_requested"; props: { user_id: string } }
+  // Marketing / acquisition
+  | {
+      name: "hero_variant_seen";
+      props: { variant: string };
+    }
+  | {
+      name: "cta_clicked";
+      props: { location: string; label: string; variant?: string };
+    }
+  | {
+      name: "blog_post_viewed";
+      props: { slug: string; title: string };
+    };
 
 /**
  * Type-safe wrapper around amplitude.track().
