@@ -24,7 +24,7 @@ export async function sendBuyerAccessEmail(opts: {
   return resend.emails.send({
     from: FROM_EMAIL,
     to: opts.to,
-    subject: `Your access link — ${opts.productTitle}`,
+    subject: `Your access link: ${opts.productTitle}`,
     html: await render(
       AccessLinkEmail({
         unlockUrl: opts.accessLink,
@@ -85,7 +85,7 @@ export async function sendSaleNotificationEmail(opts: {
   return resend.emails.send({
     from: FROM_EMAIL,
     to: opts.to,
-    subject: `New sale — ${opts.productTitle}`,
+    subject: `New sale: ${opts.productTitle}`,
     html: await render(
       SaleNotificationEmail({
         sellerName: opts.sellerName,

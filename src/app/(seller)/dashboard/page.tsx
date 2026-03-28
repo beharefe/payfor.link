@@ -121,7 +121,7 @@ export default async function DashboardPage() {
         {!seller.stripe_connected && !!links?.length && (
           <div className="border border-border rounded-2xl p-6 bg-card flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="flex-1">
-              <p className="font-medium text-foreground mb-1">One step left — connect Stripe to go live</p>
+              <p className="font-medium text-foreground mb-1">One step left: connect Stripe to go live</p>
               <p className="text-sm text-muted-foreground">Takes 2 minutes. Your links activate the moment Stripe approves your account.</p>
             </div>
             <InitiateStripeConnectButton />

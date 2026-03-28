@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { StepsTabs } from "./steps-tabs";
 
 export const metadata: Metadata = {
-  title: "How it works — unseal.link",
+  title: "How it works · unseal.link",
   description:
     "Paste a link, set a price, share your paywall. Buyers pay via Stripe and get instant access by email.",
 };

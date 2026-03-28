@@ -189,7 +189,7 @@ export function EditLinkForm({ id, defaultValues }: Props) {
       </div>
 
       <div>
-        <label>Price (USD) * — min $9.99</label>
+        <label>Price (USD), min $9.99 *</label>
         <div className="flex gap-2 mt-1 flex-wrap">
           {PRICE_PRESETS.map((p) => (
             <button
@@ -221,7 +221,7 @@ export function EditLinkForm({ id, defaultValues }: Props) {
       <div>
         <label htmlFor="preview_image">Preview image</label>
         <p className="text-muted-foreground text-[0.8125rem] mt-[0.1rem] mb-1">
-          Recommended: 1200×630px (1.91:1). Max 2MB — JPG, PNG, or WebP.
+          Recommended: 1200×630px (1.91:1). Max 2MB. JPG, PNG, or WebP.
         </p>
         <input
           id="preview_image"

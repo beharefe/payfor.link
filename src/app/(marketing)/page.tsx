@@ -26,7 +26,7 @@ const steps = [
   {
     n: "01",
     title: "Paste any link",
-    body: "Notion, Figma, Google Drive, GitHub, Discord — any URL you already own.",
+    body: "Notion, Figma, Google Drive, GitHub, Discord. Any URL you already own.",
   },
   {
     n: "02",

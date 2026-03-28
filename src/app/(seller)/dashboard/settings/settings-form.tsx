@@ -100,7 +100,7 @@ export function SettingsForm({
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-foreground mb-1">Profile photo</p>
-          <p className="text-xs text-muted-foreground mb-2">Square image. Max 2MB — JPG, PNG, or WebP.</p>
+          <p className="text-xs text-muted-foreground mb-2">Square image. Max 2MB. JPG, PNG, or WebP.</p>
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp"

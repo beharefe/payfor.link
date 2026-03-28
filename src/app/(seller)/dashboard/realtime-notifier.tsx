@@ -25,7 +25,7 @@ export function SellerRealtimeNotifier({ sellerId }: { sellerId: string }) {
         (payload) => {
           const order = payload.new as NewOrder;
           const price = `$${order.price_paid.toFixed(2)} ${order.currency.toUpperCase()}`;
-          setToast(`New order: ${order.product_title} — ${price}`);
+          setToast(`New order: ${order.product_title} · ${price}`);
           router.refresh();
           setTimeout(() => setToast(null), 6000);
         },

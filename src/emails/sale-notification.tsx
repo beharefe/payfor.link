@@ -19,7 +19,7 @@ export function SaleNotificationEmail({
   const net = (pricePaid - platformFee).toFixed(2);
 
   return (
-    <EmailLayout preview={`New sale — ${productTitle} — $${pricePaid.toFixed(2)}`}>
+    <EmailLayout preview={`New sale: ${productTitle} · $${pricePaid.toFixed(2)}`}>
       <Text style={{ fontSize: "24px", fontWeight: 700, color: "#3D3530", margin: "0 0 8px" }}>
         You just made a sale
       </Text>

@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!link) return { title: "Not found" };
 
   const baseUrl = await getBaseUrl();
-  const title = `${link.title} — $${link.price}`;
+  const title = `${link.title} · $${link.price}`;
   const description = link.description ?? "Pay once and get instant access.";
 
   const canonical = `${baseUrl}/@${username}/${slug}`;

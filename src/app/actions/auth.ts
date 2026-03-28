@@ -38,7 +38,7 @@ export async function verifySellerOtp(formData: FormData): Promise<void> {
 
   if (error) {
     const msg = error.message?.toLowerCase().includes("expired")
-      ? "Code expired — request a new one."
+      ? "Code expired. Request a new one."
       : (error.message ?? "Invalid code.");
     redirect(
       `/auth?error=${encodeURIComponent(msg)}&sent=1&email=${encodeURIComponent(email)}`,

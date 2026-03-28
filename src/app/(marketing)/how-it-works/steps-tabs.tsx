@@ -11,7 +11,7 @@ const sellerSteps = [
   {
     n: "02",
     title: "Paste your link and set a price",
-    body: "Any URL works — Notion, Figma, Google Drive, GitHub, Discord invite, anything.",
+    body: "Any URL works: Notion, Figma, Google Drive, GitHub, Discord invite, anything.",
   },
   {
     n: "03",

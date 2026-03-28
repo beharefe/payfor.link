@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
 
 export const metadata: Metadata = {
-  title: "Pricing — unseal.link",
+  title: "Pricing · unseal.link",
   description:
     "4.5% per sale. No monthly fees. No setup costs. Half the fee of Gumroad. You only pay when you earn.",
   alternates: { canonical: `${APP_URL}/pricing` },
@@ -48,7 +48,7 @@ const competitors = [
 const benefits = [
   {
     title: "We never hold your money",
-    body: "Payments go directly into your Stripe account. We have no access to your funds — ever. Stripe is the merchant of record.",
+    body: "Payments go directly into your Stripe account. We have no access to your funds. Ever. Stripe is the merchant of record.",
   },
   {
     title: "Buyers need no account",
@@ -56,7 +56,7 @@ const benefits = [
   },
   {
     title: "No platform lock-in",
-    body: "Your content lives wherever you put it — Notion, Figma, Google Drive, GitHub. We just control access. Switch or leave any time.",
+    body: "Your content lives wherever you put it: Notion, Figma, Google Drive, GitHub. We just control access. Switch or leave any time.",
   },
   {
     title: "No ghosting. Ever.",
@@ -92,7 +92,7 @@ export default function PricingPage() {
         </h1>
         <p className="text-lg text-muted-foreground max-w-lg leading-relaxed">
           No monthly fees. No setup costs. Half the cut of Gumroad. You only
-          pay when you earn — and so do we.
+          pay when you earn. So do we.
         </p>
       </section>
 
