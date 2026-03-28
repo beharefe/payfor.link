@@ -54,7 +54,7 @@ export default async function DashboardOrdersPage() {
             )}
           </div>
         </div>
-        <div className="max-w-5xl mx-auto px-6 pb-1">
+        <div className="max-w-5xl mx-auto px-6 pb-4">
           <DashboardTabs />
         </div>
       </div>

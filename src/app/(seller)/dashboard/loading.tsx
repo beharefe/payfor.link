@@ -7,7 +7,7 @@ function Skeleton({ className }: { className?: string }) {
 
 function DashboardTabsSkeleton() {
   return (
-    <div className="flex items-center gap-1 overflow-x-auto scrollbar-none pb-1">
+    <div className="flex items-center gap-1 overflow-x-auto scrollbar-none pb-4">
       {[
         { icon: BarChart2, label: "Overview" },
         { icon: Package, label: "Orders" },

@@ -16,7 +16,7 @@ export default function SettingsLoading() {
             <Skeleton className="w-8 h-8 rounded-full" />
           </div>
         </div>
-        <div className="max-w-5xl mx-auto px-6 pb-1">
+        <div className="max-w-5xl mx-auto px-6 pb-4">
           <div className="flex items-center gap-1">
             {[
               { icon: BarChart2, label: "Overview" },
