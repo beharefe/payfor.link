@@ -13,7 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@unseallink/components/ui/dialog";
-import { Loader2, RotateCcw } from "lucide-react";
+import { HandCoins, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
@@ -133,7 +133,7 @@ export function RefundButton({
           className="inline-flex items-center justify-center p-1.5 rounded-full text-muted-foreground cursor-pointer hover:text-foreground hover:bg-muted transition-colors bg-transparent border-none"
           title="Refund this order"
         >
-          <RotateCcw className="size-3.5 shrink-0" aria-hidden="true" />
+          <HandCoins className="size-3.5 shrink-0" aria-hidden="true" />
           <span className="sr-only">Refund</span>
         </DialogTrigger>
         <DialogContent showCloseButton={false}>
