@@ -16,12 +16,16 @@ export async function createCheckoutSession(
 
   const { data: link } = await supabase
     .from(TABLES.PRODUCTS)
-    .select("id, title, price, currency, slug, seller_id, version, status")
+    .select("id, title, price, currency, slug, seller_id, version, status, expires_at")
     .eq("id", linkId)
     .eq("status", "active")
     .single();
 
   if (!link) return { error: "This product is no longer available" };
+
+  if (link.expires_at && new Date(link.expires_at) < new Date()) {
+    return { error: "This offer has expired" };
+  }
 
   const { data: seller } = await supabase
     .from(TABLES.SELLERS)

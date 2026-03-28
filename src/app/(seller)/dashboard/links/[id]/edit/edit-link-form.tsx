@@ -34,6 +34,7 @@ type Props = {
     destination_url: string;
     price: number;
     preview_image_url: string | null;
+    expires_at: string | null;
   };
 };
 
@@ -228,6 +229,24 @@ export function EditLinkForm({ id, defaultValues }: Props) {
             {imageError}
           </p>
         )}
+      </div>
+
+      <div>
+        <label htmlFor="expires_at">Expiry date <span className="text-muted-foreground font-normal">(optional)</span></label>
+        <p className="text-muted-foreground text-[0.8125rem] mt-[0.1rem] mb-1">
+          Link stops accepting payments after this date.
+        </p>
+        <input
+          id="expires_at"
+          name="expires_at"
+          type="datetime-local"
+          defaultValue={
+            defaultValues.expires_at
+              ? new Date(defaultValues.expires_at).toISOString().slice(0, 16)
+              : ""
+          }
+          className="block w-full px-2 py-2 mt-1 border border-input bg-background text-foreground rounded"
+        />
       </div>
 
       {error && <p className="text-destructive">{error}</p>}

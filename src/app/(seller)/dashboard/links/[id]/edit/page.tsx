@@ -19,7 +19,7 @@ export default async function EditLinkPage({
   const { data: link } = await supabase
     .from(TABLES.PRODUCTS)
     .select(
-      "id, title, description, destination_url, price, preview_image_url, status, seller_id",
+      "id, title, description, destination_url, price, preview_image_url, expires_at, status, seller_id",
     )
     .eq("id", id)
     .single();
@@ -41,6 +41,7 @@ export default async function EditLinkPage({
           destination_url: link.destination_url,
           price: link.price,
           preview_image_url: link.preview_image_url ?? null,
+          expires_at: link.expires_at ?? null,
         }}
       />
     </main>

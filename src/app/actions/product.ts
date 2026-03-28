@@ -17,6 +17,7 @@ type CreateProductInput = {
   destination_url: string;
   price: number;
   preview_image_url?: string;
+  expires_at?: string | null;
 };
 
 type ActionResult = { error: string } | { id: string };
@@ -95,6 +96,7 @@ export async function createProduct(
       price: input.price,
       product_type: productType,
       preview_image_url: input.preview_image_url?.trim() || null,
+      expires_at: input.expires_at || null,
       status,
     })
     .select("id")
@@ -127,8 +129,8 @@ export async function createProductAction(
     description: formData.get("description")?.toString() ?? "",
     destination_url: formData.get("destination_url")?.toString() ?? "",
     price: Number.isFinite(price) ? price : MIN_PRICE,
-    preview_image_url:
-      formData.get("preview_image_url")?.toString() || undefined,
+    preview_image_url: formData.get("preview_image_url")?.toString() || undefined,
+    expires_at: formData.get("expires_at")?.toString() || null,
   });
   if ("error" in result) return result.error;
   return null; // createProduct redirects on success
@@ -141,6 +143,7 @@ type UpdateProductInput = {
   destination_url: string;
   price: number;
   preview_image_url?: string;
+  expires_at?: string | null;
 };
 
 export async function updateProduct(
@@ -190,6 +193,7 @@ export async function updateProduct(
       price: input.price,
       product_type: productType,
       preview_image_url: input.preview_image_url?.trim() || null,
+      expires_at: input.expires_at || null,
     })
     .eq("id", input.id)
     .eq("seller_id", user.id);
@@ -217,8 +221,8 @@ export async function updateProductAction(
     description: formData.get("description")?.toString() ?? "",
     destination_url: formData.get("destination_url")?.toString() ?? "",
     price: Number.isFinite(price) ? price : MIN_PRICE,
-    preview_image_url:
-      formData.get("preview_image_url")?.toString() || undefined,
+    preview_image_url: formData.get("preview_image_url")?.toString() || undefined,
+    expires_at: formData.get("expires_at")?.toString() || null,
   });
   if ("error" in result) return result.error;
   return null;

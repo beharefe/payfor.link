@@ -65,7 +65,7 @@ export default async function PaywallPage({ params }: Props) {
   const { data: link } = await supabase
     .from(TABLES.PRODUCTS)
     .select(
-      "id, title, description, price, currency, seller_id, status, preview_image_url, total_sales, sellers!inner(name, username)",
+      "id, title, description, price, currency, seller_id, status, preview_image_url, total_sales, expires_at, sellers!inner(name, username)",
     )
     .eq("slug", slug)
     .eq("sellers.username", username)
@@ -73,15 +73,19 @@ export default async function PaywallPage({ params }: Props) {
 
   if (!link) notFound();
 
-  if (link.status !== "active") {
+  const isExpired = link.expires_at && new Date(link.expires_at) < new Date();
+
+  if (link.status !== "active" || isExpired) {
     return (
       <main className="min-h-dvh flex items-center justify-center px-6">
         <div className="text-center max-w-xs">
           <h1 className="text-xl font-medium text-foreground mb-2">
-            No longer available
+            {isExpired ? "Offer expired" : "No longer available"}
           </h1>
           <p className="text-muted-foreground text-sm">
-            This product has been removed or is paused.
+            {isExpired
+              ? "This offer is no longer accepting payments."
+              : "This product has been removed or is paused."}
           </p>
         </div>
       </main>
