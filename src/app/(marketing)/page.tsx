@@ -1,3 +1,4 @@
+import { createClient } from "@unseallink/lib/supabase/server";
 import { TrustBar } from "@unseallink/components/trust-bar";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -76,7 +77,10 @@ const jsonLd = {
   },
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const ctaHref = user ? "/dashboard" : "/auth";
   return (
     <>
       <script
@@ -101,7 +105,7 @@ export default function HomePage() {
 
           <div className="flex flex-wrap gap-3 mb-10">
             <HeroCTA
-              href="/auth"
+              href={ctaHref}
               label="Start selling free"
               location="hero_primary"
               className="inline-flex items-center px-6 py-3 bg-primary text-primary-foreground rounded-full font-medium text-sm hover:opacity-90 transition-opacity no-underline"
@@ -220,7 +224,7 @@ export default function HomePage() {
           under 5 minutes. No storefront needed.
         </p>
         <HeroCTA
-          href="/auth"
+          href={ctaHref}
           label="Get started free"
           location="footer_cta"
           className="inline-flex items-center px-7 py-3.5 bg-primary text-primary-foreground rounded-full font-medium text-base hover:opacity-90 transition-opacity no-underline"

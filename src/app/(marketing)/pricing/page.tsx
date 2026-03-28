@@ -1,3 +1,4 @@
+import { createClient } from "@unseallink/lib/supabase/server";
 import { TrustBar } from "@unseallink/components/trust-bar";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -72,7 +73,10 @@ const benefits = [
   },
 ];
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const ctaHref = user ? "/dashboard" : "/auth";
   return (
     <>
       <script
@@ -240,7 +244,7 @@ export default function PricingPage() {
           you sell.
         </p>
         <Link
-          href="/auth"
+          href={ctaHref}
           className="inline-flex items-center px-7 py-3.5 bg-primary text-primary-foreground no-underline rounded-full font-medium text-base hover:opacity-90 transition-opacity"
         >
           Start selling free →
