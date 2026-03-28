@@ -75,7 +75,7 @@ export default async function PaywallPage({ params }: Props) {
 
   if (link.status !== "active") {
     return (
-      <main className="min-h-screen flex items-center justify-center px-6">
+      <main className="min-h-dvh flex items-center justify-center px-6">
         <div className="text-center max-w-xs">
           <h1 className="text-xl font-medium text-foreground mb-2">
             No longer available
@@ -116,7 +116,7 @@ export default async function PaywallPage({ params }: Props) {
   };
 
   return (
-    <main className="min-h-screen bg-background flex flex-col items-center justify-center px-6 py-16">
+    <main className="min-h-dvh bg-background flex flex-col items-center justify-center px-6 py-16">
       <script
         type="application/ld+json"
         // biome-ignore lint/security/noDangerouslySetInnerHtml: controlled JSON-LD

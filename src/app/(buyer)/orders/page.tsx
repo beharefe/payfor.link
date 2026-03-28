@@ -24,7 +24,7 @@ export default async function OrdersPage({
 
   if (!session) {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center px-6 py-16 bg-background">
+      <main className="min-h-dvh flex flex-col items-center justify-center px-6 py-16 bg-background">
         <div className="w-full max-w-sm">
           <div className="mb-8 text-center">
             <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3">unseal.link</p>
@@ -49,7 +49,7 @@ export default async function OrdersPage({
     .order("created_at", { ascending: false });
 
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-dvh bg-background">
       <div className="max-w-2xl mx-auto px-6 py-10">
         <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-2">Signed in as {session.email}</p>
         <h1 className="text-2xl font-medium tracking-tight text-foreground mb-8">Your purchases</h1>

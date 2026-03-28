@@ -16,7 +16,7 @@ export default async function AuthPage({
   const error = rawError ? (ERROR_MESSAGES[rawError] ?? rawError) : null;
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-6 py-16 bg-background">
+    <main className="min-h-dvh flex flex-col items-center justify-center px-6 py-16 bg-background">
       <div className="w-full max-w-sm">
         <div className="mb-8">
           <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3">

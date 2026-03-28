@@ -62,7 +62,7 @@ export default async function LinkDetailPage({
   };
 
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-dvh bg-background">
       {/* Header */}
       <div className="border-b border-border">
         <div className="max-w-3xl mx-auto px-6 h-16 flex items-center gap-4">

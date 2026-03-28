@@ -70,7 +70,7 @@ export default async function MdxPage({
         // biome-ignore lint/security/noDangerouslySetInnerHtml: controlled JSON-LD
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="min-h-screen bg-[#F5F4EF] dark:bg-[#111111] flex flex-col items-stretch font-sans">
+      <div className="min-h-dvh bg-[#F5F4EF] dark:bg-[#111111] flex flex-col items-stretch font-sans">
         <MDXRemote
           source={content}
           components={mdxComponents}

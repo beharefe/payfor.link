@@ -3,7 +3,7 @@ import { NewLinkForm } from "./new-link-form";
 
 export default function NewLinkPage() {
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-dvh bg-background">
       <div className="border-b border-border">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center gap-4">
           <Link

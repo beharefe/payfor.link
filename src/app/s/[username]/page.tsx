@@ -45,7 +45,7 @@ export default async function SellerProfilePage({ params }: Props) {
   const totalSales = products?.reduce((sum, p) => sum + (p.total_sales ?? 0), 0) ?? 0;
 
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-dvh bg-background">
       {/* Seller header */}
       <section className="pt-16 pb-12 border-b border-border">
         <div className="max-w-5xl mx-auto px-6">

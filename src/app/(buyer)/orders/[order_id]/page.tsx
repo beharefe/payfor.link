@@ -26,7 +26,7 @@ export default async function OrderPage({ params }: Props) {
 
   if (!order) {
     return (
-      <main className="min-h-screen flex items-center justify-center px-6">
+      <main className="min-h-dvh flex items-center justify-center px-6">
         <div className="text-center max-w-sm">
           <h1 className="text-xl font-medium text-foreground mb-2">Order not found</h1>
           <Link href="/orders" className="text-sm text-muted-foreground hover:text-foreground transition-colors">← All purchases</Link>
@@ -40,7 +40,7 @@ export default async function OrderPage({ params }: Props) {
 
   if (!session || session.email.toLowerCase() !== order.buyer_email.toLowerCase()) {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center px-6 py-16 bg-background">
+      <main className="min-h-dvh flex flex-col items-center justify-center px-6 py-16 bg-background">
         <div className="w-full max-w-sm text-center">
           <p className="text-3xl mb-4">🔒</p>
           <h1 className="text-2xl font-medium tracking-tight text-foreground mb-2">Sign in to view this</h1>
@@ -58,7 +58,7 @@ export default async function OrderPage({ params }: Props) {
 
   if (order.status === "refunded") {
     return (
-      <main className="min-h-screen flex items-center justify-center px-6">
+      <main className="min-h-dvh flex items-center justify-center px-6">
         <div className="text-center max-w-sm">
         <p className="text-3xl mb-2">↩️</p>
         <h1 className="text-xl font-medium mb-2">Order refunded</h1>
@@ -93,7 +93,7 @@ export default async function OrderPage({ params }: Props) {
   const shortId = order.id.slice(0, 8).toUpperCase();
 
   return (
-    <main className="min-h-screen bg-background flex flex-col items-center justify-center px-6 py-16">
+    <main className="min-h-dvh bg-background flex flex-col items-center justify-center px-6 py-16">
       <div className="w-full max-w-sm space-y-4">
         {/* Header */}
         <div className="text-center mb-2">

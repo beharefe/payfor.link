@@ -26,7 +26,7 @@ export default async function PaymentSuccessPage({
 
   if (!session_id) {
     return (
-      <main className="min-h-screen flex items-center justify-center px-6">
+      <main className="min-h-dvh flex items-center justify-center px-6">
         <div className="text-center">
           <h1 className="text-xl font-medium text-foreground mb-2">Invalid session</h1>
           <p className="text-muted-foreground text-sm">Missing session. Return to the paywall and try again.</p>
@@ -42,7 +42,7 @@ export default async function PaymentSuccessPage({
     });
   } catch {
     return (
-      <main className="min-h-screen flex items-center justify-center px-6">
+      <main className="min-h-dvh flex items-center justify-center px-6">
         <div className="text-center">
           <h1 className="text-xl font-medium text-foreground mb-2">Invalid session</h1>
           <p className="text-muted-foreground text-sm">Could not load session.</p>
@@ -58,7 +58,7 @@ export default async function PaymentSuccessPage({
 
   if (!customerEmail) {
     return (
-      <main className="min-h-screen flex items-center justify-center px-6">
+      <main className="min-h-dvh flex items-center justify-center px-6">
         <div className="text-center">
           <h1 className="text-xl font-medium text-foreground mb-2">Invalid session</h1>
           <p className="text-muted-foreground text-sm">No customer email found.</p>
@@ -76,7 +76,7 @@ export default async function PaymentSuccessPage({
 
   if (!order) {
     return (
-      <main className="min-h-screen flex items-center justify-center px-6">
+      <main className="min-h-dvh flex items-center justify-center px-6">
         <div className="text-center max-w-sm">
           <p className="text-3xl mb-3">⏳</p>
           <h1 className="text-xl font-medium text-foreground mb-2">Payment received</h1>
@@ -87,7 +87,7 @@ export default async function PaymentSuccessPage({
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-6">
+    <main className="min-h-dvh flex items-center justify-center px-6">
       <div className="w-full max-w-sm text-center">
         <p className="text-4xl mb-4">✓</p>
         <h1 className="text-2xl font-medium tracking-tight text-foreground mb-1">

@@ -4,8 +4,6 @@ import { track } from "@unseallink/lib/amplitude";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
-// A/B variants for the hero headline.
-// Change copy here — variant key is what gets sent to Amplitude.
 const VARIANTS = {
   A: { line1: "Get paid before", line2: "you share anything." },
   B: { line1: "Lock any link", line2: "behind a payment." },
@@ -27,11 +25,13 @@ function getOrAssignVariant(): Variant {
 
 export function HeroHeadline() {
   const [variant, setVariant] = useState<Variant>("A");
+  const [ready, setReady] = useState(false);
   const tracked = useRef(false);
 
   useEffect(() => {
     const v = getOrAssignVariant();
     setVariant(v);
+    setReady(true);
     if (!tracked.current) {
       tracked.current = true;
       track({ name: "hero_variant_seen", props: { variant: v } });
@@ -41,7 +41,10 @@ export function HeroHeadline() {
   const { line1, line2 } = VARIANTS[variant];
 
   return (
-    <h1 className="text-5xl md:text-6xl lg:text-[4.5rem] font-medium tracking-tight leading-[1.05] mb-6 text-foreground">
+    <h1
+      className={`text-5xl md:text-6xl lg:text-[4.5rem] font-medium tracking-tight leading-[1.05] mb-6 text-foreground transition-opacity duration-200 ${ready ? "opacity-100" : "opacity-0"}`}
+      suppressHydrationWarning
+    >
       {line1}
       <br />
       {line2}

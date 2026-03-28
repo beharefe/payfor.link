@@ -44,7 +44,7 @@ export default async function DashboardPage() {
   const initial = seller.name?.charAt(0).toUpperCase() ?? "?";
 
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-dvh bg-background">
       <SellerRealtimeNotifier sellerId={user.id} />
 
       {/* Header */}
