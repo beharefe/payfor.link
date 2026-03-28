@@ -7,12 +7,12 @@ import { ProductScroll } from "./product-scroll";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
 
 export const metadata: Metadata = {
-  title: "unseal.link -- Sell any link, instantly",
+  title: "unseal.link · Sell any link, instantly",
   description:
     "Paste a URL, set a price, share your paywall. Buyers pay once and get instant access by email. Keep 95.5% of every sale. No monthly fees.",
   alternates: { canonical: APP_URL },
   openGraph: {
-    title: "unseal.link -- Sell any link, instantly",
+    title: "unseal.link · Sell any link, instantly",
     description:
       "Paste a URL, set a price, share your paywall. Buyers pay once and get instant access by email. Keep 95.5% of every sale.",
     url: APP_URL,
@@ -35,7 +35,7 @@ const steps = [
   {
     n: "01",
     title: "Paste any link",
-    body: "Notion, Figma, Google Drive, GitHub, Discord -- any URL you already own.",
+    body: "Notion, Figma, Google Drive, GitHub, Discord — any URL you already own.",
   },
   {
     n: "02",
@@ -45,7 +45,7 @@ const steps = [
   {
     n: "03",
     title: "Share the paywall",
-    body: "Buyers pay via Stripe and receive the link by email -- no account required, under 30 seconds.",
+    body: "Buyers pay via Stripe and receive the link by email. No account required, under 30 seconds.",
   },
 ];
 
@@ -104,7 +104,7 @@ export default function HomePage() {
 
           <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-lg leading-relaxed">
             Paste a URL, set a price, share your paywall link. Buyers pay once
-            and receive access by email -- no accounts, no friction, under 30
+            and get instant access by email. No accounts, no friction, under 30
             seconds.
           </p>
 
@@ -123,8 +123,8 @@ export default function HomePage() {
             />
           </div>
 
-          {/* Trust bar — 2-col grid on mobile, single row on md+ */}
-          <div className="grid grid-cols-2 md:flex md:flex-wrap gap-x-6 gap-y-2.5">
+          {/* Trust bar — 3-col grid, 2 rows */}
+          <div className="grid grid-cols-3 gap-x-6 gap-y-2.5">
             {trustItems.map((item, i) => (
               <div key={i} className="flex items-center gap-1.5">
                 <Check
@@ -148,7 +148,7 @@ export default function HomePage() {
               </p>
               <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
                 If it has a URL, you can paywall it. Your content stays where it
-                lives -- we just control who gets the link.
+                lives. We just control who gets the link.
               </p>
             </div>
           </div>

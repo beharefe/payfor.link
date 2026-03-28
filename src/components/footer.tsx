@@ -17,14 +17,17 @@ function StripeBadge() {
 export function Footer() {
   return (
     <footer className="border-t border-border mt-auto">
-      <div className="max-w-5xl mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div className="flex items-center gap-5">
-          <span className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} unseal.link
-          </span>
-          <StripeBadge />
+      <div className="max-w-5xl mx-auto px-6 py-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+        <div className="flex flex-col gap-3">
+          <span className="text-sm font-medium text-foreground">unseal.link</span>
+          <div className="flex items-center gap-4">
+            <span className="text-xs text-muted-foreground">
+              © {new Date().getFullYear()} unseal.link
+            </span>
+            <StripeBadge />
+          </div>
         </div>
-        <div className="flex items-center gap-5">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
           <Link
             href="/pricing"
             className="text-xs text-muted-foreground hover:text-foreground transition-colors no-underline"
@@ -42,6 +45,18 @@ export function Footer() {
             className="text-xs text-muted-foreground hover:text-foreground transition-colors no-underline"
           >
             Orders
+          </Link>
+          <Link
+            href="/terms"
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors no-underline"
+          >
+            Terms
+          </Link>
+          <Link
+            href="/privacy"
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors no-underline"
+          >
+            Privacy
           </Link>
         </div>
       </div>

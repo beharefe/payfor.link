@@ -119,7 +119,7 @@ export function ProductScroll() {
       {/* Scroll track */}
       <div
         ref={ref}
-        className="flex gap-3 overflow-x-auto px-6 pb-1 scrollbar-none snap-x snap-mandatory"
+        className="flex gap-3 overflow-x-auto px-6 pb-1 scrollbar-none snap-x snap-mandatory scroll-pl-6"
       >
         {PRODUCTS.map((p) => (
           <div
