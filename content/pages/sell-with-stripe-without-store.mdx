@@ -1,0 +1,183 @@
+---
+title: "How to Sell with Stripe Without Building a Store"
+description: Accept Stripe payments for any digital product without coding a checkout page or building a storefront. Paste a link, set a price, share your paywall.
+og_title: "Sell with Stripe Without a Store or Code"
+og_description: Skip the storefront. Use Stripe Checkout for any link-based product with zero code. 4.5% per sale, live in 5 minutes.
+schema_type: Article
+published: true
+---
+
+<Hero
+  title="Accept Stripe payments. No store. No code."
+  subtitle="Stripe is the best payment processor on the planet. But building a checkout from scratch takes days. unseal.link gives you Stripe Checkout for any product in 5 minutes."
+  cta="Start accepting Stripe payments"
+  ctaHref="/auth"
+  note="4.5% per sale. No monthly fees. No coding."
+/>
+
+## Stripe is powerful. Setting it up is not.
+
+Stripe is what every serious business uses to process payments. It handles card networks, fraud detection, SCA compliance, and payouts to 40+ countries.
+
+But to use Stripe directly, you need to:
+- Build a checkout page (frontend code)
+- Create a backend to initiate sessions and handle webhooks
+- Set up Stripe Connect if you want to sell as yourself
+- Handle email delivery of your product
+- Test everything, fix edge cases, deploy
+
+That is days or weeks of work. For most creators and freelancers, it is not worth doing from scratch.
+
+unseal.link gives you the full Stripe Checkout flow -- for any URL-based product -- in 5 minutes. No code required.
+
+<FeatureList
+  items={[
+    {
+      icon: "lock",
+      title: "Real Stripe Checkout",
+      body: "Buyers see the same Stripe-hosted checkout page used by Shopify, Figma, and thousands of other businesses. Full fraud protection and SCA compliance included.",
+    },
+    {
+      icon: "zap",
+      title: "Webhooks handled for you",
+      body: "We handle checkout.session.completed, generate your access token, send the delivery email, and update your dashboard. You do nothing.",
+    },
+    {
+      icon: "banknote",
+      title: "Direct payouts to your bank",
+      body: "Payments flow through Stripe Connect Express directly to your Stripe account. We are never in the money flow.",
+    },
+  ]}
+/>
+
+## Who this is for
+
+**Independent creators** selling Notion templates, Figma files, Google Drive content, or any digital product with a URL -- who want Stripe payments without the setup overhead.
+
+**Freelancers** who want to send a payment link to clients for project deliverables, without building an invoice portal or manually collecting card details.
+
+**Developers** who need a quick internal tool -- sell access to a private repo, a documentation site, or a service endpoint without spinning up a full payment backend.
+
+**Non-technical founders** who want to validate a paid product idea before investing in infrastructure.
+
+## How it compares to building on Stripe directly
+
+<CompareTable
+  rows={[
+    { feature: "Setup time", a: "Days to weeks", b: "Hours", c: "5 minutes", cWins: true },
+    { feature: "Code required", a: "Yes -- full stack", b: "Minimal", c: "None", cWins: true },
+    { feature: "Webhook handling", a: "You build it", b: "Partial", c: "Included", cWins: true },
+    { feature: "Email delivery", a: "You build it", b: "Manual", c: "Automatic", cWins: true },
+    { feature: "Stripe-native checkout", a: "Yes", b: "Depends", c: "Yes", cWins: false },
+    { feature: "Platform fee", a: "None (+ Stripe fees)", b: "Varies", c: "4.5% + Stripe fees", cWins: false },
+  ]}
+/>
+
+The trade-off is clear: you pay 4.5% to not build and maintain the payment infrastructure yourself. For most products, that is a good trade.
+
+<InlineCTA
+  text="Accept Stripe payments in 5 minutes"
+  href="/auth"
+  note="Connect your Stripe account once. All products use it automatically."
+/>
+
+## The Stripe Connect setup (once only)
+
+When you sign up for unseal.link, you connect your Stripe account via Stripe Connect Express. This is the same OAuth flow used by Shopify, Airbnb, and Lyft for their sellers.
+
+What this means:
+- You have your own Stripe account
+- Payments from buyers go to your account directly
+- unseal.link takes its 4.5% platform fee via Stripe's application fees API
+- We never hold your money
+- You can withdraw on your own schedule
+
+Connecting Stripe takes about 2 minutes. Once connected, all your products use it automatically.
+
+## What you can sell
+
+Any product with a shareable URL:
+
+- **Digital files** hosted on Google Drive, Dropbox, or any CDN
+- **Notion pages** (templates, databases, dashboards)
+- **Figma files** (UI kits, design systems, templates)
+- **Private URLs** (Discord invite links, GitHub repos, Airtable bases)
+- **Service bookings** (Calendly links, consultation booking pages)
+- **Course content** (hosted on Loom, Drive, or any video platform)
+- **Freelance deliverables** (final files sent to specific clients at a specific price)
+
+<Steps
+  items={[
+    {
+      title: "Create an account",
+      body: "Sign up with your email -- magic link, no password. Takes 30 seconds.",
+    },
+    {
+      title: "Connect Stripe",
+      body: "Go through the Stripe Connect OAuth flow. Takes 2 minutes. This is the only setup you do once.",
+    },
+    {
+      title: "Create a product",
+      body: "Paste your URL, write a title, set a price. Your paywall is live immediately.",
+    },
+    {
+      title: "Share your paywall link",
+      body: "Share unseal.link/@yourname/product-name anywhere. Buyers pay via Stripe Checkout. Delivery is automatic.",
+    },
+  ]}
+/>
+
+<InlineCTA
+  text="Connect Stripe and go live"
+  href="/auth"
+  note="4.5% per sale. Stripe's standard processing fees apply separately."
+/>
+
+## Stripe's checkout, not ours
+
+When your buyer clicks "Pay," they are sent to a Stripe-hosted checkout page. Not a custom form we built. The real Stripe Checkout.
+
+This matters because:
+- Stripe Checkout has 3DS / SCA handling built in
+- It supports Apple Pay, Google Pay, and 40+ payment methods
+- Buyers recognize it and trust it
+- Chargebacks and fraud detection are handled by Stripe
+
+You get enterprise-grade payment infrastructure without enterprise-level engineering effort.
+
+<FeeCallout keep="95.5" />
+
+<FAQ
+  items={[
+    {
+      q: "Do I need an existing Stripe account?",
+      a: "No. You can create one during the connect flow. If you already have Stripe, you connect that account.",
+    },
+    {
+      q: "What countries does this work in?",
+      a: "Anywhere Stripe Connect Express is supported -- which covers most of Europe, North America, Australia, and many other markets. Check Stripe's supported countries list for the full details.",
+    },
+    {
+      q: "Can I use this for one-off client payments instead of a public product?",
+      a: "Yes. Create a product, set the price for that client, share the paywall link with them directly. You can create a new product per client if needed.",
+    },
+    {
+      q: "What about refunds?",
+      a: "Refunds are processed through Stripe directly. We pass the refund back to the buyer. The platform fee is not returned on refunds.",
+    },
+    {
+      q: "Is there a minimum or maximum price?",
+      a: "Minimum is $9.99 per product. No maximum. Prices are set per product.",
+    },
+    {
+      q: "Can I test this without real money?",
+      a: "You can create products and preview the paywall page in your dashboard before going live. For full payment testing, use Stripe's test mode card numbers.",
+    },
+  ]}
+/>
+
+<CTA
+  text="Start accepting Stripe payments"
+  href="/auth"
+  sub="No code. No storefront. 4.5% per sale. Live in 5 minutes."
+/>
