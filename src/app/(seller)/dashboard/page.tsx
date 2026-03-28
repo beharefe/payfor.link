@@ -75,12 +75,12 @@ export default async function DashboardPage() {
 
       <div className="max-w-5xl mx-auto px-6 py-10 space-y-10">
 
-        {/* Stripe connect banner */}
-        {!seller.stripe_connected && (
+        {/* Stripe connect banner — only shown after the seller has at least one link */}
+        {!seller.stripe_connected && !!links?.length && (
           <div className="border border-border rounded-2xl p-6 bg-card flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="flex-1">
-              <p className="font-medium text-foreground mb-1">Connect Stripe to start selling</p>
-              <p className="text-sm text-muted-foreground">Takes about 2 minutes. Stripe handles all payments and payouts.</p>
+              <p className="font-medium text-foreground mb-1">One step left — connect Stripe to go live</p>
+              <p className="text-sm text-muted-foreground">Takes 2 minutes. Your links activate the moment Stripe approves your account.</p>
             </div>
             <InitiateStripeConnectButton />
           </div>
@@ -150,7 +150,9 @@ export default async function DashboardPage() {
                       </span>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {link.total_sales} sales · ${(link.total_revenue ?? 0).toFixed(2)} earned
+                      {link.status === "draft" && !seller.stripe_connected
+                        ? "Connect Stripe to activate"
+                        : `${link.total_sales} sales · $${(link.total_revenue ?? 0).toFixed(2)} earned`}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">

@@ -186,17 +186,31 @@ async function handleAccountUpdated(account: Stripe.Account) {
   const supabase = createServiceClient();
   const { data: seller } = await supabase
     .from(TABLES.SELLERS)
-    .select("id, stripe_payouts_enabled")
+    .select("id, stripe_connected, stripe_payouts_enabled")
     .eq("stripe_account_id", account.id)
     .single();
   if (!seller) return;
 
+  const chargesEnabled = account.charges_enabled ?? false;
+
   await supabase
     .from(TABLES.SELLERS)
     .update({
-      stripe_charges_enabled: account.charges_enabled ?? false,
+      // Mark as connected the moment Stripe enables charges — this is the
+      // authoritative signal, not the return URL (which can be skipped).
+      stripe_connected: chargesEnabled ? true : seller.stripe_connected,
+      stripe_charges_enabled: chargesEnabled,
       stripe_payouts_enabled: account.payouts_enabled ?? false,
       stripe_details_submitted: account.details_submitted ?? false,
     })
     .eq("id", seller.id);
+
+  // Activate all draft products the moment the seller can accept payments.
+  if (chargesEnabled) {
+    await supabase
+      .from(TABLES.PRODUCTS)
+      .update({ status: "active" })
+      .eq("seller_id", seller.id)
+      .eq("status", "draft");
+  }
 }

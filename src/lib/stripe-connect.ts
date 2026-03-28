@@ -4,7 +4,7 @@ import { stripe } from "@unseallink/lib/stripe";
 import { createClient } from "@unseallink/lib/supabase/server";
 
 /** Returns the Stripe account onboarding URL for the current user. Throws if unauthorized or no user. */
-export async function getStripeConnectAccountLinkUrl(): Promise<string> {
+export async function getStripeConnectAccountLinkUrl(appUrl: string): Promise<string> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -19,7 +19,6 @@ export async function getStripeConnectAccountLinkUrl(): Promise<string> {
 
   if (!seller) throw new Error("User not found");
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   let stripeAccountId = seller.stripe_account_id;
 
   if (!stripeAccountId) {
@@ -61,7 +60,7 @@ export async function getStripeConnectAccountLinkUrl(): Promise<string> {
  * - Payouts not enabled → Stripe account onboarding link to complete currently_due requirements.
  * - Payouts enabled → Stripe Express dashboard login link so seller can manage payouts.
  */
-export async function getStripeWithdrawUrl(): Promise<string | null> {
+export async function getStripeWithdrawUrl(appUrl: string): Promise<string | null> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -78,8 +77,6 @@ export async function getStripeWithdrawUrl(): Promise<string | null> {
 
   // Always ask Stripe — never rely on our cached flags.
   const account = await stripe.accounts.retrieve(seller.stripe_account_id);
-
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
   if (!account.payouts_enabled) {
     const accountLink = await stripe.accountLinks.create({

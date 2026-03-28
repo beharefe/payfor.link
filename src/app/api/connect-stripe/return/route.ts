@@ -3,18 +3,18 @@ import { log } from "@unseallink/lib/logger";
 import { stripe } from "@unseallink/lib/stripe";
 import { createClient } from "@unseallink/lib/supabase/server";
 import { serializeError } from "@unseallink/lib/utils";
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+export async function GET(request: NextRequest) {
+  const { protocol, host } = request.nextUrl;
+  const appUrl = `${protocol}//${host}`;
+
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    return NextResponse.redirect(new URL("/auth", appUrl));
-  }
+  if (!user) return NextResponse.redirect(new URL("/auth", appUrl));
 
   const { data: seller } = await supabase
     .from(TABLES.SELLERS)
@@ -28,22 +28,25 @@ export async function GET() {
 
   try {
     const account = await stripe.accounts.retrieve(seller.stripe_account_id);
+    const chargesEnabled = account.charges_enabled ?? false;
 
     await supabase
       .from(TABLES.SELLERS)
       .update({
-        stripe_connected: true,
-        stripe_charges_enabled: account.charges_enabled ?? false,
+        stripe_connected: chargesEnabled,
+        stripe_charges_enabled: chargesEnabled,
         stripe_payouts_enabled: account.payouts_enabled ?? false,
         stripe_details_submitted: account.details_submitted ?? false,
       })
       .eq("id", user.id);
 
-    await supabase
-      .from(TABLES.PRODUCTS)
-      .update({ status: "active" })
-      .eq("seller_id", user.id)
-      .eq("status", "draft");
+    if (chargesEnabled) {
+      await supabase
+        .from(TABLES.PRODUCTS)
+        .update({ status: "active" })
+        .eq("seller_id", user.id)
+        .eq("status", "draft");
+    }
   } catch (err) {
     log.error("connect-stripe return failed", {
       user_id: user.id,
