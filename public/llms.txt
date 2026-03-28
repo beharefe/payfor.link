@@ -30,6 +30,10 @@
 - /sell-notion-templates-without-gumroad-fees         -> Sell Notion templates without Gumroad fees
 - /stop-getting-ghosted-get-paid-before-delivering    -> Get paid before delivering files or commissions
 - /unseal-link-vs-gumroad-vs-payhip-2026              -> unseal.link vs Gumroad vs Payhip (2026)
+- /get-paid-before-sharing                            -> Get paid before sharing any file or link
+- /freelance-file-delivery                            -> Deliver freelance files through a paywall
+- /sell-google-drive-files                            -> Sell Google Drive files and folders
+- /sell-with-stripe-without-store                     -> Accept Stripe payments without building a store
 
 ## Pricing
 

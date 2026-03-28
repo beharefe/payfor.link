@@ -21,7 +21,7 @@ import type { MDXComponents } from "mdx/types";
 import Link from "next/link";
 import type { ComponentType } from "react";
 
-// ---------- Icon map (MDX passes strings, we resolve to Lucide) ----------
+// ---------- Icon map ----------
 
 const ICON_MAP: Record<string, ComponentType<LucideProps>> = {
   lock: LockKeyhole,
@@ -52,7 +52,7 @@ function FeatureIcon({ name }: { name: string }) {
   );
 }
 
-// ---------- Layout primitives ----------
+// ---------- Components ----------
 
 export function Hero({
   title,
@@ -188,6 +188,84 @@ export function CTA({
   );
 }
 
+// Mid-content CTA — drop after every 2-3 sections
+export function InlineCTA({
+  text = "Create your first paid link",
+  href = "/auth",
+  note,
+}: {
+  text?: string;
+  href?: string;
+  note?: string;
+}) {
+  return (
+    <div className="my-8 px-6 max-w-3xl mx-auto w-full">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+        <Link
+          href={href}
+          className="inline-flex items-center px-5 py-2.5 bg-[#111111] dark:bg-[#F5F4EF] text-white dark:text-[#111111] font-medium rounded-full text-sm hover:opacity-80 transition-opacity shrink-0"
+        >
+          {text} →
+        </Link>
+        {note && (
+          <span className="text-xs text-[#6B6B6B] dark:text-[#999999]">
+            {note}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// 4-column comparison table: feature | Gumroad | Payhip | unseal.link
+export function CompareTable({
+  rows = [],
+}: {
+  rows?: { feature: string; a: string; b: string; c: string; cWins?: boolean }[];
+}) {
+  return (
+    <section className="px-6 py-10 max-w-3xl mx-auto w-full overflow-x-auto">
+      <div className="border border-[#E5E5E5] dark:border-[#2C2C2C] rounded-2xl overflow-hidden">
+        <table className="w-full border-collapse text-sm min-w-[480px]">
+          <thead>
+            <tr className="border-b border-[#E5E5E5] dark:border-[#2C2C2C]">
+              {["Feature", "Gumroad", "Payhip", "unseal.link"].map((h, i) => (
+                <th
+                  key={h}
+                  className={`px-4 py-3 text-left text-xs font-medium uppercase tracking-widest ${
+                    i === 3
+                      ? "text-[#111111] dark:text-[#F5F4EF] bg-[#F5F4EF] dark:bg-[#1C1C1C]"
+                      : "text-[#6B6B6B] dark:text-[#999999]"
+                  }`}
+                >
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, i) => (
+              <tr
+                key={row.feature}
+                className={i < rows.length - 1 ? "border-b border-[#E5E5E5] dark:border-[#2C2C2C]" : ""}
+              >
+                <td className="px-4 py-3 font-medium text-[#111111] dark:text-[#F5F4EF]">
+                  {row.feature}
+                </td>
+                <td className="px-4 py-3 text-[#6B6B6B] dark:text-[#999999]">{row.a}</td>
+                <td className="px-4 py-3 text-[#6B6B6B] dark:text-[#999999]">{row.b}</td>
+                <td className={`px-4 py-3 bg-[#F5F4EF] dark:bg-[#1C1C1C] ${row.cWins ? "font-medium text-[#111111] dark:text-[#F5F4EF]" : "text-[#6B6B6B] dark:text-[#999999]"}`}>
+                  {row.c}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
 export function FAQ({ items = [] }: { items?: { q: string; a: string }[] }) {
   return (
     <section className="px-6 py-16 max-w-2xl mx-auto w-full">
@@ -218,6 +296,8 @@ export const mdxComponents: MDXComponents = {
   Steps,
   FeeCallout,
   CTA,
+  InlineCTA,
+  CompareTable,
   FAQ,
   h1: (props) => (
     <h1
@@ -256,10 +336,7 @@ export const mdxComponents: MDXComponents = {
     />
   ),
   li: (props) => (
-    <li
-      className="text-base leading-relaxed pl-1"
-      {...props}
-    />
+    <li className="text-base leading-relaxed pl-1" {...props} />
   ),
   code: (props) => (
     <code
@@ -268,10 +345,7 @@ export const mdxComponents: MDXComponents = {
     />
   ),
   strong: (props) => (
-    <strong
-      className="font-semibold text-[#111111] dark:text-[#F5F4EF]"
-      {...props}
-    />
+    <strong className="font-semibold text-[#111111] dark:text-[#F5F4EF]" {...props} />
   ),
   a: ({ href = "#", ...props }) => (
     <Link
