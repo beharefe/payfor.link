@@ -1,22 +1,22 @@
+import { Check } from "lucide-react";
 import Link from "next/link";
+import { PRODUCTS } from "./brand-icons";
 import { HeroCTA, HeroHeadline } from "./hero-ab";
 
-const useCases = [
-  { icon: "📄", label: "Notion templates" },
-  { icon: "🎨", label: "Figma files" },
-  { icon: "📁", label: "Google Drive folders" },
-  { icon: "💬", label: "Discord invites" },
-  { icon: "💻", label: "GitHub repos" },
-  { icon: "📹", label: "Loom / video links" },
-  { icon: "📋", label: "Airtable bases" },
-  { icon: "📦", label: "Any URL" },
+const trustItems = [
+  <>Payments by <span className="font-semibold" style={{ color: "#635BFF" }}>Stripe</span></>,
+  "No monthly fees",
+  "Buyers need no account",
+  "Instant delivery by email",
+  "4.5% per sale only",
+  "Cancel any time",
 ];
 
 const steps = [
   {
     n: "01",
     title: "Paste any link",
-    body: "Notion, Figma, Google Drive, GitHub, Discord — any URL you already own.",
+    body: "Notion, Figma, Google Drive, GitHub, Discord -- any URL you already own.",
   },
   {
     n: "02",
@@ -26,7 +26,7 @@ const steps = [
   {
     n: "03",
     title: "Share the paywall",
-    body: "Buyers pay via Stripe and receive the link by email — no account required, under 30 seconds.",
+    body: "Buyers pay via Stripe and receive the link by email -- no account required, under 30 seconds.",
   },
 ];
 
@@ -49,22 +49,21 @@ export default function HomePage() {
   return (
     <>
       {/* Hero */}
-      <section className="pt-20 pb-24 px-6 max-w-5xl mx-auto">
+      <section className="pt-20 pb-16 px-6 max-w-5xl mx-auto">
         <div className="max-w-2xl">
           <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-6">
             The paywall for any link
           </p>
 
-          {/* A/B tested headline — client component, falls back to variant A on SSR */}
           <HeroHeadline />
 
           <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-lg leading-relaxed">
             Paste a URL, set a price, share your paywall link. Buyers pay once
-            and receive access by email — no accounts, no friction, under 30
+            and receive access by email -- no accounts, no friction, under 30
             seconds.
           </p>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 mb-10">
             <HeroCTA
               href="/auth"
               label="Start selling free"
@@ -79,50 +78,44 @@ export default function HomePage() {
             />
           </div>
 
-          {/* Trust bar */}
-          <div className="flex flex-wrap gap-x-6 gap-y-2 mt-8">
-            <span className="text-xs text-muted-foreground">
-              Payments by{" "}
-              <span className="font-semibold" style={{ color: "#635BFF" }}>
-                Stripe
-              </span>
-            </span>
-            <span className="text-xs text-muted-foreground">
-              · No monthly fees
-            </span>
-            <span className="text-xs text-muted-foreground">
-              · Buyers need no account
-            </span>
-            <span className="text-xs text-muted-foreground">
-              · Instant delivery
-            </span>
-            <span className="text-xs text-muted-foreground">
-              · 4.5% per sale
-            </span>
+          {/* Trust bar — 2-col grid on mobile, single row on md+ */}
+          <div className="grid grid-cols-2 md:flex md:flex-wrap gap-x-6 gap-y-2.5">
+            {trustItems.map((item, i) => (
+              <div key={i} className="flex items-center gap-1.5">
+                <Check
+                  className="size-3 shrink-0 text-foreground"
+                  aria-hidden="true"
+                />
+                <span className="text-xs text-muted-foreground">{item}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* What you can sell */}
-      <section className="border-t border-border py-16 md:py-20 bg-card">
-        <div className="max-w-5xl mx-auto px-6">
-          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-10">
+      {/* What you can sell — horizontal scroll on mobile */}
+      <section className="border-t border-border py-14 bg-card">
+        <div className="max-w-5xl mx-auto">
+          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-8 px-6">
             Sell anything with a URL
           </p>
-          <div className="flex flex-wrap gap-3">
-            {useCases.map((u) => (
+
+          {/* Scroll container — full bleed on mobile, no padding so chips touch edge */}
+          <div className="flex gap-3 overflow-x-auto px-6 pb-1 scrollbar-none snap-x snap-mandatory md:flex-wrap">
+            {PRODUCTS.map((p) => (
               <span
-                key={u.label}
-                className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-full text-sm text-foreground bg-background"
+                key={p.label}
+                className="inline-flex items-center gap-2 px-4 py-2.5 border border-border rounded-full text-sm text-foreground bg-background whitespace-nowrap shrink-0 snap-start"
               >
-                <span>{u.icon}</span>
-                {u.label}
+                {p.icon}
+                {p.label}
               </span>
             ))}
           </div>
-          <p className="mt-6 text-sm text-muted-foreground max-w-md leading-relaxed">
+
+          <p className="mt-6 px-6 text-sm text-muted-foreground max-w-md leading-relaxed">
             If it has a URL, you can paywall it. Your content stays where it
-            lives — we just control who gets the link.
+            lives -- we just control who gets the link.
           </p>
         </div>
       </section>
@@ -212,7 +205,7 @@ export default function HomePage() {
         </p>
         <HeroCTA
           href="/auth"
-          label="Get started free →"
+          label="Get started free"
           location="footer_cta"
           className="inline-flex items-center px-7 py-3.5 bg-primary text-primary-foreground rounded-full font-medium text-base hover:opacity-90 transition-opacity no-underline"
         />
