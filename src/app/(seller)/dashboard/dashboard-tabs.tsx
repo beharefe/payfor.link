@@ -1,21 +1,22 @@
 "use client";
 
-import { BarChart2, Package, Settings2 } from "lucide-react";
+import { BarChart2, Link2, Package, Settings2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const TABS = [
-  { href: "/dashboard", label: "Overview", icon: BarChart2 },
-  { href: "/dashboard/orders", label: "Orders", icon: Package },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings2 },
+  { href: "/dashboard",         label: "Overview", icon: BarChart2, exact: true },
+  { href: "/dashboard/links",   label: "Links",    icon: Link2,     exact: false },
+  { href: "/dashboard/orders",  label: "Orders",   icon: Package,   exact: true },
+  { href: "/dashboard/settings",label: "Settings", icon: Settings2, exact: true },
 ];
 
 export function DashboardTabs() {
   const pathname = usePathname();
   return (
     <div className="flex items-center gap-1 overflow-x-auto scrollbar-none">
-      {TABS.map(({ href, label, icon: Icon }) => {
-        const active = pathname === href;
+      {TABS.map(({ href, label, icon: Icon, exact }) => {
+        const active = exact ? pathname === href : pathname.startsWith(href);
         return (
           <Link
             key={href}

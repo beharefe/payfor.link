@@ -1,4 +1,4 @@
-import { BarChart2, Package, Settings2 } from "lucide-react";
+import { BarChart2, Link2, Package, Settings2 } from "lucide-react";
 import Link from "next/link";
 
 function Skeleton({ className }: { className?: string }) {
@@ -20,6 +20,7 @@ export default function SettingsLoading() {
           <div className="flex items-center gap-1">
             {[
               { icon: BarChart2, label: "Overview" },
+              { icon: Link2,     label: "Links" },
               { icon: Package, label: "Orders" },
               { icon: Settings2, label: "Settings" },
             ].map(({ icon: Icon, label }) => (

@@ -197,7 +197,7 @@ export default async function PaywallPage({ params }: Props) {
             {[
               { icon: LockKeyhole, label: "Secure" },
               { icon: Mail,        label: "By email" },
-              { icon: Timer,       label: "24h link" },
+              { icon: Timer,       label: "Instant" },
             ].map(({ icon: Icon, label }) => (
               <div
                 key={label}

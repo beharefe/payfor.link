@@ -1,4 +1,4 @@
-import { BarChart2, Package, Settings2 } from "lucide-react";
+import { BarChart2, Link2, Package, Settings2 } from "lucide-react";
 import Link from "next/link";
 
 function Skeleton({ className }: { className?: string }) {
@@ -10,6 +10,7 @@ function DashboardTabsSkeleton() {
     <div className="flex items-center gap-1 overflow-x-auto scrollbar-none pb-4">
       {[
         { icon: BarChart2, label: "Overview" },
+              { icon: Link2,     label: "Links" },
         { icon: Package, label: "Orders" },
         { icon: Settings2, label: "Settings" },
       ].map(({ icon: Icon, label }) => (
