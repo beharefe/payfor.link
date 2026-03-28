@@ -80,7 +80,7 @@ export function SettingsForm({ currentName, currentBio, currentAvatarUrl }: Prop
               {currentName?.charAt(0).toUpperCase() ?? "?"}
             </div>
           )}
-          <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+          <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center">
             <Camera className="size-4 text-white" aria-hidden="true" />
           </div>
         </button>
