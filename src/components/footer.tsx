@@ -44,7 +44,7 @@ export function Footer() {
             href="/orders"
             className="text-xs text-muted-foreground hover:text-foreground transition-colors no-underline"
           >
-            Orders
+            My orders
           </Link>
           <Link
             href="/terms"

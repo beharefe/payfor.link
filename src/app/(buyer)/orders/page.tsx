@@ -28,7 +28,7 @@ export default async function OrdersPage({
         <div className="w-full max-w-sm">
           <div className="mb-8 text-center">
             <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3">unseal.link</p>
-            <h1 className="text-3xl font-medium tracking-tight text-foreground mb-2">Your purchases</h1>
+            <h1 className="text-3xl font-medium tracking-tight text-foreground mb-2">Your orders</h1>
             {error === "link_expired" ? (
               <p className="text-destructive text-sm">That link has expired. Enter your email to get a new one.</p>
             ) : (
@@ -52,11 +52,11 @@ export default async function OrdersPage({
     <main className="min-h-dvh bg-background">
       <div className="max-w-2xl mx-auto px-6 py-10">
         <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-2">Signed in as {session.email}</p>
-        <h1 className="text-2xl font-medium tracking-tight text-foreground mb-8">Your purchases</h1>
+        <h1 className="text-2xl font-medium tracking-tight text-foreground mb-8">Your orders</h1>
 
         {!orders?.length ? (
           <div className="border border-dashed border-border rounded-2xl p-12 text-center">
-            <p className="text-muted-foreground text-sm">No purchases found for {session.email}.</p>
+            <p className="text-muted-foreground text-sm">No orders found for {session.email}.</p>
           </div>
         ) : (
           <div className="flex flex-col gap-3">

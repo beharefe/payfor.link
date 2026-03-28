@@ -57,7 +57,7 @@ export function RevenueChart({ data, totalSales, totalEarned, stripeConnected }:
       {/* Chart */}
       <div className="px-4 pt-4 pb-2">
         <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-4 px-2">
-          Revenue -- last 30 days
+          Revenue · last 30 days
         </p>
         {hasData ? (
           <ChartContainer config={chartConfig} className="h-[200px] w-full">

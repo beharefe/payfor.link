@@ -29,7 +29,7 @@ export default async function OrderPage({ params }: Props) {
       <main className="min-h-dvh flex items-center justify-center px-6">
         <div className="text-center max-w-sm">
           <h1 className="text-xl font-medium text-foreground mb-2">Order not found</h1>
-          <Link href="/orders" className="text-sm text-muted-foreground hover:text-foreground transition-colors">← All purchases</Link>
+          <Link href="/orders" className="text-sm text-muted-foreground hover:text-foreground transition-colors">← All orders</Link>
         </div>
       </main>
     );
@@ -44,7 +44,7 @@ export default async function OrderPage({ params }: Props) {
         <div className="w-full max-w-sm text-center">
           <p className="text-3xl mb-4">🔒</p>
           <h1 className="text-2xl font-medium tracking-tight text-foreground mb-2">Sign in to view this</h1>
-          <p className="text-muted-foreground text-sm mb-8">Use the access link from your purchase email, or enter your email below.</p>
+          <p className="text-muted-foreground text-sm mb-8">Use the access link from your order email, or enter your email below.</p>
           <Link
             href={`/orders?oid=${order_id}`}
             className="inline-flex items-center px-6 py-3 bg-primary text-primary-foreground no-underline rounded-full font-medium hover:opacity-90 transition-opacity"
@@ -67,7 +67,7 @@ export default async function OrderPage({ params }: Props) {
           This order was refunded and access is no longer available.
         </p>
         <Link href="/orders" className="text-sm text-muted-foreground hover:text-foreground">
-          ← All purchases
+          ← All orders
         </Link>
       </div>
       </main>
@@ -155,7 +155,7 @@ export default async function OrderPage({ params }: Props) {
         <div className="flex flex-col gap-3 text-center">
           {seller?.email && (
             <a
-              href={`mailto:${seller.email}?subject=${encodeURIComponent(`Question about my purchase — ${order.product_title}`)}`}
+              href={`mailto:${seller.email}?subject=${encodeURIComponent(`Question about my order: ${order.product_title}`)}`}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               Questions? Contact seller →
@@ -167,7 +167,7 @@ export default async function OrderPage({ params }: Props) {
             reporterEmail={session.email}
           />
           <Link href="/orders" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-            ← All purchases
+            ← All orders
           </Link>
         </div>
       </div>
