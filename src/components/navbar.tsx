@@ -1,10 +1,24 @@
-import { createClient } from "@unseallink/lib/supabase/server";
-import Link from "next/link";
+"use client";
 
-export async function Navbar() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  const loggedIn = !!user;
+import { createClient } from "@unseallink/lib/supabase/client";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+
+export function Navbar() {
+  const [loggedIn, setLoggedIn] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setLoggedIn(!!session);
+    });
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_, session) => {
+      setLoggedIn(!!session);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">

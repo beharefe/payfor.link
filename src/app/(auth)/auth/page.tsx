@@ -1,3 +1,5 @@
+import { createClient } from "@unseallink/lib/supabase/server";
+import { redirect } from "next/navigation";
 import { EmailForm, OtpForm } from "./auth-forms";
 
 const ERROR_MESSAGES: Record<string, string> = {
@@ -9,6 +11,10 @@ export default async function AuthPage({
 }: {
   searchParams: Promise<{ sent?: string; error?: string; email?: string }>;
 }) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) redirect("/dashboard");
+
   const params = await searchParams;
   const sent = params.sent === "1";
   const email = params.email ? decodeURIComponent(params.email) : "";

@@ -1,8 +1,6 @@
 import { Footer } from "@unseallink/components/footer";
 import { Navbar } from "@unseallink/components/navbar";
 
-export const dynamic = "force-dynamic";
-
 export default function MarketingLayout({
   children,
 }: {
