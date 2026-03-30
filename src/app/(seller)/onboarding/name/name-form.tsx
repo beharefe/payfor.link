@@ -72,7 +72,7 @@ export function NameForm({
         type="submit"
         className="w-full py-3 bg-primary text-primary-foreground border-none rounded-full font-medium text-sm cursor-pointer hover:opacity-90 transition-opacity"
       >
-        Go to dashboard →
+        Start selling →
       </button>
     </form>
   );

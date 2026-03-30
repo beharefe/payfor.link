@@ -5,6 +5,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@unseallink/components/ui/chart";
+import Link from "next/link";
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 import {
   InitiateStripeConnectButton,
@@ -22,9 +23,10 @@ type Props = {
   totalSales: number;
   totalEarned: number;
   stripeConnected: boolean;
+  hasLinks: boolean;
 };
 
-export function RevenueChart({ data, totalSales, totalEarned, stripeConnected }: Props) {
+export function RevenueChart({ data, totalSales, totalEarned, stripeConnected, hasLinks }: Props) {
   const hasData = data.some((d) => d.revenue > 0);
 
   return (
@@ -86,8 +88,16 @@ export function RevenueChart({ data, totalSales, totalEarned, stripeConnected }:
             </BarChart>
           </ChartContainer>
         ) : (
-          <div className="h-[200px] flex items-center justify-center">
+          <div className="h-[200px] flex flex-col items-center justify-center gap-4">
             <p className="text-sm text-muted-foreground">No sales yet</p>
+            {!hasLinks && (
+              <Link
+                href="/dashboard/links/new"
+                className="inline-flex items-center px-5 py-2.5 bg-primary text-primary-foreground no-underline rounded-full font-medium text-sm hover:opacity-90 transition-opacity"
+              >
+                Sell your first link →
+              </Link>
+            )}
           </div>
         )}
       </div>

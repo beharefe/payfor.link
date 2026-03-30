@@ -137,10 +137,16 @@ export default async function LinksPage() {
                       <CopyLinkButtons url={`${appUrl}/@${seller.username}/${link.slug}`} />
                     )}
                     <Link
+                      href={`/preview/${link.id}`}
+                      className="px-4 py-2 border border-border rounded-full text-sm font-medium text-foreground no-underline hover:bg-muted transition-colors"
+                    >
+                      Preview
+                    </Link>
+                    <Link
                       href={`/dashboard/links/${link.id}`}
                       className="px-4 py-2 border border-border rounded-full text-sm font-medium text-foreground no-underline hover:bg-muted transition-colors"
                     >
-                      View
+                      Edit
                     </Link>
                   </div>
                 </div>
