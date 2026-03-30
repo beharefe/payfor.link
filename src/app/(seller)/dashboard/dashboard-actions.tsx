@@ -5,7 +5,7 @@ import {
   initiateStripeConnect,
   requestWithdraw,
 } from "@unseallink/app/actions/stripe-connect";
-import { Loader2, LogOut } from "lucide-react";
+import { ArrowUpRight, Loader2, LogOut } from "lucide-react";
 import { useTransition } from "react";
 
 export function InitiateStripeConnectButton({ label = "Connect Stripe" }: { label?: string }) {
@@ -43,10 +43,11 @@ export function WithdrawButton() {
       <button
         type="submit"
         disabled={isPending}
-        className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-full text-sm font-medium text-foreground cursor-pointer hover:bg-muted transition-colors disabled:opacity-60 disabled:cursor-not-allowed bg-transparent"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary text-primary-foreground border-none rounded-full text-xs font-medium cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed shrink-0"
       >
-        {isPending && <Loader2 className="animate-spin size-4 shrink-0" />}
-        {isPending ? "Loading..." : "Manage payouts"}
+        {isPending && <Loader2 className="animate-spin size-3 shrink-0" />}
+        {isPending ? "..." : "Payout"}
+        {!isPending && <ArrowUpRight className="size-3 shrink-0" />}
       </button>
     </form>
   );
