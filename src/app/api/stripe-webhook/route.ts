@@ -1,5 +1,5 @@
 import { sendBuyerAccessEmail, sendSaleNotificationEmail } from "@unseallink/lib/email";
-import { createBuyerToken } from "@unseallink/lib/buyer-token";
+import { generateAccessToken } from "@unseallink/lib/access-token";
 import { TABLES } from "@unseallink/lib/db";
 import { log } from "@unseallink/lib/logger";
 import { platformFeeCents, stripe } from "@unseallink/lib/stripe";
@@ -154,8 +154,15 @@ async function handleCheckoutSessionCompleted(
     }),
   ]);
 
-  // Send buyer a signed access link — no Supabase session involved
-  const accessLink = `${appUrl}/api/orders/verify?token=${createBuyerToken(customerEmail)}&oid=${insertedOrder.id}`;
+  // Generate a single-use access token and store its hash in DB
+  const { raw, hash, expiresAt } = generateAccessToken();
+  await supabase.from(TABLES.ACCESS_TOKENS).insert({
+    order_id: insertedOrder.id,
+    token_hash: hash,
+    expires_at: expiresAt.toISOString(),
+  });
+  // Link goes to confirmation page — token is NOT consumed on GET (prevents email-scanner pre-click)
+  const accessLink = `${appUrl}/orders/access?t=${raw}&oid=${insertedOrder.id}`;
   await sendBuyerAccessEmail({
     to: customerEmail,
     accessLink,
