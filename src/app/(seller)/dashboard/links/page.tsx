@@ -42,7 +42,7 @@ export default async function LinksPage() {
   return (
     <main className="min-h-dvh bg-background">
       <div className="border-b border-border">
-        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <Link href="/" className="text-sm font-medium text-foreground no-underline">unseal.link</Link>
           <div className="flex items-center gap-3">
             <SignOutButton />
@@ -55,12 +55,12 @@ export default async function LinksPage() {
             )}
           </div>
         </div>
-        <div className="max-w-5xl mx-auto px-6 pb-4">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-4">
           <DashboardTabs />
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-center justify-between mb-6">
           <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Your links</p>
           <Link

@@ -85,7 +85,7 @@ export default async function DashboardPage() {
 
       {/* Header */}
       <div className="border-b border-border">
-        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <Link href="/" className="text-sm font-medium text-foreground no-underline">
             unseal.link
           </Link>
@@ -100,12 +100,12 @@ export default async function DashboardPage() {
             )}
           </div>
         </div>
-        <div className="max-w-5xl mx-auto px-6 pb-4">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-4">
           <DashboardTabs />
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-6">
         {/* Stripe connect banner */}
         {!seller.stripe_connected && (
           <div className="border border-border rounded-2xl p-5 bg-card flex flex-col sm:flex-row sm:items-center gap-4">

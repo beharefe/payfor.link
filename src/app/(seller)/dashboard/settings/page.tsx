@@ -27,7 +27,7 @@ export default async function SettingsPage() {
     <main className="min-h-dvh bg-background">
       {/* Header */}
       <div className="border-b border-border">
-        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <Link href="/" className="text-sm font-medium text-foreground no-underline">
             unseal.link
           </Link>
@@ -46,12 +46,12 @@ export default async function SettingsPage() {
             )}
           </div>
         </div>
-        <div className="max-w-5xl mx-auto px-6 pb-4">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-4">
           <DashboardTabs />
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-6 py-10 space-y-10">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10 space-y-10">
         {/* Profile */}
         <div>
           <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-6">Profile</p>
@@ -95,13 +95,13 @@ export default async function SettingsPage() {
         <div>
           <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-6">Account</p>
           <div className="border border-border rounded-2xl p-6 bg-card space-y-3">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">Email</p>
-              <p className="text-sm font-medium text-foreground">{seller.email}</p>
+            <div className="flex items-start gap-4 justify-between">
+              <p className="text-sm text-muted-foreground shrink-0">Email</p>
+              <p className="text-sm font-medium text-foreground text-right break-all">{seller.email}</p>
             </div>
             {seller.username && (
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">Profile URL</p>
+              <div className="flex items-center gap-4 justify-between">
+                <p className="text-sm text-muted-foreground shrink-0">Profile URL</p>
                 <a
                   href={`/@${seller.username}`}
                   target="_blank"

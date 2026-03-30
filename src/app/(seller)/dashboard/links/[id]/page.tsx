@@ -65,7 +65,7 @@ export default async function LinkDetailPage({
     <main className="min-h-dvh bg-background">
       {/* Header */}
       <div className="border-b border-border">
-        <div className="max-w-3xl mx-auto px-6 h-16 flex items-center gap-4">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-4">
           <Link
             href="/dashboard"
             className="text-sm text-muted-foreground hover:text-foreground transition-colors no-underline"
@@ -75,7 +75,7 @@ export default async function LinkDetailPage({
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-6 py-10 space-y-8">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 space-y-8">
 
         {/* Title + actions */}
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">

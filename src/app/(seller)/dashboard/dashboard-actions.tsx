@@ -5,7 +5,7 @@ import {
   initiateStripeConnect,
   requestWithdraw,
 } from "@unseallink/app/actions/stripe-connect";
-import { Loader2 } from "lucide-react";
+import { Loader2, LogOut } from "lucide-react";
 import { useTransition } from "react";
 
 export function InitiateStripeConnectButton({ label = "Connect Stripe" }: { label?: string }) {
@@ -65,10 +65,10 @@ export function SignOutButton() {
       <button
         type="submit"
         disabled={isPending}
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-60 bg-transparent border-none p-0 cursor-pointer"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-60 bg-transparent border-none p-1 cursor-pointer"
       >
-        {isPending && <Loader2 className="animate-spin size-4 shrink-0" />}
-        {isPending ? "Signing out..." : "Sign out"}
+        {isPending ? <Loader2 className="animate-spin size-4 shrink-0" /> : <LogOut className="size-4 shrink-0" />}
+        <span className="hidden sm:inline">{isPending ? "Signing out..." : "Sign out"}</span>
       </button>
     </form>
   );

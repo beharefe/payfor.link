@@ -18,16 +18,16 @@ export function EmailLayout({ preview, children }: EmailLayoutProps) {
       <Head />
       <Preview>{preview}</Preview>
       <Tailwind>
-        <Body className="bg-[#F0EDE8] font-sans m-0 py-10 px-4">
-          <Container className="bg-white max-w-[560px] mx-auto rounded-2xl" style={{ padding: "40px 24px" }}>
-            <div style={{ marginBottom: "40px" }}>
+        <Body className="bg-[#F0EDE8] font-sans m-0 py-8 px-0">
+          <Container style={{ maxWidth: "560px", width: "100%", margin: "0 auto", background: "#ffffff", borderRadius: "16px", padding: "32px 20px" }}>
+            <div style={{ marginBottom: "32px" }}>
               <span style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 600, color: "#3D3530", letterSpacing: "-0.3px" }}>
                 unseal.link
               </span>
             </div>
             {children}
           </Container>
-          <Container className="max-w-[560px] mx-auto px-4 pt-6 pb-10">
+          <Container style={{ maxWidth: "560px", width: "100%", margin: "0 auto", padding: "20px 20px 32px" }}>
             <p className="text-[#A09A94] text-xs text-center m-0">
               unseal.link · Lock any link, sell instant access
             </p>
