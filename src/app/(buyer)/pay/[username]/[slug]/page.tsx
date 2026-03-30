@@ -84,12 +84,12 @@ export default async function PaywallPage({ params }: Props) {
       const h = await headers();
       const host = h.get("host") ?? "unseal.link";
       const proto = h.get("x-forwarded-proto") ?? "https";
-      void sendMissedSaleEmail({
+      await sendMissedSaleEmail({
         to: sellerData.email,
         sellerName: sellerData.name ?? "",
         productTitle: link.title,
         dashboardUrl: `${proto}://${host}/dashboard`,
-      }).catch(() => {});
+      }).catch((err) => log.error("missed_sale_email_failed", { error: err?.message, seller_id: link.seller_id }));
     }
 
     return (
