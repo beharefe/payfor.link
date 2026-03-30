@@ -128,14 +128,12 @@ export default async function LinkDetailPage({
             <p className="break-all font-mono text-sm text-foreground">{paywallUrl}</p>
             <div className="flex gap-2 flex-wrap pt-1">
               <CopyLinkButton url={paywallUrl} />
-              <a
-                href={paywallUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                href={`/preview/${link.id}`}
                 className="inline-flex items-center gap-1.5 px-5 py-2.5 border border-border rounded-full text-sm font-medium text-foreground no-underline hover:bg-muted transition-colors"
               >
-                Preview ↗
-              </a>
+                Preview
+              </Link>
             </div>
           </div>
         )}
