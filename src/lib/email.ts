@@ -6,6 +6,7 @@
 import { render } from "@react-email/render";
 import { AccessLinkEmail } from "@unseallink/emails/access-link";
 import { MagicLinkEmail } from "@unseallink/emails/magic-link";
+import { MissedSaleEmail } from "@unseallink/emails/missed-sale";
 import { SaleNotificationEmail } from "@unseallink/emails/sale-notification";
 import { ACCESS_TOKEN_DAYS } from "./buyer-token";
 import { FROM_EMAIL, resend } from "./resend";
@@ -68,6 +69,27 @@ export async function sendSellerSignInEmail(opts: {
         body: "Click below to sign in to your seller dashboard. No password needed.",
         cta: "Sign in to dashboard →",
         expiresIn: SELLER_LINK_EXPIRY,
+      }),
+    ),
+  });
+}
+
+/** Missed sale — sent to seller when a buyer visits a draft/inactive link. */
+export async function sendMissedSaleEmail(opts: {
+  to: string;
+  sellerName: string;
+  productTitle: string;
+  dashboardUrl: string;
+}) {
+  return resend.emails.send({
+    from: FROM_EMAIL,
+    to: opts.to,
+    subject: `Someone tried to buy "${opts.productTitle}" — connect Stripe to go live`,
+    html: await render(
+      MissedSaleEmail({
+        sellerName: opts.sellerName,
+        productTitle: opts.productTitle,
+        dashboardUrl: opts.dashboardUrl,
       }),
     ),
   });

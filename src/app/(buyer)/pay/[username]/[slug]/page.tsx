@@ -1,4 +1,5 @@
 import { TABLES } from "@unseallink/lib/db";
+import { sendMissedSaleEmail } from "@unseallink/lib/email";
 import { log } from "@unseallink/lib/logger";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { Clock, LockKeyhole, Mail, Timer } from "lucide-react";
@@ -65,7 +66,7 @@ export default async function PaywallPage({ params }: Props) {
   const { data: link } = await supabase
     .from(TABLES.PRODUCTS)
     .select(
-      "id, title, description, price, currency, seller_id, status, preview_image_url, total_sales, expires_at, sellers!inner(name, username)",
+      "id, title, description, price, currency, seller_id, status, preview_image_url, total_sales, expires_at, sellers!inner(name, username, email, stripe_connected)",
     )
     .eq("slug", slug)
     .eq("sellers.username", username)
@@ -73,9 +74,24 @@ export default async function PaywallPage({ params }: Props) {
 
   if (!link) notFound();
 
+  // biome-ignore lint/suspicious/noExplicitAny: Supabase join type
+  const sellerData = link.sellers as any;
   const isExpired = link.expires_at && new Date(link.expires_at) < new Date();
 
   if (link.status !== "active" || isExpired) {
+    // Notify seller if their link is draft because Stripe isn't connected
+    if (link.status === "draft" && !sellerData?.stripe_connected && sellerData?.email) {
+      const h = await headers();
+      const host = h.get("host") ?? "unseal.link";
+      const proto = h.get("x-forwarded-proto") ?? "https";
+      void sendMissedSaleEmail({
+        to: sellerData.email,
+        sellerName: sellerData.name ?? "",
+        productTitle: link.title,
+        dashboardUrl: `${proto}://${host}/dashboard`,
+      }).catch(() => {});
+    }
+
     return (
       <main className="min-h-dvh flex items-center justify-center px-6">
         <div className="text-center max-w-xs">
@@ -92,8 +108,7 @@ export default async function PaywallPage({ params }: Props) {
     );
   }
 
-  // biome-ignore lint/suspicious/noExplicitAny: Supabase join type
-  const seller = link.sellers as any;
+  const seller = sellerData;
   log.info("paywall_viewed", { link_id: link.id, slug, username });
 
   function formatTimeUntil(expiresAt: string): string {
