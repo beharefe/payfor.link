@@ -1,10 +1,7 @@
 import { TABLES } from "@unseallink/lib/db";
 import { createClient } from "@unseallink/lib/supabase/server";
 import { Package } from "lucide-react";
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import { SignOutButton } from "../dashboard-actions";
-import { DashboardTabs } from "../dashboard-tabs";
 import { RefundButton } from "../links/[id]/link-actions";
 
 export default async function DashboardOrdersPage() {
@@ -16,7 +13,7 @@ export default async function DashboardOrdersPage() {
 
   const { data: seller } = await supabase
     .from(TABLES.SELLERS)
-    .select("name, avatar_url")
+    .select("id")
     .eq("id", user.id)
     .single();
 
@@ -29,36 +26,8 @@ export default async function DashboardOrdersPage() {
     .order("created_at", { ascending: false })
     .limit(200);
 
-  const initial = seller.name?.charAt(0).toUpperCase() ?? "?";
-
   return (
-    <main className="min-h-dvh bg-background">
-      {/* Header */}
-      <div className="border-b border-border">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-          <Link href="/" className="text-sm font-medium text-foreground no-underline">
-            unseal.link
-          </Link>
-          <div className="flex items-center gap-3">
-            <SignOutButton />
-            {seller.avatar_url ? (
-              <img
-                src={seller.avatar_url}
-                alt={seller.name ?? ""}
-                className="w-8 h-8 rounded-full object-cover border border-border shrink-0"
-              />
-            ) : (
-              <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center text-sm font-medium text-foreground shrink-0">
-                {initial}
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-4">
-          <DashboardTabs />
-        </div>
-      </div>
-
+    <main>
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
         {!orders?.length ? (
           <div className="border border-dashed border-border rounded-2xl p-12 text-center flex flex-col items-center gap-4">

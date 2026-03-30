@@ -245,7 +245,18 @@ export async function archiveProduct(id: string): Promise<ActionResult> {
   if (existing.status === "deleted" || existing.status === "suspended")
     return { error: "Cannot archive this link" };
 
-  const newStatus = existing.status === "archived" ? "active" : "archived";
+  let newStatus: string;
+  if (existing.status === "archived") {
+    // Restore to active only if Stripe is connected; otherwise draft
+    const { data: seller } = await supabase
+      .from(TABLES.SELLERS)
+      .select("stripe_connected")
+      .eq("id", user.id)
+      .single();
+    newStatus = seller?.stripe_connected ? "active" : "draft";
+  } else {
+    newStatus = "archived";
+  }
 
   const { error } = await supabase
     .from(TABLES.PRODUCTS)

@@ -5,8 +5,6 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { CopyLinkButtons } from "../copy-link-buttons";
-import { SignOutButton } from "../dashboard-actions";
-import { DashboardTabs } from "../dashboard-tabs";
 
 function isExpired(expiresAt: string | null): boolean {
   if (!expiresAt) return false;
@@ -20,7 +18,7 @@ export default async function LinksPage() {
 
   const { data: seller } = await supabase
     .from(TABLES.SELLERS)
-    .select("name, username, avatar_url, stripe_connected")
+    .select("username, stripe_connected")
     .eq("id", user.id)
     .single();
 
@@ -37,29 +35,9 @@ export default async function LinksPage() {
   const host = h.get("host") ?? "unseal.link";
   const proto = h.get("x-forwarded-proto") ?? "https";
   const appUrl = `${proto}://${host}`;
-  const initial = seller.name?.charAt(0).toUpperCase() ?? "?";
 
   return (
-    <main className="min-h-dvh bg-background">
-      <div className="border-b border-border">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-          <Link href="/" className="text-sm font-medium text-foreground no-underline">unseal.link</Link>
-          <div className="flex items-center gap-3">
-            <SignOutButton />
-            {seller.avatar_url ? (
-              <img src={seller.avatar_url} alt={seller.name ?? ""} className="w-8 h-8 rounded-full object-cover border border-border shrink-0" />
-            ) : (
-              <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center text-sm font-medium text-foreground shrink-0">
-                {initial}
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-4">
-          <DashboardTabs />
-        </div>
-      </div>
-
+    <main>
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-center justify-between mb-6">
           <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Your links</p>

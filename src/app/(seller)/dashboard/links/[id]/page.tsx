@@ -2,6 +2,7 @@ import { TABLES } from "@unseallink/lib/db";
 import { createClient } from "@unseallink/lib/supabase/server";
 import { headers } from "next/headers";
 import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import { InitiateStripeConnectButton } from "../../dashboard-actions";
 import { CopyLinkButton } from "./copy-link-button";
@@ -62,27 +63,37 @@ export default async function LinkDetailPage({
   };
 
   return (
-    <main className="min-h-dvh bg-background">
-      {/* Header */}
-      <div className="border-b border-border">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-4">
-          <Link
-            href="/dashboard"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors no-underline"
-          >
-            ← Dashboard
-          </Link>
-        </div>
-      </div>
+    <main>
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-6">
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 space-y-8">
+        {/* Back link */}
+        <Link
+          href="/dashboard/links"
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors no-underline"
+        >
+          ← Links
+        </Link>
 
-        {/* Title + actions */}
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-medium tracking-tight text-foreground mb-2">
-              {link.title}
-            </h1>
+        {/* Title row — mobile: title + paywall arrow button side by side */}
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
+              <h1 className="text-xl font-medium tracking-tight text-foreground leading-snug">
+                {link.title}
+              </h1>
+              {/* Mobile-only: black arrow button for paywall URL */}
+              {!isDeleted && paywallUrl && (
+                <a
+                  href={paywallUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="sm:hidden flex items-center justify-center w-8 h-8 bg-primary text-primary-foreground rounded-full shrink-0 hover:opacity-90 transition-opacity"
+                  title="Open paywall"
+                >
+                  <ArrowUpRight className="w-4 h-4" />
+                </a>
+              )}
+            </div>
             <div className="flex items-center gap-2 flex-wrap">
               <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusStyles[link.status] ?? statusStyles.draft}`}>
                 {link.status.charAt(0).toUpperCase() + link.status.slice(1)}
@@ -112,7 +123,7 @@ export default async function LinkDetailPage({
 
         {/* Stripe connect prompt */}
         {!seller?.stripe_connected && (
-          <div className="border border-border rounded-2xl p-6 bg-card flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="border border-border rounded-2xl p-5 bg-card flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="flex-1">
               <p className="font-medium text-foreground mb-1">Connect Stripe to activate this link</p>
               <p className="text-sm text-muted-foreground">Takes about 2 minutes.</p>
@@ -121,16 +132,16 @@ export default async function LinkDetailPage({
           </div>
         )}
 
-        {/* Paywall URL */}
+        {/* Paywall URL — desktop only (mobile uses arrow button in title row) */}
         {!isDeleted && paywallUrl && (
-          <div className="border border-border rounded-2xl p-6 bg-card space-y-3">
+          <div className="hidden sm:block border border-border rounded-2xl p-5 bg-card space-y-3">
             <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Paywall URL</p>
             <p className="break-all font-mono text-sm text-foreground">{paywallUrl}</p>
             <div className="flex gap-2 flex-wrap pt-1">
               <CopyLinkButton url={paywallUrl} />
               <Link
                 href={`/preview/${link.id}`}
-                className="inline-flex items-center gap-1.5 px-5 py-2.5 border border-border rounded-full text-sm font-medium text-foreground no-underline hover:bg-muted transition-colors"
+                className="inline-flex items-center gap-1.5 px-4 py-2 border border-border rounded-full text-sm font-medium text-foreground no-underline hover:bg-muted transition-colors"
               >
                 Preview
               </Link>
@@ -138,15 +149,28 @@ export default async function LinkDetailPage({
           </div>
         )}
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="border border-border rounded-2xl p-5 bg-card">
-            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3">Total sales</p>
-            <p className="text-3xl font-medium text-foreground">{link.total_sales}</p>
+        {/* Mobile: copy + preview buttons (separate from URL card) */}
+        {!isDeleted && paywallUrl && (
+          <div className="sm:hidden flex gap-2">
+            <CopyLinkButton url={paywallUrl} />
+            <Link
+              href={`/preview/${link.id}`}
+              className="inline-flex items-center gap-1.5 px-4 py-2 border border-border rounded-full text-sm font-medium text-foreground no-underline hover:bg-muted transition-colors"
+            >
+              Preview
+            </Link>
           </div>
-          <div className="border border-border rounded-2xl p-5 bg-card">
-            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3">Revenue</p>
-            <p className="text-3xl font-medium text-foreground">${link.total_revenue.toFixed(2)}</p>
+        )}
+
+        {/* Stats */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="border border-border rounded-2xl px-4 py-4 bg-card">
+            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-2">Total sales</p>
+            <p className="text-2xl font-medium text-foreground">{link.total_sales}</p>
+          </div>
+          <div className="border border-border rounded-2xl px-4 py-4 bg-card">
+            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-2">Revenue</p>
+            <p className="text-2xl font-medium text-foreground">${link.total_revenue.toFixed(2)}</p>
           </div>
         </div>
 
@@ -159,29 +183,30 @@ export default async function LinkDetailPage({
             </div>
           ) : (
             <div className="border border-border rounded-2xl overflow-hidden bg-card">
-              {orders.map((order, i) => (
-                <div
-                  key={order.id}
-                  className={`flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-4 ${i < orders.length - 1 ? "border-b border-border" : ""}`}
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{order.buyer_email}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {new Date(order.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-4 shrink-0">
-                    <div className="text-right">
-                      <p className="text-sm font-medium text-foreground">${order.price_paid.toFixed(2)}</p>
-                      <p className="text-xs text-muted-foreground">net ${(order.price_paid - order.platform_fee).toFixed(2)}</p>
+              <div className="divide-y divide-border">
+                {orders.map((order) => (
+                  <div key={order.id} className="px-4 sm:px-5 py-4 flex flex-col gap-2">
+                    <div className="flex items-start justify-between gap-3 min-w-0">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-foreground truncate">{order.buyer_email}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {new Date(order.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                          {" · "}net ${(order.price_paid - order.platform_fee).toFixed(2)}
+                        </p>
+                      </div>
+                      <div className="shrink-0 text-right">
+                        <p className="text-sm font-medium text-foreground tabular-nums">${order.price_paid.toFixed(2)}</p>
+                      </div>
                     </div>
-                    <OrderStatusBadge status={order.status} />
-                    {order.status === "paid" && (
-                      <RefundButton orderId={order.id} buyerEmail={order.buyer_email} />
-                    )}
+                    <div className="flex items-center gap-2">
+                      <OrderStatusBadge status={order.status} />
+                      {order.status === "paid" && (
+                        <RefundButton orderId={order.id} buyerEmail={order.buyer_email} />
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
         </div>

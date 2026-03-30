@@ -1,9 +1,7 @@
 import { TABLES } from "@unseallink/lib/db";
 import { createClient } from "@unseallink/lib/supabase/server";
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import { InitiateStripeConnectButton, SignOutButton, WithdrawButton } from "../dashboard-actions";
-import { DashboardTabs } from "../dashboard-tabs";
+import { InitiateStripeConnectButton, WithdrawButton } from "../dashboard-actions";
 import { SettingsForm } from "./settings-form";
 
 export default async function SettingsPage() {
@@ -21,36 +19,8 @@ export default async function SettingsPage() {
 
   if (!seller) redirect("/onboarding/name");
 
-  const initial = seller.name?.charAt(0).toUpperCase() ?? "?";
-
   return (
-    <main className="min-h-dvh bg-background">
-      {/* Header */}
-      <div className="border-b border-border">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-          <Link href="/" className="text-sm font-medium text-foreground no-underline">
-            unseal.link
-          </Link>
-          <div className="flex items-center gap-3">
-            <SignOutButton />
-            {seller.avatar_url ? (
-              <img
-                src={seller.avatar_url}
-                alt={seller.name ?? ""}
-                className="w-8 h-8 rounded-full object-cover border border-border shrink-0"
-              />
-            ) : (
-              <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center text-sm font-medium text-foreground shrink-0">
-                {initial}
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-4">
-          <DashboardTabs />
-        </div>
-      </div>
-
+    <main>
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10 space-y-10">
         {/* Profile */}
         <div>

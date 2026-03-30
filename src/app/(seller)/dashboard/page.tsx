@@ -1,10 +1,8 @@
 import { TABLES } from "@unseallink/lib/db";
 import { createClient } from "@unseallink/lib/supabase/server";
-import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { InitiateStripeConnectButton, SignOutButton } from "./dashboard-actions";
-import { DashboardTabs } from "./dashboard-tabs";
+import { InitiateStripeConnectButton } from "./dashboard-actions";
 import { SellerRealtimeNotifier } from "./realtime-notifier";
 import { type DayRevenue, RevenueChart } from "./revenue-chart";
 
@@ -76,34 +74,9 @@ export default async function DashboardPage() {
   const totalEarned = seller.total_earned ?? 0;
   const hasLinks = (latestLinks?.length ?? 0) > 0;
 
-  const h = await headers();
-  const initial = seller.name?.charAt(0).toUpperCase() ?? "?";
-
   return (
-    <main className="min-h-dvh bg-background">
+    <main>
       <SellerRealtimeNotifier sellerId={user.id} />
-
-      {/* Header */}
-      <div className="border-b border-border">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-          <Link href="/" className="text-sm font-medium text-foreground no-underline">
-            unseal.link
-          </Link>
-          <div className="flex items-center gap-3">
-            <SignOutButton />
-            {seller.avatar_url ? (
-              <img src={seller.avatar_url} alt={seller.name ?? ""} className="w-8 h-8 rounded-full object-cover border border-border shrink-0" />
-            ) : (
-              <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center text-sm font-medium text-foreground shrink-0">
-                {initial}
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-4">
-          <DashboardTabs />
-        </div>
-      </div>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-6">
         {/* Stripe connect banner */}
