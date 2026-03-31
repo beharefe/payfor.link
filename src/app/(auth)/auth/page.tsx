@@ -1,4 +1,5 @@
 import { createClient } from "@unseallink/lib/supabase/server";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { EmailForm, OtpForm } from "./auth-forms";
 
@@ -25,9 +26,9 @@ export default async function AuthPage({
     <main className="min-h-dvh flex flex-col items-center justify-center px-6 py-16 bg-background">
       <div className="w-full max-w-sm">
         <div className="mb-8">
-          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3">
+          <Link href="/" className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3 hover:text-foreground transition-colors no-underline block">
             unseal.link
-          </p>
+          </Link>
           <h1 className="text-3xl font-medium tracking-tight text-foreground mb-2">
             {sent ? "Check your email" : "Sign in"}
           </h1>
