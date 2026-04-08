@@ -247,13 +247,16 @@ export async function archiveProduct(id: string): Promise<ActionResult> {
 
   let newStatus: string;
   if (existing.status === "archived") {
-    // Restore to active only if Stripe is connected; otherwise draft
+    // Restore to active only if Stripe is fully set up (OAuth + charges enabled)
     const { data: seller } = await supabase
       .from(TABLES.SELLERS)
-      .select("stripe_connected")
+      .select("stripe_connected, stripe_charges_enabled")
       .eq("id", user.id)
       .single();
-    newStatus = seller?.stripe_connected ? "active" : "draft";
+    newStatus =
+      seller?.stripe_connected && seller?.stripe_charges_enabled
+        ? "active"
+        : "draft";
   } else {
     newStatus = "archived";
   }
