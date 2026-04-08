@@ -64,6 +64,17 @@ export async function createCheckoutSession(
       application_fee_amount: platformFeeCents(link.price),
       transfer_data: { destination: seller.stripe_account_id },
     },
+    custom_fields: [
+      {
+        key: "email_confirmed",
+        label: {
+          type: "custom",
+          custom: "The email above is correct — this is where my access link will be sent",
+        },
+        type: "checkbox",
+        optional: false,
+      },
+    ],
     custom_text: {
       submit: {
         message: "Your access link will be sent to the email address above. Make sure it's correct.",
