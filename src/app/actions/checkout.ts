@@ -64,17 +64,6 @@ export async function createCheckoutSession(
       application_fee_amount: platformFeeCents(link.price),
       transfer_data: { destination: seller.stripe_account_id },
     },
-    custom_fields: [
-      {
-        key: "email_confirmed",
-        label: {
-          type: "custom",
-          custom: "The email above is correct — this is where my access link will be sent",
-        },
-        type: "checkbox",
-        optional: false,
-      },
-    ],
     custom_text: {
       after_submit: {
         message: "By completing this purchase you agree to our [Terms of Service](https://unseal.link/terms) and [Privacy Policy](https://unseal.link/privacy).",
