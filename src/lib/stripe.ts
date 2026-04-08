@@ -4,6 +4,7 @@ import Stripe from "stripe";
 // A non-empty fallback prevents module init errors in build/test environments.
 export const stripe = new Stripe(
   process.env.STRIPE_SECRET_KEY ?? "sk_build_placeholder",
+  { apiVersion: "2026-03-25.dahlia" },
 );
 
 export const PLATFORM_FEE_PERCENT = 0.045;
