@@ -4,7 +4,7 @@ import { TABLES } from "@unseallink/lib/db";
 import { sendRefundBuyerEmail, sendRefundSellerEmail } from "@unseallink/lib/email";
 import { log } from "@unseallink/lib/logger";
 import { stripe } from "@unseallink/lib/stripe";
-import { createClient } from "@unseallink/lib/supabase/server";
+import { createClient, createServiceClient } from "@unseallink/lib/supabase/server";
 import { serializeError } from "@unseallink/lib/utils";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
@@ -40,7 +40,8 @@ export async function refundPurchase(orderId: string, note?: string): Promise<Ac
     return { error: "Refund failed. Please try again or contact support." };
   }
 
-  const { error: dbError } = await supabase
+  const service = createServiceClient();
+  const { error: dbError } = await service
     .from(TABLES.ORDERS)
     .update({
       status: "refunded",
@@ -61,11 +62,11 @@ export async function refundPurchase(orderId: string, note?: string): Promise<Ac
 
   // Decrement stats — mirror of the increments done on purchase
   await Promise.all([
-    supabase.rpc("increment_product_stats", {
+    service.rpc("increment_product_stats", {
       p_product_id: order.product_id,
       p_revenue: -order.price_paid,
     }),
-    supabase.rpc("increment_seller_stats", {
+    service.rpc("increment_seller_stats", {
       p_seller_id: user.id,
       p_earned: -order.price_paid,
       p_fees: -order.platform_fee,
@@ -84,7 +85,7 @@ export async function refundPurchase(orderId: string, note?: string): Promise<Ac
   const proto = h.get("x-forwarded-proto") ?? "https";
   const appUrl = `${proto}://${host}`;
 
-  const { data: seller } = await supabase
+  const { data: seller } = await service
     .from(TABLES.SELLERS)
     .select("email, name")
     .eq("id", user.id)
