@@ -20,11 +20,12 @@ export async function refundPurchase(orderId: string, note?: string): Promise<Ac
 
   const { data: order } = await supabase
     .from(TABLES.ORDERS)
-    .select("id, product_id, seller_id, stripe_payment_id, status, price_paid, platform_fee, currency, buyer_email, product_title")
+    .select("id, product_id, seller_id, stripe_payment_id, stripe_refund_id, status, price_paid, platform_fee, currency, buyer_email, product_title")
     .eq("id", orderId)
     .single();
 
   if (!order || order.seller_id !== user.id) return { error: "Not found" };
+  if (order.status === "refunded" || order.stripe_refund_id) return { ok: true }; // idempotent
   if (order.status !== "paid") return { error: "This order cannot be refunded" };
   if (!order.stripe_payment_id) return { error: "No payment found for this order" };
 

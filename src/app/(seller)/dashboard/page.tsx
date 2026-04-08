@@ -7,7 +7,8 @@ import { SellerRealtimeNotifier } from "./realtime-notifier";
 import { type DayRevenue, RevenueChart } from "./revenue-chart";
 
 function buildChartData(
-  orders: { created_at: string; price_paid: number }[],
+  paid: { created_at: string; price_paid: number }[],
+  refunded: { refunded_at: string | null; price_paid: number }[],
 ): DayRevenue[] {
   const days: DayRevenue[] = [];
   const now = new Date();
@@ -17,15 +18,20 @@ function buildChartData(
     days.push({
       date: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
       revenue: 0,
+      refunded: 0,
     });
   }
-  for (const order of orders) {
-    const label = new Date(order.created_at).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    });
+  for (const order of paid) {
+    const label = new Date(order.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" });
     const slot = days.find((d) => d.date === label);
     if (slot) slot.revenue += order.price_paid;
+  }
+  for (const order of refunded) {
+    const date = order.refunded_at ?? "";
+    if (!date) continue;
+    const label = new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    const slot = days.find((d) => d.date === label);
+    if (slot) slot.refunded += order.price_paid;
   }
   return days;
 }
@@ -46,13 +52,19 @@ export default async function DashboardPage() {
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-  const [{ data: recentOrders }, { data: latestLinks }, { data: latestOrders }] =
+  const [{ data: recentOrders }, { data: recentRefunds }, { data: latestLinks }, { data: latestOrders }] =
     await Promise.all([
       supabase
         .from(TABLES.ORDERS)
         .select("created_at, price_paid")
         .eq("seller_id", user.id)
         .eq("status", "paid")
+        .gte("created_at", thirtyDaysAgo.toISOString()),
+      supabase
+        .from(TABLES.ORDERS)
+        .select("refunded_at, price_paid")
+        .eq("seller_id", user.id)
+        .eq("status", "refunded")
         .gte("created_at", thirtyDaysAgo.toISOString()),
       supabase
         .from(TABLES.PRODUCTS)
@@ -69,7 +81,7 @@ export default async function DashboardPage() {
         .limit(5),
     ]);
 
-  const chartData = buildChartData(recentOrders ?? []);
+  const chartData = buildChartData(recentOrders ?? [], recentRefunds ?? []);
   const totalSales = latestLinks?.reduce((s, l) => s + (l.total_sales ?? 0), 0) ?? 0;
   const totalEarned = seller.total_earned ?? 0;
   const hasLinks = (latestLinks?.length ?? 0) > 0;

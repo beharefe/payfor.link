@@ -166,17 +166,14 @@ export default async function PreviewPage({ params }: Props) {
           </button>
 
           {/* Trust row */}
-          <div className="grid grid-cols-3 gap-2 pt-1">
+          <div className="flex items-center justify-center gap-4 pt-1">
             {[
               { icon: LockKeyhole, label: "Secure" },
               { icon: Mail, label: "By email" },
               { icon: Timer, label: "Instant" },
             ].map(({ icon: Icon, label }) => (
-              <div
-                key={label}
-                className="flex flex-col items-center gap-1.5 py-2.5 rounded-xl bg-muted/50"
-              >
-                <Icon className="size-3.5 text-muted-foreground" aria-hidden="true" />
+              <div key={label} className="flex items-center gap-1.5">
+                <Icon className="size-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
                 <span className="text-[11px] text-muted-foreground leading-none">
                   {label}
                 </span>
