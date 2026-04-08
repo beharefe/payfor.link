@@ -1,4 +1,6 @@
 import { TABLES } from "@unseallink/lib/db";
+import { sendAbuseReportAlert } from "@unseallink/lib/email";
+import { log } from "@unseallink/lib/logger";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { NextResponse } from "next/server";
 
@@ -27,10 +29,10 @@ export async function POST(request: Request) {
 
   const supabase = createServiceClient();
 
-  // Verify product exists
+  // Verify product exists and grab title for the alert email
   const { data: product } = await supabase
     .from(TABLES.PRODUCTS)
-    .select("id")
+    .select("id, title")
     .eq("id", product_id)
     .single();
 
@@ -59,6 +61,18 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
+
+  // Extract order ref from description prefix "[Order: XXXXXXXX]" if present
+  const orderRef = description?.match(/^\[Order: ([A-Z0-9]+)\]/)?.[1] ?? null;
+
+  sendAbuseReportAlert({
+    productId: product_id,
+    productTitle: product.title,
+    reason,
+    description: trimmedDescription,
+    reporterEmail: reporter_email?.trim().toLowerCase() || null,
+    orderId: orderRef,
+  }).catch((err) => log.error("abuse_report_alert_email_failed", { error: String(err) }));
 
   return NextResponse.json({ ok: true });
 }

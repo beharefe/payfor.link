@@ -4,9 +4,12 @@
  */
 
 import { render } from "@react-email/render";
+import { AbuseReportAlert } from "@unseallink/emails/abuse-report-alert";
 import { AccessLinkEmail } from "@unseallink/emails/access-link";
 import { MagicLinkEmail } from "@unseallink/emails/magic-link";
 import { MissedSaleEmail } from "@unseallink/emails/missed-sale";
+import { RefundBuyerEmail } from "@unseallink/emails/refund-buyer";
+import { RefundSellerEmail } from "@unseallink/emails/refund-seller";
 import { SaleNotificationEmail } from "@unseallink/emails/sale-notification";
 import { ACCESS_TOKEN_DAYS } from "./buyer-token";
 import { FROM_EMAIL, resend } from "./resend";
@@ -92,6 +95,61 @@ export async function sendMissedSaleEmail(opts: {
         dashboardUrl: opts.dashboardUrl,
       }),
     ),
+  });
+}
+
+/** Abuse report alert — sent to info@unseal.link when a buyer submits a report. */
+export async function sendAbuseReportAlert(opts: {
+  productId: string;
+  productTitle?: string;
+  reason: string;
+  description?: string | null;
+  reporterEmail?: string | null;
+  orderId?: string | null;
+}) {
+  return resend.emails.send({
+    from: FROM_EMAIL,
+    to: "info@unseal.link",
+    subject: `[Report] ${opts.reason} — ${opts.productTitle ?? opts.productId}`,
+    html: await render(AbuseReportAlert(opts)),
+  });
+}
+
+/** Refund confirmation — sent to buyer when a refund is issued. */
+export async function sendRefundBuyerEmail(opts: {
+  to: string;
+  productTitle: string;
+  pricePaid: number;
+  currency: string;
+  orderId: string;
+  sellerName?: string | null;
+}) {
+  return resend.emails.send({
+    from: FROM_EMAIL,
+    to: opts.to,
+    subject: `Refund confirmed: ${opts.productTitle}`,
+    html: await render(RefundBuyerEmail(opts)),
+  });
+}
+
+/** Refund notification — sent to seller when they issue a refund. */
+export async function sendRefundSellerEmail(opts: {
+  to: string;
+  sellerName: string;
+  productTitle: string;
+  pricePaid: number;
+  platformFee: number;
+  currency: string;
+  buyerEmail: string;
+  orderId: string;
+  note?: string | null;
+  dashboardUrl: string;
+}) {
+  return resend.emails.send({
+    from: FROM_EMAIL,
+    to: opts.to,
+    subject: `Refund issued: ${opts.productTitle}`,
+    html: await render(RefundSellerEmail(opts)),
   });
 }
 
