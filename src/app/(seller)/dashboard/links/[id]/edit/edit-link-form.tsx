@@ -117,6 +117,11 @@ export function EditLinkForm({ id, defaultValues }: Props) {
     const formData = new FormData(form);
 
     startTransition(async () => {
+      // Convert datetime-local (local time, no tz) to UTC ISO string so DB stores the correct time
+      if (expiresAt) {
+        formData.set("expires_at", new Date(expiresAt).toISOString());
+      }
+
       if (imageFile) {
         const uploadBody = new FormData();
         uploadBody.append("file", imageFile);

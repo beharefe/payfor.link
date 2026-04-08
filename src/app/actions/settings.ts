@@ -3,6 +3,7 @@
 import { TABLES } from "@unseallink/lib/db";
 import { isValidUrl } from "@unseallink/lib/product-utils";
 import { createClient } from "@unseallink/lib/supabase/server";
+import { revalidatePath } from "next/cache";
 
 export type SettingsResult = { error: string } | { ok: true };
 
@@ -17,6 +18,15 @@ export async function updateName(formData: FormData): Promise<SettingsResult> {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Not signed in" };
 
+  // Case-insensitive uniqueness check — DB constraint is case-sensitive so "Alex" and "alex" would both pass
+  const { data: existing } = await supabase
+    .from(TABLES.SELLERS)
+    .select("id")
+    .ilike("name", name)
+    .neq("id", user.id)
+    .maybeSingle();
+  if (existing) return { error: "That display name is already taken. Try another." };
+
   const { error } = await supabase
     .from(TABLES.SELLERS)
     .update({ name })
@@ -26,6 +36,8 @@ export async function updateName(formData: FormData): Promise<SettingsResult> {
     if (error.code === "23505") return { error: "That display name is already taken. Try another." };
     return { error: "Failed to save. Please try again." };
   }
+
+  revalidatePath("/dashboard", "layout");
   return { ok: true };
 }
 
@@ -49,6 +61,15 @@ export async function updateProfile(
   if (avatar_url && !isValidUrl(avatar_url))
     return { error: "Invalid avatar URL" };
 
+  // Case-insensitive uniqueness check — DB constraint is case-sensitive so "Alex" and "alex" would both pass
+  const { data: existing } = await supabase
+    .from(TABLES.SELLERS)
+    .select("id")
+    .ilike("name", name)
+    .neq("id", user.id)
+    .maybeSingle();
+  if (existing) return { error: "That display name is already taken. Try another." };
+
   const { error } = await supabase
     .from(TABLES.SELLERS)
     .update({ name, bio, avatar_url })
@@ -58,5 +79,7 @@ export async function updateProfile(
     if (error.code === "23505") return { error: "That display name is already taken. Try another." };
     return { error: "Failed to save. Please try again." };
   }
+
+  revalidatePath("/dashboard", "layout");
   return { ok: true };
 }

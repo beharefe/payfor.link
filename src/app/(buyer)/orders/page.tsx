@@ -51,7 +51,15 @@ export default async function OrdersPage({
   return (
     <main className="min-h-dvh bg-background">
       <div className="max-w-2xl mx-auto px-6 py-10">
-        <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-2">Signed in as {session.email}</p>
+        <div className="flex items-center justify-between gap-4 mb-2">
+          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Signed in as {session.email}</p>
+          <a
+            href="/api/buyer-signout"
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors no-underline shrink-0"
+          >
+            Sign out →
+          </a>
+        </div>
         <h1 className="text-2xl font-medium tracking-tight text-foreground mb-8">Your orders</h1>
 
         {!orders?.length ? (
