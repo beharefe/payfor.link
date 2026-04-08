@@ -233,7 +233,7 @@ async function handleDisputeCreated(dispute: Stripe.Dispute) {
     amount: dispute.amount / 100,
     currency: dispute.currency,
     reason: dispute.reason,
-    evidenceDueBy: dispute.evidence_due_by,
+    evidenceDueBy: dispute.evidence_details?.due_by ?? null,
   };
 
   // Alert admin
