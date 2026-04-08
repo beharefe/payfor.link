@@ -169,6 +169,9 @@ export default async function OrderPage({ params }: Props) {
           <Link href="/orders" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             ← All orders
           </Link>
+          <p className="text-xs text-muted-foreground">
+            Payments &amp; refunds handled by <span className="font-medium text-foreground">Stripe</span>
+          </p>
         </div>
       </div>
     </main>

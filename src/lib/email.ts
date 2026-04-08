@@ -6,6 +6,7 @@
 import { render } from "@react-email/render";
 import { AbuseReportAlert } from "@unseallink/emails/abuse-report-alert";
 import { AccessLinkEmail } from "@unseallink/emails/access-link";
+import { DisputeAlert } from "@unseallink/emails/dispute-alert";
 import { MagicLinkEmail } from "@unseallink/emails/magic-link";
 import { MissedSaleEmail } from "@unseallink/emails/missed-sale";
 import { RefundBuyerEmail } from "@unseallink/emails/refund-buyer";
@@ -150,6 +151,28 @@ export async function sendRefundSellerEmail(opts: {
     to: opts.to,
     subject: `Refund issued: ${opts.productTitle}`,
     html: await render(RefundSellerEmail(opts)),
+  });
+}
+
+/** Dispute alert — sent to admin and seller when a chargeback is opened. */
+export async function sendDisputeAlert(opts: {
+  to: string;
+  orderId: string;
+  productTitle: string;
+  buyerEmail: string;
+  amount: number;
+  currency: string;
+  reason: string;
+  evidenceDueBy?: number | null;
+  sellerEmail?: string | null;
+  isSellerCopy?: boolean;
+  sellerName?: string | null;
+}) {
+  return resend.emails.send({
+    from: FROM_EMAIL,
+    to: opts.to,
+    subject: `[Dispute] ${opts.productTitle} · $${opts.amount.toFixed(2)} — respond before deadline`,
+    html: await render(DisputeAlert(opts)),
   });
 }
 

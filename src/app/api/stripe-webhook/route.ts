@@ -1,4 +1,4 @@
-import { sendBuyerAccessEmail, sendSaleNotificationEmail } from "@unseallink/lib/email";
+import { sendBuyerAccessEmail, sendDisputeAlert, sendSaleNotificationEmail } from "@unseallink/lib/email";
 import { generateAccessToken } from "@unseallink/lib/access-token";
 import { TABLES } from "@unseallink/lib/db";
 import { log } from "@unseallink/lib/logger";
@@ -51,6 +51,8 @@ export async function POST(request: Request) {
       );
     } else if (event.type === "account.updated") {
       await handleAccountUpdated(event.data.object as Stripe.Account);
+    } else if (event.type === "charge.dispute.created") {
+      await handleDisputeCreated(event.data.object as Stripe.Dispute);
     }
   } catch (err) {
     log.error("Stripe webhook handler error", {
@@ -187,6 +189,71 @@ async function handleCheckoutSessionCompleted(
       dashboardUrl: `${appUrl}/dashboard`,
     });
   }
+}
+
+async function handleDisputeCreated(dispute: Stripe.Dispute) {
+  const supabase = createServiceClient();
+
+  const paymentIntentId =
+    typeof dispute.payment_intent === "string"
+      ? dispute.payment_intent
+      : dispute.payment_intent?.id ?? null;
+
+  if (!paymentIntentId) {
+    log.error("charge.dispute.created: no payment_intent on dispute", { dispute_id: dispute.id });
+    return;
+  }
+
+  const { data: order } = await supabase
+    .from(TABLES.ORDERS)
+    .select("id, seller_id, buyer_email, product_title, price_paid, currency")
+    .eq("stripe_payment_id", paymentIntentId)
+    .single();
+
+  if (!order) {
+    log.error("charge.dispute.created: order not found", { payment_intent: paymentIntentId });
+    return;
+  }
+
+  await supabase
+    .from(TABLES.ORDERS)
+    .update({ status: "disputed" })
+    .eq("id", order.id);
+
+  const { data: seller } = await supabase
+    .from(TABLES.SELLERS)
+    .select("email, name")
+    .eq("id", order.seller_id)
+    .single();
+
+  const disputePayload = {
+    orderId: order.id,
+    productTitle: order.product_title,
+    buyerEmail: order.buyer_email,
+    amount: dispute.amount / 100,
+    currency: dispute.currency,
+    reason: dispute.reason,
+    evidenceDueBy: dispute.evidence_due_by,
+  };
+
+  // Alert admin
+  await sendDisputeAlert({
+    to: "info@unseal.link",
+    ...disputePayload,
+    sellerEmail: seller?.email ?? null,
+  }).catch((err) => log.error("dispute_alert_admin_email_failed", { error: serializeError(err) }));
+
+  // Notify seller
+  if (seller?.email) {
+    await sendDisputeAlert({
+      to: seller.email,
+      ...disputePayload,
+      isSellerCopy: true,
+      sellerName: seller.name ?? null,
+    }).catch((err) => log.error("dispute_alert_seller_email_failed", { error: serializeError(err) }));
+  }
+
+  log.info("charge.dispute.created: handled", { order_id: order.id, dispute_id: dispute.id });
 }
 
 async function handleAccountUpdated(account: Stripe.Account) {

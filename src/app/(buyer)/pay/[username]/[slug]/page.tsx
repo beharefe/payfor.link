@@ -257,6 +257,12 @@ export default async function PaywallPage({ params }: Props) {
         <div className="text-center">
           <AbuseReportForm productId={link.id} />
         </div>
+
+        {/* Stripe trust */}
+        <p className="text-center text-[11px] text-muted-foreground">
+          Payments &amp; refunds handled by{" "}
+          <span className="font-medium text-foreground">Stripe</span>
+        </p>
       </div>
     </main>
   );
