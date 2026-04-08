@@ -85,19 +85,11 @@ export default async function PaymentSuccessPage({
     );
   }
 
-  const [{ data: product }, { data: seller }] = await Promise.all([
-    supabase
-      .from(TABLES.PRODUCTS)
-      .select("preview_image_url, slug")
-      .eq("seller_id", order.seller_id)
-      .eq("slug", slug)
-      .maybeSingle(),
-    supabase
-      .from(TABLES.SELLERS)
-      .select("name")
-      .eq("id", order.seller_id)
-      .single(),
-  ]);
+  const { data: seller } = await supabase
+    .from(TABLES.SELLERS)
+    .select("name")
+    .eq("id", order.seller_id)
+    .single();
 
   const shortId = order.id.slice(0, 8).toUpperCase();
   const purchasedOn = new Date(order.created_at).toLocaleDateString("en-US", {
@@ -110,17 +102,7 @@ export default async function PaymentSuccessPage({
     <main className="min-h-dvh flex items-center justify-center px-6 py-16 bg-background">
       <div className="w-full max-w-sm flex flex-col gap-5">
 
-        {/* Preview image */}
-        {product?.preview_image_url && (
-          <img
-            src={product.preview_image_url}
-            alt={order.product_title}
-            className="w-full rounded-2xl object-cover"
-            style={{ aspectRatio: "1.91/1" }}
-          />
-        )}
-
-        {/* Success header */}
+          {/* Success header */}
         <div className="flex flex-col items-center text-center gap-2">
           <div className="flex items-center justify-center size-12 rounded-full bg-green-100 dark:bg-green-950 mb-1">
             <CheckCircle className="size-6 text-green-600 dark:text-green-400" strokeWidth={2} />

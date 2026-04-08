@@ -45,8 +45,8 @@ export async function refundPurchase(orderId: string, note?: string): Promise<Ac
     .update({
       status: "refunded",
       refunded_at: new Date().toISOString(),
+      refund_reason: note?.trim() || null,
       stripe_refund_id: stripeRefundId,
-      ...(note ? { refund_reason: note } : {}),
     })
     .eq("id", orderId)
     .eq("seller_id", user.id);
