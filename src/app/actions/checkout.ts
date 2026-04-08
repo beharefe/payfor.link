@@ -76,9 +76,6 @@ export async function createCheckoutSession(
       },
     ],
     custom_text: {
-      submit: {
-        message: "Your access link will be sent to the email address above. Make sure it's correct.",
-      },
       after_submit: {
         message: "By completing this purchase you agree to our [Terms of Service](https://unseal.link/terms) and [Privacy Policy](https://unseal.link/privacy).",
       },
