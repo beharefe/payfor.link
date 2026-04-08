@@ -14,6 +14,7 @@ export function AbuseReportForm({ productId }: { productId: string }) {
         product_id: productId,
         reason: formData.get("reason"),
         description: formData.get("description"),
+        reporter_email: formData.get("reporter_email") || null,
       }),
       headers: { "Content-Type": "application/json" },
     });
@@ -60,6 +61,12 @@ export function AbuseReportForm({ productId }: { productId: string }) {
         <option value="copyright">Copyright violation</option>
         <option value="other">Other</option>
       </select>
+      <input
+        name="reporter_email"
+        type="email"
+        placeholder="Your email (optional, for follow-up)"
+        className="block w-full px-2 py-2 mb-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground"
+      />
       <textarea
         name="description"
         placeholder="Optional details"

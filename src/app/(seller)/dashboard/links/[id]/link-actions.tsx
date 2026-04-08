@@ -112,6 +112,7 @@ export function RefundButton({
   const [note, setNote] = useState("");
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   function handleConfirm() {
     startTransition(async () => {
@@ -119,16 +120,28 @@ export function RefundButton({
       if ("error" in result) {
         setError(result.error);
       } else {
-        setOpen(false);
+        setSuccess(true);
         setNote("");
-        router.refresh();
+        // Short delay so user sees the success state, then close + reload
+        setTimeout(() => {
+          setOpen(false);
+          setSuccess(false);
+          router.push(window.location.pathname);
+        }, 1200);
       }
     });
   }
 
+  function handleOpenChange(val: boolean) {
+    if (!isPending) {
+      setOpen(val);
+      if (!val) { setError(null); setSuccess(false); setNote(""); }
+    }
+  }
+
   return (
     <span className="inline-flex items-center gap-2">
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogTrigger
           className="inline-flex items-center justify-center p-1.5 rounded-full text-muted-foreground cursor-pointer hover:text-foreground hover:bg-muted transition-colors bg-transparent border-none"
           title="Refund this order"
@@ -137,36 +150,45 @@ export function RefundButton({
           <span className="sr-only">Refund</span>
         </DialogTrigger>
         <DialogContent showCloseButton={false}>
-          <DialogHeader>
-            <DialogTitle>Refund this order?</DialogTitle>
-            <DialogDescription>
-              A full refund will be issued to <span className="font-medium text-foreground">{buyerEmail}</span>. This cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="refund-note" className="text-xs font-medium text-muted-foreground">
-              Note <span className="font-normal">(optional)</span>
-            </label>
-            <textarea
-              id="refund-note"
-              rows={2}
-              placeholder="Reason for refund…"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              className="w-full resize-none rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-foreground/20"
-            />
-          </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
-          <DialogFooter>
-            <DialogClose render={<Button variant="outline" />}>Cancel</DialogClose>
-            <Button
-              onClick={handleConfirm}
-              disabled={isPending}
-            >
-              {isPending && <Loader2 className="animate-spin size-3.5 shrink-0" />}
-              {isPending ? "Processing…" : "Issue refund"}
-            </Button>
-          </DialogFooter>
+          {success ? (
+            <div className="py-4 text-center">
+              <p className="text-2xl mb-2">✓</p>
+              <p className="font-medium text-foreground">Refund issued</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                The buyer will receive their money back shortly.
+              </p>
+            </div>
+          ) : (
+            <>
+              <DialogHeader>
+                <DialogTitle>Refund this order?</DialogTitle>
+                <DialogDescription>
+                  A full refund will be issued to <span className="font-medium text-foreground">{buyerEmail}</span>. This cannot be undone.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="refund-note" className="text-xs font-medium text-muted-foreground">
+                  Note <span className="font-normal">(optional)</span>
+                </label>
+                <textarea
+                  id="refund-note"
+                  rows={2}
+                  placeholder="Reason for refund…"
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  className="w-full resize-none rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-foreground/20"
+                />
+              </div>
+              {error && <p className="text-sm text-destructive">{error}</p>}
+              <DialogFooter>
+                <DialogClose render={<Button variant="outline" />}>Cancel</DialogClose>
+                <Button onClick={handleConfirm} disabled={isPending}>
+                  {isPending && <Loader2 className="animate-spin size-3.5 shrink-0" />}
+                  {isPending ? "Processing…" : "Issue refund"}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </span>

@@ -5,10 +5,10 @@ import { Loader2 } from "lucide-react";
 import { useRef, useState, useTransition } from "react";
 
 const PRICE_PRESETS = [9.99, 19, 29, 49];
+const MIN_PRICE = 9.99;
 
-const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
+const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
-// Accepts 1.91:1 OG standard and 16:9, rejects portrait/square
 const MIN_RATIO = 1.5;
 const MAX_RATIO = 2.4;
 
@@ -38,18 +38,30 @@ function formatExpiryPreview(value: string): string {
   return "less than an hour";
 }
 
+const inputClass =
+  "w-full px-4 py-2.5 border border-input rounded-xl bg-background text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors";
+
+const inputErrorClass =
+  "w-full px-4 py-2.5 border border-destructive rounded-xl bg-background text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-destructive transition-colors";
+
+const labelClass = "block text-sm font-medium text-foreground mb-1.5";
+const hintClass = "text-xs text-muted-foreground mt-1";
+
 export function NewLinkForm() {
   const [error, setError] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
   const [expiresAt, setExpiresAt] = useState<string>("");
+  const [priceValue, setPriceValue] = useState<string>("9.99");
   const [isPending, startTransition] = useTransition();
   const priceInputRef = useRef<HTMLInputElement>(null);
   const prevObjectUrl = useRef<string | null>(null);
 
+  const priceNum = parseFloat(priceValue);
+  const priceInvalid = priceValue !== "" && (isNaN(priceNum) || priceNum < MIN_PRICE);
+
   async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
-    // Clean up previous object URL to avoid memory leaks
     if (prevObjectUrl.current) {
       URL.revokeObjectURL(prevObjectUrl.current);
       prevObjectUrl.current = null;
@@ -81,7 +93,7 @@ export function NewLinkForm() {
       const ratio = await getImageRatio(file);
       if (ratio < MIN_RATIO || ratio > MAX_RATIO) {
         setImageError(
-          `Image must be landscape with a ~1.91:1 ratio (e.g. 1200×630px). Your image: ${ratio.toFixed(2)}:1`,
+          `Image must be landscape ~1.91:1 (e.g. 1200×630px). Your image: ${ratio.toFixed(2)}:1`,
         );
         setImageFile(null);
         setImagePreviewUrl(null);
@@ -108,7 +120,6 @@ export function NewLinkForm() {
     const formData = new FormData(form);
 
     startTransition(async () => {
-      // Convert datetime-local (local time, no tz) to UTC ISO string so DB stores the correct time
       if (expiresAt) {
         formData.set("expires_at", new Date(expiresAt).toISOString());
       }
@@ -142,51 +153,59 @@ export function NewLinkForm() {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex flex-col gap-4"
-    >
+    <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+
+      {/* Title */}
       <div>
-        <label htmlFor="title">Title *</label>
+        <label htmlFor="title" className={labelClass}>Title</label>
         <input
           id="title"
           name="title"
           required
-          className="block w-full px-2 py-2 mt-1 border border-input bg-background text-foreground rounded"
+          className={inputClass}
         />
       </div>
+
+      {/* Description */}
       <div>
-        <label htmlFor="description">Description</label>
+        <label htmlFor="description" className={labelClass}>
+          Description{" "}
+          <span className="font-normal text-muted-foreground">optional</span>
+        </label>
         <textarea
           id="description"
           name="description"
           rows={3}
-          className="block w-full px-2 py-2 mt-1 border border-input bg-background text-foreground rounded"
+          className={`${inputClass} resize-none`}
         />
       </div>
+
+      {/* Destination URL */}
       <div>
-        <label htmlFor="destination_url">Destination URL *</label>
+        <label htmlFor="destination_url" className={labelClass}>Destination URL</label>
         <input
           id="destination_url"
           name="destination_url"
           type="url"
           required
-          placeholder="https://..."
-          className="block w-full px-2 py-2 mt-1 border border-input bg-background text-foreground rounded"
+          placeholder="https://"
+          className={inputClass}
         />
       </div>
+
+      {/* Price */}
       <div>
-        <label>Price (USD), min $9.99 *</label>
-        <div className="flex gap-2 mt-1 flex-wrap">
+        <label className={labelClass}>Price (USD)</label>
+        <div className="flex gap-2 mb-2 flex-wrap">
           {PRICE_PRESETS.map((p) => (
             <button
               key={p}
               type="button"
               onClick={() => {
-                if (priceInputRef.current)
-                  priceInputRef.current.value = String(p);
+                setPriceValue(String(p));
+                if (priceInputRef.current) priceInputRef.current.value = String(p);
               }}
-              className="px-3 py-2 cursor-pointer"
+              className="px-4 py-1.5 text-sm border border-border rounded-full text-muted-foreground hover:border-foreground hover:text-foreground transition-colors cursor-pointer"
             >
               ${p}
             </button>
@@ -201,59 +220,82 @@ export function NewLinkForm() {
           step={0.01}
           required
           defaultValue={9.99}
-          className="block w-full px-2 py-2 mt-1 border border-input bg-background text-foreground rounded"
+          onChange={(e) => setPriceValue(e.target.value)}
+          className={priceInvalid ? inputErrorClass : inputClass}
         />
+        {priceInvalid ? (
+          <p className="text-xs text-destructive mt-1">Minimum price is $9.99</p>
+        ) : (
+          <p className={hintClass}>Minimum $9.99</p>
+        )}
       </div>
+
+      {/* Preview image */}
       <div>
-        <label htmlFor="preview_image">Preview image</label>
-        <p className="text-muted-foreground text-[0.8125rem] mt-[0.1rem] mb-1">
-          Shown on your paywall page and social shares. Recommended: 1200×630px
-          (1.91:1). Max 2MB. JPG, PNG, or WebP.
+        <label className={labelClass}>
+          Preview image{" "}
+          <span className="font-normal text-muted-foreground">optional</span>
+        </label>
+        <p className={hintClass + " mb-2"}>
+          Shown on your paywall page and social shares. Recommended: 1200×630px (1.91:1). Max 2MB. JPG, PNG, or WebP.
         </p>
+        {imagePreviewUrl && (
+          <img
+            src={imagePreviewUrl}
+            alt="Preview"
+            className="w-full max-w-sm rounded-xl object-cover mb-3"
+            style={{ aspectRatio: "1.91/1" }}
+          />
+        )}
+        <label
+          htmlFor="preview_image"
+          className="inline-flex items-center gap-2 px-4 py-2 text-sm border border-border rounded-xl cursor-pointer text-muted-foreground hover:text-foreground hover:border-foreground transition-colors"
+        >
+          {imagePreviewUrl ? "Change image" : "Upload image"}
+        </label>
         <input
           id="preview_image"
           type="file"
           accept="image/jpeg,image/png,image/webp"
           onChange={handleImageChange}
-          className="block mt-1"
+          className="sr-only"
         />
-        {imagePreviewUrl && (
-          <img
-            src={imagePreviewUrl}
-            alt="Preview"
-            className="block mt-2 max-w-[300px] rounded-lg object-cover [aspect-ratio:1.91/1]"
-          />
+        {imageFile && (
+          <p className="text-xs text-muted-foreground mt-1.5">{imageFile.name}</p>
         )}
         {imageError && (
-          <p className="text-destructive text-[0.8125rem] mt-1">
-            {imageError}
-          </p>
+          <p className="text-destructive text-xs mt-1.5">{imageError}</p>
         )}
       </div>
+
+      {/* Expiry */}
       <div>
-        <label htmlFor="expires_at">Expiry date <span className="text-muted-foreground font-normal">(optional)</span></label>
-        <p className="text-muted-foreground text-[0.8125rem] mt-[0.1rem] mb-1">
-          Link stops accepting payments after this date.
-        </p>
+        <label htmlFor="expires_at" className={labelClass}>
+          Expiry date{" "}
+          <span className="font-normal text-muted-foreground">optional</span>
+        </label>
+        <p className={hintClass + " mb-2"}>Link stops accepting payments after this date.</p>
         <input
           id="expires_at"
           name="expires_at"
           type="datetime-local"
           value={expiresAt}
           onChange={(e) => setExpiresAt(e.target.value)}
-          className="block w-full px-2 py-2 mt-1 border border-input bg-background text-foreground rounded"
+          className={inputClass}
         />
         {expiresAt && formatExpiryPreview(expiresAt) && (
           <p className="text-xs text-amber-600 dark:text-amber-400 mt-1.5">
-            Your link will show a "Limited offer" badge with {formatExpiryPreview(expiresAt)} remaining.
+            Shows a "Limited offer" badge with {formatExpiryPreview(expiresAt)} remaining.
           </p>
         )}
       </div>
-      {error && <p className="text-destructive">{error}</p>}
+
+      {error && <p className="text-destructive text-sm">{error}</p>}
+
       <button
         type="submit"
-        disabled={isPending}
-        className="inline-flex items-center justify-center gap-2 w-full py-3.5 bg-primary text-primary-foreground rounded-full text-base font-medium cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-70 disabled:cursor-not-allowed border-none mt-2"
+        disabled={isPending || priceInvalid}
+        className="inline-flex items-center justify-center gap-2 w-full py-3.5 bg-primary text-primary-foreground rounded-full text-base font-medium cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed border-none mt-2"
       >
         {isPending && <Loader2 className="animate-spin size-4 shrink-0" />}
         {isPending ? "Creating…" : "Create link →"}

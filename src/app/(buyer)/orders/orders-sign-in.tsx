@@ -34,7 +34,7 @@ export function OrdersSignIn({ oid }: { oid?: string }) {
         <p className="text-3xl mb-2">✉️</p>
         <p className="font-medium mb-2">Check your inbox</p>
         <p className="text-muted-foreground text-sm">
-          If there are orders for <strong>{email}</strong>, we sent you a sign-in link.
+          If we have a purchase for <strong>{email}</strong>, we sent you an access link.
         </p>
       </div>
     );
@@ -57,7 +57,7 @@ export function OrdersSignIn({ oid }: { oid?: string }) {
         className="w-full h-11 flex items-center justify-center gap-2 bg-primary text-primary-foreground border-none rounded-full font-medium text-base cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {loading && <Loader2 className="size-4 animate-spin shrink-0" />}
-        {loading ? "Sending…" : "Send sign-in link"}
+        {loading ? "Sending…" : "Send access link"}
       </button>
       {error && <p className="text-destructive text-sm">{error}</p>}
     </form>

@@ -33,7 +33,7 @@ export function RefundSellerEmail({
         Refund issued
       </Text>
       <Text style={{ fontSize: "15px", color: "#6B6B6B", margin: "0 0 32px" }}>
-        {sellerName ? `Hey ${sellerName}, you` : "You"} issued a full refund to {buyerEmail}. Stripe will reverse the payout to your account.
+        {sellerName ? `Hey ${sellerName}, you` : "You"} issued a full refund to {buyerEmail}. Stripe will deduct this amount from your balance.
       </Text>
 
       <div style={{ background: "#F5F3EE", borderRadius: "12px", padding: "24px", marginBottom: "32px" }}>

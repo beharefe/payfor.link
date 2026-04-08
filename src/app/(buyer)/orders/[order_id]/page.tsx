@@ -99,7 +99,7 @@ export default async function OrderPage({ params }: Props) {
         <div className="text-center mb-2">
           <p className="text-4xl mb-3">✓</p>
           <h1 className="text-2xl font-medium tracking-tight text-foreground mb-1">Access ready</h1>
-          <p className="text-muted-foreground text-sm">Your sale is confirmed</p>
+          <p className="text-muted-foreground text-sm">Your purchase is confirmed</p>
         </div>
 
         {/* Main card */}

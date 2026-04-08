@@ -29,7 +29,7 @@ export function EmailLayout({ preview, children }: EmailLayoutProps) {
           </Container>
           <Container style={{ maxWidth: "560px", width: "100%", margin: "0 auto", padding: "20px 20px 32px" }}>
             <p className="text-[#A09A94] text-xs text-center m-0">
-              unseal.link · Lock any link, sell instant access
+              unseal.link
             </p>
           </Container>
         </Body>

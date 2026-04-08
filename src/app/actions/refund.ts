@@ -28,8 +28,10 @@ export async function refundPurchase(orderId: string, note?: string): Promise<Ac
   if (order.status !== "paid") return { error: "This order cannot be refunded" };
   if (!order.stripe_payment_id) return { error: "No payment found for this order" };
 
+  let stripeRefundId: string;
   try {
-    await stripe.refunds.create({ payment_intent: order.stripe_payment_id });
+    const refund = await stripe.refunds.create({ payment_intent: order.stripe_payment_id });
+    stripeRefundId = refund.id;
   } catch (err) {
     log.error("refundPurchase: Stripe refund failed", {
       order_id: orderId,
@@ -43,6 +45,7 @@ export async function refundPurchase(orderId: string, note?: string): Promise<Ac
     .update({
       status: "refunded",
       refunded_at: new Date().toISOString(),
+      stripe_refund_id: stripeRefundId,
       ...(note ? { refund_reason: note } : {}),
     })
     .eq("id", orderId)
@@ -56,10 +59,24 @@ export async function refundPurchase(orderId: string, note?: string): Promise<Ac
     return { error: "Refund processed but failed to update record. Contact support." };
   }
 
+  // Decrement stats — mirror of the increments done on purchase
+  await Promise.all([
+    supabase.rpc("increment_product_stats", {
+      p_product_id: order.product_id,
+      p_revenue: -order.price_paid,
+    }),
+    supabase.rpc("increment_seller_stats", {
+      p_seller_id: user.id,
+      p_earned: -order.price_paid,
+      p_fees: -order.platform_fee,
+    }),
+  ]);
+
   log.info("refundPurchase: success", { order_id: orderId, seller_id: user.id });
 
   revalidatePath(`/dashboard/links/${order.product_id}`);
   revalidatePath("/dashboard/orders");
+  revalidatePath("/dashboard");
 
   // Send refund emails to buyer and seller (fire-and-forget, don't block the response)
   const h = await headers();
