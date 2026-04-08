@@ -68,8 +68,8 @@ export async function createCheckoutSession(
       terms_of_service: "required",
     },
     custom_text: {
-      after_submit: {
-        message: "By completing this purchase you agree to our [Terms of Service](https://unseal.link/terms) and [Privacy Policy](https://unseal.link/privacy).",
+      submit: {
+        message: "Your access link will be sent to the email address above.",
       },
     },
     success_url: `${paywallUrl}/success?session_id={CHECKOUT_SESSION_ID}`,

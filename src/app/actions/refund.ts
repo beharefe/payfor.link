@@ -66,6 +66,7 @@ export async function refundPurchase(orderId: string, note?: string): Promise<Ac
     service.rpc("increment_product_stats", {
       p_product_id: order.product_id,
       p_revenue: -order.price_paid,
+      p_sales_delta: -1,
     }),
     service.rpc("increment_seller_stats", {
       p_seller_id: user.id,

@@ -189,11 +189,15 @@ create trigger products_version_increment
 -- ============================================================
 -- RPC HELPERS (atomic increments — avoids read-modify-write races)
 -- ============================================================
-create or replace function increment_product_stats(p_product_id uuid, p_revenue numeric)
+create or replace function increment_product_stats(
+  p_product_id uuid,
+  p_revenue numeric,
+  p_sales_delta integer default 1
+)
 returns void as $$
 begin
   update products
-  set total_sales   = total_sales + 1,
+  set total_sales   = total_sales + p_sales_delta,
       total_revenue = total_revenue + p_revenue
   where id = p_product_id;
 end;
