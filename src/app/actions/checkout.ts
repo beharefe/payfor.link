@@ -64,6 +64,11 @@ export async function createCheckoutSession(
       application_fee_amount: platformFeeCents(link.price),
       transfer_data: { destination: seller.stripe_account_id },
     },
+    custom_text: {
+      submit: {
+        message: "Your access link will be sent to the email address above. Make sure it's correct.",
+      },
+    },
     success_url: `${paywallUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: paywallUrl,
     metadata: {
