@@ -111,7 +111,40 @@ These require a public staging or production URL (not Vercel-auth-protected):
 
 ---
 
-## 8. Pre-Launch Polish
+## 8. Legal & Privacy (GDPR)
+
+- [ ] `/privacy` page written and live — must cover:
+  - What data you collect (email, purchase history)
+  - Why (contract performance — delivering purchased content)
+  - Who you share it with (Stripe, Supabase, Resend, Amplitude, Axiom, Sentry)
+  - How long you keep it
+  - How to request deletion (email: info@unseal.link)
+- [ ] `/terms` page written and live — cover: acceptable use, no refund policy exceptions, platform fees, seller responsibilities
+- [ ] Both pages linked in site footer
+- [ ] Stripe Dashboard → Settings → Business → add `https://unseal.link/privacy` and `https://unseal.link/terms` (shown on Stripe-hosted pages)
+- [ ] Stripe checkout `after_submit` text already links to both ✓ (done in code)
+
+### Amplitude — Cookie Consent
+Amplitude uses cookies for session tracking which requires consent under GDPR/ePrivacy for EU visitors.
+
+**Option A — Disable cookies (recommended for MVP, zero friction)**
+In your Amplitude init config, set:
+```ts
+amplitude.init(API_KEY, { defaultTracking: true, cookieOptions: { disable: true } })
+```
+This switches Amplitude to localStorage only — no consent banner needed. You lose cross-domain tracking but that's fine for this product.
+
+**Option B — Consent banner (do later, when real EU traffic warrants it)**
+Use a library like `cookie-consent` or `CookieYes`. Only initialise Amplitude after consent is given.
+
+- [ ] Decide: Option A (disable cookies, no banner) or Option B (banner)
+- [ ] If Option A: update `src/lib/amplitude.tsx` to add `cookieOptions: { disable: true }`
+- [ ] If Option B: add consent banner before EU launch
+
+---
+
+## 9. Pre-Launch Polish
+
 
 - [ ] `NEXT_PUBLIC_APP_URL` set to `https://unseal.link` (affects OG images, access links, email links)
 - [ ] OG image endpoint (`/api/og/[slug]`) tested at production domain
@@ -124,7 +157,7 @@ These require a public staging or production URL (not Vercel-auth-protected):
 
 ---
 
-## 9. Post-Launch
+## 10. Post-Launch
 
 - [ ] Monitor Axiom logs for errors in first 24h
 - [ ] Monitor Sentry for any unexpected crashes
