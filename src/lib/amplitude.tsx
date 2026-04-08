@@ -10,6 +10,7 @@ if (
     serverZone: "EU",
     analytics: { autocapture: true },
     sessionReplay: { sampleRate: 1 },
+    cookieOptions: { disable: true },
   });
 }
 

@@ -29,6 +29,7 @@ export function NameForm({
   detail?: string;
 }) {
   const [name, setName] = useState(defaultName ?? "");
+  const [agreed, setAgreed] = useState(false);
   const handle = toHandle(name);
 
   return (
@@ -68,9 +69,29 @@ export function NameForm({
           </p>
         )}
       </div>
+      <label className="flex items-start gap-3 cursor-pointer">
+        <input
+          type="checkbox"
+          required
+          checked={agreed}
+          onChange={(e) => setAgreed(e.target.checked)}
+          className="mt-0.5 shrink-0 accent-primary"
+        />
+        <span className="text-sm text-muted-foreground leading-snug">
+          I agree to the{" "}
+          <a href="/terms" target="_blank" className="underline text-foreground hover:opacity-70">
+            Terms of Service
+          </a>{" "}
+          and{" "}
+          <a href="/privacy" target="_blank" className="underline text-foreground hover:opacity-70">
+            Privacy Policy
+          </a>
+        </span>
+      </label>
       <button
         type="submit"
-        className="w-full py-3 bg-primary text-primary-foreground border-none rounded-full font-medium text-sm cursor-pointer hover:opacity-90 transition-opacity"
+        disabled={!agreed}
+        className="w-full py-3 bg-primary text-primary-foreground border-none rounded-full font-medium text-sm cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
       >
         Start selling →
       </button>
