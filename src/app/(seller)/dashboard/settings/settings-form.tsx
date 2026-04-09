@@ -2,7 +2,7 @@
 
 import { updateProfile } from "@unseallink/app/actions/settings";
 import { Input } from "@unseallink/components/ui/input";
-import { Camera, Loader2 } from "lucide-react";
+import { Camera, Loader2, Pencil, Trash2, X } from "lucide-react";
 import { useActionState, useRef, useState, useTransition } from "react";
 
 const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
@@ -18,7 +18,9 @@ export function SettingsForm({ currentName, currentBio, currentAvatarUrl }: Prop
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(currentAvatarUrl);
+  const [avatarRemoved, setAvatarRemoved] = useState(false);
   const [avatarError, setAvatarError] = useState<string | null>(null);
+  const [avatarModalOpen, setAvatarModalOpen] = useState(false);
   const [uploadPending, _startUpload] = useTransition();
 
   const [state, formAction, isPending] = useActionState(
@@ -33,6 +35,8 @@ export function SettingsForm({ currentName, currentBio, currentAvatarUrl }: Prop
         }
         const { url } = await res.json();
         formData.set("avatar_url", url);
+      } else if (avatarRemoved) {
+        formData.set("avatar_url", "");
       } else {
         formData.set("avatar_url", currentAvatarUrl ?? "");
       }
@@ -56,19 +60,25 @@ export function SettingsForm({ currentName, currentBio, currentAvatarUrl }: Prop
     }
     setAvatarError(null);
     setAvatarFile(file);
+    setAvatarRemoved(false);
     setAvatarPreview(URL.createObjectURL(file));
+    setAvatarModalOpen(false);
   }
+
+  function handleRemoveAvatar() {
+    setAvatarFile(null);
+    setAvatarPreview(null);
+    setAvatarRemoved(true);
+    setAvatarModalOpen(false);
+  }
+
+  const hasAvatar = Boolean(avatarPreview);
 
   return (
     <form action={formAction} className="space-y-5">
-      {/* Compact avatar */}
+      {/* Avatar */}
       <div className="flex items-center gap-4">
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          className="relative shrink-0 group cursor-pointer rounded-full border-none p-0 bg-transparent"
-          title="Change photo"
-        >
+        <div className="relative shrink-0">
           {avatarPreview ? (
             <img
               src={avatarPreview}
@@ -80,10 +90,15 @@ export function SettingsForm({ currentName, currentBio, currentAvatarUrl }: Prop
               {currentName?.charAt(0).toUpperCase() ?? "?"}
             </div>
           )}
-          <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center">
-            <Camera className="size-4 text-white" aria-hidden="true" />
-          </div>
-        </button>
+          <button
+            type="button"
+            onClick={() => setAvatarModalOpen(true)}
+            className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-background border border-border flex items-center justify-center hover:bg-muted transition-colors"
+            title="Edit photo"
+          >
+            <Camera className="size-3 text-foreground" aria-hidden="true" />
+          </button>
+        </div>
         <input
           ref={fileInputRef}
           type="file"
@@ -97,6 +112,49 @@ export function SettingsForm({ currentName, currentBio, currentAvatarUrl }: Prop
           {avatarError && <p className="text-destructive text-xs mt-1">{avatarError}</p>}
         </div>
       </div>
+
+      {/* Avatar modal */}
+      {avatarModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          onClick={() => setAvatarModalOpen(false)}
+        >
+          <div
+            className="bg-background rounded-2xl p-5 w-64 shadow-xl flex flex-col gap-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-sm font-medium text-foreground">Profile photo</p>
+              <button
+                type="button"
+                onClick={() => setAvatarModalOpen(false)}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm text-foreground w-full text-left"
+            >
+              <Pencil className="size-4 text-muted-foreground shrink-0" />
+              {hasAvatar ? "Change photo" : "Upload photo"}
+            </button>
+            {hasAvatar && (
+              <button
+                type="button"
+                onClick={handleRemoveAvatar}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-destructive/10 transition-colors text-sm text-destructive w-full text-left"
+              >
+                <Trash2 className="size-4 shrink-0" />
+                Remove photo
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
 
       {/* Display name */}
       <div>
