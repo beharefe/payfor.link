@@ -2,7 +2,7 @@
 
 import { TABLES } from "@unseallink/lib/db";
 import { isValidUrl } from "@unseallink/lib/product-utils";
-import { createClient } from "@unseallink/lib/supabase/server";
+import { createClient, createServiceClient } from "@unseallink/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
 export type SettingsResult = { error: string } | { ok: true };
@@ -18,8 +18,9 @@ export async function updateName(formData: FormData): Promise<SettingsResult> {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Not signed in" };
 
-  // Case-insensitive uniqueness check — DB constraint is case-sensitive so "Alex" and "alex" would both pass
-  const { data: existing } = await supabase
+  // Case-insensitive uniqueness check — use service client because RLS only allows reading own row
+  const service = createServiceClient();
+  const { data: existing } = await service
     .from(TABLES.SELLERS)
     .select("id")
     .ilike("name", name)
@@ -61,8 +62,9 @@ export async function updateProfile(
   if (avatar_url && !isValidUrl(avatar_url))
     return { error: "Invalid avatar URL" };
 
-  // Case-insensitive uniqueness check — DB constraint is case-sensitive so "Alex" and "alex" would both pass
-  const { data: existing } = await supabase
+  // Case-insensitive uniqueness check — use service client because RLS only allows reading own row
+  const service = createServiceClient();
+  const { data: existing } = await service
     .from(TABLES.SELLERS)
     .select("id")
     .ilike("name", name)

@@ -1,7 +1,23 @@
 "use client";
 
 import { saveOnboardingName } from "@unseallink/app/actions/onboarding";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
+import { useFormStatus } from "react-dom";
+
+function SubmitButton({ agreed }: { agreed: boolean }) {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={!agreed || pending}
+      className="w-full py-3 bg-primary text-primary-foreground border-none rounded-full font-medium text-sm cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
+    >
+      {pending && <Loader2 className="animate-spin size-4 shrink-0" />}
+      {pending ? "Setting up…" : "Start selling →"}
+    </button>
+  );
+}
 
 function toHandle(name: string): string {
   return name
@@ -88,13 +104,7 @@ export function NameForm({
           </a>
         </span>
       </label>
-      <button
-        type="submit"
-        disabled={!agreed}
-        className="w-full py-3 bg-primary text-primary-foreground border-none rounded-full font-medium text-sm cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
-      >
-        Start selling →
-      </button>
+      <SubmitButton agreed={agreed} />
     </form>
   );
 }
