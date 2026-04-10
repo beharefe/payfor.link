@@ -39,15 +39,9 @@ export default async function LinksPage() {
   return (
     <main>
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Your links</p>
-          <Link
-            href="/dashboard/links/new"
-            className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground no-underline rounded-full font-medium text-sm hover:opacity-90 transition-opacity"
-          >
-            + New link
-          </Link>
-        </div>
+        <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-6">
+          Your links
+        </p>
 
         {!links?.length ? (
           <div className="border border-dashed border-border rounded-2xl p-12 text-center flex flex-col items-center gap-4">
