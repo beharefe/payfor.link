@@ -5,16 +5,17 @@ import {
   initiateStripeConnect,
   requestWithdraw,
 } from "@unseallink/app/actions/stripe-connect";
+import { Button } from "@unseallink/components/ui/button";
 import { ArrowUpRight, Loader2, LogOut, Settings } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
 
 export function InitiateStripeConnectButton({
   label = "Connect Stripe",
-  variant = "primary",
+  variant = "default",
 }: {
   label?: string;
-  variant?: "primary" | "outline";
+  variant?: "default" | "outline";
 }) {
   const [isPending, startTransition] = useTransition();
   return (
@@ -25,18 +26,15 @@ export function InitiateStripeConnectButton({
         startTransition(() => initiateStripeConnect());
       }}
     >
-      <button
+      <Button
         type="submit"
+        variant={variant}
         disabled={isPending}
-        className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-medium text-sm cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed border shrink-0 ${
-          variant === "outline"
-            ? "border-border bg-transparent text-foreground hover:bg-muted"
-            : "border-transparent bg-primary text-primary-foreground"
-        }`}
+        className="rounded-full shrink-0"
       >
         {isPending && <Loader2 className="animate-spin size-4 shrink-0" />}
         {isPending ? "Redirecting…" : label}
-      </button>
+      </Button>
     </form>
   );
 }
