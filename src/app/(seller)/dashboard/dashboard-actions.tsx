@@ -9,7 +9,13 @@ import { ArrowUpRight, Loader2, LogOut, Settings } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
 
-export function InitiateStripeConnectButton({ label = "Connect Stripe" }: { label?: string }) {
+export function InitiateStripeConnectButton({
+  label = "Connect Stripe",
+  variant = "primary",
+}: {
+  label?: string;
+  variant?: "primary" | "outline";
+}) {
   const [isPending, startTransition] = useTransition();
   return (
     <form
@@ -22,10 +28,14 @@ export function InitiateStripeConnectButton({ label = "Connect Stripe" }: { labe
       <button
         type="submit"
         disabled={isPending}
-        className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-full font-medium text-sm cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed border-none shrink-0"
+        className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-medium text-sm cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed border shrink-0 ${
+          variant === "outline"
+            ? "border-border bg-transparent text-foreground hover:bg-muted"
+            : "border-transparent bg-primary text-primary-foreground"
+        }`}
       >
         {isPending && <Loader2 className="animate-spin size-4 shrink-0" />}
-        {isPending ? "Redirecting..." : label}
+        {isPending ? "Redirecting…" : label}
       </button>
     </form>
   );

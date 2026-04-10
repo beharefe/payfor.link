@@ -1,5 +1,6 @@
 import { TABLES } from "@unseallink/lib/db";
 import { createClient } from "@unseallink/lib/supabase/server";
+import { Check } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { InitiateStripeConnectButton } from "./dashboard-actions";
@@ -91,14 +92,46 @@ export default async function DashboardPage() {
       <SellerRealtimeNotifier sellerId={user.id} />
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-        {/* Stripe connect banner */}
+        {/* Setup card — shown until Stripe is connected */}
         {!seller.stripe_connected && (
-          <div className="border border-border rounded-2xl p-5 bg-card flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="flex-1">
-              <p className="font-medium text-foreground mb-1">One step left: connect Stripe to go live</p>
-              <p className="text-sm text-muted-foreground">Takes 2 minutes. Your links activate the moment Stripe approves your account.</p>
+          <div className="border border-border rounded-2xl p-6 bg-card">
+            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-6">
+              Getting started
+            </p>
+            <div className="space-y-5">
+              {/* Step 1 — done */}
+              <div className="flex items-center gap-4">
+                <div className="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
+                  <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+                </div>
+                <p className="text-sm text-muted-foreground line-through">Create your account</p>
+              </div>
+
+              {/* Step 2 — current */}
+              <div className="flex items-start sm:items-center gap-4">
+                <div className="w-7 h-7 rounded-full border-2 border-foreground flex items-center justify-center shrink-0 text-xs font-semibold text-foreground">
+                  2
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground">Connect Stripe</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Takes 2 minutes. Payments go directly to your bank — we never touch your funds.
+                  </p>
+                </div>
+                <InitiateStripeConnectButton variant="outline" />
+              </div>
+
+              {/* Step 3 — locked */}
+              <div className="flex items-center gap-4 opacity-40 select-none">
+                <div className="w-7 h-7 rounded-full border border-border flex items-center justify-center shrink-0 text-xs text-muted-foreground">
+                  3
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Create your first paywall link</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Paste any URL, set a price, start selling.</p>
+                </div>
+              </div>
             </div>
-            <InitiateStripeConnectButton />
           </div>
         )}
 
