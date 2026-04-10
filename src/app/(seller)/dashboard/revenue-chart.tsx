@@ -7,10 +7,7 @@ import {
 } from "@unseallink/components/ui/chart";
 import Link from "next/link";
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
-import {
-  InitiateStripeConnectButton,
-  WithdrawButton,
-} from "./dashboard-actions";
+import { WithdrawButton } from "./dashboard-actions";
 
 export type DayRevenue = { date: string; revenue: number; refunded: number };
 
@@ -33,28 +30,26 @@ export function RevenueChart({ data, totalSales, totalEarned, stripeConnected, h
   return (
     <div className="border border-border rounded-2xl bg-card overflow-hidden">
       {/* Stat boxes */}
-      <div className="grid grid-cols-2 divide-x divide-border border-b border-border">
+      <div className={`grid divide-x divide-border border-b border-border ${stripeConnected ? "grid-cols-2" : ""}`}>
         <div className="px-4 py-4">
           <p className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground mb-1">
             Total sales
           </p>
           <p className="text-2xl font-medium text-foreground tabular-nums">{totalSales}</p>
         </div>
-        <div className="px-4 py-4 flex items-center justify-between gap-2">
-          <div>
-            <p className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground mb-1">
-              Total earned
-            </p>
-            <p className="text-2xl font-medium text-foreground tabular-nums">
-              ${totalEarned.toFixed(2)}
-            </p>
-          </div>
-          {stripeConnected ? (
+        {stripeConnected && (
+          <div className="px-4 py-4 flex items-center justify-between gap-2">
+            <div>
+              <p className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground mb-1">
+                Total earned
+              </p>
+              <p className="text-2xl font-medium text-foreground tabular-nums">
+                ${totalEarned.toFixed(2)}
+              </p>
+            </div>
             <WithdrawButton />
-          ) : (
-            <InitiateStripeConnectButton label="Set up" />
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Chart */}
