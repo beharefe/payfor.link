@@ -1,6 +1,5 @@
 import { TrustBar } from "@unseallink/components/trust-bar";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { HeroCTA, HeroHeadline } from "./hero-ab";
 import { ProductScroll } from "./product-scroll";
 
@@ -106,20 +105,38 @@ export default function HomePage() {
               location="hero_primary"
               className="inline-flex items-center px-6 py-3 bg-primary text-primary-foreground rounded-full font-medium text-sm hover:opacity-90 transition-opacity no-underline"
             />
-            <HeroCTA
-              href="/pricing"
-              label="See pricing"
-              location="hero_secondary"
-              className="inline-flex items-center px-6 py-3 border border-border rounded-full font-medium text-sm hover:bg-muted transition-colors no-underline text-foreground"
-            />
           </div>
 
           <TrustBar />
         </div>
       </section>
 
+      {/* How it works — right after hero so visitors immediately understand the product */}
+      <section className="border-t border-border py-16 md:py-20 bg-card">
+        <div className="max-w-5xl mx-auto px-6">
+          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-12">
+            How it works
+          </p>
+          <div className="grid sm:grid-cols-3 gap-10">
+            {steps.map((step) => (
+              <div key={step.n}>
+                <span className="text-xs font-medium text-muted-foreground font-mono">
+                  {step.n}
+                </span>
+                <h3 className="text-lg font-medium mt-3 mb-2 text-foreground">
+                  {step.title}
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {step.body}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* What you can sell — scrollable cards */}
-      <section className="border-t border-border py-14 bg-card overflow-hidden">
+      <section className="border-t border-border py-14 overflow-hidden">
         <div className="max-w-5xl mx-auto">
           <div className="flex items-end justify-between px-6 mb-8">
             <div>
@@ -137,7 +154,7 @@ export default function HomePage() {
       </section>
 
       {/* Pain points */}
-      <section className="border-t border-border py-16 md:py-24">
+      <section className="border-t border-border py-16 md:py-24 bg-card">
         <div className="max-w-5xl mx-auto px-6">
           <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-12">
             Built for people who got burned
@@ -160,31 +177,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Steps */}
-      <section className="border-t border-border py-16 md:py-24 bg-card">
-        <div className="max-w-5xl mx-auto px-6">
-          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-12">
-            Three steps
-          </p>
-          <div className="grid sm:grid-cols-3 gap-10">
-            {steps.map((step) => (
-              <div key={step.n}>
-                <span className="text-xs font-medium text-muted-foreground font-mono">
-                  {step.n}
-                </span>
-                <h3 className="text-lg font-medium mt-3 mb-2 text-foreground">
-                  {step.title}
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {step.body}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing callout */}
+      {/* Pricing */}
       <section className="border-t border-border py-16 md:py-24">
         <div className="max-w-5xl mx-auto px-6">
           <div className="max-w-xl">
@@ -196,16 +189,19 @@ export default function HomePage() {
               <br />
               Nothing else.
             </h2>
-            <p className="text-muted-foreground leading-relaxed mb-8 max-w-md">
-              No monthly fees. No setup costs. Gumroad charges 10%. We charge
-              4.5%. You keep the rest. We earn only when you earn.
+            <div className="space-y-1.5 text-sm text-muted-foreground mb-8 max-w-md">
+              <p>No monthly fees. No setup costs.</p>
+              <p>Stripe fees (~2.9% + $0.30) apply per transaction.</p>
+              <p>
+                Gumroad charges 10%. We charge 4.5%.{" "}
+                <span className="text-foreground font-medium">
+                  You keep the rest.
+                </span>
+              </p>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              We earn only when you earn. Free to list, zero monthly cost.
             </p>
-            <Link
-              href="/pricing"
-              className="inline-flex items-center text-sm font-medium text-foreground hover:text-muted-foreground transition-colors no-underline"
-            >
-              See full pricing breakdown →
-            </Link>
           </div>
         </div>
       </section>

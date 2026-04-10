@@ -29,20 +29,6 @@ export function Navbar() {
         >
           unseal.link
         </Link>
-        <div className="hidden sm:flex items-center gap-6">
-          <Link
-            href="/how-it-works"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors no-underline"
-          >
-            How it works
-          </Link>
-          <Link
-            href="/pricing"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors no-underline"
-          >
-            Pricing
-          </Link>
-        </div>
         {loggedIn ? (
           <Link
             href="/dashboard"
