@@ -121,16 +121,18 @@ export default async function DashboardPage() {
                 <InitiateStripeConnectButton variant="outline" />
               </div>
 
-              {/* Step 3 — locked */}
-              <div className="flex items-center gap-4 opacity-40 select-none">
-                <div className="w-7 h-7 rounded-full border border-border flex items-center justify-center shrink-0 text-xs text-muted-foreground">
-                  3
+              {/* Step 3 — only show if they haven't created a link yet */}
+              {!hasLinks && (
+                <div className="flex items-center gap-4 opacity-40 select-none">
+                  <div className="w-7 h-7 rounded-full border border-border flex items-center justify-center shrink-0 text-xs text-muted-foreground">
+                    3
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Create your first paywall link</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Paste any URL, set a price, start selling.</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Create your first paywall link</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Paste any URL, set a price, start selling.</p>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         )}
