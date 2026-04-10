@@ -83,6 +83,15 @@ export default async function SettingsPage() {
               </div>
             )}
           </div>
+          <p className="text-xs text-muted-foreground mt-4">
+            Need help?{" "}
+            <a
+              href="mailto:info@unseal.link"
+              className="text-foreground hover:underline"
+            >
+              info@unseal.link
+            </a>
+          </p>
         </div>
       </div>
     </main>
