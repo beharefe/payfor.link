@@ -261,39 +261,57 @@ export function NewLinkForm() {
             />
           </div>
 
+          {/* Your link (destination URL) */}
+          <div>
+            <label htmlFor="destination_url" className={labelClass}>Your link</label>
+            <input
+              id="destination_url"
+              name="destination_url"
+              type="url"
+              required
+              placeholder="https://notion.so/your-template, drive.google.com/…"
+              className={inputClass}
+            />
+          </div>
+
           {/* Description */}
           <div>
             <label htmlFor="description" className={labelClass}>
               Description{" "}
               <span className="font-normal text-muted-foreground">optional</span>
             </label>
-            <textarea
+            <input
               id="description"
               name="description"
-              rows={3}
+              type="text"
               value={descriptionValue}
               onChange={(e) => setDescriptionValue(e.target.value)}
-              className={`${inputClass} resize-none`}
-            />
-          </div>
-
-          {/* Destination URL */}
-          <div>
-            <label htmlFor="destination_url" className={labelClass}>Destination URL</label>
-            <input
-              id="destination_url"
-              name="destination_url"
-              type="url"
-              required
-              placeholder="https://"
+              placeholder="Short description shown on the paywall page"
               className={inputClass}
             />
           </div>
 
           {/* Price */}
           <div>
-            <label className={labelClass}>Price (USD)</label>
-            <div className="flex gap-2 mb-2 flex-wrap">
+            <label htmlFor="price" className={labelClass}>Price (USD)</label>
+            <div className="relative mb-2">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm select-none pointer-events-none">
+                $
+              </span>
+              <input
+                ref={priceInputRef}
+                id="price"
+                name="price"
+                type="number"
+                min={MIN_PRICE}
+                step={0.01}
+                required
+                defaultValue={MIN_PRICE}
+                onChange={(e) => setPriceValue(e.target.value)}
+                className={`${priceInvalid ? inputErrorClass : inputClass} pl-8`}
+              />
+            </div>
+            <div className="flex gap-2 flex-wrap">
               {PRICE_PRESETS.map((p) => (
                 <button
                   key={p}
@@ -302,28 +320,18 @@ export function NewLinkForm() {
                     setPriceValue(String(p));
                     if (priceInputRef.current) priceInputRef.current.value = String(p);
                   }}
-                  className="px-4 py-1.5 text-sm border border-border rounded-full text-muted-foreground hover:border-foreground hover:text-foreground transition-colors cursor-pointer"
+                  className={`px-3 py-1 text-xs border rounded-full transition-colors cursor-pointer ${
+                    priceNum === p
+                      ? "border-foreground text-foreground"
+                      : "border-border text-muted-foreground hover:border-foreground hover:text-foreground"
+                  }`}
                 >
                   ${p}
                 </button>
               ))}
             </div>
-            <input
-              ref={priceInputRef}
-              id="price"
-              name="price"
-              type="number"
-              min={MIN_PRICE}
-              step={0.01}
-              required
-              defaultValue={MIN_PRICE}
-              onChange={(e) => setPriceValue(e.target.value)}
-              className={priceInvalid ? inputErrorClass : inputClass}
-            />
-            {priceInvalid ? (
-              <p className="text-xs text-destructive mt-1">Minimum price is $9.99</p>
-            ) : (
-              <p className={hintClass}>Minimum $9.99</p>
+            {priceInvalid && (
+              <p className="text-xs text-destructive mt-1.5">Minimum price is $9.99</p>
             )}
           </div>
 

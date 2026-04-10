@@ -43,7 +43,7 @@ export default async function DashboardLayout({
           <DashboardTabs />
           <Link
             href="/dashboard/links/new"
-            className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary text-primary-foreground no-underline rounded-full font-medium text-xs hover:opacity-90 transition-opacity shrink-0"
+            className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground no-underline rounded-full font-medium text-sm hover:opacity-90 transition-opacity shrink-0"
           >
             <Plus className="w-3.5 h-3.5" aria-hidden="true" />
             New link
