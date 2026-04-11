@@ -1,39 +1,31 @@
-import { TABLES } from "@unseallink/lib/db";
-import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
 
-export async function GET(
-  _request: Request,
-  { params }: { params: Promise<{ slug: string }> },
-) {
-  const { slug } = await params;
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
 
-  const supabase = createServiceClient();
-  const { data: link } = await supabase
-    .from(TABLES.PRODUCTS)
-    .select("title, description, price, currency, preview_image_url, seller_id, status")
-    .eq("slug", slug)
-    .not("status", "in", '("deleted","suspended")')
-    .single();
+  const title  = searchParams.get("t") ?? "";
+  const price  = searchParams.get("p") ?? "";
+  const seller = searchParams.get("s") ?? "";
+  const imgSrc = searchParams.get("i") ?? "";
 
-  if (!link) {
-    return new Response("Not found", { status: 404 });
+  const hasImage = Boolean(imgSrc);
+  const IMAGE_W = 420;
+
+  // Attempt to load the preview image — wrap in try/catch so a bad URL
+  // falls back to the text-only layout rather than a 500 error.
+  let resolvedImg: string | null = null;
+  if (hasImage) {
+    try {
+      const res = await fetch(imgSrc, { signal: AbortSignal.timeout(3000) });
+      if (res.ok) resolvedImg = imgSrc;
+    } catch {
+      resolvedImg = null;
+    }
   }
 
-  const { data: seller } = await supabase
-    .from(TABLES.SELLERS)
-    .select("name")
-    .eq("id", link.seller_id)
-    .single();
-
-  const title = link.title;
-  const sellerName = seller?.name ?? null;
-  const price = `$${Number(link.price).toFixed(2)} ${(link.currency ?? "usd").toUpperCase()}`;
-  const hasImage = Boolean(link.preview_image_url);
-
-  return new ImageResponse(
+  const imageResponse = new ImageResponse(
     <div
       style={{
         width: "1200px",
@@ -43,44 +35,46 @@ export async function GET(
         fontFamily: "sans-serif",
       }}
     >
-      {/* Preview image panel */}
-      {hasImage && (
+      {/* Left: preview image panel */}
+      {resolvedImg && (
         <div
           style={{
-            width: "420px",
+            width: `${IMAGE_W}px`,
             height: "630px",
             flexShrink: 0,
-            overflow: "hidden",
             display: "flex",
+            position: "relative",
+            overflow: "hidden",
           }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={link.preview_image_url!}
+            src={resolvedImg}
             alt=""
-            style={{ width: "420px", height: "630px", objectFit: "cover" }}
+            style={{ width: `${IMAGE_W}px`, height: "630px", objectFit: "cover" }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: "linear-gradient(to right, transparent 60%, #F5F4EF 100%)",
+            }}
           />
         </div>
       )}
 
-      {/* Content area */}
+      {/* Right: content */}
       <div
         style={{
           flex: 1,
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          padding: hasImage ? "56px 56px 56px 52px" : "72px 80px",
+          padding: resolvedImg ? "56px 64px 56px 44px" : "72px 80px",
         }}
       >
-        {/* Top: tag */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-          }}
-        >
+        {/* Top badge */}
+        <div style={{ display: "flex" }}>
           <div
             style={{
               background: "#111111",
@@ -91,37 +85,31 @@ export async function GET(
               borderRadius: "100px",
             }}
           >
-            Pay once, get access
+            unseal.link
           </div>
         </div>
 
-        {/* Middle: title + author */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        {/* Title + seller */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
           <div
             style={{
-              fontSize: hasImage ? "44px" : "56px",
+              fontSize: resolvedImg ? "42px" : "56px",
               fontWeight: 700,
               color: "#111111",
               lineHeight: 1.15,
               letterSpacing: "-1px",
             }}
           >
-            {title.length > 60 ? `${title.slice(0, 58)}…` : title}
+            {title.length > 58 ? `${title.slice(0, 56)}…` : title}
           </div>
-          {sellerName && (
-            <div
-              style={{
-                fontSize: "22px",
-                color: "#6B6B6B",
-                fontWeight: 400,
-              }}
-            >
-              by {sellerName}
+          {seller && (
+            <div style={{ fontSize: "22px", color: "#6B6B6B", fontWeight: 400 }}>
+              by {seller}
             </div>
           )}
         </div>
 
-        {/* Bottom: price + brand */}
+        {/* Price */}
         <div
           style={{
             display: "flex",
@@ -131,18 +119,20 @@ export async function GET(
         >
           <div
             style={{
-              fontSize: "36px",
+              fontSize: "44px",
               fontWeight: 700,
               color: "#111111",
+              letterSpacing: "-1px",
             }}
           >
             {price}
           </div>
           <div
             style={{
+              fontFamily: "Georgia, serif",
               fontSize: "18px",
-              color: "#6B6B6B",
-              fontWeight: 400,
+              fontWeight: 600,
+              color: "#3D3530",
               letterSpacing: "-0.3px",
             }}
           >
@@ -153,4 +143,11 @@ export async function GET(
     </div>,
     { width: 1200, height: 630 },
   );
+
+  imageResponse.headers.set(
+    "Cache-Control",
+    "public, max-age=3600, stale-while-revalidate=86400",
+  );
+
+  return imageResponse;
 }
