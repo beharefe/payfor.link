@@ -7,17 +7,28 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: "/",
+        // /api/og/ must be accessible so link preview bots can fetch OG images
+        allow: ["/", "/api/og/"],
         disallow: ["/dashboard/", "/api/", "/unlock", "/orders"],
       },
-      // Explicitly allow AI crawlers so they can index paywall pages and
-      // content pages for product discovery via ChatGPT, Claude, Perplexity, etc.
-      { userAgent: "GPTBot", allow: "/" },
+      // Social / messaging platform link-preview bots — full access so OG images load
+      { userAgent: "Twitterbot",            allow: "/" },
+      { userAgent: "facebookexternalhit",   allow: "/" },
+      { userAgent: "WhatsApp",              allow: "/" },
+      { userAgent: "Discordbot",            allow: "/" },
+      { userAgent: "Slackbot-LinkExpanding",allow: "/" },
+      { userAgent: "Slackbot",              allow: "/" },
+      { userAgent: "TelegramBot",           allow: "/" },
+      { userAgent: "LinkedInBot",           allow: "/" },
+      // Apple (iMessage uses LPLinkMetadataAgent, web uses Applebot)
+      { userAgent: "Applebot",              allow: "/" },
+      { userAgent: "LPLinkMetadataAgent",   allow: "/" },
+      // AI crawlers
+      { userAgent: "GPTBot",        allow: "/" },
       { userAgent: "OAI-SearchBot", allow: "/" },
-      { userAgent: "ClaudeBot", allow: "/" },
+      { userAgent: "ClaudeBot",     allow: "/" },
       { userAgent: "PerplexityBot", allow: "/" },
-      { userAgent: "anthropic-ai", allow: "/" },
-      { userAgent: "Applebot", allow: "/" },
+      { userAgent: "anthropic-ai",  allow: "/" },
     ],
     sitemap: `${APP_URL}/sitemap.xml`,
     host: APP_URL,
