@@ -54,11 +54,14 @@ export async function refundPurchase(orderId: string, note?: string): Promise<Ac
     .eq("seller_id", user.id);
 
   if (dbError) {
-    log.error("refundPurchase: failed to update order status", {
+    log.error("refundPurchase: failed to update order status after successful Stripe refund", {
       order_id: orderId,
+      stripe_refund_id: stripeRefundId,
       error: dbError.message,
     });
-    return { error: "Refund processed but failed to update record. Contact support." };
+    return {
+      error: `The refund was issued to the buyer (ref: ${stripeRefundId}) but our records failed to update. Email info@unseal.link quoting order ID ${orderId}.`,
+    };
   }
 
   // Decrement stats — mirror of the increments done on purchase

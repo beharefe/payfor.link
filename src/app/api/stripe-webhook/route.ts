@@ -53,12 +53,16 @@ export async function POST(request: Request) {
       await handleAccountUpdated(event.data.object as Stripe.Account);
     } else if (event.type === "charge.dispute.created") {
       await handleDisputeCreated(event.data.object as Stripe.Dispute);
+    } else {
+      log.warn("Stripe webhook: unhandled event type", { type: event.type });
     }
   } catch (err) {
     log.error("Stripe webhook handler error", {
       type: event.type,
       error: serializeError(err),
     });
+    // Return 500 so Stripe retries — never swallow critical handler failures with 200
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 
   return NextResponse.json({ received: true }, { status: 200 });
@@ -137,10 +141,9 @@ async function handleCheckoutSessionCompleted(
     .single();
 
   if (insertError || !insertedOrder) {
-    log.error("checkout.session.completed: insert order failed", {
-      error: insertError?.message,
-    });
-    return;
+    // Throw so the outer catch returns 500 and Stripe retries this event.
+    // A silent return here would leave the order missing with no retry.
+    throw new Error(`Order insert failed: ${insertError?.message ?? "no data returned"}`);
   }
 
   // Atomic increments via RPC — avoids read-modify-write races on concurrent orders.
@@ -163,16 +166,23 @@ async function handleCheckoutSessionCompleted(
     token_hash: hash,
     expires_at: expiresAt.toISOString(),
   });
-  // Link goes to confirmation page — token is NOT consumed on GET (prevents email-scanner pre-click)
+
+  // Fire-and-forget emails — a failed send must NOT throw and cause Stripe to retry
+  // (that would create a duplicate order on retry since the insert already succeeded)
   const accessLink = `${appUrl}/orders/access?t=${raw}&oid=${insertedOrder.id}`;
-  await sendBuyerAccessEmail({
+  sendBuyerAccessEmail({
     to: customerEmail,
     accessLink,
     productTitle: product.title,
     orderUrl: `${appUrl}/orders/${insertedOrder.id}`,
-  });
+  }).catch((err) =>
+    log.error("buyer_access_email_failed", {
+      order_id: insertedOrder.id,
+      error: serializeError(err),
+    }),
+  );
 
-  // Notify seller of the new sale
+  // Notify seller of the new sale (fire-and-forget)
   const { data: seller } = await supabase
     .from(TABLES.SELLERS)
     .select("email, name")
@@ -180,14 +190,19 @@ async function handleCheckoutSessionCompleted(
     .maybeSingle();
 
   if (seller?.email) {
-    await sendSaleNotificationEmail({
+    sendSaleNotificationEmail({
       to: seller.email,
       sellerName: seller.name ?? "",
       productTitle: product.title,
       pricePaid,
       platformFee,
       dashboardUrl: `${appUrl}/dashboard`,
-    });
+    }).catch((err) =>
+      log.error("sale_notification_email_failed", {
+        order_id: insertedOrder.id,
+        error: serializeError(err),
+      }),
+    );
   }
 }
 

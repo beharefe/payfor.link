@@ -38,6 +38,36 @@ Set all of these in Vercel → Project → Settings → Environment Variables fo
   ```sql
   CREATE UNIQUE INDEX sellers_name_lower_idx ON sellers (lower(name));
   ```
+### Required indexes
+
+Run these in **Supabase Dashboard → SQL Editor** before launch:
+
+```sql
+-- Fast seller dashboard queries
+CREATE INDEX IF NOT EXISTS idx_products_seller_id ON products(seller_id);
+CREATE INDEX IF NOT EXISTS idx_orders_seller_id   ON orders(seller_id);
+CREATE INDEX IF NOT EXISTS idx_orders_created_at  ON orders(created_at DESC);
+
+-- Paywall page load (slug + seller join)
+CREATE INDEX IF NOT EXISTS idx_products_slug   ON products(slug);
+CREATE INDEX IF NOT EXISTS idx_products_status ON products(status);
+
+-- Expiry badge / Limited offer queries
+CREATE INDEX IF NOT EXISTS idx_products_expires_at ON products(expires_at)
+  WHERE expires_at IS NOT NULL;
+
+-- Access token lookup (critical path — every buyer access)
+CREATE UNIQUE INDEX IF NOT EXISTS idx_access_tokens_token_hash ON access_tokens(token_hash);
+CREATE INDEX        IF NOT EXISTS idx_access_tokens_order_id   ON access_tokens(order_id);
+
+-- Webhook idempotency check
+CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_stripe_payment_id ON orders(stripe_payment_id);
+```
+
+- [ ] All indexes above created in production
+
+---
+
 - [ ] Supabase Auth → Email → OTP Expiry set to match `ACCESS_TOKEN_DAYS` in code (7 days)
 - [ ] Supabase Auth → Email templates customised with unseal.link branding (magic link email)
 - [ ] Supabase Auth → Redirect URLs: add `https://unseal.link/**`

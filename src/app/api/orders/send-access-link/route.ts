@@ -21,6 +21,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Email required" }, { status: 400 });
   }
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  if (!emailRegex.test(email)) {
+    return NextResponse.json({ error: "Invalid email" }, { status: 400 });
+  }
+
   // Always return ok — don't reveal whether an account/orders exist for this email
   const reqUrl = new URL(request.url);
   const appUrl = `${reqUrl.protocol}//${reqUrl.host}`;
@@ -37,21 +42,33 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (order) {
-      const { raw, hash, expiresAt } = generateAccessToken();
-      const { error: insertError } = await service.from(TABLES.ACCESS_TOKENS).insert({
-        order_id: order.id,
-        token_hash: hash,
-        expires_at: expiresAt.toISOString(),
-      });
+      // Rate limit: don't create a new token if one was issued in the last 60 seconds.
+      // Prevents inbox flooding if someone hammers the resend button.
+      const { data: recentToken } = await service
+        .from(TABLES.ACCESS_TOKENS)
+        .select("created_at")
+        .eq("order_id", order.id)
+        .gte("created_at", new Date(Date.now() - 60_000).toISOString())
+        .limit(1)
+        .maybeSingle();
 
-      if (!insertError) {
-        const accessLink = `${appUrl}/orders/access?t=${raw}&oid=${order.id}`;
-        await sendBuyerAccessEmail({
-          to: order.buyer_email,
-          accessLink,
-          productTitle: order.product_title,
-          orderUrl: `${appUrl}/orders/${order.id}`,
-        }).catch((err) => log.error("send-access-link: email failed", { error: String(err) }));
+      if (!recentToken) {
+        const { raw, hash, expiresAt } = generateAccessToken();
+        const { error: insertError } = await service.from(TABLES.ACCESS_TOKENS).insert({
+          order_id: order.id,
+          token_hash: hash,
+          expires_at: expiresAt.toISOString(),
+        });
+
+        if (!insertError) {
+          const accessLink = `${appUrl}/orders/access?t=${raw}&oid=${order.id}`;
+          sendBuyerAccessEmail({
+            to: order.buyer_email,
+            accessLink,
+            productTitle: order.product_title,
+            orderUrl: `${appUrl}/orders/${order.id}`,
+          }).catch((err) => log.error("send-access-link: email failed", { error: String(err) }));
+        }
       }
     }
   } else {
