@@ -1,6 +1,6 @@
 import { TABLES } from "@unseallink/lib/db";
 import { createClient } from "@unseallink/lib/supabase/server";
-import { LockKeyhole } from "lucide-react";
+import { ChevronRight, LockKeyhole } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -66,61 +66,65 @@ export default async function LinksPage() {
             {links.map((link) => {
               const expired = isExpired(link.expires_at);
               const effectiveStatus = expired ? "expired" : link.status;
+              const paywallUrl = `${appUrl}/@${seller.username}/${link.slug}`;
               return (
                 <div
                   key={link.id}
-                  className="border border-border rounded-2xl px-5 py-4 bg-card flex flex-col sm:flex-row sm:items-center gap-4"
+                  className="border border-border rounded-2xl bg-card overflow-hidden"
                 >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <p className="font-medium text-foreground truncate">{link.title}</p>
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${
-                        effectiveStatus === "active"
-                          ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-                          : effectiveStatus === "expired"
-                            ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-                            : "bg-muted text-muted-foreground"
-                      }`}>
-                        {effectiveStatus}
-                      </span>
-                      {link.expires_at && !expired && (
-                        <span
-                          className="text-xs px-2 py-0.5 rounded-full font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 shrink-0 cursor-default"
-                          title={new Date(link.expires_at).toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })}
-                        >
-                          Limited
+                  {/* Top row — tappable to open link detail */}
+                  <Link
+                    href={`/dashboard/links/${link.id}`}
+                    className="flex items-center gap-3 px-4 py-4 no-underline hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                        <p className="font-medium text-foreground truncate">{link.title}</p>
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${
+                          effectiveStatus === "active"
+                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                            : effectiveStatus === "expired"
+                              ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                              : "bg-muted text-muted-foreground"
+                        }`}>
+                          {effectiveStatus}
                         </span>
-                      )}
+                        {link.expires_at && !expired && (
+                          <span
+                            className="text-xs px-2 py-0.5 rounded-full font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 shrink-0 cursor-default"
+                            title={new Date(link.expires_at).toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })}
+                          >
+                            Limited
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {link.status === "draft" && !seller.stripe_connected
+                          ? "Connect Stripe to activate"
+                          : `${link.total_sales} sales · $${(link.total_revenue ?? 0).toFixed(2)} earned`}
+                        {link.expires_at && !expired && (() => {
+                          const ms = new Date(link.expires_at).getTime() - Date.now();
+                          const hours = Math.floor(ms / 3600000);
+                          const label = hours >= 24 ? `${Math.floor(hours / 24)}d` : `${hours}h`;
+                          return <span className="ml-2 text-xs text-amber-600 dark:text-amber-400">· expires in {label}</span>;
+                        })()}
+                      </p>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      {link.status === "draft" && !seller.stripe_connected
-                        ? "Connect Stripe to activate"
-                        : `${link.total_sales} sales · $${(link.total_revenue ?? 0).toFixed(2)} earned`}
-                      {link.expires_at && !expired && (() => {
-                        const ms = new Date(link.expires_at).getTime() - Date.now();
-                        const hours = Math.floor(ms / 3600000);
-                        const label = hours >= 24 ? `${Math.floor(hours / 24)}d` : `${hours}h`;
-                        return <span className="ml-2 text-xs text-amber-600 dark:text-amber-400">· expires in {label}</span>;
-                      })()}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    {effectiveStatus === "active" && (
-                      <CopyLinkButtons url={`${appUrl}/@${seller.username}/${link.slug}`} linkId={link.id} price={link.price} />
-                    )}
-                    <Link
-                      href={`/preview/${link.id}`}
-                      className="px-4 py-2 border border-border rounded-full text-sm font-medium text-foreground no-underline hover:bg-muted transition-colors"
-                    >
-                      Preview
-                    </Link>
-                    <Link
-                      href={`/dashboard/links/${link.id}`}
-                      className="px-4 py-2 border border-border rounded-full text-sm font-medium text-foreground no-underline hover:bg-muted transition-colors"
-                    >
-                      Edit
-                    </Link>
-                  </div>
+                    <ChevronRight className="size-4 text-muted-foreground shrink-0" aria-hidden="true" />
+                  </Link>
+
+                  {/* Actions footer */}
+                  {effectiveStatus === "active" && (
+                    <div className="border-t border-border px-4 py-3 flex items-center gap-2 flex-wrap">
+                      <CopyLinkButtons url={paywallUrl} linkId={link.id} price={link.price} />
+                      <Link
+                        href={`/preview/${link.id}`}
+                        className="px-4 py-2 border border-border rounded-full text-sm font-medium text-foreground no-underline hover:bg-muted transition-colors"
+                      >
+                        Preview
+                      </Link>
+                    </div>
+                  )}
                 </div>
               );
             })}
