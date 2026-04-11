@@ -1,7 +1,11 @@
 import { TrustBar } from "@unseallink/components/trust-bar";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ProductScroll } from "./product-scroll";
+import dynamic from "next/dynamic";
+
+const ProductScroll = dynamic(() =>
+  import("./product-scroll").then((m) => m.ProductScroll)
+);
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
 
