@@ -2,7 +2,8 @@
 
 import { TABLES } from "@unseallink/lib/db";
 import { log } from "@unseallink/lib/logger";
-import { platformFeeCents, stripe } from "@unseallink/lib/stripe";
+import { calculateFee } from "@unseallink/lib/promotions/promotions-service";
+import { stripe } from "@unseallink/lib/stripe";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -48,6 +49,11 @@ export async function createCheckoutSession(
 
   const paywallUrl = `${appUrl}/@${seller.username}/${link.slug}`;
 
+  // Calculate fee with any active promotions applied.
+  // Reads DB fresh — never cache. Race condition risk on concurrent payments.
+  const grossCents = Math.round(link.price * 100);
+  const feeCalc = await calculateFee(link.seller_id, grossCents);
+
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
     line_items: [
@@ -55,13 +61,13 @@ export async function createCheckoutSession(
         quantity: 1,
         price_data: {
           currency: link.currency,
-          unit_amount: Math.round(link.price * 100),
+          unit_amount: grossCents,
           product_data: { name: link.title },
         },
       },
     ],
     payment_intent_data: {
-      application_fee_amount: platformFeeCents(link.price),
+      application_fee_amount: feeCalc.final_fee_cents,
       transfer_data: { destination: seller.stripe_account_id },
     },
     success_url: `${paywallUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
@@ -69,6 +75,9 @@ export async function createCheckoutSession(
     metadata: {
       product_id: link.id,
       product_version: String(link.version),
+      seller_id: link.seller_id,
+      fee_cents: String(feeCalc.final_fee_cents),
+      promotions_applied: JSON.stringify(feeCalc.promotions_applied),
     },
   });
 

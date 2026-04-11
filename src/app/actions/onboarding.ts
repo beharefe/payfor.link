@@ -1,6 +1,7 @@
 "use server";
 
 import { TABLES } from "@unseallink/lib/db";
+import { grantSignupPromotions } from "@unseallink/lib/promotions/promotions-service";
 import { createClient } from "@unseallink/lib/supabase/server";
 import { redirect } from "next/navigation";
 import slugify from "slugify";
@@ -60,6 +61,9 @@ export async function saveOnboardingName(formData: FormData) {
     const detail = encodeURIComponent(upsertError.message ?? upsertError.code ?? "unknown");
     redirect(`/onboarding/name?error=save_failed&detail=${detail}`);
   }
+
+  // Grant any auto-apply promotions (e.g. launch fee waiver). Non-blocking — never delay signup.
+  await grantSignupPromotions(user.id).catch(() => undefined);
 
   redirect("/dashboard");
 }

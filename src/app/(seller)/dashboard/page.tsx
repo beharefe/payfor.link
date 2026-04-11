@@ -3,6 +3,7 @@ import { createClient } from "@unseallink/lib/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { InitiateStripeConnectButton } from "./dashboard-actions";
+import { PromotionBanners } from "./promotion-banners";
 import { SellerRealtimeNotifier } from "./realtime-notifier";
 import { type DayRevenue, RevenueChart } from "./revenue-chart";
 
@@ -79,6 +80,9 @@ export default async function DashboardPage() {
       <SellerRealtimeNotifier sellerId={user.id} />
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+        {/* Active promotions — shown when seller has fee waivers or credits */}
+        <PromotionBanners sellerId={user.id} />
+
         {/* Stripe connect banner */}
         {!seller.stripe_connected && (
           <div className="border border-border rounded-2xl p-5 bg-card flex flex-col sm:flex-row sm:items-center gap-4">

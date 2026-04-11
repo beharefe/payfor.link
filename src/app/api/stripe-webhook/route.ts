@@ -2,6 +2,7 @@ import { sendBuyerAccessEmail, sendDisputeAlert, sendSaleNotificationEmail } fro
 import { generateAccessToken } from "@unseallink/lib/access-token";
 import { TABLES } from "@unseallink/lib/db";
 import { log } from "@unseallink/lib/logger";
+import { recordPaymentUsage, reversePaymentUsage } from "@unseallink/lib/promotions/promotions-service";
 import { platformFeeCents, stripe } from "@unseallink/lib/stripe";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { serializeError } from "@unseallink/lib/utils";
@@ -53,6 +54,10 @@ export async function POST(request: Request) {
       await handleAccountUpdated(event.data.object as Stripe.Account);
     } else if (event.type === "charge.dispute.created") {
       await handleDisputeCreated(event.data.object as Stripe.Dispute);
+    } else if (event.type === "charge.refunded") {
+      await handleChargeRefunded(event.data.object as Stripe.Charge);
+    } else {
+      log.warn("Stripe webhook: unhandled event type", { type: event.type });
     }
   } catch (err) {
     log.error("Stripe webhook handler error", {
@@ -115,7 +120,13 @@ async function handleCheckoutSessionCompleted(
 
   const amountTotal = session.amount_total ?? 0;
   const pricePaid = amountTotal / 100;
-  const platformFee = platformFeeCents(pricePaid) / 100;
+  // Use the fee that was actually set at checkout time (stored in metadata after promotion calc).
+  // Fall back to base-rate calculation for sessions created before promotions were deployed.
+  const feeCentsFromMeta = session.metadata?.fee_cents
+    ? Number(session.metadata.fee_cents)
+    : null;
+  const platformFee =
+    feeCentsFromMeta !== null ? feeCentsFromMeta / 100 : platformFeeCents(pricePaid) / 100;
 
   const { data: insertedOrder, error: insertError } = await supabase
     .from(TABLES.ORDERS)
@@ -156,6 +167,37 @@ async function handleCheckoutSessionCompleted(
     }),
   ]);
 
+  // Record promotion usage if any promotions were applied at checkout.
+  const sellerId = session.metadata?.seller_id ?? product.seller_id;
+  const promotionsApplied = session.metadata?.promotions_applied
+    ? (() => {
+        try {
+          return JSON.parse(session.metadata.promotions_applied);
+        } catch {
+          return [];
+        }
+      })()
+    : [];
+
+  if (promotionsApplied.length > 0 && feeCentsFromMeta !== null) {
+    await recordPaymentUsage({
+      sellerId,
+      stripePaymentIntentId: paymentIntentId,
+      grossAmountCents: amountTotal,
+      feeCalculation: {
+        original_fee_cents: platformFeeCents(pricePaid),
+        final_fee_cents: feeCentsFromMeta,
+        savings_cents: platformFeeCents(pricePaid) - feeCentsFromMeta,
+        promotions_applied: promotionsApplied,
+      },
+    }).catch((err) =>
+      log.error("record_payment_usage_failed", {
+        order_id: insertedOrder.id,
+        error: serializeError(err),
+      }),
+    );
+  }
+
   // Generate a single-use access token and store its hash in DB
   const { raw, hash, expiresAt } = generateAccessToken();
   await supabase.from(TABLES.ACCESS_TOKENS).insert({
@@ -189,6 +231,25 @@ async function handleCheckoutSessionCompleted(
       dashboardUrl: `${appUrl}/dashboard`,
     });
   }
+}
+
+async function handleChargeRefunded(charge: Stripe.Charge) {
+  const paymentIntentId =
+    typeof charge.payment_intent === "string"
+      ? charge.payment_intent
+      : charge.payment_intent?.id ?? null;
+
+  if (!paymentIntentId || !charge.amount_refunded) return;
+
+  await reversePaymentUsage({
+    stripePaymentIntentId: paymentIntentId,
+    refundedAmountCents: charge.amount_refunded,
+  }).catch((err) =>
+    log.error("reverse_payment_usage_failed", {
+      payment_intent: paymentIntentId,
+      error: serializeError(err),
+    }),
+  );
 }
 
 async function handleDisputeCreated(dispute: Stripe.Dispute) {
@@ -233,7 +294,7 @@ async function handleDisputeCreated(dispute: Stripe.Dispute) {
     amount: dispute.amount / 100,
     currency: dispute.currency,
     reason: dispute.reason,
-    evidenceDueBy: dispute.evidence_due_by,
+    evidenceDueBy: dispute.evidence_details?.due_by ?? null,
   };
 
   // Alert admin

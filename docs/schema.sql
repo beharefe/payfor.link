@@ -237,3 +237,77 @@ create policy "orders: seller sees own" on orders
 
 create policy "reports: public insert" on reports
   for insert with check (true);
+
+-- ============================================================
+-- PROMOTIONS SYSTEM (migration: 20260411000000_promotions_system)
+-- ============================================================
+
+create table promotions (
+  id uuid primary key default gen_random_uuid(),
+  code text unique,                -- optional human-readable code e.g. 'LAUNCH2026'
+  name text not null,
+  description text,
+  type text not null check (type in (
+    'fee_waiver_gmv',
+    'fee_rate_reduction',
+    'flat_credit',
+    'feature_unlock'
+  )),
+  config jsonb not null default '{}',
+  is_active boolean not null default true,
+  auto_apply_on_signup boolean not null default false,
+  max_redemptions integer,
+  redemption_count integer not null default 0,
+  valid_from timestamptz default now(),
+  valid_until timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table seller_promotions (
+  id uuid primary key default gen_random_uuid(),
+  seller_id uuid not null references sellers(id) on delete cascade,
+  promotion_id uuid not null references promotions(id) on delete cascade,
+  status text not null default 'active' check (status in (
+    'active', 'exhausted', 'expired', 'revoked'
+  )),
+  used_value bigint not null default 0,
+  max_value bigint not null default 0,
+  config_snapshot jsonb not null default '{}',
+  granted_at timestamptz not null default now(),
+  expires_at timestamptz,
+  exhausted_at timestamptz,
+  granted_by text default 'system',
+  notes text,
+  unique(seller_id, promotion_id),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table promotion_usage_log (
+  id uuid primary key default gen_random_uuid(),
+  seller_promotion_id uuid not null references seller_promotions(id) on delete cascade,
+  seller_id uuid not null references sellers(id) on delete cascade,
+  event_type text not null check (event_type in (
+    'payment_succeeded', 'payment_refunded', 'manual_adjustment', 'expiry_check'
+  )),
+  stripe_payment_intent_id text,
+  stripe_charge_id text,
+  gross_amount_cents bigint,
+  fee_before_cents bigint,
+  fee_after_cents bigint,
+  benefit_applied_cents bigint,
+  used_value_delta bigint not null default 0,
+  created_at timestamptz not null default now()
+);
+
+alter table seller_promotions enable row level security;
+alter table promotions enable row level security;
+alter table promotion_usage_log enable row level security;
+
+create policy "sellers_own_promotions" on seller_promotions
+  for select using (seller_id = auth.uid());
+create policy "promotions_public_read" on promotions
+  for select using (is_active = true);
+create policy "sellers_own_usage_log" on promotion_usage_log
+  for select using (seller_id = auth.uid());

@@ -5,4 +5,7 @@ export const TABLES = {
   ORDERS: "orders",
   ACCESS_TOKENS: "access_tokens",
   REPORTS: "reports",
+  PROMOTIONS: "promotions",
+  SELLER_PROMOTIONS: "seller_promotions",
+  PROMOTION_USAGE_LOG: "promotion_usage_log",
 } as const;
