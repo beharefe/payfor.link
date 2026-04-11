@@ -13,7 +13,7 @@
     "format": "biome format --write"
   },
   "dependencies": {
-    "@amplitude/unified": "^1.0.11",
+    "@amplitude/analytics-browser": "^2.39.0",
     "@base-ui/react": "^1.3.0",
     "@react-email/components": "^1.0.10",
     "@react-email/render": "^2.0.4",

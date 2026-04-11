@@ -1,28 +1,24 @@
 "use client";
 
-import * as amplitude from "@amplitude/unified";
+import * as amplitude from "@amplitude/analytics-browser";
 
 if (
   typeof window !== "undefined" &&
   process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY
 ) {
-  // Defer init to after the page renders — avoids blocking the main thread
-  // and contributing to Total Blocking Time (TBT).
   const key = process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY;
   if (typeof requestIdleCallback !== "undefined") {
     requestIdleCallback(() => {
-      amplitude.initAll(key, {
+      amplitude.init(key, {
         serverZone: "EU",
-        analytics: { autocapture: true },
-        sessionReplay: { sampleRate: 0 },
+        autocapture: true,
       });
     });
   } else {
     setTimeout(() => {
-      amplitude.initAll(key, {
+      amplitude.init(key, {
         serverZone: "EU",
-        analytics: { autocapture: true },
-        sessionReplay: { sampleRate: 0 },
+        autocapture: true,
       });
     }, 0);
   }
@@ -68,10 +64,6 @@ export type AnalyticsEvent =
   | { name: "link_archived"; props: { link_id: string } }
   | { name: "payout_requested"; props: { user_id: string } }
   // Marketing / acquisition
-  | {
-      name: "hero_variant_seen";
-      props: { variant: string };
-    }
   | {
       name: "cta_clicked";
       props: { location: string; label: string; variant?: string };
