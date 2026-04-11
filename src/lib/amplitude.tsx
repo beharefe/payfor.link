@@ -9,17 +9,11 @@ if (
   const key = process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY;
   if (typeof requestIdleCallback !== "undefined") {
     requestIdleCallback(() => {
-      amplitude.init(key, {
-        serverZone: "EU",
-        autocapture: true,
-      });
+      amplitude.init(key, { autocapture: true });
     });
   } else {
     setTimeout(() => {
-      amplitude.init(key, {
-        serverZone: "EU",
-        autocapture: true,
-      });
+      amplitude.init(key, { autocapture: true });
     }, 0);
   }
 }
