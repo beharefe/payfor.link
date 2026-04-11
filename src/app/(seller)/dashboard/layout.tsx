@@ -1,5 +1,6 @@
 import { TABLES } from "@unseallink/lib/db";
 import { createClient } from "@unseallink/lib/supabase/server";
+import { Plus } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AvatarDropdown } from "./dashboard-actions";
