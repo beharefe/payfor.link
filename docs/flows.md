@@ -14,7 +14,7 @@ Core mechanic: Lock link → Pay → Unlock
 Seller visits unseal.link
 → enters email → Supabase magic link sent
 → clicks link → authenticated
-→ users row upserted (id = auth.uid())
+→ sellers row upserted (id = auth.uid())
 → lands on /dashboard (empty state)
 → clicks "Create link"
 ```
@@ -31,7 +31,7 @@ Seller fills form: title, description, destination URL, price
 → platform-specific validation (see product-validation.md)
 → auto-generate slug: slugify(title) + "-" + 4-char random hex  e.g. notion-crm-a3f2
 → check slug globally unique → retry with new suffix if collision (max 5 attempts)
-→ insert links row:
+→ insert products row:
     status = 'draft' (if Stripe not connected)
     status = 'active' (if Stripe already connected)
 → redirect to /dashboard/links/[id]
@@ -55,11 +55,11 @@ Seller clicks "Connect Stripe"
 → seller authorizes (email only, no ID docs)
 → returns to /api/connect-stripe/return
 → stripe.accounts.retrieve() → check charges_enabled
-→ update users:
+→ update sellers:
     stripe_connected = true
     stripe_charges_enabled = true/false
     stripe_details_submitted = true/false
-→ activate all seller's draft links → status = 'active'
+→ activate all seller's draft products → status = 'active'
 → redirect to /dashboard
 ```
 
@@ -116,21 +116,21 @@ Buyer opens /pay/[slug]
 Stripe fires checkout.session.completed
 → POST /api/stripe-webhook
 → verify Stripe signature
-→ check purchases.stripe_payment_id (idempotency — skip if exists)
-→ fetch link by metadata.link_id
-→ insert purchase:
-    delivery_url = links.destination_url (SNAPSHOT — never read from links again)
-    product_title = links.title (SNAPSHOT)
+→ check orders.stripe_payment_id (idempotency — skip if exists)
+→ fetch product by metadata.product_id
+→ insert order:
+    delivery_url = products.destination_url (SNAPSHOT — never read from products again)
+    product_title = products.title (SNAPSHOT)
     price_paid = session.amount_total / 100 (SNAPSHOT)
     platform_fee = price_paid * 0.045
-    link_version = links.version (SNAPSHOT)
+    product_version = products.version (SNAPSHOT)
     buyer_email = session.customer_email
-    seller_id = links.seller_id
-→ UPDATE links SET total_sales++, total_revenue += price_paid
-→ UPDATE users SET total_earned += price_paid, total_fees += platform_fee
-→ supabase.auth.signInWithOtp({ email: buyer_email })
-    Supabase sends 6-digit OTP to buyer — this is the verification step
-    NOTE: unlock token is NOT generated here — only after OTP verified on success page
+    seller_id = products.seller_id
+→ rpc increment_product_stats(product_id, price_paid)
+→ rpc increment_seller_stats(seller_id, price_paid, platform_fee)
+→ generate 6-digit OTP, hash with SHA-256, store in orders.otp_hash (15min expiry)
+→ send OTP email to buyer via Resend
+    NOTE: access token is NOT generated here — only after OTP verified on success page
 → return 200 immediately
 ```
 
@@ -142,8 +142,8 @@ Stripe fires checkout.session.completed
 
 ```
 Stripe fires account.updated
-→ find user by stripe_account_id
-→ update:
+→ find seller by stripe_account_id
+→ update sellers:
     stripe_charges_enabled = account.charges_enabled
     stripe_payouts_enabled = account.payouts_enabled
     stripe_details_submitted = account.details_submitted
@@ -159,27 +159,30 @@ Stripe fires account.updated
 ```
 Buyer lands on /pay/[slug]/success?session_id=xxx
 → server fetches Stripe session → gets buyer_email
-→ server looks up purchase by stripe_checkout_session_id
-→ if purchase not yet created (webhook in-flight):
-    → client polls every 2s via router.refresh() until purchase appears
-→ if purchase.buyer_email_verified = true:
-    → redirect immediately to /orders/[purchase_id]  (repeat visit)
+→ server looks up order by stripe_checkout_session_id
+→ if order not yet created (webhook in-flight):
+    → client polls every 2s via router.refresh() until order appears
+→ if order.buyer_email_verified = true:
+    → redirect immediately to /orders/[order_id]  (repeat visit)
 → show OTP input: "Enter the 6-digit code sent to {email}"
 
-verifyOtp(purchase_id, code):
-→ supabase.auth.verifyOtp({ email: buyer_email, token: code, type: 'email' })
-→ if error: return error message
-→ set purchase.buyer_email_verified = true
-→ generate unlock token:
+verifyOtp(orderId, code):
+→ load order, check otp_hash and otp_expires_at
+→ hash input code with SHA-256, compare to orders.otp_hash
+→ if mismatch or expired: return error message
+→ set orders.buyer_email_verified = true, clear otp_hash + otp_expires_at
+→ generate access token:
     raw = crypto.randomBytes(32).toString('hex')
     hash = sha256(raw)
-    insert unlock_tokens: { purchase_id, token_hash, expires_at: now + 24h }
-→ send unlock email via Resend with raw token in URL
-→ redirect to /orders/[purchase_id]
+    insert access_tokens: { order_id, token_hash, expires_at: now + 24h }
+→ send access email via Resend with raw token in URL
+→ set purchase_session cookie (scoped to this order)
+→ redirect to /orders/[order_id]
 
-resendOtp(purchase_id):
-→ supabase.auth.signInWithOtp({ email: purchase.buyer_email })
-→ Supabase enforces rate limits + expiry
+resendOtp(orderId):
+→ generate new 6-digit OTP, hash with SHA-256
+→ update orders.otp_hash + otp_expires_at (15min)
+→ send new OTP email via Resend
 ```
 
 ---
@@ -190,8 +193,8 @@ resendOtp(purchase_id):
 Buyer clicks link in email: /unlock?token=abc123
 → server validates token on GET:
     hash token → sha256(abc123)
-    lookup unlock_tokens by token_hash
-    check: exists / not used / not expired / purchase not refunded
+    lookup access_tokens by token_hash
+    check: exists / not used / not expired / order not refunded
 → if invalid/used/expired: show error page
 → if valid: show confirmation screen — "You're one click away"
     DO NOT consume token on GET
@@ -200,7 +203,7 @@ Buyer clicks link in email: /unlock?token=abc123
 Buyer clicks "Access content →" button (form POST via Server Action):
 → re-validate token atomically
 → mark used_at = now() WHERE used_at IS NULL  (race-condition guard)
-→ fetch purchase.delivery_url
+→ fetch order.delivery_url
 → 302 redirect → delivery_url
 ```
 
@@ -212,34 +215,36 @@ Buyer clicks "Access content →" button (form POST via Server Action):
 Buyer clicks "Resend" or visits /unlock-request
 → enters email
 → POST /api/resend-unlock
-→ find purchases by buyer_email where status = 'paid'
-→ rate limit: max 3 active tokens per purchase per hour
-→ for each purchase:
+→ find orders by buyer_email where status = 'paid'
+→ rate limit: max 3 active tokens per order per hour
+→ for each order:
     invalidate unused tokens
     generate new token
-    insert unlock_tokens
+    insert access_tokens
     send unlock email
 → show "Check your inbox"
 ```
 
 ---
 
-## 10. Buyer Orders (session-based re-access)
+## 10. Buyer Orders (cookie-based re-access)
 
 ```
 Buyer visits /orders
-→ middleware checks Supabase session
-→ if no session: redirect to /auth (magic link / OTP sign-in)
-→ fetch purchases WHERE buyer_email = user.email AND status = 'paid'
+→ no Supabase session required — uses custom HMAC-signed cookie
+→ if no orders_session cookie: show email lookup form
+→ buyer enters email → POST /api/orders/send-code → OTP sent via Resend
+→ buyer enters code → POST /api/orders/verify-code → sets orders_session cookie (1hr)
+→ fetch orders WHERE buyer_email = session.email AND status = 'paid'
 → show list: product title, date, amount, "View order →"
 
 Buyer visits /orders/[order_id]
-→ middleware guards route (session required)
-→ verify purchase.buyer_email = user.email (ownership check)
+→ validate orders_session or purchase_session cookie
+→ verify order.buyer_email matches session email (ownership check)
 → show order detail — delivery_url NOT rendered in HTML
 → "Access content →" button → GET /api/orders/[order_id]/access
-    server validates session + ownership
-    302 redirect → purchase.delivery_url
+    server validates cookie + ownership
+    302 redirect → order.delivery_url
 ```
 
 ---
@@ -250,9 +255,9 @@ Buyer visits /orders/[order_id]
 Buyer clicks "Report" on /pay/[slug]
 → fill reason + optional description
 → POST /api/report-abuse
-→ insert abuse_reports row
+→ insert reports row
 → admin reviews in moderation queue
-→ if confirmed: links.status = 'suspended', notify seller
+→ if confirmed: products.status = 'suspended', notify seller
 ```
 
 ---

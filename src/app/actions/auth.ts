@@ -1,8 +1,8 @@
 "use server";
 
+import { TABLES } from "@unseallink/lib/db";
 import { createClient } from "@unseallink/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { TABLES } from "@unseallink/lib/db";
 
 export async function signInWithOtp(formData: FormData): Promise<void> {
   const email = formData.get("email")?.toString()?.trim();
@@ -11,7 +11,6 @@ export async function signInWithOtp(formData: FormData): Promise<void> {
   }
 
   const supabase = await createClient();
-
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: { shouldCreateUser: true },
@@ -31,7 +30,6 @@ export async function verifySellerOtp(formData: FormData): Promise<void> {
   }
 
   const supabase = await createClient();
-
   const { error } = await supabase.auth.verifyOtp({
     email,
     token: code,
@@ -41,35 +39,38 @@ export async function verifySellerOtp(formData: FormData): Promise<void> {
   if (error) {
     const msg = error.message?.toLowerCase().includes("expired")
       ? "Code expired. Request a new one."
-      : (error.message ?? "Invalid or expired code.");
-    redirect(`/auth?error=${encodeURIComponent(msg)}&sent=1&email=${encodeURIComponent(email)}`);
-  }
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  let needsName = false;
-  if (user) {
-    const { data: existing } = await supabase
-      .from(TABLES.SELLERS)
-      .select("name")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    needsName = !existing?.name;
-
-    await supabase.from(TABLES.SELLERS).upsert(
-      { id: user.id, email: user.email ?? "", name: user.user_metadata?.name ?? null },
-      { onConflict: "id" },
+      : (error.message ?? "Invalid code.");
+    redirect(
+      `/auth?error=${encodeURIComponent(msg)}&sent=1&email=${encodeURIComponent(email)}`,
     );
   }
 
-  redirect(needsName ? "/onboarding/name" : "/dashboard");
+  const { data: { user } } = await supabase.auth.getUser();
+
+  let needsOnboarding = false;
+  if (user) {
+    const { data: existing } = await supabase
+      .from(TABLES.SELLERS)
+      .select("name, username")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    needsOnboarding = !existing?.name || !existing?.username;
+
+    // If row already exists, keep email in sync — but never insert without name
+    if (existing) {
+      await supabase
+        .from(TABLES.SELLERS)
+        .update({ email: user.email ?? "" })
+        .eq("id", user.id);
+    }
+  }
+
+  redirect(needsOnboarding ? "/onboarding/name" : "/dashboard");
 }
 
 export async function signOut(): Promise<void> {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  redirect("/auth");
+  redirect("/");
 }

@@ -1,33 +1,38 @@
-import { NextResponse } from "next/server";
-import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { TABLES } from "@unseallink/lib/db";
+import { sendAbuseReportAlert } from "@unseallink/lib/email";
+import { log } from "@unseallink/lib/logger";
+import { createServiceClient } from "@unseallink/lib/supabase/server";
+import { NextResponse } from "next/server";
 
 const VALID_REASONS = ["scam", "malware", "copyright", "other"] as const;
 
 export async function POST(request: Request) {
-  let body: { product_id?: string; reason?: string; description?: string };
+  let body: { product_id?: string; reason?: string; description?: string; reporter_email?: string };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 
-  const { product_id, reason, description } = body;
+  const { product_id, reason, description, reporter_email } = body;
 
   if (!product_id || typeof product_id !== "string") {
     return NextResponse.json({ error: "Missing product_id" }, { status: 400 });
   }
 
-  if (!reason || !VALID_REASONS.includes(reason as (typeof VALID_REASONS)[number])) {
+  if (
+    !reason ||
+    !VALID_REASONS.includes(reason as (typeof VALID_REASONS)[number])
+  ) {
     return NextResponse.json({ error: "Invalid reason" }, { status: 400 });
   }
 
   const supabase = createServiceClient();
 
-  // Verify product exists
+  // Verify product exists and grab title for the alert email
   const { data: product } = await supabase
     .from(TABLES.PRODUCTS)
-    .select("id")
+    .select("id, title")
     .eq("id", product_id)
     .single();
 
@@ -37,18 +42,37 @@ export async function POST(request: Request) {
 
   const trimmedDescription = description?.trim() || null;
   if (trimmedDescription && trimmedDescription.length > 500) {
-    return NextResponse.json({ error: "Description must be 500 characters or less" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Description must be 500 characters or less" },
+      { status: 400 },
+    );
   }
 
   const { error } = await supabase.from(TABLES.REPORTS).insert({
     product_id,
     reason,
     description: trimmedDescription,
+    reporter_email: reporter_email?.trim().toLowerCase() || null,
   });
 
   if (error) {
-    return NextResponse.json({ error: "Failed to submit report" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to submit report" },
+      { status: 500 },
+    );
   }
+
+  // Extract order ref from description prefix "[Order: XXXXXXXX]" if present
+  const orderRef = description?.match(/^\[Order: ([A-Z0-9]+)\]/)?.[1] ?? null;
+
+  sendAbuseReportAlert({
+    productId: product_id,
+    productTitle: product.title,
+    reason,
+    description: trimmedDescription,
+    reporterEmail: reporter_email?.trim().toLowerCase() || null,
+    orderId: orderRef,
+  }).catch((err) => log.error("abuse_report_alert_email_failed", { error: String(err) }));
 
   return NextResponse.json({ ok: true });
 }

@@ -8,7 +8,7 @@
 | Scam products | Buyer defrauded | Abuse reporting + moderation |
 | Stolen cards | Chargebacks, platform risk | Stripe Radar (built-in) |
 | Token sharing | Paid content leaked | Single-use tokens, 24h expiry |
-| Duplicate webhooks | Double purchase records | `stripe_payment_id` UNIQUE constraint |
+| Duplicate webhooks | Double order records | `stripe_payment_id` UNIQUE constraint |
 | Webhook spoofing | Fake purchase records | Stripe signature verification |
 | Brute force unlocks | Token guessing | 32-byte random tokens = impossible to brute force |
 | Email scanner pre-click | Token consumed before buyer | Browser-side confirmation step before consuming token |
@@ -26,7 +26,7 @@ Every destination URL is checked before a product can go active:
 4. Platform-specific validation (see product-validation.md)
 ```
 
-If flagged: `links.status = 'suspended'`, seller notified.
+If flagged: `products.status = 'suspended'`, seller notified.
 
 Google Safe Browsing: free, 10K requests/day, sufficient for MVP.
 
@@ -81,11 +81,11 @@ Every `/pay/[slug]` page has a "Report" link (small, bottom of page).
 Report flow:
 ```
 Buyer submits report (reason + description)
-→ insert abuse_reports row
+→ insert reports row
 → admin notified (email or Slack webhook)
 → admin reviews in moderation queue
 → if confirmed violation:
-    links.status = 'suspended'
+    products.status = 'suspended'
     seller notified
 → if repeated violations:
     seller account suspended
@@ -104,12 +104,12 @@ Immediate suspension (no review needed):
 Stripe handles the financial side automatically.
 
 Platform supports disputes by providing evidence:
-- `purchases.created_at` — proof of purchase timestamp
-- `unlock_tokens.used_at` — proof of delivery
-- `purchases.buyer_email` — proof of who purchased
+- `orders.created_at` — proof of purchase timestamp
+- `access_tokens.used_at` — proof of delivery
+- `orders.buyer_email` — proof of who purchased
 
 When `charge.dispute.created` fires (Phase 2 webhook):
-- Mark `purchases.status = 'disputed'`
+- Mark `orders.status = 'disputed'`
 - Alert seller
 - Provide evidence to Stripe
 
@@ -119,11 +119,11 @@ When `charge.dispute.created` fires (Phase 2 webhook):
 
 All tables have RLS enabled. Key rules:
 
-- **users**: read/update own row only
-- **links**: sellers manage own; anyone reads `status = 'active'` only
-- **purchases**: sellers see their own sales; buyers via service role only
-- **unlock_tokens**: service role only — never client-accessible
-- **abuse_reports**: anyone can insert; only service role reads
+- **sellers**: read/update own row only
+- **products**: sellers manage own; anyone reads `status = 'active'` only
+- **orders**: sellers see their own sales; buyers via service role only
+- **access_tokens**: service role only — never client-accessible
+- **reports**: anyone can insert; only service role reads
 
 All sensitive operations (webhook, unlock, resend) use the Supabase secret key (`SUPABASE_SECRET_KEY`, or legacy `SUPABASE_SERVICE_ROLE_KEY`).
 Client-side code uses the publishable key (`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, or legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY`) with RLS enforced. See [Supabase API keys](https://supabase.com/docs/guides/api/api-keys).

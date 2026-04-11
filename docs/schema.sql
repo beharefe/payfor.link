@@ -7,7 +7,7 @@
 create table sellers (
   id              uuid primary key references auth.users(id) on delete cascade,
   email           text not null unique,
-  name            text,
+  name            text not null,         -- display name: "Alex Templates", "John Doe"
 
   stripe_account_id          text unique,
   stripe_connected           boolean not null default false,
@@ -18,7 +18,7 @@ create table sellers (
   total_earned    numeric(10,2) not null default 0,
   total_fees      numeric(10,2) not null default 0,
 
-  username        text unique,
+  username        text not null unique,  -- URL handle, auto-generated from name: "alex-templates"
   avatar_url      text,
   bio             text,
 
@@ -189,11 +189,15 @@ create trigger products_version_increment
 -- ============================================================
 -- RPC HELPERS (atomic increments — avoids read-modify-write races)
 -- ============================================================
-create or replace function increment_product_stats(p_product_id uuid, p_revenue numeric)
+create or replace function increment_product_stats(
+  p_product_id uuid,
+  p_revenue numeric,
+  p_sales_delta integer default 1
+)
 returns void as $$
 begin
   update products
-  set total_sales   = total_sales + 1,
+  set total_sales   = total_sales + p_sales_delta,
       total_revenue = total_revenue + p_revenue
   where id = p_product_id;
 end;

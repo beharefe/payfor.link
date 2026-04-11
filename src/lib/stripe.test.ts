@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { platformFeeCents, PLATFORM_FEE_PERCENT } from "./stripe";
+import { describe, expect, it } from "vitest";
+import { PLATFORM_FEE_PERCENT, platformFeeCents } from "./stripe";
 
 describe("platformFeeCents", () => {
   it("calculates 4.5% fee correctly for common amounts", () => {

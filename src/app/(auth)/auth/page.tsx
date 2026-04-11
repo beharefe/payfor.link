@@ -1,73 +1,79 @@
-import { signInWithOtp, verifySellerOtp } from "@unseallink/app/actions/auth";
+import { createClient } from "@unseallink/lib/supabase/server";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { EmailForm, OtpForm } from "./auth-forms";
+
+const ERROR_MESSAGES: Record<string, string> = {
+  missing_code: "That link is invalid or has expired.",
+};
 
 export default async function AuthPage({
   searchParams,
 }: {
   searchParams: Promise<{ sent?: string; error?: string; email?: string }>;
 }) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) redirect("/dashboard");
+
   const params = await searchParams;
   const sent = params.sent === "1";
   const email = params.email ? decodeURIComponent(params.email) : "";
-  const error = params.error ? decodeURIComponent(params.error) : null;
+  const rawError = params.error ? decodeURIComponent(params.error) : null;
+  const error = rawError ? (ERROR_MESSAGES[rawError] ?? rawError) : null;
 
   return (
-    <main style={{ padding: "2rem", maxWidth: "24rem", margin: "0 auto" }}>
-      <h1>Sign in</h1>
-
-      {error && (
-        <p style={{ marginBottom: "1rem", color: "red" }}>{error}</p>
-      )}
-
-      {!sent ? (
-        <>
-          <p>Enter your email and we&apos;ll send you a 6-digit code.</p>
-          <form action={signInWithOtp}>
-            <div style={{ marginBottom: "1rem" }}>
-              <label htmlFor="email">Email</label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                autoComplete="email"
-                style={{ display: "block", width: "100%", padding: "0.5rem", marginTop: "0.25rem" }}
-              />
-            </div>
-            <button type="submit" style={{ padding: "0.5rem 1rem" }}>
-              Send code
-            </button>
-          </form>
-        </>
-      ) : (
-        <>
-          <p>
-            Enter the 6-digit code we sent to <strong>{email}</strong>
+    <main className="min-h-dvh flex flex-col items-center justify-center px-6 py-16 bg-background">
+      <div className="w-full max-w-sm">
+        <div className="mb-8">
+          <Link href="/" className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3 hover:text-foreground transition-colors no-underline block">
+            unseal.link
+          </Link>
+          <h1 className="text-3xl font-medium tracking-tight text-foreground mb-2">
+            {sent ? "Check your email" : "Sign in"}
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            {sent ? (
+              <>
+                We sent a 6-digit code to{" "}
+                <span className="font-medium text-foreground">{email}</span>.
+              </>
+            ) : (
+              "Seller sign-in. Enter your email and we'll send you a code."
+            )}
           </p>
-          <form action={verifySellerOtp}>
-            <input type="hidden" name="email" value={email} />
-            <div style={{ marginBottom: "1rem" }}>
-              <label htmlFor="code">Code</label>
-              <input
-                id="code"
-                name="code"
-                type="text"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                placeholder="000000"
-                maxLength={6}
-                required
-                style={{ display: "block", padding: "0.5rem", fontSize: "1.25rem", width: "8rem", marginTop: "0.25rem" }}
-              />
-            </div>
-            <button type="submit" style={{ padding: "0.5rem 1rem" }}>
-              Verify
-            </button>
-          </form>
-          <p style={{ marginTop: "1rem" }}>
-            <a href="/auth">Use a different email</a>
-          </p>
-        </>
-      )}
+          {!sent && (
+            <p className="text-xs text-muted-foreground mt-2">
+              Looking for something you bought?{" "}
+              <a
+                href="/orders"
+                className="underline underline-offset-2 hover:text-foreground transition-colors"
+              >
+                Access your orders
+              </a>
+            </p>
+          )}
+        </div>
+
+        {sent ? (
+          <OtpForm email={email} resendEmail={email} error={error} />
+        ) : (
+          <>
+            <EmailForm defaultEmail={email} error={error} />
+            <p className="text-xs text-muted-foreground mt-4 leading-relaxed">
+              By continuing you agree to our{" "}
+              <Link href="/terms" className="underline underline-offset-2 hover:text-foreground transition-colors">
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link href="/privacy" className="underline underline-offset-2 hover:text-foreground transition-colors">
+                Privacy Policy
+              </Link>
+              .
+            </p>
+          </>
+        )}
+      </div>
     </main>
   );
 }

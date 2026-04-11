@@ -268,7 +268,7 @@ Re-access (later): sign in at /orders → see all purchases → access any time
 
 # Database Schema (MVP)
 
-## users
+## sellers
 
 id uuid
 email text
@@ -278,7 +278,7 @@ created_at timestamp
 
 ---
 
-## links
+## products
 
 id uuid
 seller_id uuid
@@ -292,23 +292,23 @@ created_at timestamp
 
 ---
 
-## purchases
+## orders
 
 id uuid
-link_id uuid
+product_id uuid
 buyer_email text
 stripe_payment_id text unique
-amount numeric
+price_paid numeric
 delivery_url text  -- snapshot at purchase time
 status text        -- paid | refunded | disputed
 created_at timestamp
 
 ---
 
-## unlock_tokens
+## access_tokens
 
 id uuid
-purchase_id uuid
+order_id uuid
 token_hash text
 expires_at timestamp
 used_at timestamp
@@ -322,8 +322,8 @@ POST /api/create-product
 POST /api/create-checkout
 POST /api/stripe-webhook
 POST /api/connect-stripe
-GET  /api/purchases
-POST /api/unlock-request
+GET  /api/orders/lookup
+POST /api/resend-unlock
 
 ---
 

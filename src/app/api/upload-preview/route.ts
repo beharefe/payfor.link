@@ -1,5 +1,8 @@
+import {
+  createClient,
+  createServiceClient,
+} from "@unseallink/lib/supabase/server";
 import { type NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceClient } from "@unseallink/lib/supabase/server";
 
 const BUCKET = "preview-images";
 const MAX_SIZE = 2 * 1024 * 1024; // 2MB
@@ -13,7 +16,11 @@ const EXT_MAP: Record<string, string> = {
 // Magic byte signatures to verify actual file content
 const SIGNATURES = [
   { mime: "image/jpeg", bytes: [0xff, 0xd8, 0xff], offset: 0 },
-  { mime: "image/png", bytes: [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a], offset: 0 },
+  {
+    mime: "image/png",
+    bytes: [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a],
+    offset: 0,
+  },
   { mime: "image/webp", bytes: [0x52, 0x49, 0x46, 0x46], offset: 0 }, // RIFF header
 ] as const;
 
@@ -58,7 +65,10 @@ export async function POST(req: NextRequest) {
   }
 
   if (file.size > MAX_SIZE) {
-    return NextResponse.json({ error: "Image must be under 2MB" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Image must be under 2MB" },
+      { status: 400 },
+    );
   }
 
   // MIME type check from Content-Type
@@ -91,7 +101,10 @@ export async function POST(req: NextRequest) {
     .upload(path, buffer, { contentType: detectedMime, upsert: false });
 
   if (uploadError) {
-    return NextResponse.json({ error: "Upload failed. Please try again." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Upload failed. Please try again." },
+      { status: 500 },
+    );
   }
 
   const {

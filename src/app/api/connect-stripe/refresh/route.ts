@@ -1,6 +1,8 @@
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  return NextResponse.redirect(new URL("/dashboard?onboarding=incomplete", appUrl));
+export async function GET(request: NextRequest) {
+  const { protocol, host } = request.nextUrl;
+  return NextResponse.redirect(
+    new URL("/dashboard?onboarding=incomplete", `${protocol}//${host}`),
+  );
 }

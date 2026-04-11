@@ -89,7 +89,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - Magic link only (Supabase) — no passwords ever
 - Sellers = Supabase users with row in `users` table
 - Buyers = email only, no account required
-- Middleware protects: `/dashboard` and all `/dashboard/*` routes (e.g. `/dashboard/links/new`, `/dashboard/links/[id]`, `/dashboard/settings`)
+- `src/proxy.ts` protects: `/dashboard` and `/onboarding` routes — redirects unauthenticated users to `/auth`
 
 ### Stripe Connect — Deferred Onboarding
 - Sellers connect Stripe with `collect: 'eventually_due'` — no KYC upfront
@@ -98,50 +98,50 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - `account.updated` webhook syncs `charges_enabled` + `payouts_enabled`
 - **Never store payouts in DB** — query Stripe directly: `stripe.payouts.list({}, { stripeAccount: id })`
 
-### Links
+### Products
 - Status: `draft` → `active` → `suspended` | `deleted`
 - Draft until seller connects Stripe → then auto-activates
 - Slug auto-generated from title, collision-handled
 - Minimum price: $9.99
-- Rate limits: 20 links/user, 5/day
+- Rate limits: 20 products/user, 5/day
 - `version` auto-increments via DB trigger on seller edits
 
-### Purchases — Immutable Snapshots
-- `delivery_url` — snapshot at purchase time, NEVER re-read from `links`
+### Orders — Immutable Snapshots
+- `delivery_url` — snapshot at purchase time, NEVER re-read from `products`
 - `product_title` — snapshot
 - `price_paid` — snapshot
 - `platform_fee` — 4.5% of price_paid, stored for accounting
-- `link_version` — which version was purchased
+- `product_version` — which version was purchased
 - `stripe_payment_id` — UNIQUE constraint for webhook idempotency
 
-### Unlock Tokens
+### Access Tokens
 - 32-byte random, stored as SHA-256 hash
 - 24h expiry
 - Single-use (`used_at` timestamp)
-- Multiple tokens per purchase allowed (resend flow)
+- Multiple tokens per order allowed (resend flow)
 - Browser-side confirmation before consuming (prevents email scanner pre-click)
-- Separate `unlock_tokens` table — never store on `purchases`
+- Separate `access_tokens` table — never store on `orders`
 
 ### Webhooks (2 events only)
 ```
-checkout.session.completed  → create purchase → Supabase signInWithOtp(buyer_email) → buyer verifies on success page → then unlock token + email
+checkout.session.completed  → create order → generate custom OTP (SHA-256 hashed) → send via Resend → buyer verifies on success page → then access token + email
 account.updated             → sync Stripe Connect status → notify seller on KYC complete
 ```
 
 ### Payouts
 - **No payouts table** — Stripe is source of truth
 - Query: `stripe.payouts.list({}, { stripeAccount: seller.stripe_account_id })`
-- Store only: `users.total_earned`, `users.total_fees`, `users.total_paid_out` for fast dashboard
+- Store only: `sellers.total_earned`, `sellers.total_fees` for fast dashboard
 
 ---
 
 ## Final Database Schema
 
 ```sql
--- users (sellers)
+-- sellers
 id uuid PK → auth.users.id
 email text UNIQUE
-name text
+name text NOT NULL UNIQUE                     -- handle + display name: "alex" → /@alex
 stripe_account_id text UNIQUE
 stripe_connected boolean DEFAULT false        -- OAuth complete → can sell
 stripe_charges_enabled boolean DEFAULT false  -- can accept payments
@@ -149,16 +149,14 @@ stripe_payouts_enabled boolean DEFAULT false  -- KYC complete → can withdraw
 stripe_details_submitted boolean DEFAULT false
 total_earned numeric(10,2) DEFAULT 0
 total_fees numeric(10,2) DEFAULT 0
-total_paid_out numeric(10,2) DEFAULT 0
-username text UNIQUE                          -- Phase 2
 avatar_url text                               -- Phase 2
 bio text                                      -- Phase 2
 created_at, updated_at timestamptz
 
--- links (products)
+-- products (paywall links)
 id uuid PK
-seller_id uuid FK → users.id
-slug text UNIQUE per seller
+seller_id uuid FK → sellers.id
+slug text UNIQUE
 title, description text
 destination_url text
 price numeric(10,2) CHECK >= 9.99
@@ -168,47 +166,50 @@ status text CHECK IN (draft|active|suspended|archived|deleted) DEFAULT 'draft'
 -- suspended = platform action
 product_type text CHECK IN (template|file|access|service|dataset|other)  -- optional
 version integer DEFAULT 1                     -- auto-incremented by trigger
-preview_image_url text                        -- Phase 2 (used for OG tags immediately)
+preview_image_url text
 cta_text text                                 -- Phase 2
 expires_at timestamptz                        -- Phase 2
-max_purchases integer                         -- Phase 2
+max_orders integer                            -- Phase 2
 total_sales integer DEFAULT 0
 total_revenue numeric(10,2) DEFAULT 0
 reported_at timestamptz
 suspended_reason text
 created_at, updated_at timestamptz
 
--- purchases (immutable snapshots)
+-- orders (immutable snapshots)
 id uuid PK
-link_id uuid FK → links.id
-seller_id uuid FK → users.id
+product_id uuid FK → products.id
+seller_id uuid FK → sellers.id
 buyer_email text
-buyer_email_verified boolean DEFAULT false    -- Phase 2 abuse protection
+buyer_email_verified boolean DEFAULT false
+otp_hash text                                 -- SHA-256 of OTP code (cleared after verify)
+otp_expires_at timestamptz
+otp_attempts integer DEFAULT 0
 stripe_payment_id text UNIQUE                 -- idempotency
 stripe_checkout_session_id text
-delivery_url text NOT NULL                    -- snapshot, never from links table
+delivery_url text NOT NULL                    -- snapshot, never from products table
 product_title text NOT NULL                   -- snapshot
 price_paid numeric(10,2) NOT NULL             -- snapshot
 platform_fee numeric(10,2) NOT NULL           -- 4.5% stored for accounting
 currency text DEFAULT 'usd'
-link_version integer DEFAULT 1               -- snapshot
+product_version integer DEFAULT 1            -- snapshot
 status text CHECK IN (paid|refunded|disputed|fraud) DEFAULT 'paid'
 refunded_at timestamptz
 refund_reason text
 stripe_refund_id text
 created_at, updated_at timestamptz
 
--- unlock_tokens
+-- access_tokens
 id uuid PK
-purchase_id uuid FK → purchases.id
+order_id uuid FK → orders.id
 token_hash text UNIQUE                        -- SHA-256 of raw token
 expires_at timestamptz NOT NULL               -- now() + 24h
 used_at timestamptz                           -- null = unused
 created_at timestamptz
 
--- abuse_reports
+-- reports
 id uuid PK
-link_id uuid FK → links.id
+product_id uuid FK → products.id
 reporter_email text
 reason text CHECK IN (scam|malware|copyright|other)
 description text
@@ -247,7 +248,7 @@ Full spec in `/docs/ux.md`.
 1. **One thing per screen** — WeTransfer philosophy, no distractions
 2. **Never host content** — platform controls access, sellers own content
 3. **Stripe handles money** — never hold funds, never touch card data
-4. **Purchases are immutable** — always use `delivery_url`, never re-read `links.destination_url`
+4. **Orders are immutable** — always use `delivery_url`, never re-read `products.destination_url`
 5. **Deferred KYC** — only trigger when seller requests payout
 6. **Stripe is source of truth for payouts** — never duplicate payout data in DB
 7. **Webhook idempotency** — always check `stripe_payment_id` before inserting

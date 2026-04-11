@@ -25,7 +25,7 @@ Next.js App Router (Vercel)
 ### Seller creates a product
 ```
 Browser → POST /api/create-product
-  → Supabase: insert links row
+  → Supabase: insert products row
   → Google Safe Browsing: validate URL
   ← return { slug, paywall_url }
 ```
@@ -37,8 +37,8 @@ Browser → POST /api/create-checkout
   ← return { url }
 Browser → redirect to Stripe hosted checkout
 Stripe → POST /api/stripe-webhook (checkout.session.completed)
-  → Supabase: insert purchases row
-  → Resend: send unlock email
+  → Supabase: insert orders row
+  → Resend: send OTP email to buyer
   ← 200 OK
 Browser → /pay/[slug]/success
 ```
@@ -46,7 +46,7 @@ Browser → /pay/[slug]/success
 ### Buyer unlocks
 ```
 Email link → GET /unlock?token=xxx
-  → Supabase: validate unlock_tokens
+  → Supabase: validate access_tokens
   → mark token used
   ← 302 redirect → delivery_url (e.g. notion.so/template)
 ```

@@ -7,9 +7,9 @@ Run once. Do not alter production tables after deploy.
 
 ```sql
 -- ============================================================
--- USERS (sellers)
+-- SELLERS
 -- ============================================================
-create table users (
+create table sellers (
   id              uuid primary key references auth.users(id) on delete cascade,
   email           text not null unique,
   name            text,
@@ -35,11 +35,11 @@ create table users (
 );
 
 -- ============================================================
--- LINKS (products)
+-- PRODUCTS (paywall links)
 -- ============================================================
-create table links (
+create table products (
   id              uuid primary key default gen_random_uuid(),
-  seller_id       uuid not null references users(id) on delete cascade,
+  seller_id       uuid not null references sellers(id) on delete cascade,
   slug            text not null,
   title           text not null,
   description     text,
@@ -58,7 +58,7 @@ create table links (
   preview_image_url text,
   cta_text          text,
   expires_at        timestamptz,
-  max_purchases     integer,
+  max_orders        integer,
 
   -- Stats cache (updated via webhook)
   total_sales     integer not null default 0,
@@ -71,38 +71,39 @@ create table links (
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now(),
 
-  unique(seller_id, slug)
+  unique(slug)   -- globally unique: slugs include a random 4-char suffix (title-a3f2)
 );
 
 -- ============================================================
--- PURCHASES (immutable snapshots)
+-- ORDERS (immutable snapshots)
 -- ============================================================
-create table purchases (
+create table orders (
   id                          uuid primary key default gen_random_uuid(),
-  link_id                     uuid not null references links(id),
-  seller_id                   uuid not null references users(id),
+  product_id                  uuid not null references products(id),
+  seller_id                   uuid not null references sellers(id),
 
   -- Buyer (no account required)
   buyer_email                 text not null,
   buyer_email_verified        boolean not null default false,
 
-  -- OTP verification (verified on /pay/[slug]/success before unlock is issued)
-  otp_code_hash               text,
+  -- Custom OTP verification (SHA-256 hashed, stored temporarily until verified)
+  otp_hash                    text,
   otp_expires_at              timestamptz,
   otp_attempts                integer not null default 0,
 
   -- Stripe
-  stripe_payment_id           text not null unique,
+  stripe_payment_id           text not null unique,   -- idempotency key
   stripe_checkout_session_id  text,
 
   -- Immutable snapshot at purchase time
-  delivery_url                text not null,
-  product_title               text not null,
-  price_paid                  numeric(10,2) not null,
-  platform_fee                numeric(10,2) not null,
+  delivery_url                text not null,          -- never read from products table
+  product_title               text not null,          -- snapshot of products.title
+  price_paid                  numeric(10,2) not null, -- snapshot of products.price
+  platform_fee                numeric(10,2) not null, -- 4.5% of price_paid
   currency                    text not null default 'usd',
-  link_version                integer not null default 1,
+  product_version             integer not null default 1, -- which version was bought
 
+  -- Status
   status                      text not null default 'paid'
                                 check (status in ('paid','refunded','disputed','fraud')),
 
@@ -116,23 +117,27 @@ create table purchases (
 );
 
 -- ============================================================
--- UNLOCK TOKENS
+-- ACCESS TOKENS
 -- ============================================================
-create table unlock_tokens (
+create table access_tokens (
   id            uuid primary key default gen_random_uuid(),
-  purchase_id   uuid not null references purchases(id) on delete cascade,
-  token_hash    text not null unique,
-  expires_at    timestamptz not null,
-  used_at       timestamptz,
+  order_id      uuid not null references orders(id) on delete cascade,
+  token_hash    text not null unique,   -- sha256 of raw token
+  expires_at    timestamptz not null,   -- now() + 24h
+  used_at       timestamptz,            -- null = not yet used
   created_at    timestamptz not null default now()
 );
 
+-- NOTE: No payouts table.
+-- Stripe is source of truth for payout history.
+-- Query: stripe.payouts.list({}, { stripeAccount: seller.stripe_account_id })
+
 -- ============================================================
--- ABUSE REPORTS
+-- REPORTS
 -- ============================================================
-create table abuse_reports (
+create table reports (
   id              uuid primary key default gen_random_uuid(),
-  link_id         uuid not null references links(id),
+  product_id      uuid not null references products(id),
   reporter_email  text,
   reason          text not null
                     check (reason in ('scam','malware','copyright','other')),
@@ -145,15 +150,15 @@ create table abuse_reports (
 -- ============================================================
 -- INDEXES
 -- ============================================================
-create index idx_links_slug on links(slug);
-create index idx_links_seller_id on links(seller_id);
-create index idx_links_status on links(status);
-create unique index idx_purchases_stripe_payment_id on purchases(stripe_payment_id);
-create index idx_purchases_buyer_email on purchases(buyer_email);
-create index idx_purchases_link_id on purchases(link_id);
-create index idx_purchases_seller_id on purchases(seller_id);
-create unique index idx_unlock_tokens_hash on unlock_tokens(token_hash);
-create index idx_unlock_tokens_purchase_id on unlock_tokens(purchase_id);
+create index idx_products_slug on products(slug);
+create index idx_products_seller_id on products(seller_id);
+create index idx_products_status on products(status);
+create unique index idx_orders_stripe_payment_id on orders(stripe_payment_id);
+create index idx_orders_buyer_email on orders(buyer_email);
+create index idx_orders_product_id on orders(product_id);
+create index idx_orders_seller_id on orders(seller_id);
+create unique index idx_access_tokens_hash on access_tokens(token_hash);
+create index idx_access_tokens_order_id on access_tokens(order_id);
 
 -- ============================================================
 -- UPDATED_AT TRIGGER
@@ -166,22 +171,22 @@ begin
 end;
 $$ language plpgsql;
 
-create trigger users_updated_at
-  before update on users
+create trigger sellers_updated_at
+  before update on sellers
   for each row execute function set_updated_at();
 
-create trigger links_updated_at
-  before update on links
+create trigger products_updated_at
+  before update on products
   for each row execute function set_updated_at();
 
-create trigger purchases_updated_at
-  before update on purchases
+create trigger orders_updated_at
+  before update on orders
   for each row execute function set_updated_at();
 
 -- ============================================================
--- VERSION INCREMENT TRIGGER (links only)
+-- VERSION INCREMENT TRIGGER (products only)
 -- ============================================================
-create or replace function increment_link_version()
+create or replace function increment_product_version()
 returns trigger as $$
 begin
   if (
@@ -198,26 +203,26 @@ begin
 end;
 $$ language plpgsql;
 
-create trigger links_version_increment
-  before update on links
-  for each row execute function increment_link_version();
+create trigger products_version_increment
+  before update on products
+  for each row execute function increment_product_version();
 
 -- ============================================================
 -- ATOMIC STAT INCREMENT FUNCTIONS
 -- Called from the Stripe webhook via supabase.rpc() to avoid
 -- read-modify-write races when multiple purchases complete concurrently.
 -- ============================================================
-create or replace function increment_link_stats(p_link_id uuid, p_revenue numeric)
+create or replace function increment_product_stats(p_product_id uuid, p_revenue numeric)
 returns void language sql security definer as $$
-  update links
+  update products
   set total_sales   = total_sales + 1,
       total_revenue = total_revenue + p_revenue
-  where id = p_link_id;
+  where id = p_product_id;
 $$;
 
 create or replace function increment_seller_stats(p_seller_id uuid, p_earned numeric, p_fees numeric)
 returns void language sql security definer as $$
-  update users
+  update sellers
   set total_earned = total_earned + p_earned,
       total_fees   = total_fees + p_fees
   where id = p_seller_id;
@@ -226,34 +231,38 @@ $$;
 -- ============================================================
 -- ROW LEVEL SECURITY
 -- ============================================================
-alter table users enable row level security;
-alter table links enable row level security;
-alter table purchases enable row level security;
-alter table unlock_tokens enable row level security;
-alter table abuse_reports enable row level security;
+alter table sellers enable row level security;
+alter table products enable row level security;
+alter table orders enable row level security;
+alter table access_tokens enable row level security;
+alter table reports enable row level security;
 
--- Users
-create policy "users: select own" on users
+-- Sellers
+create policy "sellers: select own" on sellers
   for select using (auth.uid() = id);
-create policy "users: update own" on users
+create policy "sellers: update own" on sellers
   for update using (auth.uid() = id);
-create policy "users: insert own" on users
+create policy "sellers: insert own" on sellers
   for insert with check (auth.uid() = id);
 
--- Links: sellers manage own, public reads active
-create policy "links: seller full access" on links
+-- Products: sellers manage own, public reads active
+create policy "products: seller full access" on products
   for all using (auth.uid() = seller_id);
-create policy "links: public read active" on links
+create policy "products: public read active" on products
   for select using (status = 'active');
 
--- Purchases: sellers see their sales
-create policy "purchases: seller sees own" on purchases
+-- Orders: sellers see their sales
+create policy "orders: seller sees own" on orders
   for select using (auth.uid() = seller_id);
 
--- Unlock tokens: RLS enabled, zero client policies = blanket deny.
--- Only touch via server-side service role key. Never expose to browser.
+-- NOTE: No payouts table — Stripe is source of truth.
+-- Query payout history via: stripe.payouts.list({}, { stripeAccount: seller.stripe_account_id })
 
--- Abuse reports: anyone can insert. Rate limiting via Vercel Firewall.
-create policy "abuse_reports: public insert" on abuse_reports
+-- Access tokens: RLS enabled, zero client policies = blanket deny for all
+-- client roles. Service role key bypasses RLS entirely. Only ever touch access_tokens
+-- server-side using the service role key. Never expose to browser clients.
+
+-- Reports: anyone can insert. Rate limiting handled at API route level, not DB.
+create policy "reports: public insert" on reports
   for insert with check (true);
 ```

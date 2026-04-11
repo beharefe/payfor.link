@@ -90,10 +90,10 @@ Fired when a buyer opens a paywall page. Most important funnel event.
 ```typescript
 // In /pay/[slug]/page.tsx — server component, use server-side tracking
 await trackServer('paywall_viewed', {
-  link_id: link.id,
-  slug: link.slug,
-  price: link.price,
-  platform: detectPlatform(link.destination_url)  // notion|figma|drive|github|other
+  product_id: product.id,
+  slug: product.slug,
+  price: product.price,
+  platform: detectPlatform(product.destination_url)  // notion|figma|drive|github|other
 })
 ```
 
@@ -136,7 +136,7 @@ Fired when buyer clicks "Pay & Get Access" and is redirected to Stripe.
 
 ```typescript
 track('checkout_started', {
-  link_id: 'abc123',
+  product_id: 'abc123',
   price: 19,
   slug: 'notion-crm-template',
   platform: 'notion'
@@ -169,7 +169,7 @@ export const trackServer = async (
         event_type: event,
         event_properties: properties,
         time: Date.now(),
-        insert_id: properties.purchase_id as string  // dedup
+        insert_id: properties.order_id as string  // dedup
       }]
     })
   })
@@ -177,9 +177,9 @@ export const trackServer = async (
 
 // In webhook handler:
 await trackServer('payment_success', {
-  purchase_id: purchase.id,
-  link_id: purchase.link_id,
-  amount: purchase.amount,
+  order_id: order.id,
+  product_id: order.product_id,
+  amount: order.price_paid,
   platform: 'notion'
 })
 ```
@@ -194,9 +194,9 @@ Fired when buyer successfully validates token and gets redirected to content.
 ```typescript
 // Server-side
 await trackServer('unlock_success', {
-  purchase_id: purchase.id,
-  link_id: purchase.link_id,
-  time_to_unlock_minutes: minutesSincePurchase
+  order_id: order.id,
+  product_id: order.product_id,
+  time_to_unlock_minutes: minutesSinceOrder
 })
 ```
 
@@ -268,5 +268,5 @@ Key conversion rates:
 1. **5 events only in MVP** — no event creep until you have real users
 2. **Never track PII** — no emails, no names in event properties
 3. **Server-side for payment events** — never trust client for revenue data
-4. **Use `insert_id`** for server events to prevent duplicates (use `purchase_id`)
+4. **Use `insert_id`** for server events to prevent duplicates (use `order_id`)
 5. **No tracking in development** — check `NODE_ENV` before firing

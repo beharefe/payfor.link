@@ -1,23 +1,17 @@
-import { NextResponse } from "next/server";
-import { createClient, createServiceClient } from "@unseallink/lib/supabase/server";
+import { verifySessionValue } from "@unseallink/lib/buyer-token";
 import { TABLES } from "@unseallink/lib/db";
 import { isValidUrl } from "@unseallink/lib/product-utils";
+import { createServiceClient } from "@unseallink/lib/supabase/server";
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ order_id: string }> },
 ) {
   const { order_id } = await params;
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.redirect(new URL("/auth", appUrl));
-  }
+  const url = new URL(_request.url);
+  const appUrl = `${url.protocol}//${url.host}`;
 
   const service = createServiceClient();
   const { data: order } = await service
@@ -30,15 +24,19 @@ export async function GET(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  if (order.buyer_email !== user.email) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
   if (order.status === "refunded") {
     return NextResponse.redirect(new URL(`/orders/${order_id}`, appUrl));
   }
 
-  // Re-validate delivery_url at redirect time — defense against compromised DB records
+  const cookieStore = await cookies();
+  const session = verifySessionValue(cookieStore.get("buyer_session")?.value ?? "");
+
+  if (!session || session.email.toLowerCase() !== order.buyer_email.toLowerCase()) {
+    return NextResponse.redirect(
+      new URL(`/orders?next=/orders/${order_id}`, appUrl),
+    );
+  }
+
   if (!isValidUrl(order.delivery_url)) {
     return NextResponse.json({ error: "Invalid delivery URL" }, { status: 500 });
   }

@@ -13,11 +13,7 @@ export type ProductType =
   | "dataset"
   | "other";
 export type ReportReason = "scam" | "malware" | "copyright" | "other";
-export type ReportStatus =
-  | "pending"
-  | "reviewed"
-  | "actioned"
-  | "dismissed";
+export type ReportStatus = "pending" | "reviewed" | "actioned" | "dismissed";
 
 export interface Seller {
   id: string;
@@ -67,7 +63,7 @@ export interface Order {
   seller_id: string;
   buyer_email: string;
   buyer_email_verified: boolean;
-  otp_code_hash: string | null;
+  otp_hash: string | null;
   otp_expires_at: string | null;
   otp_attempts: number;
   stripe_payment_id: string;

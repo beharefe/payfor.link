@@ -10,8 +10,8 @@ Platform stores only metadata. External services own their data.
 | Payment records | Stripe (query via API) |
 | Payout records | Stripe (query via API — no local copy) |
 | Product metadata | Supabase |
-| Purchase snapshots | Supabase |
-| Unlock tokens | Supabase |
+| Order snapshots | Supabase |
+| Access tokens | Supabase |
 | Auth sessions | Supabase Auth |
 | Emails sent | Resend |
 
@@ -20,13 +20,13 @@ Platform stores only metadata. External services own their data.
 ## Entity Relationships
 
 ```
-users (sellers)
-  ├── links (products) — one seller has many links
-  │     └── purchases — one link has many purchases
-  │           └── unlock_tokens — one purchase has many tokens
-  └── purchases — seller_id denormalized for fast dashboard queries
+sellers
+  ├── products — one seller has many products
+  │     └── orders — one product has many orders
+  │           └── access_tokens — one order has many tokens
+  └── orders — seller_id denormalized for fast dashboard queries
 
-abuse_reports → links (many reports per link)
+reports → products (many reports per product)
 ```
 
 ---
@@ -34,10 +34,10 @@ abuse_reports → links (many reports per link)
 ## External Service Bindings
 
 ```
-users.id → auth.users.id (Supabase Auth)
-users.stripe_account_id → Stripe Connect Express account
-purchases.stripe_payment_id → Stripe PaymentIntent or Checkout Session
-purchases.stripe_checkout_session_id → Stripe Checkout Session
+sellers.id → auth.users.id (Supabase Auth)
+sellers.stripe_account_id → Stripe Connect Express account
+orders.stripe_payment_id → Stripe PaymentIntent
+orders.stripe_checkout_session_id → Stripe Checkout Session
 ```
 
 ---
@@ -47,13 +47,14 @@ purchases.stripe_checkout_session_id → Stripe Checkout Session
 ```
 seller visits /auth
 → enters email
-→ Supabase sends magic link
-→ seller clicks link → auth.users row created automatically
-→ app upserts row in users table (id = auth.uid())
+→ Supabase sends magic link OTP
+→ seller enters 6-digit code → auth.users row created automatically
+→ app upserts row in sellers table (id = auth.uid())
 → seller lands on /dashboard
 ```
 
 Buyers never have Supabase accounts. Identified by email only.
+Buyer sessions use HMAC-signed cookies (`orders_session`, `purchase_session`).
 
 ---
 
@@ -95,27 +96,27 @@ Use Resend dashboard to debug delivery issues.
 
 ### Paywall page load
 ```sql
-SELECT l.*, u.name as seller_name
-FROM links l
-JOIN users u ON u.id = l.seller_id
-WHERE l.slug = $1 AND l.status = 'active'
+SELECT p.*, s.name as seller_name
+FROM products p
+JOIN sellers s ON s.id = p.seller_id
+WHERE p.slug = $1 AND p.status = 'active'
 LIMIT 1
 ```
 
 ### Webhook idempotency check
 ```sql
-SELECT id FROM purchases
+SELECT id FROM orders
 WHERE stripe_payment_id = $1
 LIMIT 1
 ```
 
-### Buyer library
+### Buyer order library
 ```sql
-SELECT p.*, l.title as current_title
-FROM purchases p
-JOIN links l ON l.id = p.link_id
-WHERE p.buyer_email = $1
-ORDER BY p.created_at DESC
+SELECT o.*, p.title as current_title
+FROM orders o
+JOIN products p ON p.id = o.product_id
+WHERE o.buyer_email = $1
+ORDER BY o.created_at DESC
 ```
 
 ### Seller dashboard stats
@@ -125,15 +126,15 @@ SELECT
   SUM(price_paid) as gross_revenue,
   SUM(platform_fee) as total_fees,
   SUM(price_paid - platform_fee) as net_revenue
-FROM purchases
+FROM orders
 WHERE seller_id = $1 AND status = 'paid'
 ```
 
 ### Token validation
 ```sql
-SELECT t.*, p.delivery_url, p.product_title
-FROM unlock_tokens t
-JOIN purchases p ON p.id = t.purchase_id
+SELECT t.*, o.delivery_url, o.product_title
+FROM access_tokens t
+JOIN orders o ON o.id = t.order_id
 WHERE t.token_hash = $1
   AND t.expires_at > now()
   AND t.used_at IS NULL
@@ -146,22 +147,22 @@ LIMIT 1
 
 | Table | Rule |
 |---|---|
-| users | Select/update own row only |
-| links | Sellers manage own; public reads `status = active` |
-| purchases | Sellers see own sales; buyers via service role only |
-| unlock_tokens | Service role only — never expose to client |
-| abuse_reports | Anyone can insert; service role reads |
+| sellers | Select/update own row only |
+| products | Sellers manage own; public reads `status = active` |
+| orders | Sellers see own sales; buyers via service role only |
+| access_tokens | Service role only — never expose to client |
+| reports | Anyone can insert; service role reads |
 
 ---
 
 ## Triggers
 
 ### `set_updated_at()`
-Fires on UPDATE for: `users`, `links`, `purchases`
+Fires on UPDATE for: `sellers`, `products`, `orders`
 Sets `updated_at = now()` automatically.
 
-### `increment_link_version()`
-Fires on UPDATE for: `links`
+### `increment_product_version()`
+Fires on UPDATE for: `products`
 Increments `version` only when seller-editable fields change:
 `title`, `description`, `destination_url`, `price`, `cta_text`, `preview_image_url`
 
