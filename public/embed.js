@@ -27,9 +27,9 @@
       "transition:opacity .15s ease;-webkit-appearance:none;}",
       ".unseal-btn:hover{opacity:.82;}",
       ".unseal-wrap{display:inline-flex;flex-direction:column;align-items:center;gap:7px;}",
-      ".unseal-powered{font-family:system-ui,-apple-system,sans-serif;font-size:11px;",
-      "color:#aaa;text-decoration:none;line-height:1;}",
-      ".unseal-powered:hover{color:#555;}",
+      ".unseal-powered{font-family:Georgia,serif;font-size:12px;font-weight:600;",
+      "color:#3D3530;letter-spacing:-0.3px;text-decoration:none;line-height:1;}",
+      ".unseal-powered:hover{opacity:.65;}",
     ].join("");
     document.head.appendChild(style);
   }
@@ -50,7 +50,7 @@
     a.target = "_blank";
     a.rel = "noopener noreferrer";
     a.className = "unseal-powered";
-    a.textContent = "\u26A1 unseal.link";
+    a.textContent = "unseal.link";
     return a;
   }
 
