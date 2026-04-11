@@ -26,7 +26,7 @@ export default async function LinksPage() {
 
   const { data: links } = await supabase
     .from(TABLES.PRODUCTS)
-    .select("id, title, slug, status, total_sales, total_revenue, expires_at")
+    .select("id, title, slug, status, price, total_sales, total_revenue, expires_at")
     .eq("seller_id", user.id)
     .neq("status", "deleted")
     .order("created_at", { ascending: false });
@@ -106,7 +106,7 @@ export default async function LinksPage() {
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     {effectiveStatus === "active" && (
-                      <CopyLinkButtons url={`${appUrl}/@${seller.username}/${link.slug}`} linkId={link.id} />
+                      <CopyLinkButtons url={`${appUrl}/@${seller.username}/${link.slug}`} linkId={link.id} price={link.price} />
                     )}
                     <Link
                       href={`/preview/${link.id}`}
