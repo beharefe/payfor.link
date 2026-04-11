@@ -6,6 +6,7 @@ import { ArrowUpRight } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import { InitiateStripeConnectButton } from "../../dashboard-actions";
 import { CopyLinkButton } from "./copy-link-button";
+import { CopyCodeButton } from "./copy-code-button";
 import { ArchiveButton, DeleteButton, RefundButton } from "./link-actions";
 
 export default async function LinkDetailPage({
@@ -159,6 +160,18 @@ export default async function LinkDetailPage({
             >
               Preview
             </Link>
+          </div>
+        )}
+
+        {/* Embed code */}
+        {!isDeleted && paywallUrl && (
+          <div className="border border-border rounded-2xl p-5 bg-card space-y-3">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-1">Embed</p>
+              <p className="text-xs text-muted-foreground">Add a buy button to any website or blog.</p>
+            </div>
+            <pre className="bg-muted rounded-xl px-4 py-3 text-xs font-mono text-foreground leading-relaxed overflow-x-auto whitespace-pre-wrap break-all">{`<script async src="${appUrl}/embed.js"></script>\n<a href="${paywallUrl}" class="unseal-button">Buy — $${link.price.toFixed(2)}</a>`}</pre>
+            <CopyCodeButton code={`<script async src="${appUrl}/embed.js"></script>\n<a href="${paywallUrl}" class="unseal-button">Buy — $${link.price.toFixed(2)}</a>`} />
           </div>
         )}
 

@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const { data: link } = await supabase
     .from(TABLES.PRODUCTS)
-    .select("title, description, price, sellers!inner(username)")
+    .select("title, description, price, currency, sellers!inner(username, name)")
     .eq("slug", slug)
     .eq("sellers.username", username)
     .not("status", "in", '("deleted","suspended")')
@@ -34,28 +34,48 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!link) return { title: "Not found" };
 
+  // biome-ignore lint/suspicious/noExplicitAny: Supabase join type
+  const sellerData = link.sellers as any;
+  const sellerName: string = sellerData?.name ?? sellerData?.username ?? "unseal.link";
+
   const baseUrl = await getBaseUrl();
-  const title = `${link.title} · $${link.price}`;
-  const description = link.description ?? "Pay once and get instant access.";
+  const priceLabel = `$${Number(link.price).toFixed(2)}`;
+  const title = `${link.title} — ${priceLabel}`;
+  const description = link.description
+    ? `${link.description}`
+    : `Pay once with Stripe and get instant access. No account needed.`;
 
   const canonical = `${baseUrl}/@${username}/${slug}`;
+  const ogImage = `${baseUrl}/api/og/${slug}`;
+
   return {
     title,
     description,
+    themeColor: "#111111",
     metadataBase: new URL(baseUrl),
     alternates: { canonical },
     openGraph: {
       title,
       description,
       url: canonical,
-      images: [{ url: `${baseUrl}/api/og/${slug}`, width: 1200, height: 630 }],
+      siteName: "unseal.link",
+      images: [{ url: ogImage, width: 1200, height: 630 }],
       type: "website",
     },
     twitter: {
       card: "summary_large_image",
+      site: "@unseallink",
       title,
       description,
-      images: [`${baseUrl}/api/og/${slug}`],
+      images: [ogImage],
+    },
+    other: {
+      "product:price:amount": Number(link.price).toFixed(2),
+      "product:price:currency": (link.currency ?? "usd").toUpperCase(),
+      "twitter:label1": "Price",
+      "twitter:data1": priceLabel,
+      "twitter:label2": "Seller",
+      "twitter:data2": sellerName,
     },
   };
 }
