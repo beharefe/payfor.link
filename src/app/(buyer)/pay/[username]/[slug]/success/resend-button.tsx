@@ -11,24 +11,26 @@ export function ResendAccessButton({
   email: string;
   orderId: string;
 }) {
-  const [state, setState] = useState<"idle" | "loading" | "sent" | "error">("idle");
+  const [state, setState] = useState<"idle" | "sent" | "error">("idle");
+  const [loading, setLoading] = useState(false);
   const [attempts, setAttempts] = useState(0);
 
   async function handleResend() {
-    if (attempts >= MAX_ATTEMPTS) return;
-    setState("loading");
+    if (attempts >= MAX_ATTEMPTS || loading) return;
+    setLoading(true);
     try {
       const res = await fetch("/api/orders/send-access-link", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, oid: orderId }),
       });
-      const next = attempts + 1;
-      setAttempts(next);
+      setAttempts((n) => n + 1);
       setState(res.ok ? "sent" : "error");
     } catch {
       setAttempts((n) => n + 1);
       setState("error");
+    } finally {
+      setLoading(false);
     }
   }
 
