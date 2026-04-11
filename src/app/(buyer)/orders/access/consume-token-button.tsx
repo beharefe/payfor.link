@@ -30,7 +30,9 @@ export function ConsumeTokenButton({
         setLoading(false);
         return;
       }
-      // Redirect to delivery URL via the access route (session cookie now set)
+      // Remember this order so the navbar can show a personalised link
+      localStorage.setItem("last_order_id", orderId);
+      // Redirect to delivery URL via the access route
       router.push(`/api/orders/${orderId}/access`);
     } catch {
       setError("Network error. Please try again.");

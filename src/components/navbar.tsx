@@ -6,8 +6,10 @@ import { useEffect, useState } from "react";
 
 export function Navbar() {
   const [loggedIn, setLoggedIn] = useState<boolean | null>(null);
+  const [lastOrderId, setLastOrderId] = useState<string | null>(null);
 
   useEffect(() => {
+    setLastOrderId(localStorage.getItem("last_order_id"));
     const supabase = createClient();
     supabase.auth.getSession().then(({ data: { session } }) => {
       setLoggedIn(!!session);
@@ -30,12 +32,12 @@ export function Navbar() {
           unseal.link
         </Link>
         <div className="flex items-center gap-4">
-          {!loggedIn && (
+          {!loggedIn && lastOrderId && (
             <Link
-              href="/orders"
+              href={`/orders?oid=${lastOrderId}`}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors no-underline shrink-0"
             >
-              My orders
+              My purchase →
             </Link>
           )}
           {loggedIn ? (

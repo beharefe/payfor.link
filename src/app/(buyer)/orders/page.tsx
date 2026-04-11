@@ -2,6 +2,7 @@ import { TABLES } from "@unseallink/lib/db";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { ChevronDown } from "lucide-react";
 import type { Metadata } from "next";
+import { PersistOrderId } from "./persist-order-id";
 
 export const dynamic = "force-dynamic";
 
@@ -183,6 +184,7 @@ export default async function OrdersPage({
 
     return (
       <main className="min-h-dvh bg-background">
+        <PersistOrderId oid={oid} />
         <div className="max-w-sm mx-auto px-6 py-12 flex flex-col gap-5">
           <Logo />
           <FeaturedCard order={order} sellerName={seller?.name} />
