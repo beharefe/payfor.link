@@ -1,6 +1,7 @@
 "use server";
 
 import crypto from "node:crypto";
+import { trackServer } from "@unseallink/lib/amplitude-server";
 import { TABLES } from "@unseallink/lib/db";
 import { log } from "@unseallink/lib/logger";
 import { detectProductType, isValidUrl } from "@unseallink/lib/product-utils";
@@ -115,6 +116,20 @@ export async function createProduct(
     return { error: msg };
   }
 
+  void trackServer(
+    {
+      name: "Link Created",
+      props: {
+        link_id: link.id,
+        content_type: productType ?? "other",
+        unlock_method: "otp_email",
+        price: input.price,
+        currency: "usd",
+      },
+    },
+    user.id,
+  );
+
   redirect(`/dashboard/links/${link.id}`);
 }
 
@@ -207,6 +222,14 @@ export async function updateProduct(
     return { error: "Failed to update product" };
   }
 
+  void trackServer(
+    {
+      name: "Link Settings Updated",
+      props: { link_id: input.id, changed_fields: ["title", "price", "description", "destination_url"] },
+    },
+    user.id,
+  );
+
   redirect(`/dashboard/links/${input.id}`);
 }
 
@@ -274,6 +297,13 @@ export async function archiveProduct(id: string): Promise<ActionResult> {
       user_id: user.id,
     });
     return { error: "Failed to update link" };
+  }
+
+  if (newStatus === "archived") {
+    void trackServer(
+      { name: "Link Revoked", props: { link_id: id, revoke_reason: "archived_by_seller" } },
+      user.id,
+    );
   }
 
   redirect(`/dashboard/links/${id}`);

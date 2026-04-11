@@ -1,3 +1,4 @@
+import { trackServer } from "@unseallink/lib/amplitude-server";
 import { TABLES } from "@unseallink/lib/db";
 import { log } from "@unseallink/lib/logger";
 import { stripe } from "@unseallink/lib/stripe";
@@ -46,6 +47,11 @@ export async function GET(request: NextRequest) {
         .update({ status: "active" })
         .eq("seller_id", user.id)
         .eq("status", "draft");
+
+      void trackServer(
+        { name: "Stripe Connected", props: { user_id: user.id } },
+        user.id,
+      );
     }
   } catch (err) {
     log.error("connect-stripe return failed", {

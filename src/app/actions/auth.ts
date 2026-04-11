@@ -1,5 +1,6 @@
 "use server";
 
+import { trackServer } from "@unseallink/lib/amplitude-server";
 import { TABLES } from "@unseallink/lib/db";
 import { createClient } from "@unseallink/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -64,6 +65,13 @@ export async function verifySellerOtp(formData: FormData): Promise<void> {
         .update({ email: user.email ?? "" })
         .eq("id", user.id);
     }
+  }
+
+  if (!needsOnboarding && user) {
+    void trackServer(
+      { name: "Login Completed", props: { user_id: user.id, login_method: "magic_link" } },
+      user.id,
+    );
   }
 
   redirect(needsOnboarding ? "/onboarding/name" : "/dashboard");
