@@ -1,10 +1,10 @@
 import { TABLES } from "@unseallink/lib/db";
 import { createClient } from "@unseallink/lib/supabase/server";
-import { Plus } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AvatarDropdown } from "./dashboard-actions";
 import { DashboardTabs } from "./dashboard-tabs";
+import { MobileFABMenu } from "./mobile-fab-menu";
 
 export default async function DashboardLayout({
   children,
@@ -53,14 +53,8 @@ export default async function DashboardLayout({
 
       {children}
 
-      {/* Mobile FAB — only on small screens where the tabs-row button is hidden */}
-      <Link
-        href="/dashboard/links/new"
-        aria-label="Create new link"
-        className="sm:hidden fixed bottom-6 right-6 z-50 w-14 h-14 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-xl hover:opacity-90 transition-opacity no-underline"
-      >
-        <Plus className="w-6 h-6" aria-hidden="true" />
-      </Link>
+      {/* Mobile FAB menu — only on small screens */}
+      <MobileFABMenu />
     </div>
   );
 }
