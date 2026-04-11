@@ -12,8 +12,8 @@ import { WithdrawButton } from "./dashboard-actions";
 export type DayRevenue = { date: string; revenue: number; refunded: number };
 
 const chartConfig = {
-  revenue:  { label: "Revenue",  color: "hsl(var(--foreground))" },
-  refunded: { label: "Refunded", color: "hsl(var(--muted-foreground))" },
+  revenue:  { label: "Revenue",  color: "var(--foreground)" },
+  refunded: { label: "Refunded", color: "var(--muted-foreground)" },
 };
 
 type Props = {
@@ -93,8 +93,8 @@ export function RevenueChart({ data, totalSales, totalEarned, stripeConnected, h
                   />
                 }
               />
-              <Bar dataKey="revenue"  stackId="a" fill="hsl(var(--foreground))"        radius={[0, 0, 0, 0]} />
-              <Bar dataKey="refunded" stackId="a" fill="hsl(var(--muted-foreground)/0.4)" radius={[3, 3, 0, 0]} />
+              <Bar dataKey="revenue"  stackId="a" fill="var(--color-revenue)"  radius={[3, 3, 0, 0]} />
+              <Bar dataKey="refunded" stackId="a" fill="var(--color-refunded)" fillOpacity={0.45} radius={[3, 3, 0, 0]} />
             </BarChart>
           </ChartContainer>
         ) : (
