@@ -1,9 +1,6 @@
 import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 import { withAxiom } from "next-axiom";
-import createNextIntlPlugin from "next-intl/plugin";
-
-const withNextIntl = createNextIntlPlugin();
 
 const securityHeaders = [
   { key: "X-Frame-Options", value: "DENY" },
@@ -38,7 +35,7 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSentryConfig(withAxiom(withNextIntl(nextConfig)), {
+export default withSentryConfig(withAxiom(nextConfig), {
   // For all available options, see:
   // https://www.npmjs.com/package/@sentry/webpack-plugin#options
 

@@ -6,11 +6,26 @@ if (
   typeof window !== "undefined" &&
   process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY
 ) {
-  amplitude.initAll(process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY, {
-    serverZone: "EU",
-    analytics: { autocapture: true },
-    sessionReplay: { sampleRate: 0 },
-  });
+  // Defer init to after the page renders — avoids blocking the main thread
+  // and contributing to Total Blocking Time (TBT).
+  const key = process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY;
+  if (typeof requestIdleCallback !== "undefined") {
+    requestIdleCallback(() => {
+      amplitude.initAll(key, {
+        serverZone: "EU",
+        analytics: { autocapture: true },
+        sessionReplay: { sampleRate: 0 },
+      });
+    });
+  } else {
+    setTimeout(() => {
+      amplitude.initAll(key, {
+        serverZone: "EU",
+        analytics: { autocapture: true },
+        sessionReplay: { sampleRate: 0 },
+      });
+    }, 0);
+  }
 }
 
 // ---------------------------------------------------------------------------

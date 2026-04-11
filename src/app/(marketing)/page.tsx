@@ -1,6 +1,6 @@
 import { TrustBar } from "@unseallink/components/trust-bar";
 import type { Metadata } from "next";
-import { HeroCTA, HeroHeadline } from "./hero-ab";
+import Link from "next/link";
 import { ProductScroll } from "./product-scroll";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
@@ -90,7 +90,11 @@ export default function HomePage() {
             The paywall for any link
           </p>
 
-          <HeroHeadline />
+          <h1 className="text-4xl md:text-6xl font-medium tracking-tight text-foreground mb-6 leading-[1.1]">
+            Lock any link
+            <br />
+            behind a payment.
+          </h1>
 
           <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-lg leading-relaxed">
             Paste a URL, set a price, share your paywall link. Buyers pay once
@@ -99,19 +103,19 @@ export default function HomePage() {
           </p>
 
           <div className="flex flex-wrap gap-3 mb-10">
-            <HeroCTA
+            <Link
               href="/auth"
-              label="Start selling free"
-              location="hero_primary"
               className="inline-flex items-center px-6 py-3 bg-primary text-primary-foreground rounded-full font-medium text-sm hover:opacity-90 transition-opacity no-underline"
-            />
+            >
+              Start selling free
+            </Link>
           </div>
 
           <TrustBar />
         </div>
       </section>
 
-      {/* How it works — right after hero so visitors immediately understand the product */}
+      {/* How it works */}
       <section className="border-t border-border py-16 md:py-20 bg-card">
         <div className="max-w-5xl mx-auto px-6">
           <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-12">
@@ -135,7 +139,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* What you can sell — scrollable cards */}
+      {/* What you can sell */}
       <section className="border-t border-border py-14 overflow-hidden">
         <div className="max-w-5xl mx-auto">
           <div className="flex items-end justify-between px-6 mb-8">
@@ -215,12 +219,12 @@ export default function HomePage() {
           Create an account, connect Stripe, and your first paywall is live in
           under 5 minutes. No storefront needed.
         </p>
-        <HeroCTA
+        <Link
           href="/auth"
-          label="Get started free"
-          location="footer_cta"
           className="inline-flex items-center px-7 py-3.5 bg-primary text-primary-foreground rounded-full font-medium text-base hover:opacity-90 transition-opacity no-underline"
-        />
+        >
+          Get started free
+        </Link>
         <p className="mt-4 text-xs text-muted-foreground">
           No credit card required to list.
         </p>
