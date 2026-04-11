@@ -27,7 +27,8 @@ export function Navbar() {
       <nav className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between gap-8">
         <Link
           href="/"
-          className="font-semibold text-foreground no-underline text-[15px] tracking-tight shrink-0"
+          className="no-underline shrink-0 text-[#3D3530] dark:text-[#F0EDE8]"
+          style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 600, letterSpacing: "-0.3px" }}
         >
           unseal.link
         </Link>
