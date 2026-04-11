@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const { data: link } = await supabase
     .from(TABLES.PRODUCTS)
-    .select("title, description, price, currency, sellers!inner(username, name)")
+    .select("title, description, price, currency, preview_image_url, sellers!inner(username, name)")
     .eq("slug", slug)
     .eq("sellers.username", username)
     .not("status", "in", '("deleted","suspended")')
@@ -46,7 +46,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     : `Pay once with Stripe and get instant access. No account needed.`;
 
   const canonical = `${baseUrl}/@${username}/${slug}`;
-  const ogImage = `${baseUrl}/api/og/${slug}`;
+
+  const ogUrl = new URL(`${baseUrl}/api/og/${slug}`);
+  ogUrl.searchParams.set("t", link.title);
+  ogUrl.searchParams.set("p", priceLabel);
+  if (sellerName && sellerName !== "unseal.link") ogUrl.searchParams.set("s", sellerName);
+  if (link.preview_image_url) ogUrl.searchParams.set("i", link.preview_image_url);
+  const ogImage = ogUrl.toString();
 
   return {
     title,

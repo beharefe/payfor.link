@@ -1,5 +1,3 @@
-import { TABLES } from "@unseallink/lib/db";
-import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
@@ -37,45 +35,25 @@ async function isImageReachable(url: string): Promise<boolean> {
   }
 }
 
-export async function GET(
-  _request: Request,
-  { params }: { params: Promise<{ slug: string }> },
-) {
-  const { slug } = await params;
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
 
-  const supabase = createServiceClient();
-  const { data: link } = await supabase
-    .from(TABLES.PRODUCTS)
-    .select("title, description, price, currency, preview_image_url, seller_id, status")
-    .eq("slug", slug)
-    .not("status", "in", '("deleted","suspended")')
-    .single();
+  const title  = searchParams.get("t") ?? "";
+  const price  = searchParams.get("p") ?? "";
+  const seller = searchParams.get("s") ?? "";
+  const imgSrc = searchParams.get("i") ?? "";
 
-  if (!link) {
-    return new Response("Not found", { status: 404 });
-  }
-
-  const { data: seller } = await supabase
-    .from(TABLES.SELLERS)
-    .select("name")
-    .eq("id", link.seller_id)
-    .single();
-
-  const title = link.title;
-  const sellerName = seller?.name ?? null;
-  const price = `$${Number(link.price).toFixed(2)} ${(link.currency ?? "usd").toUpperCase()}`;
-
-  // Validate image before rendering — broken URLs leave an empty panel
   const IMAGE_W = 420;
   const IMAGE_H = 630;
-  let imageUrl: string | null = null;
-  if (link.preview_image_url) {
-    const transformedUrl = toTransformUrl(link.preview_image_url, IMAGE_W, IMAGE_H);
-    const reachable = await isImageReachable(transformedUrl);
-    imageUrl = reachable ? transformedUrl : null;
-  }
 
-  const hasImage = Boolean(imageUrl);
+  // Validate image before rendering — broken URLs leave an empty panel.
+  // Try a transform URL first (CDN resize), fall back to original if unreachable.
+  let resolvedImg: string | null = null;
+  if (imgSrc) {
+    const transformedUrl = toTransformUrl(imgSrc, IMAGE_W, IMAGE_H);
+    const reachable = await isImageReachable(transformedUrl);
+    resolvedImg = reachable ? transformedUrl : null;
+  }
 
   const imageResponse = new ImageResponse(
     <div
@@ -87,21 +65,21 @@ export async function GET(
         fontFamily: "sans-serif",
       }}
     >
-      {/* Image panel */}
-      {hasImage && (
+      {/* Left: preview image panel */}
+      {resolvedImg && (
         <div
           style={{
             width: `${IMAGE_W}px`,
             height: `${IMAGE_H}px`,
             flexShrink: 0,
-            overflow: "hidden",
             display: "flex",
             position: "relative",
+            overflow: "hidden",
           }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={imageUrl!}
+            src={resolvedImg}
             alt=""
             style={{ width: `${IMAGE_W}px`, height: `${IMAGE_H}px`, objectFit: "cover" }}
           />
@@ -116,14 +94,14 @@ export async function GET(
         </div>
       )}
 
-      {/* Content area */}
+      {/* Right: content */}
       <div
         style={{
           flex: 1,
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          padding: hasImage ? "56px 64px 56px 44px" : "72px 80px",
+          padding: resolvedImg ? "56px 64px 56px 44px" : "72px 80px",
         }}
       >
         {/* Top: badge */}
@@ -138,31 +116,31 @@ export async function GET(
               borderRadius: "100px",
             }}
           >
-            Pay once, get access
+            unseal.link
           </div>
         </div>
 
-        {/* Middle: title + author */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        {/* Title + seller */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
           <div
             style={{
-              fontSize: hasImage ? "44px" : "56px",
+              fontSize: resolvedImg ? "42px" : "56px",
               fontWeight: 700,
               color: "#111111",
               lineHeight: 1.15,
               letterSpacing: "-1px",
             }}
           >
-            {title.length > 60 ? `${title.slice(0, 58)}…` : title}
+            {title.length > 58 ? `${title.slice(0, 56)}…` : title}
           </div>
-          {sellerName && (
+          {seller && (
             <div style={{ fontSize: "22px", color: "#6B6B6B", fontWeight: 400 }}>
-              by {sellerName}
+              by {seller}
             </div>
           )}
         </div>
 
-        {/* Bottom: price + brand */}
+        {/* Price */}
         <div
           style={{
             display: "flex",
@@ -170,10 +148,25 @@ export async function GET(
             justifyContent: "space-between",
           }}
         >
-          <div style={{ fontSize: "36px", fontWeight: 700, color: "#111111" }}>
+          <div
+            style={{
+              fontSize: "44px",
+              fontWeight: 700,
+              color: "#111111",
+              letterSpacing: "-1px",
+            }}
+          >
             {price}
           </div>
-          <div style={{ fontSize: "18px", color: "#6B6B6B", fontWeight: 400, letterSpacing: "-0.3px" }}>
+          <div
+            style={{
+              fontFamily: "Georgia, serif",
+              fontSize: "18px",
+              fontWeight: 600,
+              color: "#3D3530",
+              letterSpacing: "-0.3px",
+            }}
+          >
             unseal.link
           </div>
         </div>
