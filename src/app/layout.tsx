@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
-import { Amplitude } from "@unseallink/lib/amplitude";
+import { AnalyticsProvider } from "@unseallink/components/analytics-provider";
 import { ThemeProvider } from "@unseallink/components/theme-provider";
 import "./globals.css";
 import { Inter, Source_Sans_3 } from "next/font/google";
@@ -74,7 +74,7 @@ export default async function RootLayout({
       <body className="bg-background text-foreground antialiased">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <NextIntlClientProvider messages={messages}>
-            <Amplitude />
+            <AnalyticsProvider />
             {children}
           </NextIntlClientProvider>
         </ThemeProvider>

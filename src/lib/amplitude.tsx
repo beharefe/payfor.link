@@ -9,7 +9,7 @@ if (
   amplitude.initAll(process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY, {
     serverZone: "EU",
     analytics: { autocapture: true },
-    sessionReplay: { sampleRate: 1 },
+    sessionReplay: { sampleRate: 0 },
   });
 }
 
