@@ -56,7 +56,7 @@ export function ResendAccessButton({
           <button
             type="button"
             onClick={handleResend}
-            disabled={state === "loading"}
+            disabled={loading}
             className="text-xs text-muted-foreground underline underline-offset-2 hover:opacity-70 transition-opacity mt-1 bg-transparent border-none cursor-pointer p-0"
           >
             Resend again ({MAX_ATTEMPTS - attempts} left)
@@ -74,10 +74,10 @@ export function ResendAccessButton({
       <button
         type="button"
         onClick={handleResend}
-        disabled={state === "loading"}
+        disabled={loading}
         className="text-sm font-medium text-foreground underline underline-offset-2 hover:opacity-70 transition-opacity disabled:opacity-50 bg-transparent border-none cursor-pointer p-0"
       >
-        {state === "loading" ? "Sending…" : "Resend access link"}
+        {loading ? "Sending…" : "Resend access link"}
       </button>
       {state === "error" && (
         <p className="text-xs text-destructive mt-1">Failed to send. Try again.</p>
