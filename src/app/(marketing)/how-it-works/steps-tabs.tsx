@@ -29,7 +29,7 @@ const buyerSteps = [
   { n: "01", title: "Open the link", body: "See the product title, description, and price." },
   { n: "02", title: "Pay via Stripe", body: "Card, Apple Pay, or Google Pay. Secure checkout." },
   { n: "03", title: "Check your email", body: "Your access link arrives within 30 seconds." },
-  { n: "04", title: "Click unlock", body: "One click. Access the content instantly." },
+  { n: "04", title: "Unseal your link", body: "One click. Access the content instantly." },
 ];
 
 const TABS = [

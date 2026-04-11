@@ -1,6 +1,7 @@
 import { hashAccessToken } from "@unseallink/lib/access-token";
 import { TABLES } from "@unseallink/lib/db";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
+import { Lock, Unlock } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConsumeTokenButton } from "./consume-token-button";
@@ -37,7 +38,13 @@ export default async function AccessPage({ searchParams }: Props) {
   }
 
   if (new Date(token.expires_at) < new Date()) {
-    return <ErrorState message="This link has expired (valid for 24 hours)." orderId={orderId} showResend />;
+    return (
+      <ErrorState
+        message="This link has expired (valid for 24 hours)."
+        orderId={orderId}
+        showResend
+      />
+    );
   }
 
   // Load order info for display
@@ -51,9 +58,13 @@ export default async function AccessPage({ searchParams }: Props) {
     <main className="min-h-dvh bg-background flex flex-col items-center justify-center px-6 py-16">
       <div className="w-full max-w-sm space-y-4">
         <div className="text-center mb-2">
-          <p className="text-4xl mb-3">🔓</p>
+          <div className="flex items-center justify-center mb-4">
+            <div className="flex items-center justify-center size-12 rounded-full bg-muted">
+              <Unlock className="size-5 text-foreground" strokeWidth={2} />
+            </div>
+          </div>
           <h1 className="text-2xl font-medium tracking-tight text-foreground mb-1">
-            Ready to unlock
+            Ready to unseal
           </h1>
           <p className="text-muted-foreground text-sm">
             Click below to access your purchase.
@@ -62,7 +73,7 @@ export default async function AccessPage({ searchParams }: Props) {
 
         <div className="border border-border rounded-2xl p-6 bg-card space-y-4">
           {order && (
-            <div className="flex flex-col gap-2 text-sm">
+            <div className="flex flex-col gap-1.5 text-sm">
               <p className="font-medium text-foreground leading-snug">{order.product_title}</p>
               <p className="text-muted-foreground text-xs">{order.buyer_email}</p>
             </div>
@@ -90,7 +101,11 @@ function ErrorState({
   return (
     <main className="min-h-dvh bg-background flex flex-col items-center justify-center px-6 py-16">
       <div className="w-full max-w-sm text-center space-y-4">
-        <p className="text-3xl">🔒</p>
+        <div className="flex items-center justify-center mb-1">
+          <div className="flex items-center justify-center size-12 rounded-full bg-muted">
+            <Lock className="size-5 text-muted-foreground" strokeWidth={2} />
+          </div>
+        </div>
         <h1 className="text-xl font-medium text-foreground">{message}</h1>
         <div className="flex flex-col gap-3 items-center">
           {showResend && orderId && (
@@ -101,8 +116,11 @@ function ErrorState({
               Request a new link →
             </Link>
           )}
-          <Link href="/orders" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-            ← My orders
+          <Link
+            href="/orders"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            ← My purchases
           </Link>
         </div>
       </div>

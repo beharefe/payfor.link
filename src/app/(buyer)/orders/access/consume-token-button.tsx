@@ -47,7 +47,7 @@ export function ConsumeTokenButton({
         className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-primary text-primary-foreground rounded-full font-medium text-base hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {loading && <Loader2 className="animate-spin size-4 shrink-0" />}
-        {loading ? "Opening…" : "Access my purchase →"}
+        {loading ? "Opening…" : "Unseal my purchase →"}
       </button>
       {error && <p className="text-sm text-destructive text-center">{error}</p>}
     </div>

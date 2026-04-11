@@ -21,7 +21,7 @@ export default function HowItWorksPage() {
           How it works
         </h1>
         <p className="text-lg text-muted-foreground max-w-lg">
-          Lock link. Pay. Unlock. Simple for sellers. Simple for buyers.
+          Lock link. Pay. Unseal. Simple for sellers. Simple for buyers.
         </p>
       </section>
 
