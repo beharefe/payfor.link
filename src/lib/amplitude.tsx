@@ -1,36 +1,87 @@
 "use client";
 
-import * as amplitude from "@amplitude/unified";
+import * as amplitude from "@amplitude/analytics-browser";
 
 if (
   typeof window !== "undefined" &&
   process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY
 ) {
-  amplitude.initAll(process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY, {
-    serverZone: "EU",
-    analytics: { autocapture: true },
-    sessionReplay: { sampleRate: 1 },
-  });
+  const key = process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY;
+  if (typeof requestIdleCallback !== "undefined") {
+    requestIdleCallback(() => {
+      amplitude.init(key, { autocapture: true });
+    });
+  } else {
+    setTimeout(() => {
+      amplitude.init(key, { autocapture: true });
+    }, 0);
+  }
 }
 
 // ---------------------------------------------------------------------------
-// Typed event dictionary
-// Add every event here before tracking it anywhere in the codebase.
-// Convention: snake_case names, all properties required (use `?` sparingly).
+// Typed event dictionary — based on Amplitude taxonomy (2026-04-11)
+// Event names match the Amplitude plan exactly (Title Case with spaces).
+// Properties use snake_case.
 // ---------------------------------------------------------------------------
 
 export type AnalyticsEvent =
-  // Buyer funnel
+  // ── Buyer / recipient funnel ─────────────────────────────────────────────
   | {
-      name: "paywall_viewed";
+      name: "Sealed Link Opened";
+      props: {
+        link_id: string;
+        link_token_present: boolean;
+        delivery_channel: string; // "direct" | "email" | "social" | "unknown"
+        referrer_domain?: string;
+        is_first_open_for_link?: boolean;
+        attempt_number?: number;
+      };
+    }
+  | {
+      name: "Unlock Code Submitted";
+      props: {
+        link_id: string;
+        unlock_method: "otp_email";
+        code_length: number;
+        attempt_number: number;
+        is_autofilled?: boolean;
+      };
+    }
+  | {
+      name: "Unseal Succeeded";
+      props: {
+        link_id: string;
+        unlock_method: "otp_email";
+        attempt_number: number;
+        time_to_unseal_ms?: number;
+        content_type: string; // product_type: template | file | access | service | dataset | other
+      };
+    }
+  | {
+      name: "Unseal Failed";
+      props: {
+        link_id: string;
+        unlock_method: "otp_email";
+        failure_reason: string; // "invalid_code" | "expired_code" | "max_attempts" | "order_not_found"
+        attempt_number: number;
+        is_rate_limited: boolean;
+      };
+    }
+  | {
+      name: "Content Revealed";
+      props: {
+        link_id: string;
+        order_id: string;
+        content_type: string;
+      };
+    }
+  // ── Checkout (unseal.link-specific, not in Amplitude plan) ───────────────
+  | {
+      name: "Checkout Started";
       props: { link_id: string; slug: string; price: number; currency: string };
     }
   | {
-      name: "checkout_started";
-      props: { link_id: string; slug: string; price: number; currency: string };
-    }
-  | {
-      name: "purchase_completed";
+      name: "Purchase Completed";
       props: {
         link_id: string;
         order_id: string;
@@ -39,36 +90,76 @@ export type AnalyticsEvent =
         platform_fee: number;
       };
     }
-  | { name: "otp_verified"; props: { order_id: string } }
-  | { name: "otp_resent"; props: { order_id: string } }
-  | { name: "content_accessed"; props: { order_id: string; link_id: string } }
-  // Seller funnel
-  | { name: "seller_signed_up"; props: { user_id: string } }
-  | { name: "stripe_connected"; props: { user_id: string } }
+  // ── Seller / link management ─────────────────────────────────────────────
   | {
-      name: "link_created";
-      props: { link_id: string; price: number; product_type: string };
-    }
-  | { name: "link_published"; props: { link_id: string } }
-  | { name: "link_archived"; props: { link_id: string } }
-  | { name: "payout_requested"; props: { user_id: string } }
-  // Marketing / acquisition
-  | {
-      name: "hero_variant_seen";
-      props: { variant: string };
+      name: "Link Created";
+      props: {
+        link_id: string;
+        content_type: string; // product_type
+        unlock_method: "otp_email";
+        price: number;
+        currency: string;
+      };
     }
   | {
-      name: "cta_clicked";
-      props: { location: string; label: string; variant?: string };
+      name: "Link Shared";
+      props: {
+        link_id: string;
+        share_channel: string; // "copy_link" | "dashboard"
+        is_copy_link: boolean;
+      };
     }
   | {
-      name: "blog_post_viewed";
+      name: "Link Settings Updated";
+      props: {
+        link_id: string;
+        changed_fields: string[]; // ["title", "price", "description", "destination_url", "preview_image"]
+      };
+    }
+  | {
+      name: "Link Revoked";
+      props: {
+        link_id: string;
+        revoke_reason: string; // "archived_by_seller" | "suspended_by_platform"
+      };
+    }
+  // ── Auth ─────────────────────────────────────────────────────────────────
+  | {
+      name: "Signup Completed";
+      props: { user_id: string; signup_method: "magic_link" };
+    }
+  | {
+      name: "Login Completed";
+      props: { user_id: string; login_method: "magic_link" };
+    }
+  // ── Stripe (unseal.link-specific) ────────────────────────────────────────
+  | { name: "Stripe Connected"; props: { user_id: string } }
+  | { name: "Payout Requested"; props: { user_id: string } }
+  // ── Errors ───────────────────────────────────────────────────────────────
+  | {
+      name: "Error Encountered";
+      props: {
+        error_category: string; // "checkout" | "otp" | "webhook" | "stripe" | "auth"
+        error_message: string;
+        error_context?: string;
+        http_status_code?: number;
+        link_id?: string;
+        attempt_number?: number;
+      };
+    }
+  // ── Marketing ────────────────────────────────────────────────────────────
+  | {
+      name: "CTA Clicked";
+      props: { location: string; label: string };
+    }
+  | {
+      name: "Blog Post Viewed";
       props: { slug: string; title: string };
     };
 
 /**
  * Type-safe wrapper around amplitude.track().
- * Usage: track({ name: "paywall_viewed", props: { link_id, slug, price, currency } })
+ * Usage: track({ name: "Sealed Link Opened", props: { link_id, ... } })
  */
 export function track(event: AnalyticsEvent) {
   if (typeof window === "undefined") return;

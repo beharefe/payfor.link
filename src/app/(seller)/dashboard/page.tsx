@@ -5,7 +5,10 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { InitiateStripeConnectButton } from "./dashboard-actions";
 import { SellerRealtimeNotifier } from "./realtime-notifier";
-import { type DayRevenue, RevenueChart } from "./revenue-chart";
+import dynamic from "next/dynamic";
+import type { DayRevenue } from "./revenue-chart";
+
+const RevenueChart = dynamic(() => import("./revenue-chart").then(m => m.RevenueChart));
 
 function buildChartData(
   paid: { created_at: string; price_paid: number }[],

@@ -1,5 +1,6 @@
 "use server";
 
+import { trackServer } from "@unseallink/lib/amplitude-server";
 import { TABLES } from "@unseallink/lib/db";
 import { log } from "@unseallink/lib/logger";
 import { platformFeeCents, stripe } from "@unseallink/lib/stripe";
@@ -84,6 +85,11 @@ export async function createCheckoutSession(
     log.error("Stripe session missing URL", { link_id: linkId });
     return { error: "Could not start checkout" };
   }
+
+  void trackServer({
+    name: "Checkout Started",
+    props: { link_id: link.id, slug: link.slug, price: link.price, currency: link.currency },
+  });
 
   redirect(session.url);
 }

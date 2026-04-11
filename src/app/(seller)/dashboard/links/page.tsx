@@ -106,7 +106,7 @@ export default async function LinksPage() {
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     {effectiveStatus === "active" && (
-                      <CopyLinkButtons url={`${appUrl}/@${seller.username}/${link.slug}`} />
+                      <CopyLinkButtons url={`${appUrl}/@${seller.username}/${link.slug}`} linkId={link.id} />
                     )}
                     <Link
                       href={`/preview/${link.id}`}

@@ -8,21 +8,21 @@ Track each item: `[ ]` → `[x]` when done.
 
 Set all of these in Vercel → Project → Settings → Environment Variables for **Production**.
 
-- [ ] `NEXT_PUBLIC_SUPABASE_URL` — production Supabase project URL
-- [ ] `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` — `sb_publishable_...` (or legacy anon key)
-- [ ] `SUPABASE_SECRET_KEY` — `sb_secret_...` (or legacy service role key)
-- [ ] `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` — live Stripe publishable key (`pk_live_...`)
-- [ ] `STRIPE_SECRET_KEY` — live Stripe secret key (`sk_live_...`)
-- [ ] `STRIPE_WEBHOOK_SECRET` — from Stripe Dashboard → Developers → Webhooks (production endpoint)
-- [ ] `RESEND_API_KEY` — production Resend API key
-- [ ] `RESEND_FROM_EMAIL` — `noreply@unseal.link`
-- [ ] `BUYER_SESSION_SECRET` — random 32+ char secret for signing buyer session cookies (generate with `openssl rand -hex 32`)
-- [ ] `NEXT_PUBLIC_AXIOM_DATASET` — Axiom dataset name
-- [ ] `NEXT_PUBLIC_AXIOM_TOKEN` — Axiom ingest token
-- [ ] `NEXT_PUBLIC_AMPLITUDE_API_KEY` — Amplitude project API key
-- [ ] `SENTRY_DSN` — Sentry project DSN
-- [ ] `SENTRY_AUTH_TOKEN` — Sentry auth token for source maps
-- [ ] `GOOGLE_SAFE_BROWSING_API_KEY` — Google Cloud Console → Safe Browsing API
+- [x] `NEXT_PUBLIC_SUPABASE_URL` — production Supabase project URL
+- [x] `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` — `sb_publishable_...` (or legacy anon key)
+- [x] `SUPABASE_SECRET_KEY` — `sb_secret_...` (or legacy service role key)
+- [x] `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` — live Stripe publishable key (`pk_live_...`)
+- [x] `STRIPE_SECRET_KEY` — live Stripe secret key (`sk_live_...`)
+- [x] `STRIPE_WEBHOOK_SECRET` — from Stripe Dashboard → Developers → Webhooks (production endpoint)
+- [x] `RESEND_API_KEY` — production Resend API key
+- [x] `RESEND_FROM_EMAIL` — `noreply@unseal.link`
+- [x] `BUYER_SESSION_SECRET` — random 32+ char secret for signing buyer session cookies (generate with `openssl rand -hex 32`)
+- [x] `NEXT_PUBLIC_AXIOM_DATASET` — Axiom dataset name
+- [x] `NEXT_PUBLIC_AXIOM_TOKEN` — Axiom ingest token
+- [x] `NEXT_PUBLIC_AMPLITUDE_API_KEY` — Amplitude project API key
+- [?] `SENTRY_DSN` — Sentry project DSN
+- [x] `SENTRY_AUTH_TOKEN` — Sentry auth token for source maps
+- [?] `GOOGLE_SAFE_BROWSING_API_KEY` — Google Cloud Console → Safe Browsing API
 - [ ] `NEXT_PUBLIC_APP_URL` — `https://unseal.link`
 
 ---
@@ -71,6 +71,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_stripe_payment_id ON orders(stripe_
 - [ ] Supabase Auth → Email → OTP Expiry set to match `ACCESS_TOKEN_DAYS` in code (7 days)
 - [ ] Supabase Auth → Email templates customised with unseal.link branding (magic link email)
 - [ ] Supabase Auth → Redirect URLs: add `https://unseal.link/**`
+- [ ] Supabase SMTP configured to use Resend (https://supabase.com/docs/guides/auth/auth-smtp)
+- [ ] Supabase Bucket public (preview-images) configured for file storage (https://supabase.com/docs/guides/storage) 
 
 ### Supabase SMTP — use Resend instead of the default mailer
 

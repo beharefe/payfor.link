@@ -3,7 +3,9 @@ import { stripe } from "@unseallink/lib/stripe";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { CheckCircle } from "lucide-react";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { SuccessPoller } from "./success-page-client";
+import { ResendAccessButton } from "./resend-button";
 
 export const metadata: Metadata = {
   robots: { index: false },
@@ -151,6 +153,17 @@ export default async function PaymentSuccessPage({
             </p>
           </div>
         </div>
+
+        {/* Resend */}
+        <ResendAccessButton email={customerEmail} orderId={order.id} />
+
+        {/* Footer */}
+        <p className="text-center text-xs text-muted-foreground">
+          Powered by{" "}
+          <Link href="/" className="font-medium text-foreground hover:underline">
+            unseal.link
+          </Link>
+        </p>
 
       </div>
     </main>

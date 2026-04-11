@@ -1,3 +1,4 @@
+import { trackServer } from "@unseallink/lib/amplitude-server";
 import { verifySessionValue } from "@unseallink/lib/buyer-token";
 import { TABLES } from "@unseallink/lib/db";
 import { isValidUrl } from "@unseallink/lib/product-utils";
@@ -16,7 +17,7 @@ export async function GET(
   const service = createServiceClient();
   const { data: order } = await service
     .from(TABLES.ORDERS)
-    .select("buyer_email, delivery_url, status")
+    .select("buyer_email, delivery_url, status, product_id")
     .eq("id", order_id)
     .single();
 
@@ -40,6 +41,14 @@ export async function GET(
   if (!isValidUrl(order.delivery_url)) {
     return NextResponse.json({ error: "Invalid delivery URL" }, { status: 500 });
   }
+
+  void trackServer(
+    {
+      name: "Content Revealed",
+      props: { link_id: order.product_id, order_id, content_type: "link" },
+    },
+    order.buyer_email,
+  );
 
   return NextResponse.redirect(order.delivery_url);
 }

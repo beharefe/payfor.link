@@ -3,7 +3,7 @@ import { ImageResponse } from "next/og";
 export const runtime = "edge";
 
 export function GET() {
-  return new ImageResponse(
+  const res = new ImageResponse(
     <div
       style={{
         width: "1200px",
@@ -89,4 +89,6 @@ export function GET() {
     </div>,
     { width: 1200, height: 630 },
   );
+  res.headers.set("Cache-Control", "public, max-age=86400, stale-while-revalidate=604800");
+  return res;
 }

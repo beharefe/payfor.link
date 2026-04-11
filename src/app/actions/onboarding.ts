@@ -1,5 +1,6 @@
 "use server";
 
+import { trackServer } from "@unseallink/lib/amplitude-server";
 import { TABLES } from "@unseallink/lib/db";
 import { createClient } from "@unseallink/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -60,6 +61,11 @@ export async function saveOnboardingName(formData: FormData) {
     const detail = encodeURIComponent(upsertError.message ?? upsertError.code ?? "unknown");
     redirect(`/onboarding/name?error=save_failed&detail=${detail}`);
   }
+
+  void trackServer(
+    { name: "Signup Completed", props: { user_id: user.id, signup_method: "magic_link" } },
+    user.id,
+  );
 
   redirect("/dashboard");
 }

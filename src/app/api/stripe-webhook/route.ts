@@ -1,5 +1,6 @@
 import { sendBuyerAccessEmail, sendDisputeAlert, sendSaleNotificationEmail } from "@unseallink/lib/email";
 import { generateAccessToken } from "@unseallink/lib/access-token";
+import { trackServer } from "@unseallink/lib/amplitude-server";
 import { TABLES } from "@unseallink/lib/db";
 import { log } from "@unseallink/lib/logger";
 import { platformFeeCents, stripe } from "@unseallink/lib/stripe";
@@ -145,6 +146,20 @@ async function handleCheckoutSessionCompleted(
     // A silent return here would leave the order missing with no retry.
     throw new Error(`Order insert failed: ${insertError?.message ?? "no data returned"}`);
   }
+
+  void trackServer(
+    {
+      name: "Purchase Completed",
+      props: {
+        link_id: product.id,
+        order_id: insertedOrder.id,
+        price: pricePaid,
+        currency: (session.currency ?? "usd").toLowerCase(),
+        platform_fee: platformFee,
+      },
+    },
+    customerEmail,
+  );
 
   // Atomic increments via RPC — avoids read-modify-write races on concurrent orders.
   await Promise.all([

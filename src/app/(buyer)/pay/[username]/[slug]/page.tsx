@@ -1,6 +1,7 @@
 import { TABLES } from "@unseallink/lib/db";
 import { sendMissedSaleEmail } from "@unseallink/lib/email";
 import { log } from "@unseallink/lib/logger";
+import { trackServer } from "@unseallink/lib/amplitude-server";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { Clock, LockKeyhole, Mail, Timer } from "lucide-react";
 import type { Metadata } from "next";
@@ -110,6 +111,14 @@ export default async function PaywallPage({ params }: Props) {
 
   const seller = sellerData;
   log.info("paywall_viewed", { link_id: link.id, slug, username });
+  void trackServer({
+    name: "Sealed Link Opened",
+    props: {
+      link_id: link.id,
+      link_token_present: false,
+      delivery_channel: "direct",
+    },
+  });
 
   function formatTimeUntil(expiresAt: string): string {
     const ms = new Date(expiresAt).getTime() - Date.now();

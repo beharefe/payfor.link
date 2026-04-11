@@ -1,4 +1,5 @@
 import { hashAccessToken } from "@unseallink/lib/access-token";
+import { trackServer } from "@unseallink/lib/amplitude-server";
 import { createSessionValue } from "@unseallink/lib/buyer-token";
 import { TABLES } from "@unseallink/lib/db";
 import { log } from "@unseallink/lib/logger";
@@ -32,21 +33,24 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (!token) {
+    void trackServer({ name: "Unseal Failed", props: { link_id: "", unlock_method: "otp_email", failure_reason: "invalid_token", attempt_number: 1, is_rate_limited: false } });
     return NextResponse.json({ error: "Invalid or expired link." }, { status: 401 });
   }
 
   if (token.used_at) {
+    void trackServer({ name: "Unseal Failed", props: { link_id: "", unlock_method: "otp_email", failure_reason: "already_used", attempt_number: 1, is_rate_limited: false } });
     return NextResponse.json({ error: "This link has already been used. Request a new one." }, { status: 401 });
   }
 
   if (new Date(token.expires_at) < new Date()) {
+    void trackServer({ name: "Unseal Failed", props: { link_id: "", unlock_method: "otp_email", failure_reason: "expired_token", attempt_number: 1, is_rate_limited: false } });
     return NextResponse.json({ error: "This link has expired. Request a new one." }, { status: 401 });
   }
 
-  // Look up the order to get buyer email
+  // Look up the order to get buyer email and product (link) id
   const { data: order } = await supabase
     .from(TABLES.ORDERS)
-    .select("buyer_email, status")
+    .select("buyer_email, status, product_id")
     .eq("id", orderId)
     .single();
 
@@ -55,6 +59,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (order.status === "refunded") {
+    void trackServer({ name: "Unseal Failed", props: { link_id: order.product_id, unlock_method: "otp_email", failure_reason: "order_refunded", attempt_number: 1, is_rate_limited: false } }, order.buyer_email);
     return NextResponse.json({ error: "This order has been refunded." }, { status: 403 });
   }
 
@@ -72,6 +77,19 @@ export async function POST(request: NextRequest) {
     });
     return NextResponse.json({ error: "Failed to process token." }, { status: 500 });
   }
+
+  void trackServer(
+    {
+      name: "Unseal Succeeded",
+      props: {
+        link_id: order.product_id,
+        unlock_method: "otp_email",
+        attempt_number: 1,
+        content_type: "link",
+      },
+    },
+    order.buyer_email,
+  );
 
   // Set buyer session cookie (30 days) so the access route can verify identity
   const response = NextResponse.json({ ok: true });

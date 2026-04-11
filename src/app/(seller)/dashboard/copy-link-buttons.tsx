@@ -1,14 +1,16 @@
 "use client";
 
+import { track } from "@unseallink/lib/amplitude";
 import { useState } from "react";
 
-export function CopyLinkButtons({ url }: { url: string }) {
+export function CopyLinkButtons({ url, linkId }: { url: string; linkId: string }) {
   const [copied, setCopied] = useState(false);
 
   function handleCopy() {
     navigator.clipboard.writeText(url).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+      track({ name: "Link Shared", props: { link_id: linkId, share_channel: "copy_link", is_copy_link: true } });
     });
   }
 
