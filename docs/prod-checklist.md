@@ -42,6 +42,53 @@ Set all of these in Vercel → Project → Settings → Environment Variables fo
 - [ ] Supabase Auth → Email templates customised with unseal.link branding (magic link email)
 - [ ] Supabase Auth → Redirect URLs: add `https://unseal.link/**`
 
+### Supabase SMTP — use Resend instead of the default mailer
+
+By default Supabase uses a shared low-volume SMTP service that rate-limits at ~3 emails/hour — **not suitable for production**. Replace it with Resend before launch.
+
+1. Go to **Supabase Dashboard → Project → Authentication → SMTP Settings**
+2. Enable **Custom SMTP**
+3. Fill in:
+   - **Host:** `smtp.resend.com`
+   - **Port:** `465` (SSL) or `587` (STARTTLS)
+   - **Username:** `resend`
+   - **Password:** your Resend API key (`re_...`)
+   - **Sender name:** `unseal.link`
+   - **Sender email:** `noreply@unseal.link` (must match a verified Resend domain)
+4. Send a test email from the Supabase UI to confirm delivery
+5. Verify magic-link emails arrive promptly from `noreply@unseal.link`
+
+- [ ] Custom SMTP configured in Supabase Auth (Resend, port 465)
+- [ ] Test magic-link email delivered successfully via Resend SMTP
+
+### Supabase Storage — preview image uploads
+
+The `/api/upload-preview` endpoint requires a Supabase Storage bucket.
+
+1. Go to **Supabase Dashboard → Storage**
+2. Create a new bucket called **`previews`**
+3. Set it to **Public** (images are served directly on paywall pages)
+4. Add a storage policy to allow authenticated sellers to upload:
+   ```sql
+   -- Allow authenticated users to insert into previews bucket
+   CREATE POLICY "Sellers can upload previews"
+   ON storage.objects FOR INSERT
+   TO authenticated
+   WITH CHECK (bucket_id = 'previews');
+
+   -- Allow public read
+   CREATE POLICY "Public read previews"
+   ON storage.objects FOR SELECT
+   TO public
+   USING (bucket_id = 'previews');
+   ```
+5. Optionally set a **file size limit** (2 MB) and allowed MIME types (`image/jpeg`, `image/png`, `image/webp`) in the bucket settings
+6. Confirm the bucket URL matches what `upload-preview` returns — typically `https://<project>.supabase.co/storage/v1/object/public/previews/<filename>`
+
+- [ ] `previews` bucket created in Supabase Storage (public)
+- [ ] Storage RLS policies applied (authenticated upload, public read)
+- [ ] Test image upload via the create-link form in production
+
 ---
 
 ## 3. Stripe
