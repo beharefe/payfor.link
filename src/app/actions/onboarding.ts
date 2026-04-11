@@ -2,6 +2,7 @@
 
 import { trackServer } from "@unseallink/lib/amplitude-server";
 import { TABLES } from "@unseallink/lib/db";
+import { grantSignupPromotions } from "@unseallink/lib/promotions/promotions-service";
 import { createClient } from "@unseallink/lib/supabase/server";
 import { redirect } from "next/navigation";
 import slugify from "slugify";
@@ -66,6 +67,9 @@ export async function saveOnboardingName(formData: FormData) {
     { name: "Signup Completed", props: { user_id: user.id, signup_method: "magic_link" } },
     user.id,
   );
+
+  // Grant any auto-apply promotions (e.g. launch fee waiver). Non-blocking — never delay signup.
+  await grantSignupPromotions(user.id).catch(() => undefined);
 
   redirect("/dashboard");
 }

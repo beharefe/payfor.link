@@ -4,6 +4,7 @@ import { Check } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { InitiateStripeConnectButton } from "./dashboard-actions";
+import { PromotionBanners } from "./promotion-banners";
 import { SellerRealtimeNotifier } from "./realtime-notifier";
 import dynamic from "next/dynamic";
 import type { DayRevenue } from "./revenue-chart";
@@ -95,6 +96,9 @@ export default async function DashboardPage() {
       <SellerRealtimeNotifier sellerId={user.id} />
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+        {/* Active promotions — shown when seller has fee waivers or credits */}
+        <PromotionBanners sellerId={user.id} />
+
         {/* Setup card — shown until Stripe is connected */}
         {!seller.stripe_connected && (
           <div className="border border-border rounded-2xl p-6 bg-card">
