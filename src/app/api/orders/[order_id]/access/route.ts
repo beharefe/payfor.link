@@ -1,8 +1,7 @@
-import { verifySessionValue } from "@unseallink/lib/buyer-token";
+import { trackServer } from "@unseallink/lib/amplitude-server";
 import { TABLES } from "@unseallink/lib/db";
 import { isValidUrl } from "@unseallink/lib/product-utils";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 export async function GET(
@@ -16,7 +15,7 @@ export async function GET(
   const service = createServiceClient();
   const { data: order } = await service
     .from(TABLES.ORDERS)
-    .select("buyer_email, delivery_url, status")
+    .select("buyer_email, delivery_url, status, product_id")
     .eq("id", order_id)
     .single();
 
@@ -25,21 +24,21 @@ export async function GET(
   }
 
   if (order.status === "refunded") {
-    return NextResponse.redirect(new URL(`/orders/${order_id}`, appUrl));
-  }
-
-  const cookieStore = await cookies();
-  const session = verifySessionValue(cookieStore.get("buyer_session")?.value ?? "");
-
-  if (!session || session.email.toLowerCase() !== order.buyer_email.toLowerCase()) {
-    return NextResponse.redirect(
-      new URL(`/orders?next=/orders/${order_id}`, appUrl),
-    );
+    return NextResponse.redirect(new URL(`/orders?oid=${order_id}`, appUrl));
   }
 
   if (!isValidUrl(order.delivery_url)) {
     return NextResponse.json({ error: "Invalid delivery URL" }, { status: 500 });
   }
+
+  // Order UUID is 122-bit random — non-guessable. Possession proves purchase.
+  void trackServer(
+    {
+      name: "Content Revealed",
+      props: { link_id: order.product_id, order_id, content_type: "link" },
+    },
+    order.buyer_email,
+  );
 
   return NextResponse.redirect(order.delivery_url);
 }

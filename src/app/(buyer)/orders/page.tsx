@@ -1,96 +1,295 @@
-import { verifySessionValue } from "@unseallink/lib/buyer-token";
 import { TABLES } from "@unseallink/lib/db";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
+import { ChevronDown } from "lucide-react";
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
-import Link from "next/link";
-import { OrdersSignIn } from "./orders-sign-in";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Your orders",
+  title: "Your purchases · unseal.link",
   robots: { index: false },
 };
+
+function formatDate(d: string) {
+  return new Date(d).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+type Order = {
+  id: string;
+  product_title: string;
+  price_paid: number;
+  currency: string;
+  created_at: string;
+  status: string;
+  seller_id?: string;
+};
+
+function Logo() {
+  return (
+    <a
+      href="/"
+      className="text-xs font-medium uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors no-underline block text-center"
+    >
+      unseal.link
+    </a>
+  );
+}
+
+function FeaturedCard({
+  order,
+  sellerName,
+}: {
+  order: Order;
+  sellerName?: string | null;
+}) {
+  const shortId = order.id.slice(0, 8).toUpperCase();
+
+  return (
+    <div className="border border-border rounded-2xl bg-card overflow-hidden">
+      <div className="p-5">
+        <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3">
+          Your purchase
+        </p>
+        <p className="font-medium text-foreground leading-snug mb-0.5">
+          {order.product_title}
+        </p>
+        {sellerName && (
+          <p className="text-sm text-muted-foreground mb-4">by {sellerName}</p>
+        )}
+        <div className="border-t border-border pt-4 flex flex-col gap-2.5">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Amount paid</span>
+            <span className="font-medium text-foreground">
+              ${order.price_paid.toFixed(2)} {order.currency.toUpperCase()}
+            </span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Date</span>
+            <span className="text-foreground">{formatDate(order.created_at)}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Order</span>
+            <span className="text-foreground font-mono text-xs">#{shortId}</span>
+          </div>
+        </div>
+      </div>
+      <div className="px-5 pb-5">
+        {order.status === "refunded" ? (
+          <p className="text-center text-sm text-muted-foreground py-2">
+            This order was refunded
+          </p>
+        ) : (
+          <a
+            href={`/api/orders/${order.id}/access`}
+            className="flex items-center justify-center w-full px-6 py-3.5 bg-primary text-primary-foreground no-underline rounded-full font-medium text-base hover:opacity-90 transition-opacity"
+          >
+            Open link →
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function OtherOrdersAccordion({ orders }: { orders: Order[] }) {
+  if (!orders.length) return null;
+  return (
+    <details className="group border border-border rounded-2xl bg-card overflow-hidden">
+      <summary className="px-5 py-4 flex items-center justify-between cursor-pointer select-none list-none text-sm font-medium text-foreground">
+        <span>
+          {orders.length === 1
+            ? "1 other purchase"
+            : `${orders.length} other purchases`}
+        </span>
+        <ChevronDown className="size-4 text-muted-foreground group-open:rotate-180 transition-transform" />
+      </summary>
+      <div className="border-t border-border divide-y divide-border">
+        {orders.map((order) => (
+          <div key={order.id} className="px-5 py-3.5 flex items-center gap-3">
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground truncate">
+                {order.product_title}
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {formatDate(order.created_at)} · ${order.price_paid.toFixed(2)}{" "}
+                {order.currency.toUpperCase()}
+              </p>
+            </div>
+            {order.status === "refunded" ? (
+              <span className="text-xs text-muted-foreground border border-border rounded-full px-3 py-1 shrink-0">
+                Refunded
+              </span>
+            ) : (
+              <a
+                href={`/api/orders/${order.id}/access`}
+                className="text-xs font-medium text-foreground hover:opacity-60 transition-opacity shrink-0 no-underline"
+              >
+                Open →
+              </a>
+            )}
+          </div>
+        ))}
+      </div>
+    </details>
+  );
+}
 
 export default async function OrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; oid?: string }>;
+  searchParams: Promise<{ oid?: string; email?: string }>;
 }) {
-  const { error, oid } = await searchParams;
-  const cookieStore = await cookies();
-  const session = verifySessionValue(cookieStore.get("buyer_session")?.value ?? "");
+  const { oid, email } = await searchParams;
+  const supabase = createServiceClient();
 
-  if (!session) {
-    return (
-      <main className="min-h-dvh flex flex-col items-center justify-center px-6 py-16 bg-background">
-        <div className="w-full max-w-sm">
-          <div className="mb-8 text-center">
-            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3">unseal.link</p>
-            <h1 className="text-3xl font-medium tracking-tight text-foreground mb-2">Your orders</h1>
-            {error === "link_expired" ? (
-              <p className="text-destructive text-sm">That link has expired. Enter your email to get a new one.</p>
-            ) : (
-              <p className="text-muted-foreground text-sm">Enter the email you used at checkout.</p>
-            )}
+  // ─── Case 1: specific order ID (from purchase email link or bookmark) ─────
+  // The order UUID is non-guessable (122-bit random) — possession proves purchase.
+  if (oid) {
+    const { data: order } = await supabase
+      .from(TABLES.ORDERS)
+      .select(
+        "id, product_title, price_paid, currency, created_at, status, buyer_email, seller_id",
+      )
+      .eq("id", oid)
+      .single();
+
+    if (!order) {
+      return (
+        <main className="min-h-dvh flex items-center justify-center px-6 bg-background">
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">Order not found.</p>
+            <a href="/orders" className="text-sm text-foreground underline mt-2 block">
+              View all purchases →
+            </a>
           </div>
-          <OrdersSignIn oid={oid} />
+        </main>
+      );
+    }
+
+    // Fetch all other orders for this buyer (email from the order itself — no session needed)
+    const [{ data: otherOrders }, { data: seller }] = await Promise.all([
+      supabase
+        .from(TABLES.ORDERS)
+        .select("id, product_title, price_paid, currency, created_at, status")
+        .eq("buyer_email", order.buyer_email)
+        .neq("id", oid)
+        .order("created_at", { ascending: false }),
+      supabase.from(TABLES.SELLERS).select("name").eq("id", order.seller_id).single(),
+    ]);
+
+    return (
+      <main className="min-h-dvh bg-background">
+        <div className="max-w-sm mx-auto px-6 py-12 flex flex-col gap-5">
+          <Logo />
+          <FeaturedCard order={order} sellerName={seller?.name} />
+          <OtherOrdersAccordion orders={otherOrders ?? []} />
+          <a
+            href={`/orders?email=${encodeURIComponent(order.buyer_email)}`}
+            className="text-xs text-center text-muted-foreground hover:text-foreground transition-colors no-underline"
+          >
+            All purchases for {order.buyer_email}
+          </a>
         </div>
       </main>
     );
   }
 
-  const service = createServiceClient();
-  const { data: orders } = await service
-    .from(TABLES.ORDERS)
-    .select("id, product_title, price_paid, currency, created_at, status")
-    .eq("buyer_email", session.email)
-    .order("created_at", { ascending: false });
+  // ─── Case 2: email lookup ─────────────────────────────────────────────────
+  if (email) {
+    const normalized = email.toLowerCase().trim();
 
-  return (
-    <main className="min-h-dvh bg-background">
-      <div className="max-w-2xl mx-auto px-6 py-10">
-        <div className="flex items-center justify-between gap-4 mb-2">
-          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Signed in as {session.email}</p>
+    const { data: orders } = await supabase
+      .from(TABLES.ORDERS)
+      .select(
+        "id, product_title, price_paid, currency, created_at, status, seller_id",
+      )
+      .eq("buyer_email", normalized)
+      .order("created_at", { ascending: false });
+
+    if (!orders?.length) {
+      return (
+        <main className="min-h-dvh flex flex-col items-center justify-center px-6 py-16 bg-background">
+          <div className="w-full max-w-sm">
+            <div className="mb-8 text-center">
+              <Logo />
+              <h1 className="text-3xl font-medium tracking-tight text-foreground mt-6 mb-2">
+                No purchases found
+              </h1>
+              <p className="text-muted-foreground text-sm">
+                Nothing for <strong>{normalized}</strong>. Check the email address you used at checkout.
+              </p>
+            </div>
+            <EmailForm />
+          </div>
+        </main>
+      );
+    }
+
+    const [featured, ...others] = orders;
+
+    // Fetch seller name only for the featured (most recent) order
+    const { data: seller } = await supabase
+      .from(TABLES.SELLERS)
+      .select("name")
+      .eq("id", featured.seller_id)
+      .single();
+
+    return (
+      <main className="min-h-dvh bg-background">
+        <div className="max-w-sm mx-auto px-6 py-12 flex flex-col gap-5">
+          <Logo />
+          <FeaturedCard order={featured} sellerName={seller?.name} />
+          <OtherOrdersAccordion orders={others} />
           <a
-            href="/api/buyer-signout"
-            className="text-xs text-muted-foreground hover:text-foreground transition-colors no-underline shrink-0"
+            href="/orders"
+            className="text-xs text-center text-muted-foreground hover:text-foreground transition-colors no-underline"
           >
-            Sign out →
+            Search a different email
           </a>
         </div>
-        <h1 className="text-2xl font-medium tracking-tight text-foreground mb-8">Your orders</h1>
+      </main>
+    );
+  }
 
-        {!orders?.length ? (
-          <div className="border border-dashed border-border rounded-2xl p-12 text-center">
-            <p className="text-muted-foreground text-sm">No orders found for {session.email}.</p>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-3">
-            {orders.map((order) => (
-              <div
-                key={order.id}
-                className="border border-border rounded-2xl px-5 py-4 bg-card flex flex-col sm:flex-row sm:items-center gap-3"
-              >
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-foreground truncate mb-1">{order.product_title}</p>
-                  <p className="text-muted-foreground text-sm">
-                    ${order.price_paid.toFixed(2)} {order.currency.toUpperCase()} ·{" "}
-                    {new Date(order.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                  </p>
-                </div>
-                <Link
-                  href={`/orders/${order.id}`}
-                  className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground no-underline rounded-full font-medium text-sm whitespace-nowrap hover:opacity-90 transition-opacity shrink-0"
-                >
-                  View →
-                </Link>
-              </div>
-            ))}
-          </div>
-        )}
+  // ─── Case 3: email form ───────────────────────────────────────────────────
+  return (
+    <main className="min-h-dvh flex flex-col items-center justify-center px-6 py-16 bg-background">
+      <div className="w-full max-w-sm">
+        <div className="mb-8 text-center">
+          <Logo />
+          <h1 className="text-3xl font-medium tracking-tight text-foreground mt-6 mb-2">
+            Your purchases
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            Enter the email you used at checkout.
+          </p>
+        </div>
+        <EmailForm />
       </div>
     </main>
+  );
+}
+
+function EmailForm() {
+  return (
+    <form action="/orders" method="GET" className="flex flex-col gap-3">
+      <input
+        type="email"
+        name="email"
+        required
+        placeholder="you@example.com"
+        className="h-11 w-full rounded-xl border border-input bg-background px-4 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+      />
+      <button
+        type="submit"
+        className="w-full h-11 flex items-center justify-center bg-primary text-primary-foreground rounded-full font-medium text-base hover:opacity-90 transition-opacity"
+      >
+        View purchases
+      </button>
+    </form>
   );
 }
