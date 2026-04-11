@@ -29,21 +29,31 @@ export function Navbar() {
         >
           unseal.link
         </Link>
-        {loggedIn ? (
-          <Link
-            href="/dashboard"
-            className="shrink-0 px-4 py-2 bg-primary text-primary-foreground no-underline rounded-full font-medium text-sm hover:opacity-90 transition-opacity"
-          >
-            Dashboard
-          </Link>
-        ) : (
-          <Link
-            href="/auth"
-            className="shrink-0 px-4 py-2 bg-primary text-primary-foreground no-underline rounded-full font-medium text-sm hover:opacity-90 transition-opacity"
-          >
-            Start selling
-          </Link>
-        )}
+        <div className="flex items-center gap-4">
+          {!loggedIn && (
+            <Link
+              href="/orders"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors no-underline shrink-0"
+            >
+              My orders
+            </Link>
+          )}
+          {loggedIn ? (
+            <Link
+              href="/dashboard"
+              className="shrink-0 px-4 py-2 bg-primary text-primary-foreground no-underline rounded-full font-medium text-sm hover:opacity-90 transition-opacity"
+            >
+              Dashboard
+            </Link>
+          ) : (
+            <Link
+              href="/auth"
+              className="shrink-0 px-4 py-2 bg-primary text-primary-foreground no-underline rounded-full font-medium text-sm hover:opacity-90 transition-opacity"
+            >
+              Start selling
+            </Link>
+          )}
+        </div>
       </nav>
     </header>
   );
