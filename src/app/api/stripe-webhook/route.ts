@@ -164,26 +164,34 @@ async function handleCheckoutSessionCompleted(
 
   if (slotClaimed === false) {
     // Race lost: another concurrent payment already took the last slot.
-    // Issue an immediate Stripe refund and mark this order as refunded.
-    // The buyer will receive a Stripe-generated refund confirmation — no
-    // access email is sent.
+    // Issue a full Connect-aware refund:
+    //   reverse_transfer: true       — pulls funds back from seller's connected account
+    //   refund_application_fee: true — returns our platform fee, platform doesn't absorb the loss
+    // Stripe fires charge.refunded → handleChargeRefunded reverses promotion usage.
+    // Buyer receives Stripe's automatic refund receipt. No access email is sent.
     log.warn("checkout.session.completed: max_orders reached, issuing auto-refund", {
       product_id: product.id,
       order_id: insertedOrder.id,
       payment_intent: paymentIntentId,
     });
-    await stripe.refunds.create({ payment_intent: paymentIntentId }).catch((err) =>
+    const refund = await stripe.refunds.create({
+      payment_intent: paymentIntentId,
+      reverse_transfer: true,
+      refund_application_fee: true,
+    }).catch((err) => {
       log.error("max_orders: stripe refund failed", {
         error: serializeError(err),
         payment_intent: paymentIntentId,
-      }),
-    );
+      });
+      return null;
+    });
     await supabase
       .from(TABLES.ORDERS)
       .update({
         status: "refunded",
         refund_reason: "sold_out",
         refunded_at: new Date().toISOString(),
+        stripe_refund_id: refund?.id ?? null,
       })
       .eq("id", insertedOrder.id);
     return;
