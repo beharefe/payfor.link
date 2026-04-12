@@ -92,7 +92,7 @@ export default async function PaywallPage({ params }: Props) {
   const { data: link } = await supabase
     .from(TABLES.PRODUCTS)
     .select(
-      "id, title, description, price, currency, seller_id, status, preview_image_url, total_sales, expires_at, sellers!inner(name, username, email, stripe_connected)",
+      "id, title, description, price, currency, seller_id, status, preview_image_url, total_sales, expires_at, max_orders, sellers!inner(name, username, email, stripe_connected)",
     )
     .eq("slug", slug)
     .eq("sellers.username", username)
@@ -103,8 +103,9 @@ export default async function PaywallPage({ params }: Props) {
   // biome-ignore lint/suspicious/noExplicitAny: Supabase join type
   const sellerData = link.sellers as any;
   const isExpired = link.expires_at && new Date(link.expires_at) < new Date();
+  const isSoldOut = link.max_orders !== null && link.max_orders !== undefined && (link.total_sales ?? 0) >= link.max_orders;
 
-  if (link.status !== "active" || isExpired) {
+  if (link.status !== "active" || isExpired || isSoldOut) {
     // Notify seller if their link is draft because Stripe isn't connected
     if (link.status === "draft" && !sellerData?.stripe_connected && sellerData?.email) {
       const h = await headers();
@@ -122,10 +123,12 @@ export default async function PaywallPage({ params }: Props) {
       <main className="min-h-dvh flex items-center justify-center px-6">
         <div className="text-center max-w-xs">
           <h1 className="text-xl font-medium text-foreground mb-2">
-            {isExpired ? "Offer expired" : "No longer available"}
+            {isSoldOut ? "Sold out" : isExpired ? "Offer expired" : "No longer available"}
           </h1>
           <p className="text-muted-foreground text-sm">
-            {isExpired
+            {isSoldOut
+              ? "This was a one-buyer link. It has already been purchased."
+              : isExpired
               ? "This offer is no longer accepting payments."
               : "This product has been removed or is paused."}
           </p>

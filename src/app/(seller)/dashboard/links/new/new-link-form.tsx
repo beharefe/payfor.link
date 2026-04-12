@@ -209,10 +209,12 @@ export function NewLinkForm() {
       <div className="flex items-start justify-between gap-4 py-1">
         <div>
           <p className="text-sm font-medium text-foreground leading-snug">
-            Limit to one sale
+            One buyer only
           </p>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Once purchased, the link stops accepting payments automatically.
+          <p className="text-xs text-muted-foreground mt-0.5 max-w-xs leading-relaxed">
+            The link closes after the first sale. Use this for exclusive freelance
+            deliverables or single-client work. Leave off for templates, kits, and
+            anything you want to sell repeatedly.
           </p>
         </div>
         <button
