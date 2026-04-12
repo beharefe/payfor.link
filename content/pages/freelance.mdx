@@ -1,36 +1,36 @@
 ---
-title: Never Get Ghosted After Delivering Freelance Work Again
-description: Gate your deliverable behind a Stripe payment. Client pays first, gets the link instantly. Works with Figma, Google Drive, Notion, Dropbox, and any URL.
+title: Get Paid Before You Deliver Freelance Work
+description: Gate your deliverable behind a Stripe payment. Client pays first, gets the link instantly. No more net-30 invoices, no more chasing. Works with Figma, Drive, Notion, and any URL.
 og_title: Stop Getting Ghosted -- Get Paid Before You Deliver
-og_description: Paste your deliverable link, set your price. Client pays via Stripe and gets instant access. Ghosting becomes structurally impossible.
+og_description: Paste your deliverable link, set your price. Client pays via Stripe and gets instant access. Works on any file type that has a URL.
 schema_type: WebPage
 published: true
 ---
 
 <Hero
-  title="Never deliver work and get ghosted again."
-  subtitle="Paste your final deliverable link, set a price, send your client the paywall. They pay via Stripe first, then get instant access by email. Ghosting becomes structurally impossible."
-  cta="Create your first payment link"
+  title="Never deliver work and get ghosted on payment again."
+  subtitle="Paste your final deliverable link, set a price, send your client the paywall. They pay via Stripe first, then get instant access by email. Payment is structurally required before delivery. No exceptions."
+  cta="Create your first payment-gated deliverable"
   ctaHref="/auth"
-  note="Works with Figma, Google Drive, Notion, Dropbox, any URL."
+  note="Works with Figma, Google Drive, Notion, Dropbox, and any shareable URL."
 />
 
 <FeatureList
   items={[
     {
       icon: "shield",
-      title: "Payment before access, every time",
-      body: "Your deliverable link stays completely hidden until Stripe confirms the payment. There is nothing to ghost on.",
-    },
-    {
-      icon: "zap",
-      title: "Set up in under 2 minutes",
-      body: "Finish the work, upload to Drive or Figma, paste the link, set your price. Send the paywall link to your client.",
+      title: "Payment before access. Every time.",
+      body: "Your deliverable link is completely hidden until Stripe confirms payment. There is no way for a client to receive the work without paying first. Ghosting becomes structurally impossible.",
     },
     {
       icon: "lock",
-      title: "One buyer only, for custom work",
-      body: "Toggle 'One buyer only' and the paywall closes after the first purchase. Perfect for exclusive client deliverables.",
+      title: "Built for one-off client work",
+      body: "Toggle 'One buyer only' and the paywall closes after the first purchase. The client gets the file, you get paid, the link is done. No one else can buy through it.",
+    },
+    {
+      icon: "zap",
+      title: "Set up between finishing the work and sending the invoice",
+      body: "Upload to Drive or Figma, paste the link here, set your price, send the paywall URL to your client. Two minutes, no invoice software, no net-30.",
     },
   ]}
 />
@@ -38,20 +38,20 @@ published: true
 <Steps
   items={[
     {
-      title: "Upload your deliverable",
-      body: "Put your final files in Figma, Google Drive, Notion, Dropbox, or anywhere with a shareable URL.",
+      title: "Upload your final deliverable",
+      body: "Put your finished files in Figma, Google Drive, Notion, Dropbox, or anywhere with a shareable URL. Get the share link.",
     },
     {
-      title: "Create a payment link",
-      body: "Paste the URL, write a title, set your price. Enable 'One buyer only' for exclusive client work.",
+      title: "Create a payment-gated link",
+      body: "Paste the URL, write a title that matches your project scope, set your price. Toggle 'One buyer only' for exclusive client work. Takes under 2 minutes.",
     },
     {
       title: "Send the link to your client",
-      body: "Share the paywall link over email or Slack. Your client sees a clean checkout with your project title and price.",
+      body: "Share the paywall link over email, Slack, or WhatsApp. Your client sees a clean Stripe checkout with your project title and price. Professional, simple.",
     },
     {
       title: "Client pays, gets instant access",
-      body: "Stripe processes the payment. Your client receives the deliverable link by email within seconds. You get notified and paid.",
+      body: "Stripe processes the payment. Your client receives the deliverable link by email within seconds. You get notified. No chasing, no follow-up, no invoice aging.",
     },
   ]}
 />
@@ -61,24 +61,28 @@ published: true
 <FAQ
   items={[
     {
-      q: "What if the client refuses to pay through the link?",
-      a: "That is a red flag before you deliver, not after. Clients who balk at a straightforward Stripe checkout are often the ones who ghost on final payment anyway.",
+      q: "What if the client wants to pay by invoice instead?",
+      a: "You can absolutely take bank transfer or invoice for larger projects. This tool is most useful for fixed-scope deliverables where you want payment confirmed before handing over files -- particularly for new clients or remote clients you have not worked with before.",
     },
     {
-      q: "What file types does this work with?",
-      a: "Any file type, as long as it has a shareable URL. Figma files, Google Drive folders, Notion pages, Dropbox links, GitHub repos, WeTransfer links. If it has a URL, you can paywall it.",
+      q: "Can I use this for milestone-based projects?",
+      a: "Yes. Create a separate paywall link for each milestone. Each one gates its own deliverable file. The client pays milestone by milestone and receives access to each stage as they go. Works well for branding packages, website builds, and multi-phase illustrations.",
     },
     {
-      q: "Can I use this for milestone payments?",
-      a: "Yes. Create a separate paywall link for each milestone. Each one gates its own deliverable. Client pays milestone by milestone, gets access to each stage as they go.",
+      q: "What file types work?",
+      a: "Any file type with a shareable URL. Figma files, Google Drive folders, Notion pages, Dropbox links, WeTransfer links, Loom videos, GitHub repos. If it has a URL, you can paywall it.",
     },
     {
-      q: "How do refunds work?",
-      a: "You can issue a refund from your Stripe dashboard at any time. Our 4.5% fee is returned on refunds.",
+      q: "How do refunds work if the client is unhappy?",
+      a: "You can issue a full refund from your Stripe dashboard at any time. Our 4.5% fee is returned on refunds.",
     },
     {
       q: "Do clients need to create an account?",
-      a: "No. Clients pay via Stripe checkout and receive the link by email. No account, no friction.",
+      a: "No. Clients pay via standard Stripe checkout -- card or Apple Pay -- and receive the file link by email. No account, no signup, no friction for them.",
+    },
+    {
+      q: "Is 4.5% worth it versus just sending an invoice?",
+      a: "You decide. On a $500 project, 4.5% is $22.50. If you have ever spent more than 20 minutes chasing a late payment, or delivered work and received nothing, the math works out quickly.",
     },
   ]}
 />

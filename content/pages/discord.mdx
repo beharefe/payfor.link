@@ -1,18 +1,18 @@
 ---
-title: Sell Access to Your Discord Server Without Bots or Subscriptions
-description: Paste your Discord invite link, set a price, share your paywall. Members pay via Stripe and get instant access by email. No bot setup. No Patreon. No Whop.
+title: Sell Access to Your Discord Server Without Bot Setup
+description: Paste your Discord invite link, set a price, share your paywall. Members pay via Stripe and get instant access by email. No bot. No LaunchPass. No Whop cut.
 og_title: Sell Discord Access -- No Bot Setup
-og_description: Turn your Discord invite link into a paid link in 60 seconds. Members pay via Stripe, get instant access by email. No bots, no monthly software fees.
+og_description: Turn your Discord invite into a paid link in 60 seconds. Members pay via Stripe, get the invite by email. No bots, no $29/mo platform fee, no percentage cut.
 schema_type: WebPage
 published: true
 ---
 
 <Hero
-  title="Turn your Discord invite into a paid link. No bot setup required."
-  subtitle="Paste your Discord invite URL, set a price, share your paywall link. Members pay via Stripe and receive the invite by email. No Whop account. No role-sync bot. No monthly software fee."
+  title="Paid Discord access in 60 seconds. No bot setup, no monthly platform fee."
+  subtitle="Paste your Discord invite URL, set a price, share your paywall link. Members pay via Stripe and receive the invite by email. No bot to install, no OAuth to configure, no LaunchPass subscription."
   cta="Create your Discord paywall"
   ctaHref="/auth"
-  note="Best for one-time and lifetime access. Recurring memberships are not currently supported."
+  note="Best for one-time and lifetime access. Recurring monthly memberships are not currently supported."
 />
 
 <FeatureList
@@ -20,17 +20,17 @@ published: true
     {
       icon: "link",
       title: "A Discord invite is just a URL",
-      body: "Paste your invite link, set a price, done. No bots to install, no OAuth to configure, no permissions to debug.",
+      body: "Paste your invite link, set a price, done. No bot permissions to configure, no OAuth redirect to debug, no role assignment logic to maintain.",
     },
     {
       icon: "zap",
       title: "Live in under 2 minutes",
-      body: "Create a new Discord invite set to never expire, paste it into unseal.link, set your price. Your paid community is live.",
+      body: "Create a non-expiring Discord invite, paste it here, set your price. Your paid community is live before LaunchPass would finish its onboarding flow.",
     },
     {
-      icon: "users",
-      title: "Lifetime access converts better than monthly",
-      body: "Members who pay once feel ownership rather than obligation. Churn disappears. The community stays active.",
+      icon: "banknote",
+      title: "No monthly platform fee",
+      body: "LaunchPass starts at $29/mo. Whop takes a percentage of every sale on top of their platform fee. We charge 4.5% per sale and nothing else. No subscription, ever.",
     },
   ]}
 />
@@ -38,16 +38,16 @@ published: true
 <Steps
   items={[
     {
-      title: "Create a Discord invite link",
-      body: "In your server, go to Invite People and create an invite set to never expire. Copy the link.",
+      title: "Create a non-expiring Discord invite",
+      body: "In your Discord server, right-click your channel and select 'Invite People'. Under settings, set the invite to never expire and no member limit. Copy the invite URL.",
     },
     {
       title: "Create your paywall",
-      body: "Paste the invite link, write a title, set your price. Add a description of what members get access to.",
+      body: "Paste the invite URL, write a title describing what members get access to, set your price. Takes under 2 minutes.",
     },
     {
       title: "Share your paywall link",
-      body: "Post it on Twitter, in your newsletter, on YouTube, or wherever your audience already follows you.",
+      body: "Post it on Twitter, in your newsletter, on YouTube, or wherever your audience already follows you. One link for all channels.",
     },
     {
       title: "Member pays, gets instant access",
@@ -61,20 +61,24 @@ published: true
 <FAQ
   items={[
     {
-      q: "Is this good for monthly memberships?",
-      a: "Not currently. unseal.link handles one-time and lifetime payments. For recurring subscriptions with automatic role management, Whop or Memberful are better fits. For lifetime access at a single price, this is the simplest option available.",
+      q: "Does this support recurring monthly memberships?",
+      a: "Not currently. unseal.link handles one-time and lifetime payments only. If your model depends on monthly billing and automatic role removal for non-paying members, Whop or Memberful are built for that. For a one-time founding member price or lifetime access, this is the simplest option available.",
     },
     {
-      q: "What if I want to limit the number of members?",
-      a: "Set a maximum order count when creating your paywall link. Once that number is reached, the link closes automatically. Good for creating scarcity around founding member pricing.",
+      q: "Can I limit how many members join?",
+      a: "Yes. Set a maximum order count when creating your paywall link. Once that number is reached, the link closes automatically. Useful for founding member cohorts or exclusive community tiers.",
     },
     {
       q: "Can members share the Discord invite with non-paying people?",
-      a: "Yes, Discord invites can be shared. This is the same trade-off as any digital product -- you deliver a URL and trust your buyers. For higher-value communities, regenerating the invite periodically limits exposure.",
+      a: "Yes, Discord invites can be forwarded. This is the same trust trade-off as any digital product that delivers a URL. For higher-value communities, you can periodically regenerate the invite in Discord -- old links stop working, new members need to buy a new one.",
     },
     {
-      q: "How is this different from Patreon or Whop?",
-      a: "No monthly platform fee. No mandatory storefront. No recurring billing infrastructure. You paste a link, set a price, and get paid. Simple one-time access without the complexity.",
+      q: "How is this different from LaunchPass or Whop?",
+      a: "LaunchPass charges $29/mo to $79/mo plus Stripe fees. Whop takes a cut of every transaction on top of other fees. We charge 4.5% per sale and nothing else. No monthly subscription, no platform storefront required, no bot installation.",
+    },
+    {
+      q: "What kinds of Discord communities work best?",
+      a: "Trading and investing signals groups, developer communities, indie hacker masterminds, creative accountability groups, niche hobby servers, and course alumni communities. Anything where one-time access at a fixed price makes sense.",
     },
   ]}
 />
