@@ -37,10 +37,12 @@ export function SaleNotificationEmail({
               <td style={{ fontSize: "14px", color: "#6B6B6B", paddingBottom: "8px" }}>Sale price</td>
               <td style={{ fontSize: "14px", color: "#3D3530", fontWeight: 500, textAlign: "right", paddingBottom: "8px" }}>${pricePaid.toFixed(2)}</td>
             </tr>
-            <tr>
-              <td style={{ fontSize: "14px", color: "#6B6B6B", paddingBottom: "16px" }}>Platform fee (4.5%)</td>
-              <td style={{ fontSize: "14px", color: "#6B6B6B", textAlign: "right", paddingBottom: "16px" }}>−${platformFee.toFixed(2)}</td>
-            </tr>
+            {platformFee > 0 && (
+              <tr>
+                <td style={{ fontSize: "14px", color: "#6B6B6B", paddingBottom: "16px" }}>Platform fee (4.5%)</td>
+                <td style={{ fontSize: "14px", color: "#6B6B6B", textAlign: "right", paddingBottom: "16px" }}>−${platformFee.toFixed(2)}</td>
+              </tr>
+            )}
           </table>
           <div style={{ borderTop: "1px solid #E3E1DC", paddingTop: "16px" }}>
             <table width="100%" cellPadding="0" cellSpacing="0">
