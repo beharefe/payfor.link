@@ -13,7 +13,7 @@ import { RefundBuyerEmail } from "@unseallink/emails/refund-buyer";
 import { RefundSellerEmail } from "@unseallink/emails/refund-seller";
 import { SaleNotificationEmail } from "@unseallink/emails/sale-notification";
 import { ACCESS_TOKEN_DAYS } from "./buyer-token";
-import { FROM_EMAIL, resend } from "./resend";
+import { FROM, resend } from "./resend";
 
 // Supabase magic link expiry is configured in the Supabase dashboard (Auth → Email → OTP Expiry).
 // Keep this in sync with that setting.
@@ -27,7 +27,7 @@ export async function sendBuyerAccessEmail(opts: {
   orderUrl: string;
 }) {
   return resend.emails.send({
-    from: FROM_EMAIL,
+    from: FROM,
     to: opts.to,
     subject: `Your access link: ${opts.productTitle}`,
     html: await render(
@@ -45,7 +45,7 @@ export async function sendBuyerSignInEmail(opts: {
   link: string;
 }) {
   return resend.emails.send({
-    from: FROM_EMAIL,
+    from: FROM,
     to: opts.to,
     subject: "Your orders sign-in link",
     html: await render(
@@ -63,7 +63,7 @@ export async function sendSellerSignInEmail(opts: {
   link: string;
 }) {
   return resend.emails.send({
-    from: FROM_EMAIL,
+    from: FROM,
     to: opts.to,
     subject: "Sign in to unseal.link",
     html: await render(
@@ -86,7 +86,7 @@ export async function sendMissedSaleEmail(opts: {
   dashboardUrl: string;
 }) {
   return resend.emails.send({
-    from: FROM_EMAIL,
+    from: FROM,
     to: opts.to,
     subject: `Someone tried to buy "${opts.productTitle}" — connect Stripe to go live`,
     html: await render(
@@ -109,7 +109,7 @@ export async function sendAbuseReportAlert(opts: {
   orderId?: string | null;
 }) {
   return resend.emails.send({
-    from: FROM_EMAIL,
+    from: FROM,
     to: "info@unseal.link",
     subject: `[Report] ${opts.reason} — ${opts.productTitle ?? opts.productId}`,
     html: await render(AbuseReportAlert(opts)),
@@ -126,7 +126,7 @@ export async function sendRefundBuyerEmail(opts: {
   sellerName?: string | null;
 }) {
   return resend.emails.send({
-    from: FROM_EMAIL,
+    from: FROM,
     to: opts.to,
     subject: `Refund confirmed: ${opts.productTitle}`,
     html: await render(RefundBuyerEmail(opts)),
@@ -147,7 +147,7 @@ export async function sendRefundSellerEmail(opts: {
   dashboardUrl: string;
 }) {
   return resend.emails.send({
-    from: FROM_EMAIL,
+    from: FROM,
     to: opts.to,
     subject: `Refund issued: ${opts.productTitle}`,
     html: await render(RefundSellerEmail(opts)),
@@ -169,7 +169,7 @@ export async function sendDisputeAlert(opts: {
   sellerName?: string | null;
 }) {
   return resend.emails.send({
-    from: FROM_EMAIL,
+    from: FROM,
     to: opts.to,
     subject: `[Dispute] ${opts.productTitle} · $${opts.amount.toFixed(2)} — respond before deadline`,
     html: await render(DisputeAlert(opts)),
@@ -186,7 +186,7 @@ export async function sendSaleNotificationEmail(opts: {
   dashboardUrl: string;
 }) {
   return resend.emails.send({
-    from: FROM_EMAIL,
+    from: FROM,
     to: opts.to,
     subject: `New sale: ${opts.productTitle}`,
     html: await render(

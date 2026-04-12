@@ -6,3 +6,5 @@ export const resend = new Resend(
 
 export const FROM_EMAIL =
   process.env.RESEND_FROM_EMAIL ?? "noreply@unseal.link";
+
+export const FROM = `unseal.link <${FROM_EMAIL}>`;
