@@ -33,7 +33,11 @@ export default async function DashboardLayout({
       <div className="border-b border-border">
         {/* Top row: logo + avatar dropdown */}
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
-          <Link href="/" className="text-sm font-medium text-foreground no-underline">
+          <Link
+            href="/"
+            className="no-underline shrink-0 text-[#3D3530] dark:text-[#F0EDE8]"
+            style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 600, letterSpacing: "-0.3px" }}
+          >
             unseal.link
           </Link>
           <AvatarDropdown initial={initial} avatarUrl={seller.avatar_url ?? null} />
