@@ -199,13 +199,27 @@ export default async function PaywallPage({ params }: Props) {
 
           {/* Title + description */}
           <div>
-            {expiresAt && (
-              <div
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 mb-3 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full text-xs font-medium cursor-default"
-                title={new Date(expiresAt).toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })}
-              >
-                <Clock className="w-3 h-3" aria-hidden="true" />
-                Limited offer · expires in {formatTimeUntil(expiresAt)}
+            {/* Badges: expiry and/or scarcity */}
+            {(expiresAt || link.max_orders !== null) && (
+              <div className="flex flex-wrap gap-2 mb-3">
+                {expiresAt && (
+                  <div
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full text-xs font-medium cursor-default"
+                    title={new Date(expiresAt).toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })}
+                  >
+                    <Clock className="w-3 h-3" aria-hidden="true" />
+                    Limited offer · expires in {formatTimeUntil(expiresAt)}
+                  </div>
+                )}
+                {link.max_orders !== null && link.max_orders !== undefined && (() => {
+                  const slotsLeft = link.max_orders - (link.total_sales ?? 0);
+                  return (
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 rounded-full text-xs font-medium">
+                      <span className="size-1.5 rounded-full bg-current shrink-0" />
+                      {slotsLeft === 1 ? "Only 1 spot remaining" : `${slotsLeft} spots remaining`}
+                    </div>
+                  );
+                })()}
               </div>
             )}
             <h1 className="text-2xl font-medium tracking-tight text-foreground leading-snug mb-2">

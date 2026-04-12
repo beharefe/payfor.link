@@ -6,7 +6,7 @@ const DEFAULT_ITEMS: React.ReactNode[] = [
   "Buyers need no account",
   "Instant delivery by email",
   "4.5% per sale only",
-  "Cancel any time",
+  "No $100 payout minimum",
 ];
 
 export function TrustBar({ items = DEFAULT_ITEMS }: { items?: React.ReactNode[] }) {
