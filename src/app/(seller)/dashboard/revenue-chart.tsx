@@ -81,7 +81,7 @@ export function RevenueChart({ data, totalSales, totalEarned, stripeConnected, h
                 dataKey="date"
                 tickLine={false}
                 axisLine={false}
-                tick={(props: { x: number; y: number; payload: { value: string } }) => (
+                tick={(props) => (
                   <text
                     x={props.x}
                     y={props.y}
@@ -89,7 +89,7 @@ export function RevenueChart({ data, totalSales, totalEarned, stripeConnected, h
                     textAnchor="middle"
                     style={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
                   >
-                    {props.payload.value}
+                    {props.payload?.value}
                   </text>
                 )}
                 interval="preserveStartEnd"
