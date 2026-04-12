@@ -1,0 +1,90 @@
+---
+title: Sell Access to Your Discord Server Without Bots or Subscriptions
+description: Paste your Discord invite link, set a price, share your paywall. Members pay via Stripe and get instant access by email. No bot setup. No Patreon. No Whop.
+og_title: Sell Discord Access -- No Bot Setup
+og_description: Turn your Discord invite link into a paid link in 60 seconds. Members pay via Stripe, get instant access by email. No bots, no monthly software fees.
+schema_type: WebPage
+published: true
+---
+
+<Hero
+  title="Turn your Discord invite into a paid link. No bot setup required."
+  subtitle="Paste your Discord invite URL, set a price, share your paywall link. Members pay via Stripe and receive the invite by email. No Whop account. No role-sync bot. No monthly software fee."
+  cta="Create your Discord paywall"
+  ctaHref="/auth"
+  note="Best for one-time and lifetime access. Recurring memberships are not currently supported."
+/>
+
+<FeatureList
+  items={[
+    {
+      icon: "link",
+      title: "A Discord invite is just a URL",
+      body: "Paste your invite link, set a price, done. No bots to install, no OAuth to configure, no permissions to debug.",
+    },
+    {
+      icon: "zap",
+      title: "Live in under 2 minutes",
+      body: "Create a new Discord invite set to never expire, paste it into unseal.link, set your price. Your paid community is live.",
+    },
+    {
+      icon: "users",
+      title: "Lifetime access converts better than monthly",
+      body: "Members who pay once feel ownership rather than obligation. Churn disappears. The community stays active.",
+    },
+  ]}
+/>
+
+<Steps
+  items={[
+    {
+      title: "Create a Discord invite link",
+      body: "In your server, go to Invite People and create an invite set to never expire. Copy the link.",
+    },
+    {
+      title: "Create your paywall",
+      body: "Paste the invite link, write a title, set your price. Add a description of what members get access to.",
+    },
+    {
+      title: "Share your paywall link",
+      body: "Post it on Twitter, in your newsletter, on YouTube, or wherever your audience already follows you.",
+    },
+    {
+      title: "Member pays, gets instant access",
+      body: "Stripe processes the payment. Member receives your Discord invite link by email within seconds and joins immediately.",
+    },
+  ]}
+/>
+
+<FeeCallout keep="95.5" />
+
+<FAQ
+  items={[
+    {
+      q: "Is this good for monthly memberships?",
+      a: "Not currently. unseal.link handles one-time and lifetime payments. For recurring subscriptions with automatic role management, Whop or Memberful are better fits. For lifetime access at a single price, this is the simplest option available.",
+    },
+    {
+      q: "What if I want to limit the number of members?",
+      a: "Set a maximum order count when creating your paywall link. Once that number is reached, the link closes automatically. Good for creating scarcity around founding member pricing.",
+    },
+    {
+      q: "Can members share the Discord invite with non-paying people?",
+      a: "Yes, Discord invites can be shared. If you want to prevent this, regenerate the invite after a suspicious spike in joins, or switch to specific-channel access links that require a server role.",
+    },
+    {
+      q: "Do I need to manually add members to roles?",
+      a: "For basic server access, no. Members join with the standard Discord member role. If you need paid roles automatically assigned, you will need a bot for that specific step.",
+    },
+    {
+      q: "How is this different from Patreon or Whop?",
+      a: "No monthly platform fee. No mandatory storefront. No recurring billing infrastructure. You paste a link, set a price, and get paid. Simple one-time access without the complexity.",
+    },
+  ]}
+/>
+
+<CTA
+  text="Create your paid Discord community"
+  href="/auth"
+  sub="Free to set up. 4.5% per sale. First $500 fee-free for new sellers."
+/>

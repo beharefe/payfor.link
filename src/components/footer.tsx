@@ -1,13 +1,12 @@
 import Link from "next/link";
 
 const USE_CASES = [
-  { href: "/sell-notion-template",                   label: "Sell Notion Templates" },
-  { href: "/sell-figma-template",                    label: "Sell Figma Files" },
-  { href: "/sell-access-discord-server",             label: "Sell Discord Access" },
-  { href: "/get-paid-before-delivering-freelance-work", label: "Freelancers" },
-  { href: "/sell-github-repo-code-boilerplate",      label: "Sell GitHub Repos" },
-  { href: "/sell-google-drive-file-folder",          label: "Sell Google Drive Files" },
-  { href: "/gumroad-alternatives-lower-fees",        label: "Gumroad Alternatives" },
+  { href: "/notion",    label: "Notion Templates" },
+  { href: "/figma",     label: "Figma Files" },
+  { href: "/discord",   label: "Discord Access" },
+  { href: "/freelance", label: "Freelancers" },
+  { href: "/github",    label: "GitHub Repos" },
+  { href: "/gumroad-alternatives-lower-fees", label: "Gumroad Alternatives" },
 ];
 
 const LEGAL = [
@@ -20,10 +19,10 @@ export function Footer() {
   return (
     <footer className="border-t border-border mt-auto">
       <div className="max-w-5xl mx-auto px-6 py-10 sm:py-12">
-        <div className="grid grid-cols-2 sm:grid-cols-[1fr_auto_auto] gap-8 sm:gap-12">
+        <div className="flex flex-col sm:flex-row gap-10 sm:gap-16">
 
           {/* Brand */}
-          <div className="col-span-2 sm:col-span-1 flex flex-col gap-2">
+          <div className="flex flex-col gap-2 sm:flex-1">
             <span className="text-sm font-medium text-foreground">unseal.link</span>
             <p className="text-xs text-muted-foreground leading-relaxed max-w-xs">
               Turn any link into a paywall. Buyers pay via Stripe and get instant
@@ -35,38 +34,42 @@ export function Footer() {
             </span>
           </div>
 
-          {/* Use cases */}
-          <div className="flex flex-col gap-2.5">
-            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-1">
-              Sell
-            </p>
-            {USE_CASES.map(({ href, label }) => (
-              <Link
-                key={href}
-                href={href}
-                className="text-xs text-muted-foreground hover:text-foreground transition-colors no-underline"
-              >
-                {label}
-              </Link>
-            ))}
-          </div>
+          {/* Link columns — always 2 columns side by side */}
+          <div className="grid grid-cols-2 gap-8 sm:gap-16 shrink-0">
 
-          {/* Legal */}
-          <div className="flex flex-col gap-2.5">
-            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-1">
-              Company
-            </p>
-            {LEGAL.map(({ href, label }) => (
-              <Link
-                key={href}
-                href={href}
-                className="text-xs text-muted-foreground hover:text-foreground transition-colors no-underline"
-              >
-                {label}
-              </Link>
-            ))}
-          </div>
+            {/* Use cases */}
+            <div className="flex flex-col gap-2.5">
+              <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-1">
+                Sell
+              </p>
+              {USE_CASES.map(({ href, label }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors no-underline"
+                >
+                  {label}
+                </Link>
+              ))}
+            </div>
 
+            {/* Legal */}
+            <div className="flex flex-col gap-2.5">
+              <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-1">
+                Company
+              </p>
+              {LEGAL.map(({ href, label }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors no-underline"
+                >
+                  {label}
+                </Link>
+              ))}
+            </div>
+
+          </div>
         </div>
       </div>
     </footer>
