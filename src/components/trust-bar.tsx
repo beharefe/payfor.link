@@ -7,7 +7,7 @@ const DEFAULT_STATS = [
 
 export function TrustBar({ stats = DEFAULT_STATS }: { stats?: { number: string; label: string }[] }) {
   return (
-    <div className="flex flex-wrap gap-x-8 gap-y-3">
+    <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-x-8 gap-y-3">
       {stats.map((s, i) => (
         <div key={i} className="flex items-baseline gap-1.5">
           <span className="text-sm font-semibold text-foreground tabular-nums">{s.number}</span>

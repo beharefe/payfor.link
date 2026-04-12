@@ -2,7 +2,7 @@ import { TrustBar } from "@unseallink/components/trust-bar";
 import type { Metadata } from "next";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { AlertTriangle, Globe, Lock, Mail, Percent, Share2 } from "lucide-react";
+import { Globe, Lock, Mail, Percent, Share2 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 const ProductScroll = dynamic(() =>
@@ -12,9 +12,9 @@ const ProductScroll = dynamic(() =>
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
 
 export const metadata: Metadata = {
-  title: "unseal.link — Sell Any URL. 4.5% Fee. No Uploads. No $100 Minimum.",
+  title: "unseal.link — Sell Any URL. Lowest Fee. No Uploads. No Minimum.",
   description:
-    "Turn any Notion, Figma, Drive, GitHub, or Discord URL into a paid link in 60 seconds. Buyers pay via Stripe before they get access. 4.5% fee — half of Gumroad. No file uploads, no storefront, no $100 payout minimum.",
+    "Turn any Notion, Figma, Drive, GitHub, or Discord URL into a paid link in 60 seconds. Buyers pay via Stripe before they get access. Half the fee of Gumroad. No file uploads, no storefront, no $100 payout minimum.",
   alternates: { canonical: APP_URL },
   openGraph: {
     title: "unseal.link — Sell Any URL in 60 Seconds",
@@ -31,7 +31,7 @@ const steps = [
   {
     n: "01",
     title: "Paste any link",
-    body: "Notion, Figma, Google Drive, GitHub, Discord — any URL you already own. No file uploads. Your content stays where it lives.",
+    body: "Notion, Figma, Google Drive, GitHub, Discord. Any URL you already own. No file uploads. Your content stays where it lives.",
   },
   {
     n: "02",
@@ -49,12 +49,12 @@ const features: { Icon: LucideIcon; title: string; body: string }[] = [
   {
     Icon: Globe,
     title: "Works with any URL",
-    body: "Notion, Figma, Canva, Google Drive, GitHub, Discord, Dropbox, Loom — if it has a link, you can sell it. No file uploads ever.",
+    body: "Notion, Figma, Canva, Google Drive, GitHub, Discord, Dropbox, Loom. If it has a link, you can sell it. No file uploads ever.",
   },
   {
     Icon: Percent,
-    title: "4.5% fee. Nothing else.",
-    body: "No monthly costs. No $100 payout minimum. No hidden fees. Money goes directly into your Stripe account per sale.",
+    title: "Lowest fee. No surprises.",
+    body: "No monthly costs. No $100 payout minimum. No hidden fees. Half the cut of Gumroad. Money lands directly in your Stripe account per sale.",
   },
   {
     Icon: Lock,
@@ -82,7 +82,7 @@ const useCases = [
   {
     audience: "Notion Template Creators",
     hook: "You drove all your own traffic. Gumroad still takes 10%.",
-    body: "When you're posting on X and Pinterest to drive every single sale yourself, paying a discovery tax to a platform that discovered nothing makes no sense.\n\n4.5%. No minimum. No storefront. Just your link.",
+    body: "When you're posting on X and Pinterest to drive every single sale yourself, paying a discovery tax to a platform that discovered nothing makes no sense.\n\nLowest fee. No minimum. No storefront. Just your link.",
   },
   {
     audience: "Freelancers",
@@ -157,7 +157,7 @@ const notRightFor = [
   },
   {
     title: "You're selling physical goods",
-    body: "unseal.link is built for digital content delivery. Physical products need shipping, inventory, and returns — use Shopify.",
+    body: "unseal.link is built for digital content delivery. Physical products need shipping, inventory, and returns. Use Shopify.",
   },
   {
     title: "You need VAT/GST handled automatically",
@@ -168,11 +168,11 @@ const notRightFor = [
 const faqItems = [
   {
     q: "Why not just use Stripe Payment Links?",
-    a: "Stripe Payment Links handles the payment. It doesn't handle the delivery.\n\nAfter a Stripe Payment Link completes, your buyer gets a receipt. You still need to manually email them your Notion link, add them to your GitHub repo, send them the Figma file, or paste them the Discord invite.\n\nunseal.link does the part Stripe doesn't: it gates your content URL behind the payment and delivers it automatically the moment Stripe confirms — without you doing anything.\n\nStripe Payment Links also requires you to create a product, configure pricing, set up redirects, and handle fulfillment. unseal.link is paste → price → share. The whole thing takes 60 seconds.\n\nIf you're selling a simple download you've already uploaded somewhere, Stripe Payment Links is fine. If you're selling access to a live URL — a Notion page, a Figma file, a GitHub repo, a Discord server — unseal.link is the missing layer.",
+    a: "Stripe Payment Links handles the payment. It doesn't handle the delivery.\n\nAfter a Stripe Payment Link completes, your buyer gets a receipt. You still need to manually email them your Notion link, add them to your GitHub repo, send them the Figma file, or paste them the Discord invite.\n\nunseal.link does the part Stripe doesn't: it gates your content URL behind the payment and delivers it automatically the moment Stripe confirms, without you doing anything.\n\nStripe Payment Links also requires you to create a product, configure pricing, set up redirects, and handle fulfillment. unseal.link is paste, price, share. The whole thing takes 60 seconds.\n\nIf you're selling a simple download you've already uploaded somewhere, Stripe Payment Links is fine. If you're selling access to a live URL: a Notion page, a Figma file, a GitHub repo, a Discord server. unseal.link is the missing layer.",
   },
   {
     q: "How does unseal.link keep my content URL private?",
-    a: "Your URL never appears in the page HTML, JavaScript, or network requests of your paywall page.\n\n1. Buyer opens your unseal.link — sees product name, price, Stripe checkout. Your content URL: not present anywhere.\n2. Buyer pays — Stripe processes the charge.\n3. Stripe fires a signed webhook to our server — we verify the signature cryptographically.\n4. Only after verification: your content URL travels over an encrypted server-to-email path to the buyer's inbox.\n5. Buyer gets the email instantly. You get notified. Done.\n\nView-source won't reveal your URL. Network inspection won't reveal your URL. The only way to get it is to pay.",
+    a: "Your URL never appears in the page HTML, JavaScript, or network requests of your paywall page.\n\n1. Buyer opens your unseal.link and sees product name, price, Stripe checkout. Your content URL: not present anywhere.\n2. Buyer pays. Stripe processes the charge.\n3. Stripe fires a signed webhook to our server. We verify the signature cryptographically.\n4. Only after verification: your content URL travels over an encrypted server-to-email path to the buyer's inbox.\n5. Buyer gets the email instantly. You get notified. Done.\n\nView-source won't reveal your URL. Network inspection won't reveal your URL. The only way to get it is to pay.",
   },
   {
     q: "What's the minimum payout?",
@@ -250,7 +250,7 @@ export default function HomePage() {
           </div>
 
           <p className="text-xs text-muted-foreground mb-10">
-            First 100 sellers get their first $500 in sales fee-free — no
+            First 100 sellers get their first $500 in sales fee-free: no
             platform cut, no Stripe fees.{" "}
             <Link href="/auth" className="text-foreground underline hover:no-underline">
               Claim your spot →
@@ -342,9 +342,9 @@ export default function HomePage() {
             </h2>
             <ol className="space-y-4">
               {[
-                "Buyer opens your unseal.link — sees product name, price, Stripe checkout. Your content URL: not present anywhere.",
-                "Buyer pays — Stripe processes the charge.",
-                "Stripe fires a signed webhook to our server — we verify the signature cryptographically.",
+                "Buyer opens your unseal.link and sees product name, price, Stripe checkout. Your content URL: not present anywhere.",
+                "Buyer pays. Stripe processes the charge.",
+                "Stripe fires a signed webhook to our server. We verify the signature cryptographically.",
                 "Only after verification: your content URL travels over an encrypted server-to-email path to the buyer's inbox.",
                 "Buyer gets the email instantly. You get notified. Done.",
               ].map((step, i) => (
@@ -476,27 +476,26 @@ export default function HomePage() {
             </table>
           </div>
 
-          <div className="border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/20 rounded-2xl p-6 space-y-3 max-w-2xl">
-            <p className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <AlertTriangle className="size-4 text-amber-600 dark:text-amber-400 shrink-0" />
+          <div className="border border-border rounded-2xl p-6 space-y-3 max-w-2xl bg-card">
+            <p className="text-sm font-semibold text-foreground">
               The Gumroad math nobody talks about
             </p>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Gumroad's Discover marketplace charges 30% — not 10%. If Gumroad
+              Gumroad's Discover marketplace charges 30%, not 10%. If Gumroad
               sends you a customer through their marketplace, they take nearly a
               third of your sale.
             </p>
             <p className="text-sm text-muted-foreground leading-relaxed">
               They also keep their fee when you refund a customer. You lose the
-              product AND pay the platform fee.
+              product and pay the platform fee.
             </p>
             <p className="text-sm text-muted-foreground leading-relaxed">
               And you can't withdraw anything until you've made $100. Your first
               $80 in sales? Held. Indefinitely.
             </p>
             <p className="text-sm font-medium text-foreground">
-              unseal.link charges 4.5%. On refunds, you get it back. Minimum
-              payout: $0. First sale pays out immediately.
+              With unseal.link: on refunds you get the fee back. Minimum payout: $0.
+              First sale pays out immediately.
             </p>
           </div>
         </div>
