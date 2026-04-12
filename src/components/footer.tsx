@@ -21,11 +21,15 @@ export function Footer() {
       <div className="max-w-5xl mx-auto px-6 py-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
         <div className="flex flex-col gap-3 max-w-sm">
           <span className="text-sm font-medium text-foreground">unseal.link</span>
-          <StripeBadge />
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Built on Stripe — the same payment infrastructure used by Amazon,
+            Shopify, and OpenAI. Your content URL is never exposed until payment
+            is cryptographically confirmed.
+          </p>
           <p className="text-xs text-muted-foreground leading-relaxed">
             We never hold your funds. Every sale pays out directly to your
-            connected Stripe account. No $100 minimum. No weekly batch.
-            Your money, immediately.
+            connected Stripe account. No $100 minimum. No weekly batch. Your
+            money, immediately.
           </p>
           <span className="text-xs text-muted-foreground">
             © {new Date().getFullYear()} unseal.link

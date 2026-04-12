@@ -79,7 +79,7 @@ const useCases = [
   },
   {
     audience: "Notion Template Creators",
-    hook: 'You drove all your own traffic. Gumroad still takes 10%.',
+    hook: "You drove all your own traffic. Gumroad still takes 10%.",
     body: "When you're posting on X and Pinterest to drive every single sale yourself, paying a discovery tax to a platform that discovered nothing makes no sense.\n\n4.5%. No minimum. No storefront. Just your link.",
   },
   {
@@ -95,7 +95,7 @@ const useCases = [
   {
     audience: "Discord Community Owners",
     hook: "Bot setup hell is optional.",
-    body: "A Discord invite link is just a URL. Paste it, set a price, share the paywall link. No Whop account. No role-sync bot. No monthly software fee.",
+    body: "A Discord invite link is just a URL. Paste it, set a price, share the paywall link. No Whop account. No role-sync bot. No monthly software fee.\n\nHonest note: unseal.link is built for one-time and lifetime access — not recurring subscriptions. If you need monthly billing with role-sync, Whop or Memberful are better fits. But lifetime access at $49 converts better than you'd think. Members who paid once feel ownership, not obligation. The churn problem disappears entirely.",
   },
 ];
 
@@ -106,7 +106,6 @@ const comparisonRows = [
     gumroadDirect: "10% + $0.50",
     gumroadDiscover: "30%",
     lemon: "5% + $0.50",
-    usWins: true,
   },
   {
     feature: "Payout minimum",
@@ -114,7 +113,6 @@ const comparisonRows = [
     gumroadDirect: "$100",
     gumroadDiscover: "$100",
     lemon: "$100",
-    usWins: true,
   },
   {
     feature: "Fee on refund",
@@ -122,7 +120,6 @@ const comparisonRows = [
     gumroadDirect: "Gumroad keeps it",
     gumroadDiscover: "Gumroad keeps it",
     lemon: "Kept",
-    usWins: true,
   },
   {
     feature: "File upload required",
@@ -130,7 +127,6 @@ const comparisonRows = [
     gumroadDirect: "Yes",
     gumroadDiscover: "Yes",
     lemon: "Yes",
-    usWins: true,
   },
   {
     feature: "Payout speed",
@@ -138,7 +134,6 @@ const comparisonRows = [
     gumroadDirect: "Weekly",
     gumroadDiscover: "Weekly",
     lemon: "Bi-weekly",
-    usWins: true,
   },
   {
     feature: "Storefront required",
@@ -146,7 +141,44 @@ const comparisonRows = [
     gumroadDirect: "Yes",
     gumroadDiscover: "Yes",
     lemon: "Yes",
-    usWins: true,
+  },
+];
+
+const notRightFor = [
+  {
+    title: "You need recurring subscriptions",
+    body: "unseal.link handles one-time and lifetime access payments. For monthly/annual billing with automatic renewals, use Whop, Memberful, or Patreon.",
+  },
+  {
+    title: "You need marketplace discovery",
+    body: "We don't have a browsable marketplace. You bring the audience. If you're starting from zero followers and need organic discovery, Gumroad or Payhip have marketplace traffic worth paying their fees for.",
+  },
+  {
+    title: "You're selling physical goods",
+    body: "unseal.link is built for digital content delivery. Physical products need shipping, inventory, and returns — use Shopify.",
+  },
+  {
+    title: "You need VAT/GST handled automatically",
+    body: "We process payments via Stripe Connect. For automatic global tax handling as a Merchant of Record, Lemon Squeezy or Paddle are purpose-built for that.",
+  },
+];
+
+const faqItems = [
+  {
+    q: "Why not just use Stripe Payment Links?",
+    a: "Stripe Payment Links handles the payment. It doesn't handle the delivery.\n\nAfter a Stripe Payment Link completes, your buyer gets a receipt. You still need to manually email them your Notion link, add them to your GitHub repo, send them the Figma file, or paste them the Discord invite.\n\nunseal.link does the part Stripe doesn't: it gates your content URL behind the payment and delivers it automatically the moment Stripe confirms — without you doing anything.\n\nStripe Payment Links also requires you to create a product, configure pricing, set up redirects, and handle fulfillment. unseal.link is paste → price → share. The whole thing takes 60 seconds.\n\nIf you're selling a simple download you've already uploaded somewhere, Stripe Payment Links is fine. If you're selling access to a live URL — a Notion page, a Figma file, a GitHub repo, a Discord server — unseal.link is the missing layer.",
+  },
+  {
+    q: "How does unseal.link keep my content URL private?",
+    a: "Your URL never appears in the page HTML, JavaScript, or network requests of your paywall page.\n\n1. Buyer opens your unseal.link — sees product name, price, Stripe checkout. Your content URL: not present anywhere.\n2. Buyer pays — Stripe processes the charge.\n3. Stripe fires a signed webhook to our server — we verify the signature cryptographically.\n4. Only after verification: your content URL travels over an encrypted server-to-email path to the buyer's inbox.\n5. Buyer gets the email within 30 seconds. You get notified. Done.\n\nView-source won't reveal your URL. Network inspection won't reveal your URL. The only way to get it is to pay.",
+  },
+  {
+    q: "What's the minimum payout?",
+    a: "$0. Every sale pays out directly to your connected Stripe account. No weekly batch. No $100 threshold like Gumroad. Your first sale pays out immediately.",
+  },
+  {
+    q: "Can I use unseal.link alongside Gumroad?",
+    a: "Yes. Run both. Use unseal.link for new products and your own audience, keep Gumroad where you have existing customers.",
   },
 ];
 
@@ -164,11 +196,7 @@ const jsonLd = {
     priceCurrency: "USD",
     description: "Free to list. 4.5% platform fee per sale.",
   },
-  publisher: {
-    "@type": "Organization",
-    name: "unseal.link",
-    url: APP_URL,
-  },
+  publisher: { "@type": "Organization", name: "unseal.link", url: APP_URL },
 };
 
 export default function HomePage() {
@@ -180,7 +208,7 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* Hero */}
+      {/* ── Hero ─────────────────────────────────────────────────────── */}
       <section className="pt-20 pb-16 px-6 max-w-5xl mx-auto">
         <div className="max-w-2xl">
           <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-6">
@@ -195,6 +223,16 @@ export default function HomePage() {
             No ghosting.
           </h1>
 
+          {/*
+            Subheadline A/B variants — swap in analytics/flag system:
+            A (current): platform list + 60 seconds
+            B: "Stripe takes the payment. unseal.link delivers the access.
+               Paste your URL → set price → buyer pays → gets your link by email.
+               Works with Notion, Figma, Drive, GitHub, Discord. 4.5% fee."
+            C: "No uploads. No 10% discovery tax. No ghosting.
+               Paste any live URL, set a price, share.
+               Buyers pay via Stripe and get instant access. 4.5% fee."
+          */}
           <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-lg leading-relaxed">
             Turn any Notion, Figma, Drive, GitHub, or Discord URL into a paid
             link in 60 seconds. Buyers pay via Stripe before they get access.
@@ -222,7 +260,26 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* How it works */}
+      {/* ── Stripe callout ───────────────────────────────────────────── */}
+      <section className="px-6 max-w-5xl mx-auto pb-12">
+        <div className="border border-border rounded-2xl p-5 bg-card flex gap-3 max-w-2xl">
+          <span className="text-base shrink-0 mt-0.5">💡</span>
+          <div>
+            <p className="text-sm font-medium text-foreground mb-1">
+              Not the same as Stripe Payment Links
+            </p>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Stripe collects the payment. unseal.link does what happens next:
+              it gates your content URL and delivers it automatically the moment
+              payment confirms. No manual email. No follow-up. Works with live
+              Notion pages, Figma files, GitHub repos, and Discord invites —
+              things you can't upload to Stripe.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── How it works ─────────────────────────────────────────────── */}
       <section className="border-t border-border py-16 md:py-20 bg-card">
         <div className="max-w-5xl mx-auto px-6">
           <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-12">
@@ -246,7 +303,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* What you can sell */}
+      {/* ── What you can sell ────────────────────────────────────────── */}
       <section className="border-t border-border py-14 overflow-hidden">
         <div className="max-w-5xl mx-auto">
           <div className="flex items-end justify-between px-6 mb-8">
@@ -264,7 +321,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Features */}
+      {/* ── Features ─────────────────────────────────────────────────── */}
       <section className="border-t border-border py-16 md:py-24 bg-card">
         <div className="max-w-5xl mx-auto px-6">
           <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-12">
@@ -289,8 +346,46 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Who it's for */}
+      {/* ── Security / delivery proof ────────────────────────────────── */}
       <section className="border-t border-border py-16 md:py-24">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="max-w-2xl">
+            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-6">
+              How delivery works
+            </p>
+            <h2 className="text-2xl md:text-3xl font-medium tracking-tight text-foreground mb-8">
+              Your content stays private
+              <br />
+              until payment confirms.
+            </h2>
+            <ol className="space-y-4">
+              {[
+                "Buyer opens your unseal.link — sees product name, price, Stripe checkout. Your content URL: not present anywhere.",
+                "Buyer pays — Stripe processes the charge.",
+                "Stripe fires a signed webhook to our server — we verify the signature cryptographically.",
+                "Only after verification: your content URL travels over an encrypted server-to-email path to the buyer's inbox.",
+                "Buyer gets the email within 30 seconds. You get notified. Done.",
+              ].map((step, i) => (
+                <li key={i} className="flex gap-4">
+                  <span className="text-xs font-mono font-medium text-muted-foreground mt-0.5 shrink-0 w-5">
+                    {i + 1}.
+                  </span>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {step}
+                  </p>
+                </li>
+              ))}
+            </ol>
+            <p className="text-sm text-muted-foreground mt-6 border-t border-border pt-6">
+              View-source won't reveal your URL. Network inspection won't reveal
+              your URL. The only way to get it is to pay.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Who it's for ─────────────────────────────────────────────── */}
+      <section className="border-t border-border py-16 md:py-24 bg-card">
         <div className="max-w-5xl mx-auto px-6">
           <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-12">
             Who it's for
@@ -308,18 +403,39 @@ export default function HomePage() {
                   {uc.hook}
                 </p>
                 {uc.body.split("\n\n").map((para) => (
-                  <p key={para} className="text-sm text-muted-foreground leading-relaxed">
+                  <p
+                    key={para}
+                    className="text-sm text-muted-foreground leading-relaxed"
+                  >
                     {para}
                   </p>
                 ))}
               </div>
             ))}
           </div>
+
+          {/* Freelancer math callout */}
+          <div className="mt-6 border-l-2 border-emerald-500 pl-5 max-w-xl">
+            <p className="text-sm font-medium text-foreground mb-2">
+              For freelancers: the math on ghosting
+            </p>
+            <p className="text-sm text-muted-foreground leading-relaxed mb-2">
+              If you're doing $2,000 projects and get ghosted on final payment
+              twice a year, that's $4,000 in lost revenue.
+            </p>
+            <p className="text-sm text-muted-foreground leading-relaxed mb-2">
+              unseal.link's fee on a $2,000 project: $90.
+            </p>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              The files don't exist from the client's perspective until Stripe
+              confirms. There's nothing to ghost on.
+            </p>
+          </div>
         </div>
       </section>
 
-      {/* Pricing */}
-      <section className="border-t border-border py-16 md:py-24 bg-card">
+      {/* ── Pricing ──────────────────────────────────────────────────── */}
+      <section className="border-t border-border py-16 md:py-24">
         <div className="max-w-5xl mx-auto px-6">
           <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-6">
             Pricing
@@ -333,7 +449,6 @@ export default function HomePage() {
             Stripe fees (~2.9% + $0.30) apply on all platforms separately.
           </p>
 
-          {/* Comparison table */}
           <div className="overflow-x-auto -mx-6 px-6 mb-10">
             <table className="w-full min-w-[600px] text-sm border-collapse">
               <thead>
@@ -379,7 +494,6 @@ export default function HomePage() {
             </table>
           </div>
 
-          {/* Gumroad callout */}
           <div className="border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/20 rounded-2xl p-6 space-y-3 max-w-2xl">
             <p className="text-sm font-semibold text-foreground">
               ⚠️ The Gumroad math nobody talks about
@@ -405,7 +519,71 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Final CTA */}
+      {/* ── When we're not the right tool ────────────────────────────── */}
+      <section className="border-t border-border py-16 md:py-24 bg-card">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="max-w-2xl">
+            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-6">
+              Honest limits
+            </p>
+            <h2 className="text-2xl md:text-3xl font-medium tracking-tight text-foreground mb-8">
+              When unseal.link isn't
+              <br />
+              the right tool
+            </h2>
+            <div className="space-y-6">
+              {notRightFor.map((item) => (
+                <div key={item.title}>
+                  <p className="text-sm font-medium text-foreground mb-1">
+                    {item.title}
+                  </p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {item.body}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <p className="text-sm text-muted-foreground mt-8 pt-6 border-t border-border">
+              If none of these apply to you: you're in the right place.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ ──────────────────────────────────────────────────────── */}
+      <section className="border-t border-border py-16 md:py-24">
+        <div className="max-w-5xl mx-auto px-6">
+          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-12">
+            FAQ
+          </p>
+          <div className="max-w-2xl space-y-0 divide-y divide-border border-y border-border">
+            {faqItems.map((item) => (
+              <details key={item.q} className="group py-5">
+                <summary className="flex items-center justify-between cursor-pointer select-none list-none gap-4">
+                  <span className="text-sm font-medium text-foreground">
+                    {item.q}
+                  </span>
+                  <span className="text-muted-foreground shrink-0 text-lg leading-none group-open:rotate-45 transition-transform">
+                    +
+                  </span>
+                </summary>
+                <div className="mt-4 space-y-3">
+                  {item.a.split("\n\n").map((para) => (
+                    <p
+                      key={para}
+                      className="text-sm text-muted-foreground leading-relaxed"
+                    >
+                      {para}
+                    </p>
+                  ))}
+                </div>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Final CTA ────────────────────────────────────────────────── */}
       <section className="border-t border-border py-24 px-6 text-center">
         <h2 className="text-3xl md:text-4xl font-medium tracking-tight text-foreground mb-4">
           Stop delivering first.
