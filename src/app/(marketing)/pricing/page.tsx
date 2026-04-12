@@ -219,13 +219,11 @@ export default function PricingPage() {
       {/* Trust bar */}
       <section className="border-t border-border py-10 bg-card">
         <div className="max-w-5xl mx-auto px-6">
-          <TrustBar items={[
-            <>Payments processed by <span className="font-semibold" style={{ color: "#635BFF" }}>Stripe</span></>,
-            "We never touch your funds",
-            "No monthly fees",
-            "No contracts",
-            "Buyers need no account",
-            "Cancel any time",
+          <TrustBar stats={[
+            { number: "4.5%", label: "fee. You keep 95.5%." },
+            { number: "$0", label: "minimum payout." },
+            { number: "Instant", label: "delivery to every buyer." },
+            { number: "0", label: "monthly fees. Ever." },
           ]} />
         </div>
       </section>

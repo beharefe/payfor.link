@@ -1,21 +1,17 @@
-import { Check } from "lucide-react";
-
-const DEFAULT_ITEMS: React.ReactNode[] = [
-  <>Payments by <span className="font-semibold" style={{ color: "#635BFF" }}>Stripe</span></>,
-  "No monthly fees",
-  "Buyers need no account",
-  "Instant delivery by email",
-  "4.5% per sale only",
-  "No $100 payout minimum",
+const DEFAULT_STATS = [
+  { number: "4.5%", label: "fee. You keep 95.5%." },
+  { number: "60 sec", label: "to your first paid link." },
+  { number: "$0", label: "minimum payout." },
+  { number: "Instant", label: "delivery to every buyer." },
 ];
 
-export function TrustBar({ items = DEFAULT_ITEMS }: { items?: React.ReactNode[] }) {
+export function TrustBar({ stats = DEFAULT_STATS }: { stats?: { number: string; label: string }[] }) {
   return (
-    <div className="grid grid-cols-2 md:flex md:flex-wrap gap-x-6 gap-y-2.5">
-      {items.map((item, i) => (
-        <div key={i} className="flex items-center gap-1.5">
-          <Check className="size-3 shrink-0 text-foreground" aria-hidden="true" />
-          <span className="text-xs text-muted-foreground">{item}</span>
+    <div className="flex flex-wrap gap-x-8 gap-y-3">
+      {stats.map((s, i) => (
+        <div key={i} className="flex items-baseline gap-1.5">
+          <span className="text-sm font-semibold text-foreground tabular-nums">{s.number}</span>
+          <span className="text-xs text-muted-foreground">{s.label}</span>
         </div>
       ))}
     </div>

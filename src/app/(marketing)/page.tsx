@@ -35,7 +35,7 @@ const steps = [
   {
     n: "03",
     title: "Share the paywall",
-    body: "Buyers pay via Stripe and receive the link by email. No account required, under 30 seconds.",
+    body: "Buyers pay via Stripe and get the link by email. Instant. No account required.",
   },
 ];
 
@@ -94,8 +94,7 @@ export default function HomePage() {
 
           <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-lg leading-relaxed">
             Paste a URL, set a price, share your paywall link. Buyers pay once
-            and get instant access by email. No accounts, no friction, under 30
-            seconds.
+            and get instant access by email. No accounts. No friction.
           </p>
 
           <div className="flex flex-wrap gap-3 mb-10">
