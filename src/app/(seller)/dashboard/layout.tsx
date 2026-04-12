@@ -56,7 +56,10 @@ export default async function DashboardLayout({
         </div>
       </div>
 
-      {children}
+      {/* pb-28 on mobile gives clearance for the FAB (56px) + spacing */}
+      <div className="pb-28 sm:pb-0">
+        {children}
+      </div>
 
       {/* Mobile FAB menu — only on small screens */}
       <MobileFABMenu />

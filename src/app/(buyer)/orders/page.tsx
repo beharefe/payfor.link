@@ -2,6 +2,7 @@ import { TABLES } from "@unseallink/lib/db";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { ChevronDown } from "lucide-react";
 import type { Metadata } from "next";
+import { ClearSessionButton } from "./clear-session-button";
 import { PersistOrderId } from "./persist-order-id";
 
 export const dynamic = "force-dynamic";
@@ -195,6 +196,9 @@ export default async function OrdersPage({
           >
             All purchases for {order.buyer_email}
           </a>
+          <div className="text-center">
+            <ClearSessionButton />
+          </div>
         </div>
       </main>
     );
@@ -246,12 +250,16 @@ export default async function OrdersPage({
           <Logo />
           <FeaturedCard order={featured} sellerName={seller?.name} />
           <OtherOrdersAccordion orders={others} />
-          <a
-            href="/orders"
-            className="text-xs text-center text-muted-foreground hover:text-foreground transition-colors no-underline"
-          >
-            Search a different email
-          </a>
+          <div className="flex items-center justify-center gap-4">
+            <a
+              href="/orders"
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors no-underline"
+            >
+              Search a different email
+            </a>
+            <span className="text-muted-foreground/40 text-xs">·</span>
+            <ClearSessionButton />
+          </div>
         </div>
       </main>
     );

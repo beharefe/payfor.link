@@ -247,7 +247,7 @@ export function NewLinkForm() {
         {/* ── Left: form ── */}
         <form
           onSubmit={handleSubmit}
-          className={`flex flex-col gap-5 ${mobileTab === "preview" ? "hidden lg:flex" : ""}`}
+          className={`flex flex-col gap-6 ${mobileTab === "preview" ? "hidden lg:flex" : ""}`}
         >
           {/* Title */}
           <div>
