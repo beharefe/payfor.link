@@ -2,6 +2,8 @@ import { TrustBar } from "@unseallink/components/trust-bar";
 import type { Metadata } from "next";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { AlertTriangle, Globe, Lock, Mail, Percent, Share2 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 const ProductScroll = dynamic(() =>
   import("./product-scroll").then((m) => m.ProductScroll)
@@ -43,29 +45,29 @@ const steps = [
   },
 ];
 
-const features = [
+const features: { Icon: LucideIcon; title: string; body: string }[] = [
   {
-    icon: "⚡",
+    Icon: Globe,
     title: "Works with any URL",
     body: "Notion, Figma, Canva, Google Drive, GitHub, Discord, Dropbox, Loom — if it has a link, you can sell it. No file uploads ever.",
   },
   {
-    icon: "💳",
+    Icon: Percent,
     title: "4.5% fee. Nothing else.",
     body: "No monthly costs. No $100 payout minimum. No hidden fees. Money goes directly into your Stripe account per sale.",
   },
   {
-    icon: "🔒",
+    Icon: Lock,
     title: "Buyers pay before they get anything",
     body: "Your link is never exposed until Stripe confirms payment. No more delivering first and hoping. Ghosting is structurally impossible.",
   },
   {
-    icon: "📬",
+    Icon: Mail,
     title: "Instant access to every buyer",
     body: "Buyer pays → Stripe webhook fires → email with your link arrives. No manual work. No follow-up. Done.",
   },
   {
-    icon: "🔗",
+    Icon: Share2,
     title: "Previews everywhere automatically",
     body: "Share on X, Discord, Slack, WhatsApp, Telegram. Preview cards show your product name and price automatically.",
   },
@@ -259,25 +261,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Stripe callout ───────────────────────────────────────────── */}
-      <section className="px-6 max-w-5xl mx-auto pb-12">
-        <div className="border border-border rounded-2xl p-5 bg-card flex gap-3 max-w-2xl">
-          <span className="text-base shrink-0 mt-0.5">💡</span>
-          <div>
-            <p className="text-sm font-medium text-foreground mb-1">
-              Not the same as Stripe Payment Links
-            </p>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Stripe collects the payment. unseal.link does what happens next:
-              it gates your content URL and delivers it automatically the moment
-              payment confirms. No manual email. No follow-up. Works with live
-              Notion pages, Figma files, GitHub repos, and Discord invites —
-              things you can't upload to Stripe.
-            </p>
-          </div>
-        </div>
-      </section>
-
       {/* ── How it works ─────────────────────────────────────────────── */}
       <section className="border-t border-border py-16 md:py-20 bg-card">
         <div className="max-w-5xl mx-auto px-6">
@@ -332,7 +315,7 @@ export default function HomePage() {
                 key={f.title}
                 className="border border-border rounded-2xl p-6 bg-background"
               >
-                <span className="text-2xl mb-3 block">{f.icon}</span>
+                <f.Icon className="size-5 text-muted-foreground mb-3" />
                 <h3 className="font-medium text-foreground mb-2 text-sm">
                   {f.title}
                 </h3>
@@ -494,8 +477,9 @@ export default function HomePage() {
           </div>
 
           <div className="border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/20 rounded-2xl p-6 space-y-3 max-w-2xl">
-            <p className="text-sm font-semibold text-foreground">
-              ⚠️ The Gumroad math nobody talks about
+            <p className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <AlertTriangle className="size-4 text-amber-600 dark:text-amber-400 shrink-0" />
+              The Gumroad math nobody talks about
             </p>
             <p className="text-sm text-muted-foreground leading-relaxed">
               Gumroad's Discover marketplace charges 30% — not 10%. If Gumroad
