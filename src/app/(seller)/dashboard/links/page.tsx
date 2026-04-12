@@ -49,9 +49,12 @@ export default async function LinksPage() {
               <LockKeyhole className="w-5 h-5 text-muted-foreground" aria-hidden="true" />
             </div>
             <div>
-              <p className="font-medium text-foreground mb-1">No links yet</p>
-              <p className="text-sm text-muted-foreground max-w-xs">
-                Paste any URL, set a price, and share your paywall. Buyers pay via Stripe and get instant access.
+              <p className="font-medium text-foreground mb-1">Ready to sell your first link?</p>
+              <p className="text-sm text-muted-foreground max-w-xs mb-3">
+                Paste your link below. Buyers pay via Stripe. You get paid directly. We take 4.5%.
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Works with: Notion templates · Figma files · Google Drive · GitHub repos · Discord servers · Any URL
               </p>
             </div>
             <Link

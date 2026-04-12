@@ -10,6 +10,7 @@ function StripeBadge() {
       >
         Stripe
       </span>
+      {" "}— the same infrastructure used by Amazon, Shopify, and OpenAI.
     </span>
   );
 }
@@ -18,22 +19,19 @@ export function Footer() {
   return (
     <footer className="border-t border-border mt-auto">
       <div className="max-w-5xl mx-auto px-6 py-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 max-w-sm">
           <span className="text-sm font-medium text-foreground">unseal.link</span>
-          <div className="flex items-center gap-4">
-            <span className="text-xs text-muted-foreground">
-              © {new Date().getFullYear()} unseal.link
-            </span>
-            <StripeBadge />
-          </div>
+          <StripeBadge />
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            We never hold your funds. Every sale pays out directly to your
+            connected Stripe account. No $100 minimum. No weekly batch.
+            Your money, immediately.
+          </p>
+          <span className="text-xs text-muted-foreground">
+            © {new Date().getFullYear()} unseal.link
+          </span>
         </div>
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-          <Link
-            href="/orders"
-            className="text-xs text-muted-foreground hover:text-foreground transition-colors no-underline"
-          >
-            My orders
-          </Link>
           <Link
             href="/terms"
             className="text-xs text-muted-foreground hover:text-foreground transition-colors no-underline"

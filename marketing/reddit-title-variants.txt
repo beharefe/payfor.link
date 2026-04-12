@@ -1,0 +1,15 @@
+Variant 1 (r/SideProject):
+"I built a tool that turns any URL into a paid link —
+no uploads, no storefront, 4.5% fee (Gumroad takes 10%)"
+
+Variant 2 (r/Notion):
+"Tired of Gumroad's 10%? I built something that charges
+4.5% and works with your Notion template link directly"
+
+Variant 3 (r/figma):
+"Since Figma closed paid file submissions, here's how
+I'm selling my UI kits now — paste a link, set a price, done"
+
+Variant 4 (r/freelance):
+"I built a tool that makes ghosting-after-delivery
+structurally impossible — payment gate for any file link"

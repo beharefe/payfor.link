@@ -2,10 +2,10 @@ import { Check } from "lucide-react";
 
 const DEFAULT_ITEMS: React.ReactNode[] = [
   <>Payments by <span className="font-semibold" style={{ color: "#635BFF" }}>Stripe</span></>,
-  "No monthly fees",
-  "Buyers need no account",
-  "Instant delivery by email",
-  "4.5% per sale only",
+  "4.5% per sale — half of Gumroad",
+  "No file uploads ever",
+  "No $100 payout minimum",
+  "Access delivered in under 30 seconds",
   "Cancel any time",
 ];
 
