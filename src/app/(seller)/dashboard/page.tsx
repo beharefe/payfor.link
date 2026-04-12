@@ -99,14 +99,14 @@ export default async function DashboardPage() {
         {/* Active promotions — shown when seller has fee waivers or credits */}
         <PromotionBanners sellerId={user.id} />
 
-        {/* Setup card — shown until Stripe is connected */}
-        {!seller.stripe_connected && (
+        {/* Setup card — shown until Stripe is connected AND first link exists */}
+        {(!seller.stripe_connected || !hasLinks) && (
           <div className="border border-border rounded-2xl p-6 bg-card">
             <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-6">
               Getting started
             </p>
             <div className="space-y-5">
-              {/* Step 1 — done */}
+              {/* Step 1 — always done */}
               <div className="flex items-center gap-4">
                 <div className="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
                   <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
@@ -114,22 +114,47 @@ export default async function DashboardPage() {
                 <p className="text-sm text-muted-foreground line-through">Create your account</p>
               </div>
 
-              {/* Step 2 — current */}
-              <div className="flex items-start sm:items-center gap-4">
-                <div className="w-7 h-7 rounded-full border-2 border-foreground flex items-center justify-center shrink-0 text-xs font-semibold text-foreground">
-                  2
+              {/* Step 2 — done if stripe connected, else current */}
+              {seller.stripe_connected ? (
+                <div className="flex items-center gap-4">
+                  <div className="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
+                    <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+                  </div>
+                  <p className="text-sm text-muted-foreground line-through">Connect Stripe</p>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground">Connect Stripe</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Takes 2 minutes. Payments go directly to your bank — we never touch your funds.
-                  </p>
+              ) : (
+                <div className="flex items-start sm:items-center gap-4">
+                  <div className="w-7 h-7 rounded-full border-2 border-foreground flex items-center justify-center shrink-0 text-xs font-semibold text-foreground">
+                    2
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground">Connect Stripe</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Takes 2 minutes. Payments go directly to your bank — we never touch your funds.
+                    </p>
+                  </div>
+                  <InitiateStripeConnectButton variant="outline" />
                 </div>
-                <InitiateStripeConnectButton variant="outline" />
-              </div>
+              )}
 
-              {/* Step 3 — only show if they haven't created a link yet */}
-              {!hasLinks && (
+              {/* Step 3 — current if stripe done, else locked */}
+              {seller.stripe_connected ? (
+                <div className="flex items-start sm:items-center gap-4">
+                  <div className="w-7 h-7 rounded-full border-2 border-foreground flex items-center justify-center shrink-0 text-xs font-semibold text-foreground">
+                    3
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground">Create your first paywall link</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Paste any URL, set a price, start selling.</p>
+                  </div>
+                  <Link
+                    href="/dashboard/links/new"
+                    className="shrink-0 px-4 py-2 border border-border rounded-full text-sm font-medium text-foreground no-underline hover:bg-muted transition-colors"
+                  >
+                    Create link
+                  </Link>
+                </div>
+              ) : (
                 <div className="flex items-center gap-4 opacity-40 select-none">
                   <div className="w-7 h-7 rounded-full border border-border flex items-center justify-center shrink-0 text-xs text-muted-foreground">
                     3
