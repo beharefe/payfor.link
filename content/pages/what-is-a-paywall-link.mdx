@@ -1,0 +1,90 @@
+---
+title: "What Is a Paywall Link?"
+description: "A paywall link gates access to any URL behind a Stripe payment. Here's exactly how they work, who uses them, and how to create one for any type of content in under 60 seconds."
+slug: "what-is-a-paywall-link"
+publishedAt: "2026-04-12"
+updatedAt: "2026-04-12"
+tags: ["paywall link", "paid link", "monetize url", "content monetization"]
+---
+
+
+# What Is a Paywall Link?
+
+A paywall link is a URL that requires payment before revealing another URL or granting access to content. You've seen the concept on news sites — "subscribe to read more" — but that implementation requires a full subscription system, a CMS, and significant infrastructure.
+
+The simpler version is a single link. You have content at a URL. Someone needs to pay before they get that URL. The paywall link is the mechanism in between.
+
+---
+
+## How It Works in Practice
+
+You have a Notion template, a Figma file, a Google Drive folder, or any other URL. Instead of sharing it directly, you create a paywall link that wraps it. When someone opens the paywall link, they see a payment form. After paying via Stripe, the original URL is revealed — either shown on screen or sent to their email within 30 seconds.
+
+The content URL stays private until payment confirms. The paywall link is what you share publicly. That's the entire mechanism.
+
+unseal.link creates paywall links. You paste your URL, set a price, and get a shareable `unseal.link/l/your-product` link in under 60 seconds. The 4.5% platform fee is deducted per sale — no monthly costs, no file uploads required.
+
+---
+
+## What Can Go Behind a Paywall Link
+
+Anything with an HTTPS URL. Notion pages. Figma files. Google Drive files and folders — PDFs, spreadsheets, videos, ZIPs, entire course libraries. Canva template links. GitHub release downloads. Discord server invite links. Slack workspace invites. Loom videos. Dropbox files. Any URL that gives access to content when opened.
+
+The only requirement is that the URL is accessible to anyone who has it — no login wall on the destination itself. (A Stripe checkout flow on the paywall is fine; a second login prompt on the content side creates unnecessary friction for buyers.)
+
+---
+
+## Who Uses Paywall Links
+
+Notion template creators who want to charge for their systems without setting up a full storefront. Figma designers selling UI kits and components since Figma's marketplace closed to new individual sellers in late 2023. Developers selling boilerplates and starter kits directly from their repos. Freelancers gating final deliverable files until payment clears — eliminating the structural possibility of getting ghosted. Community builders selling Discord or Slack access. Educators selling course video folders hosted in Google Drive.
+
+The common thread is: these people have content at a URL, and they need a payment mechanism that's simpler than building a checkout flow or using a platform that requires file uploads.
+
+---
+
+## The Difference Between a Paywall Link and a Payment Link
+
+This comes up often. Stripe Payment Links is a payment tool — it processes a charge and sends a receipt. It does nothing with content delivery.
+
+A paywall link processes a payment **and** delivers access to content. The payment is the key; the content is the door. If you used Stripe Payment Links to sell a Notion template, you'd still need to manually email the template link to every buyer. A paywall link automates that delivery entirely.
+
+---
+
+## How the Delivery Works Technically
+
+When a buyer completes payment, Stripe fires a `checkout.session.completed` webhook to unseal.link's server. Our server receives the webhook, verifies the payment signature, and triggers the transactional email with the original content URL. The email arrives within 30 seconds in the vast majority of cases — we track this at the 99th percentile.
+
+The original URL is never exposed in the HTML or JavaScript of the paywall page. It only travels over the authenticated server-to-email path after payment confirmation. A buyer can't view-source their way to the content without paying.
+
+---
+
+## Paywall Link vs. Full Platform
+
+A paywall link is the right tool when you have a URL and want to charge for it quickly. A full platform (Gumroad, Lemon Squeezy, Payhip) is the right tool when you want marketplace discovery, a full product catalog with custom design, subscription billing, or file hosting built in.
+
+For 1-5 products where you have your own distribution: paywall links win on simplicity and fees. For 20+ products where discovery is the primary challenge: a full platform's marketplace traffic might justify the higher fee.
+
+---
+
+## FAQs
+
+### Is a "paid link" the same thing as a paywall link?
+
+Effectively yes. "Paid link," "paywall link," and "gated link" all describe the same concept: a URL that requires payment before revealing content. We use "paid link" and "paywall link" interchangeably.
+
+### What happens if someone shares the paywall link without paying?
+
+They share the paywall link — which is your public-facing URL. When anyone opens it, they see the payment form. The content URL is never revealed to non-payers regardless of who shares the paywall link.
+
+### Can I set a time limit on access after payment?
+
+Not currently — access is permanent once granted. Future versions will support expiring links for time-limited access like event recordings or time-sensitive reports.
+
+---
+
+<CTA
+  headline="Create your first paywall link in 60 seconds"
+  description="Paste any URL. Set a price. Get a shareable paywall link. 4.5% fee, no monthly costs."
+  buttonText="Create a paywall link →"
+  href="https://unseal.link"
+/>

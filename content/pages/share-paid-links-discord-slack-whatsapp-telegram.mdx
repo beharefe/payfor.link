@@ -1,0 +1,78 @@
+---
+title: "How to Share Paid Links in Discord, Slack, WhatsApp, and Telegram"
+description: "Chat platforms are where buyers actually are. When you share an unseal.link in Discord or Slack, the preview card shows your price automatically. Here's how sharing works on each platform."
+slug: "share-paid-links-discord-slack-whatsapp-telegram"
+publishedAt: "2026-04-12"
+updatedAt: "2026-04-12"
+tags: ["discord", "slack", "whatsapp", "telegram", "paid links", "sell in chat"]
+---
+
+
+# How to Share Paid Links in Discord, Slack, WhatsApp, and Telegram
+
+The places where people actually spend time online aren't product pages — they're group chats. Discord servers for designers, Slack workspaces for developers, Telegram channels for traders, WhatsApp groups for communities. If you're selling to any of these audiences, you need your paid link to work perfectly when pasted into a conversation.
+
+This is what actually happens when you share an unseal.link on each platform.
+
+---
+
+## Discord: Share It in Any Channel
+
+When you paste an unseal.link in a Discord channel, Discord's crawler reads the page metadata and renders a preview card with a large image, your product title, and a description that's actually visible — up to about 350 characters. It also renders a colored left border using the `theme-color` tag, which adds a branded feel to every embed.
+
+Discord is one of the best platforms for paid link sharing because the description shows in the preview. Buyers see your product name, price, and a clear description without clicking — so the click is already informed.
+
+One thing to know: Discord caches link previews for 20-30 minutes. If you update your link and the old preview is still showing, append `?v=2` to your URL. The cache busts and the new preview loads.
+
+When posting in someone else's server, lead with context: a sentence about what the product is and who it's for before pasting the link. A bare link in a channel looks like spam. A sentence plus a link with a clear preview looks like a recommendation.
+
+---
+
+## Slack: The Best Preview Format for Selling
+
+Slack renders the most information-dense link previews of any platform. Beyond the standard image and title, Slack displays structured key-value fields from the page metadata — which means your unseal.link shows "Price: $29" and "Seller: yourname" as formatted fields in the unfurl.
+
+This is particularly useful for B2B selling. When a designer shares your UI kit in a company Slack, the whole team sees the price, the seller name, and the description without anyone having to click. Decision-making happens in the preview.
+
+For client delivery via Slack: paste your unseal.link directly in a client DM or channel with a brief note about what they're receiving. The professional-looking payment card with their deliverable name and the amount owed is more effective than a PayPal invoice in many cases.
+
+---
+
+## WhatsApp: Get the Image Right
+
+WhatsApp renders title and image — description sometimes shows depending on the device and WhatsApp version. The critical technical constraint: **preview images must be under 300KB or they're silently dropped with no error**. No broken image icon, no warning — just no image. The preview still shows the title and domain, but without the image it's significantly less compelling.
+
+unseal.link generates compressed preview images specifically for WhatsApp. But if you're sharing in WhatsApp and not seeing an image preview, check whether the image served at your link's `og:image` URL is under 300KB.
+
+WhatsApp also caches link previews aggressively — sometimes for several days. If you update a product and need the new preview to show, append a query parameter to your URL as a cache-buster. WhatsApp groups and DMs are high-trust environments, which makes them effective for selling to communities you already have relationships in.
+
+---
+
+## Telegram: Channels and Groups
+
+Telegram renders a clean preview with title, description, and image. For Telegram channel owners with large followings, sharing a paid link as a channel post is a natural format — the preview card shows your product, the post provides context, and interested followers click and buy.
+
+The cache gotcha on Telegram: previews can persist for a long time. If you update your link and Telegram is showing old preview data, send your URL to [@WebpageBot](https://t.me/WebpageBot) — it forces an immediate re-crawl and the new preview shows within seconds.
+
+---
+
+## iMessage: Short Title, Strong Image
+
+Apple Messages shows only the title and image — the description tag is completely invisible on iMessage. Your title truncates around 44 characters, so every character counts. "Freelance CRM Template — $29" is 31 characters and renders completely. "A comprehensive Notion-based freelance client relationship management system" gets cut off.
+
+For iMessage sharing, make your image carry more weight than usual — it's doing the job that description would do on other platforms.
+
+---
+
+## The One Thing That Applies Everywhere
+
+Don't just drop a link without context. One sentence about what the product is and why it matters to this specific community converts dramatically better than a bare URL. The preview card handles the visual — your message handles the "why should I care." Split the job between them.
+
+---
+
+<CTA
+  headline="Your paid link previews correctly everywhere"
+  description="Title, price, and image render automatically on Discord, Slack, WhatsApp, Telegram, and iMessage."
+  buttonText="Create your paid link →"
+  href="https://unseal.link"
+/>

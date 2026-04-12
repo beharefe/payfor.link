@@ -1,0 +1,72 @@
+---
+title: "Why Your Link Preview Is Your Storefront (And How to Get It Right)"
+description: "When you share a paid link on Twitter, Discord, WhatsApp, or Telegram — that preview card IS your product page. Here's what every platform actually renders, and what that means for selling."
+slug: "link-preview-storefront-guide"
+publishedAt: "2026-04-12"
+updatedAt: "2026-04-12"
+tags: ["link preview", "og tags", "open graph", "social sharing", "sell online"]
+---
+
+
+# Why Your Link Preview Is Your Storefront (And How to Get It Right)
+
+When someone shares your product link in a Discord channel or a WhatsApp group, almost nobody reads URLs. What they see is the preview card that appears below the message — the image, the title, the brief description. That card is doing your entire sales job in about 1.5 seconds.
+
+If the card looks right, buyers click. If it shows a broken image or your domain name as the title, they scroll past. This is worth getting right.
+
+---
+
+## What's Actually Happening When You Share a Link
+
+Every major messaging and social platform — Discord, Slack, WhatsApp, Telegram, iMessage, Twitter, LinkedIn — runs a background crawler when you paste a URL. That crawler visits your page, reads invisible `<meta>` tags in the HTML, and builds a preview card. The whole thing happens before anyone clicks.
+
+unseal.link generates these tags dynamically for every paid link you create. Your product title, price, and preview image are automatically formatted for each platform. You don't configure anything.
+
+---
+
+## Platform by Platform: What Actually Renders
+
+**Twitter/X** shows a large image with the title below it. The description doesn't appear in the card — only the image and title. This means your preview image has to carry the message. The most effective approach: burn your product name and price directly into the image. "Notion CRM Template — $29" visible in the image itself, not just the title text below it. Twitter hides URLs behind `t.co` shortlinks, but the preview card still renders fully.
+
+**Discord** renders one of the richest preview formats — large image, title up to 256 characters, and a description that's actually visible (about 350 characters). Discord also renders a colored left border on every embed, which is set via a `theme-color` meta tag. One gotcha: Discord caches link previews for 20-30 minutes. If you update a link and the old preview still shows, append `?v=2` to the URL to bust the cache.
+
+**Slack** shows structured key-value metadata alongside the preview — labels like "Price: $29" and "Seller: designstudio" that render as formatted fields. It's the most information-dense preview format of any platform, which makes it excellent for B2B selling. When a designer shares your UI kit in a company Slack, the team sees the price and description without clicking.
+
+**WhatsApp** has the strictest technical requirement: preview images must be **under 300KB or they're silently dropped** — no error message, no broken image icon, just no image at all. WhatsApp shows the domain and title but the preview is significantly less compelling without an image. Always test your link in WhatsApp before sharing widely. Also, WhatsApp's cache can persist for several days — appending `?v=2` helps but isn't guaranteed.
+
+**iMessage** only shows the title and image — the description is completely invisible on Apple Messages. The title truncates around 44 characters. Design for that constraint: "Freelance CRM Template — $29" is 31 characters and shows completely.
+
+**Telegram** renders cleanly with title, description, and image. If you update a link and Telegram is still showing the old preview, send your URL to [@WebpageBot](https://t.me/WebpageBot) — it forces an immediate re-crawl.
+
+---
+
+## The One Design Rule That Applies Everywhere
+
+Keep important content — especially price — in the center of your preview image. WhatsApp center-crops images. Discord rounds corners. Twitter's card can clip edges. An image where the price is in the bottom-right corner will get cropped or rounded on at least one major platform.
+
+Center the product name and price. Leave breathing room around the edges. This single layout decision makes your preview render correctly everywhere.
+
+---
+
+## Can a Link Preview Show a Buy Button?
+
+No. Every platform renders the preview card as a single clickable unit — there's no way to embed interactive elements like buttons in a link preview. The entire card is one click-through to your page.
+
+What you can do: make the click feel inevitable. A preview card that shows the exact product, the exact price, and a compelling image removes all ambiguity about what happens when you click. That's the entire job.
+
+---
+
+## Testing Your Previews Before Sharing
+
+Don't assume. Test your unseal.link in each platform before posting it to a large audience. Discord and Slack: paste in a private channel or DM yourself. WhatsApp: send to yourself on WhatsApp Web. LinkedIn: use their [Post Inspector](https://www.linkedin.com/post-inspector/) tool which also forces a cache refresh. Twitter: paste in the tweet composer without publishing.
+
+The image test matters most on WhatsApp — if your image is over 300KB and you don't test it, you'll share a preview with no image to potentially thousands of people.
+
+---
+
+<CTA
+  headline="Every unseal.link generates a perfect preview automatically"
+  description="Title, price, and image render correctly on Twitter, Discord, WhatsApp, Slack, Telegram, and iMessage — no configuration required."
+  buttonText="Create your paid link →"
+  href="https://unseal.link"
+/>
