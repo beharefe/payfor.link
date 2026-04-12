@@ -1,5 +1,6 @@
 "use client";
 
+import { WithdrawButton } from "./dashboard-actions";
 import { BarChart2, Link2, Menu, Package, Plus, Settings2, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -65,6 +66,9 @@ export function MobileFABMenu() {
                 </Link>
               );
             })}
+            <div className="px-4 py-3" onClick={() => setOpen(false)}>
+              <WithdrawButton />
+            </div>
           </div>
         </div>
       )}

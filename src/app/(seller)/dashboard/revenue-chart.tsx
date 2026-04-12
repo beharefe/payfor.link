@@ -47,7 +47,9 @@ export function RevenueChart({ data, totalSales, totalEarned, stripeConnected, h
                 ${totalEarned.toFixed(2)}
               </p>
             </div>
-            <WithdrawButton />
+            <span className="hidden sm:inline-flex">
+              <WithdrawButton />
+            </span>
           </div>
         )}
       </div>

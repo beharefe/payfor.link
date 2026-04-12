@@ -19,6 +19,7 @@ type CreateProductInput = {
   price: number;
   preview_image_url?: string;
   expires_at?: string | null;
+  max_orders?: number | null;
 };
 
 type ActionResult = { error: string } | { id: string };
@@ -98,6 +99,7 @@ export async function createProduct(
       product_type: productType,
       preview_image_url: input.preview_image_url?.trim() || null,
       expires_at: input.expires_at || null,
+      max_orders: input.max_orders ?? null,
       status,
     })
     .select("id")
@@ -146,6 +148,7 @@ export async function createProductAction(
     price: Number.isFinite(price) ? price : MIN_PRICE,
     preview_image_url: formData.get("preview_image_url")?.toString() || undefined,
     expires_at: formData.get("expires_at")?.toString() || null,
+    max_orders: formData.get("max_orders") === "1" ? 1 : null,
   });
   if ("error" in result) return result.error;
   return null; // createProduct redirects on success

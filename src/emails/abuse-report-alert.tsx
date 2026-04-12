@@ -19,7 +19,7 @@ export function AbuseReportAlert({
   orderId,
 }: AbuseReportAlertProps) {
   return (
-    <EmailLayout preview={`New abuse report: ${reason} — ${productTitle ?? productId}`}>
+    <EmailLayout preview={`New abuse report: ${reason} for ${productTitle ?? productId}`}>
       <Text style={{ fontSize: "24px", fontWeight: 700, color: "#3D3530", margin: "0 0 8px" }}>
         New abuse report
       </Text>

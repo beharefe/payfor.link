@@ -38,8 +38,8 @@ const steps = [
   },
   {
     n: "03",
-    title: "Get paid first",
-    body: "Buyers pay via Stripe and receive the link by email in under 30 seconds. Ghosting is structurally impossible.",
+    title: "Share the paywall",
+    body: "Buyers pay via Stripe and get the link by email. Instant. No account required.",
   },
 ];
 
@@ -61,7 +61,7 @@ const features = [
   },
   {
     icon: "📬",
-    title: "Access delivered in under 30 seconds",
+    title: "Instant access to every buyer",
     body: "Buyer pays → Stripe webhook fires → email with your link arrives. No manual work. No follow-up. Done.",
   },
   {
@@ -95,7 +95,7 @@ const useCases = [
   {
     audience: "Discord Community Owners",
     hook: "Bot setup hell is optional.",
-    body: "A Discord invite link is just a URL. Paste it, set a price, share the paywall link. No Whop account. No role-sync bot. No monthly software fee.\n\nHonest note: unseal.link is built for one-time and lifetime access — not recurring subscriptions. If you need monthly billing with role-sync, Whop or Memberful are better fits. But lifetime access at $49 converts better than you'd think. Members who paid once feel ownership, not obligation. The churn problem disappears entirely.",
+    body: "A Discord invite link is just a URL. Paste it, set a price, share the paywall link. No Whop account. No role-sync bot. No monthly software fee.\n\nHonest note: unseal.link is built for one-time and lifetime access, not recurring subscriptions. If you need monthly billing with role-sync, Whop or Memberful are better fits. But lifetime access at $49 converts better than you'd think. Members who paid once feel ownership, not obligation. The churn problem disappears entirely.",
   },
 ];
 
@@ -170,7 +170,7 @@ const faqItems = [
   },
   {
     q: "How does unseal.link keep my content URL private?",
-    a: "Your URL never appears in the page HTML, JavaScript, or network requests of your paywall page.\n\n1. Buyer opens your unseal.link — sees product name, price, Stripe checkout. Your content URL: not present anywhere.\n2. Buyer pays — Stripe processes the charge.\n3. Stripe fires a signed webhook to our server — we verify the signature cryptographically.\n4. Only after verification: your content URL travels over an encrypted server-to-email path to the buyer's inbox.\n5. Buyer gets the email within 30 seconds. You get notified. Done.\n\nView-source won't reveal your URL. Network inspection won't reveal your URL. The only way to get it is to pay.",
+    a: "Your URL never appears in the page HTML, JavaScript, or network requests of your paywall page.\n\n1. Buyer opens your unseal.link — sees product name, price, Stripe checkout. Your content URL: not present anywhere.\n2. Buyer pays — Stripe processes the charge.\n3. Stripe fires a signed webhook to our server — we verify the signature cryptographically.\n4. Only after verification: your content URL travels over an encrypted server-to-email path to the buyer's inbox.\n5. Buyer gets the email instantly. You get notified. Done.\n\nView-source won't reveal your URL. Network inspection won't reveal your URL. The only way to get it is to pay.",
   },
   {
     q: "What's the minimum payout?",
@@ -234,9 +234,8 @@ export default function HomePage() {
                Buyers pay via Stripe and get instant access. 4.5% fee."
           */}
           <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-lg leading-relaxed">
-            Turn any Notion, Figma, Drive, GitHub, or Discord URL into a paid
-            link in 60 seconds. Buyers pay via Stripe before they get access.
-            4.5% fee. No storefront. No file uploads.
+            Paste a URL, set a price, share your paywall link. Buyers pay once
+            and get instant access by email. No accounts. No friction.
           </p>
 
           <div className="flex flex-wrap gap-3 mb-5">
@@ -364,7 +363,7 @@ export default function HomePage() {
                 "Buyer pays — Stripe processes the charge.",
                 "Stripe fires a signed webhook to our server — we verify the signature cryptographically.",
                 "Only after verification: your content URL travels over an encrypted server-to-email path to the buyer's inbox.",
-                "Buyer gets the email within 30 seconds. You get notified. Done.",
+                "Buyer gets the email instantly. You get notified. Done.",
               ].map((step, i) => (
                 <li key={i} className="flex gap-4">
                   <span className="text-xs font-mono font-medium text-muted-foreground mt-0.5 shrink-0 w-5">

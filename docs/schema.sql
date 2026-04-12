@@ -203,6 +203,25 @@ begin
 end;
 $$ language plpgsql security definer;
 
+-- Atomic variant that enforces max_orders. Returns true if the slot was
+-- claimed (or max_orders is null), false if the product was already sold out.
+-- Used by the Stripe webhook to prevent overselling on concurrent payments.
+create or replace function try_increment_product_stats(p_product_id uuid, p_revenue numeric)
+returns boolean as $$
+declare
+  rows_updated integer;
+begin
+  update products
+  set total_sales   = total_sales + 1,
+      total_revenue = total_revenue + p_revenue
+  where id = p_product_id
+    and (max_orders is null or total_sales < max_orders);
+
+  get diagnostics rows_updated = row_count;
+  return rows_updated > 0;
+end;
+$$ language plpgsql security definer;
+
 create or replace function increment_seller_stats(p_seller_id uuid, p_earned numeric, p_fees numeric)
 returns void as $$
 begin

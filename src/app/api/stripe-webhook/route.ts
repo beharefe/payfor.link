@@ -102,7 +102,7 @@ async function handleCheckoutSessionCompleted(
   const { data: product } = await supabase
     .from(TABLES.PRODUCTS)
     .select(
-      "id, seller_id, destination_url, title, price, version, total_sales, total_revenue",
+      "id, seller_id, destination_url, title, price, version, total_sales, total_revenue, max_orders",
     )
     .eq("id", productId)
     .single();
@@ -170,18 +170,53 @@ async function handleCheckoutSessionCompleted(
     customerEmail,
   );
 
-  // Atomic increments via RPC — avoids read-modify-write races on concurrent orders.
-  await Promise.all([
-    supabase.rpc("increment_product_stats", {
-      p_product_id: product.id,
-      p_revenue: pricePaid,
-    }),
-    supabase.rpc("increment_seller_stats", {
-      p_seller_id: product.seller_id,
-      p_earned: pricePaid,
-      p_fees: platformFee,
-    }),
-  ]);
+  // Atomic slot claim — enforces max_orders at the DB level.
+  // Returns false if max_orders is set and already reached (concurrent webhook won).
+  const { data: slotClaimed } = await supabase.rpc("try_increment_product_stats", {
+    p_product_id: product.id,
+    p_revenue: pricePaid,
+  });
+
+  if (slotClaimed === false) {
+    // Race lost: another concurrent payment already took the last slot.
+    // Issue a full Connect-aware refund:
+    //   reverse_transfer: true       — pulls funds back from seller's connected account
+    //   refund_application_fee: true — returns our platform fee so platform doesn't absorb cost
+    // Buyer receives Stripe's automatic refund receipt. No access email is sent.
+    log.warn("checkout.session.completed: max_orders reached, issuing auto-refund", {
+      product_id: product.id,
+      order_id: insertedOrder.id,
+      payment_intent: paymentIntentId,
+    });
+    const refund = await stripe.refunds.create({
+      payment_intent: paymentIntentId,
+      reverse_transfer: true,
+      refund_application_fee: true,
+    }).catch((err) => {
+      log.error("max_orders: stripe refund failed", {
+        error: serializeError(err),
+        payment_intent: paymentIntentId,
+      });
+      return null;
+    });
+    await supabase
+      .from(TABLES.ORDERS)
+      .update({
+        status: "refunded",
+        refund_reason: "sold_out",
+        refunded_at: new Date().toISOString(),
+        stripe_refund_id: refund?.id ?? null,
+      })
+      .eq("id", insertedOrder.id);
+    return;
+  }
+
+  // Slot claimed — increment seller stats sequentially.
+  await supabase.rpc("increment_seller_stats", {
+    p_seller_id: product.seller_id,
+    p_earned: pricePaid,
+    p_fees: platformFee,
+  });
 
   // Record promotion usage if any promotions were applied at checkout.
   const sellerId = session.metadata?.seller_id ?? product.seller_id;

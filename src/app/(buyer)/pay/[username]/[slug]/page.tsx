@@ -40,7 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const baseUrl = await getBaseUrl();
   const priceLabel = `$${Number(link.price).toFixed(2)}`;
-  const title = `${link.title} — ${priceLabel}`;
+  const title = `${link.title} · ${priceLabel}`;
   const description = link.description
     ? `${link.description}`
     : `Pay once with Stripe and get instant access. No account needed.`;
@@ -93,7 +93,7 @@ export default async function PaywallPage({ params }: Props) {
   const { data: link } = await supabase
     .from(TABLES.PRODUCTS)
     .select(
-      "id, title, description, price, currency, seller_id, status, preview_image_url, total_sales, expires_at, sellers!inner(name, username, email, stripe_connected)",
+      "id, title, description, price, currency, seller_id, status, preview_image_url, total_sales, expires_at, max_orders, sellers!inner(name, username, email, stripe_connected)",
     )
     .eq("slug", slug)
     .eq("sellers.username", username)
@@ -104,8 +104,9 @@ export default async function PaywallPage({ params }: Props) {
   // biome-ignore lint/suspicious/noExplicitAny: Supabase join type
   const sellerData = link.sellers as any;
   const isExpired = link.expires_at && new Date(link.expires_at) < new Date();
+  const isSoldOut = link.max_orders !== null && link.max_orders !== undefined && (link.total_sales ?? 0) >= link.max_orders;
 
-  if (link.status !== "active" || isExpired) {
+  if (link.status !== "active" || isExpired || isSoldOut) {
     // Notify seller if their link is draft because Stripe isn't connected
     if (link.status === "draft" && !sellerData?.stripe_connected && sellerData?.email) {
       const h = await headers();
@@ -123,10 +124,12 @@ export default async function PaywallPage({ params }: Props) {
       <main className="min-h-dvh flex items-center justify-center px-6">
         <div className="text-center max-w-xs">
           <h1 className="text-xl font-medium text-foreground mb-2">
-            {isExpired ? "Offer expired" : "No longer available"}
+            {isSoldOut ? "Sold out" : isExpired ? "Offer expired" : "No longer available"}
           </h1>
           <p className="text-muted-foreground text-sm">
-            {isExpired
+            {isSoldOut
+              ? "This was a one-buyer link. It has already been purchased."
+              : isExpired
               ? "This offer is no longer accepting payments."
               : "This product has been removed or is paused."}
           </p>
@@ -205,13 +208,27 @@ export default async function PaywallPage({ params }: Props) {
 
           {/* Title + description */}
           <div>
-            {expiresAt && (
-              <div
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 mb-3 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full text-xs font-medium cursor-default"
-                title={new Date(expiresAt).toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })}
-              >
-                <Clock className="w-3 h-3" aria-hidden="true" />
-                Limited offer · expires in {formatTimeUntil(expiresAt)}
+            {/* Badges: expiry and/or scarcity */}
+            {(expiresAt || link.max_orders !== null) && (
+              <div className="flex flex-wrap gap-2 mb-3">
+                {expiresAt && (
+                  <div
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full text-xs font-medium cursor-default"
+                    title={new Date(expiresAt).toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })}
+                  >
+                    <Clock className="w-3 h-3" aria-hidden="true" />
+                    Limited offer · expires in {formatTimeUntil(expiresAt)}
+                  </div>
+                )}
+                {link.max_orders !== null && link.max_orders !== undefined && (() => {
+                  const slotsLeft = link.max_orders - (link.total_sales ?? 0);
+                  return (
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 rounded-full text-xs font-medium">
+                      <span className="size-1.5 rounded-full bg-current shrink-0" />
+                      {slotsLeft === 1 ? "Only 1 spot remaining" : `${slotsLeft} spots remaining`}
+                    </div>
+                  );
+                })()}
               </div>
             )}
             <h1 className="text-2xl font-medium tracking-tight text-foreground leading-snug mb-2">

@@ -133,6 +133,7 @@ export function NewLinkForm() {
   const [titleValue, setTitleValue] = useState<string>("");
   const [descriptionValue, setDescriptionValue] = useState<string>("");
   const [mobileTab, setMobileTab] = useState<"edit" | "preview">("edit");
+  const [limitToOneSale, setLimitToOneSale] = useState(false);
   const [isPending, startTransition] = useTransition();
   const priceInputRef = useRef<HTMLInputElement>(null);
   const prevObjectUrl = useRef<string | null>(null);
@@ -393,6 +394,33 @@ export function NewLinkForm() {
                 Shows a "Limited offer" badge with {formatExpiryPreview(expiresAt)} remaining.
               </p>
             )}
+          </div>
+
+          {/* One buyer only */}
+          <div className="flex items-start justify-between gap-4 py-1">
+            <div>
+              <p className="text-sm font-medium text-foreground leading-snug">One buyer only</p>
+              <p className="text-xs text-muted-foreground mt-0.5 max-w-xs leading-relaxed">
+                The link closes after the first sale. Use for exclusive freelance deliverables
+                or single-client work. Leave off for templates and anything you sell repeatedly.
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={limitToOneSale}
+              onClick={() => setLimitToOneSale((v) => !v)}
+              className={`relative shrink-0 mt-0.5 w-9 h-5 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring border-none cursor-pointer ${
+                limitToOneSale ? "bg-foreground" : "bg-input"
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-background shadow-sm transition-transform ${
+                  limitToOneSale ? "translate-x-4" : "translate-x-0"
+                }`}
+              />
+            </button>
+            <input type="hidden" name="max_orders" value={limitToOneSale ? "1" : ""} />
           </div>
 
           {error && <p className="text-destructive text-sm">{error}</p>}

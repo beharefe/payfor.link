@@ -10,7 +10,7 @@ function StripeBadge() {
       >
         Stripe
       </span>
-      {" "}— the same infrastructure used by Amazon, Shopify, and OpenAI.
+      , trusted by Amazon, Shopify, and OpenAI.
     </span>
   );
 }
@@ -18,36 +18,32 @@ function StripeBadge() {
 export function Footer() {
   return (
     <footer className="border-t border-border mt-auto">
-      <div className="max-w-5xl mx-auto px-6 py-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-        <div className="flex flex-col gap-3 max-w-sm">
-          <span className="text-sm font-medium text-foreground">unseal.link</span>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            Built on Stripe — the same payment infrastructure used by Amazon,
-            Shopify, and OpenAI. Your content URL is never exposed until payment
-            is cryptographically confirmed.
-          </p>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            We never hold your funds. Every sale pays out directly to your
-            connected Stripe account. No $100 minimum. No weekly batch. Your
-            money, immediately.
-          </p>
-          <span className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} unseal.link
-          </span>
-        </div>
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-          <Link
-            href="/terms"
-            className="text-xs text-muted-foreground hover:text-foreground transition-colors no-underline"
-          >
-            Terms
-          </Link>
-          <Link
-            href="/privacy"
-            className="text-xs text-muted-foreground hover:text-foreground transition-colors no-underline"
-          >
-            Privacy
-          </Link>
+      <div className="max-w-5xl mx-auto px-6 py-8 sm:py-10">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
+          <div className="flex flex-col gap-2 min-w-0">
+            <span className="text-sm font-medium text-foreground">unseal.link</span>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <span className="text-xs text-muted-foreground">
+                © {new Date().getFullYear()} unseal.link
+              </span>
+              <span className="text-xs text-muted-foreground hidden sm:inline">·</span>
+              <StripeBadge />
+            </div>
+          </div>
+          <div className="flex items-center gap-5 shrink-0">
+            <Link
+              href="/terms"
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors no-underline"
+            >
+              Terms
+            </Link>
+            <Link
+              href="/privacy"
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors no-underline"
+            >
+              Privacy
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
