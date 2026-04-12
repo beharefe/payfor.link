@@ -44,6 +44,7 @@ export function NewLinkForm() {
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
   const [expiresAt, setExpiresAt] = useState<string>("");
+  const [limitToOneSale, setLimitToOneSale] = useState(false);
   const [isPending, startTransition] = useTransition();
   const priceInputRef = useRef<HTMLInputElement>(null);
   const prevObjectUrl = useRef<string | null>(null);
@@ -204,6 +205,34 @@ export function NewLinkForm() {
           className="block w-full px-2 py-2 mt-1 border border-input bg-background text-foreground rounded"
         />
       </div>
+      {/* Limit to one sale */}
+      <div className="flex items-start justify-between gap-4 py-1">
+        <div>
+          <p className="text-sm font-medium text-foreground leading-snug">
+            Limit to one sale
+          </p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Once purchased, the link stops accepting payments automatically.
+          </p>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={limitToOneSale}
+          onClick={() => setLimitToOneSale((v) => !v)}
+          className={`relative shrink-0 mt-0.5 w-9 h-5 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring border-none cursor-pointer ${
+            limitToOneSale ? "bg-foreground" : "bg-input"
+          }`}
+        >
+          <span
+            className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-background shadow-sm transition-transform ${
+              limitToOneSale ? "translate-x-4" : "translate-x-0"
+            }`}
+          />
+        </button>
+        <input type="hidden" name="max_orders" value={limitToOneSale ? "1" : ""} />
+      </div>
+
       <div>
         <label htmlFor="preview_image">Preview image</label>
         <p className="text-muted-foreground text-[0.8125rem] mt-[0.1rem] mb-1">
