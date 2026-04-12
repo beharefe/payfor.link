@@ -19,7 +19,7 @@ export function MissedSaleEmail({
       </Text>
       <Text style={{ fontSize: "15px", color: "#6B6B6B", margin: "0 0 24px" }}>
         {sellerName ? `Hey ${sellerName}, s` : "S"}omeone just visited your paywall for{" "}
-        <strong style={{ color: "#3D3530" }}>{productTitle}</strong> — but couldn't buy because
+        <strong style={{ color: "#3D3530" }}>{productTitle}</strong>, but they couldn't buy because
         your Stripe payout account isn't connected yet.
       </Text>
 

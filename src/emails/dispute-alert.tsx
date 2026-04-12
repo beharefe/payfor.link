@@ -33,7 +33,7 @@ export function DisputeAlert({
 
   const heading = isSellerCopy ? "A buyer has opened a dispute" : "Dispute opened";
   const subheading = isSellerCopy
-    ? `${sellerName ? `Hey ${sellerName}, a` : "A"} buyer has disputed their payment for "${productTitle}" through their bank. Stripe will handle the process — you may be asked to provide evidence.`
+    ? `${sellerName ? `Hey ${sellerName}, a` : "A"} buyer has disputed their payment for "${productTitle}" through their bank. Stripe will handle the process. You may be asked to provide evidence.`
     : `A chargeback has been filed. Stripe will reach out for evidence. Review the details below.`;
 
   return (

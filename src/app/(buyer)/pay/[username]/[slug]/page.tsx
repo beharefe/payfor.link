@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const baseUrl = await getBaseUrl();
   const priceLabel = `$${Number(link.price).toFixed(2)}`;
-  const title = `${link.title} — ${priceLabel}`;
+  const title = `${link.title} · ${priceLabel}`;
   const description = link.description
     ? `${link.description}`
     : `Pay once with Stripe and get instant access. No account needed.`;
