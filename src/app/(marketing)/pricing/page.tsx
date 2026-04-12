@@ -220,7 +220,7 @@ export default function PricingPage() {
       <section className="border-t border-border py-10 bg-card">
         <div className="max-w-5xl mx-auto px-6">
           <TrustBar stats={[
-            { number: "4.5%", label: "fee. You keep 95.5%." },
+            { number: "Half the fee", label: "of Gumroad." },
             { number: "$0", label: "minimum payout." },
             { number: "Instant", label: "delivery to every buyer." },
             { number: "0", label: "monthly fees. Ever." },

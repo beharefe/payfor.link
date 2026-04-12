@@ -1,5 +1,5 @@
 const DEFAULT_STATS = [
-  { number: "4.5%", label: "fee. You keep 95.5%." },
+  { number: "Half the fee", label: "of Gumroad." },
   { number: "60 sec", label: "to your first paid link." },
   { number: "$0", label: "minimum payout." },
   { number: "Instant", label: "delivery to every buyer." },
