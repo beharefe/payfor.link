@@ -17,9 +17,12 @@ import {
   Zap,
   type LucideProps,
 } from "lucide-react";
-import type { MDXComponents } from "mdx/types";
 import Link from "next/link";
 import type { ComponentType } from "react";
+
+// Inline equivalent of MDXComponents from mdx/types (avoids missing "mdx" package dep)
+// biome-ignore lint/suspicious/noExplicitAny: MDX components accept varied prop shapes
+type MDXComponents = Record<string, ComponentType<any>>;
 
 // ---------- Icon map ----------
 
