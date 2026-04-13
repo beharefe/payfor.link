@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "About · unseal.link",
+  title: { absolute: "About · unseal.link" },
   description:
     "unseal.link is payment-gated delivery for anything that lives online. Not a storefront, not a marketplace, not a file host.",
   robots: { index: true, follow: true },

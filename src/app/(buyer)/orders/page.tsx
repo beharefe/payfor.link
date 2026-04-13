@@ -8,7 +8,7 @@ import { PersistOrderId } from "./persist-order-id";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Your purchases · unseal.link",
+  title: { absolute: "Your purchases · unseal.link" },
   robots: { index: false },
 };
 

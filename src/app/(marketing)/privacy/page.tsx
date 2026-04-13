@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy · unseal.link",
+  title: { absolute: "Privacy Policy · unseal.link" },
 };
 
 export default function PrivacyPage() {

@@ -20,7 +20,7 @@ export async function generateMetadata({
   if (!page) return {};
   const { frontmatter } = page;
   return {
-    title: `${frontmatter.og_title ?? frontmatter.title} | unseal.link`,
+    title: frontmatter.og_title ?? frontmatter.title,
     description: frontmatter.og_description ?? frontmatter.description,
     robots: frontmatter.noindex ? "noindex" : "index,follow",
     alternates: { canonical: `${APP_URL}/${page.slug}` },

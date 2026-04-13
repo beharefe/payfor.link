@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Terms of Service · unseal.link",
+  title: { absolute: "Terms of Service · unseal.link" },
 };
 
 export default function TermsPage() {
