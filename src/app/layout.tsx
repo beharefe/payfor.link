@@ -2,11 +2,6 @@ import type { Metadata } from "next";
 import { AnalyticsProvider } from "@unseallink/components/analytics-provider";
 import { ThemeProvider } from "@unseallink/components/theme-provider";
 import "./globals.css";
-import { Inter, Source_Sans_3 } from "next/font/google";
-import { cn } from "@unseallink/lib/utils";
-
-const sourceSans3Heading = Source_Sans_3({ subsets: ["latin"], variable: "--font-heading" });
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
 
@@ -46,7 +41,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={cn(inter.variable, sourceSans3Heading.variable)} suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body className="bg-background text-foreground antialiased">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <AnalyticsProvider />

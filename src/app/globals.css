@@ -4,6 +4,12 @@
 
 @custom-variant dark (@media (prefers-color-scheme: dark));
 
+/* Font variables — defined here so no Google Fonts network request is needed at build time */
+:root {
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-heading: "DM Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
