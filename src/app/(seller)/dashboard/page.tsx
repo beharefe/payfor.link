@@ -130,7 +130,7 @@ export default async function DashboardPage() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground">Connect Stripe</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      Takes 2 minutes. Payments go directly to your bank — we never touch your funds.
+                      Takes 2 minutes. Payments go directly to your bank. We never touch your funds.
                     </p>
                   </div>
                   <InitiateStripeConnectButton variant="outline" />

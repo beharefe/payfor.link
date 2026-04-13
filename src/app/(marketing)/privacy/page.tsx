@@ -30,7 +30,7 @@ export default function PrivacyPage() {
           <ul className="text-sm text-muted-foreground leading-relaxed list-disc pl-5 space-y-1">
             <li><strong className="text-foreground">Sellers:</strong> email address (for authentication and notifications), name/handle, Stripe account details (managed by Stripe).</li>
             <li><strong className="text-foreground">Buyers:</strong> email address (to deliver your access link and send order receipts).</li>
-            <li><strong className="text-foreground">All users:</strong> usage analytics via Amplitude (page views, events — no personally identifiable data sent to Amplitude). Error reports via Sentry. Server logs via Axiom.</li>
+            <li><strong className="text-foreground">All users:</strong> usage analytics via Amplitude (page views, events; no personally identifiable data sent to Amplitude). Error reports via Sentry. Server logs via Axiom.</li>
           </ul>
         </div>
 
@@ -57,12 +57,12 @@ export default function PrivacyPage() {
         <div>
           <h2 className="text-base font-medium mb-2">5. Third Parties</h2>
           <ul className="text-sm text-muted-foreground leading-relaxed list-disc pl-5 space-y-1">
-            <li><strong className="text-foreground">Stripe</strong> — payment processing and seller payouts. Stripe is the data controller for payment data.</li>
-            <li><strong className="text-foreground">Supabase</strong> — database and authentication. Data stored in EU region.</li>
-            <li><strong className="text-foreground">Resend</strong> — transactional email delivery.</li>
-            <li><strong className="text-foreground">Amplitude</strong> — product analytics (EU server zone, cookies disabled).</li>
-            <li><strong className="text-foreground">Axiom</strong> — server-side logging.</li>
-            <li><strong className="text-foreground">Sentry</strong> — error tracking.</li>
+            <li><strong className="text-foreground">Stripe:</strong> payment processing and seller payouts. Stripe is the data controller for payment data.</li>
+            <li><strong className="text-foreground">Supabase:</strong> database and authentication. Data stored in EU region.</li>
+            <li><strong className="text-foreground">Resend:</strong> transactional email delivery.</li>
+            <li><strong className="text-foreground">Amplitude:</strong> product analytics (EU server zone, cookies disabled).</li>
+            <li><strong className="text-foreground">Axiom:</strong> server-side logging.</li>
+            <li><strong className="text-foreground">Sentry:</strong> error tracking.</li>
           </ul>
           <p className="text-sm text-muted-foreground leading-relaxed mt-2">
             We do not sell your data to any third party.

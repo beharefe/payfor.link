@@ -42,7 +42,7 @@ export default function TermsPage() {
           <p className="text-sm text-muted-foreground leading-relaxed">
             Purchases are final unless a refund is issued by the seller. Access links are
             single-use and expire after 24 hours. If you believe a seller has committed fraud,
-            contact us at support@unseal.link. We do not host content — we only facilitate
+            contact us at support@unseal.link. We do not host content; we only facilitate
             access to URLs provided by sellers.
           </p>
         </div>

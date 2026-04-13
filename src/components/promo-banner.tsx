@@ -21,7 +21,7 @@ export function PromoBanner() {
   return (
     <div className="bg-emerald-600 text-white px-4 py-2.5 flex items-center justify-between gap-4">
       <p className="text-sm font-medium text-center flex-1">
-        ⚡ Launch offer — first 100 sellers get their first $500 in sales completely fee-free.{" "}
+        ⚡ Launch offer: first 100 sellers get their first $500 in sales completely fee-free.{" "}
         <Link
           href="/auth"
           className="underline font-semibold hover:no-underline whitespace-nowrap"

@@ -30,7 +30,7 @@ export function CopyLinkButtons({
   const [codeCopied, setCodeCopied] = useState(false);
 
   const appUrl = new URL(url).origin;
-  const embedCode = `<script async src="${appUrl}/embed.js"></script>\n<a href="${url}" class="unseal-button">Buy — $${price.toFixed(2)}</a>`;
+  const embedCode = `<script async src="${appUrl}/embed.js"></script>\n<a href="${url}" class="unseal-button">Buy for $${price.toFixed(2)}</a>`;
 
   function handleCopy() {
     navigator.clipboard.writeText(url).then(() => {

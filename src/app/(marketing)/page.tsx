@@ -12,12 +12,12 @@ const ProductScroll = dynamic(() =>
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
 
 export const metadata: Metadata = {
-  title: "unseal.link — Sell Any URL. Lowest Fee. No Uploads. No Minimum.",
+  title: "unseal.link: Sell Any URL. Lowest Fee. No Uploads. No Minimum.",
   description:
     "Turn any Notion, Figma, Drive, GitHub, or Discord URL into a paid link in 60 seconds. Buyers pay via Stripe before they get access. Half the fee of Gumroad. No file uploads, no storefront, no $100 payout minimum.",
   alternates: { canonical: APP_URL },
   openGraph: {
-    title: "unseal.link — Sell Any URL in 60 Seconds",
+    title: "unseal.link: Sell Any URL in 60 Seconds",
     description:
       "No uploads. No 10% tax. No ghosting. Paste your URL, set a price, get paid first. 4.5% fee, no minimums.",
     url: APP_URL,

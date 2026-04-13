@@ -26,7 +26,7 @@ export default function AboutPage() {
 
         <p className="text-base text-muted-foreground leading-relaxed">
           It's the missing layer between "I have a URL" and "I want to charge
-          for it" — without rebuilding your entire workflow around a new
+          for it, without rebuilding your entire workflow around a new
           platform.
         </p>
 
@@ -43,7 +43,7 @@ export default function AboutPage() {
         <p className="text-sm text-muted-foreground leading-relaxed">
           Thousands of people have a Notion template, a Figma file, a GitHub
           repo, or a Discord community they want to charge for. The existing
-          options — Gumroad, Payhip, Lemon Squeezy — are built around file
+          options (Gumroad, Payhip, Lemon Squeezy) are built around file
           uploads and storefronts. You have to move your content onto their
           platform, design a product page, and pay 10% for infrastructure you
           don't need.

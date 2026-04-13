@@ -88,7 +88,7 @@ export async function sendMissedSaleEmail(opts: {
   return resend.emails.send({
     from: FROM,
     to: opts.to,
-    subject: `Someone tried to buy "${opts.productTitle}" — connect Stripe to go live`,
+    subject: `Someone tried to buy "${opts.productTitle}": connect Stripe to go live`,
     html: await render(
       MissedSaleEmail({
         sellerName: opts.sellerName,
@@ -111,7 +111,7 @@ export async function sendAbuseReportAlert(opts: {
   return resend.emails.send({
     from: FROM,
     to: "info@unseal.link",
-    subject: `[Report] ${opts.reason} — ${opts.productTitle ?? opts.productId}`,
+    subject: `[Report] ${opts.reason}: ${opts.productTitle ?? opts.productId}`,
     html: await render(AbuseReportAlert(opts)),
   });
 }
@@ -171,7 +171,7 @@ export async function sendDisputeAlert(opts: {
   return resend.emails.send({
     from: FROM,
     to: opts.to,
-    subject: `[Dispute] ${opts.productTitle} · $${opts.amount.toFixed(2)} — respond before deadline`,
+    subject: `[Dispute] ${opts.productTitle} · $${opts.amount.toFixed(2)}: respond before deadline`,
     html: await render(DisputeAlert(opts)),
   });
 }

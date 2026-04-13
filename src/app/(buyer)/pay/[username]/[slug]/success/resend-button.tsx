@@ -61,7 +61,7 @@ export function ResendAccessButton({
     return (
       <div className="text-center">
         <p className="text-sm text-muted-foreground">
-          Your link was just sent — give it a minute to arrive, then check spam.
+          Your link was just sent. Give it a minute to arrive, then check spam.
         </p>
         <button
           type="button"

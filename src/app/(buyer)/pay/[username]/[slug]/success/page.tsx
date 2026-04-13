@@ -149,7 +149,7 @@ export default async function PaymentSuccessPage({
           </div>
           <div className="bg-muted/40 border-t border-border px-5 py-3.5">
             <p className="text-xs text-muted-foreground text-center">
-              Check your inbox — click the link to access your purchase
+              Check your inbox and click the link to access your purchase
             </p>
           </div>
         </div>

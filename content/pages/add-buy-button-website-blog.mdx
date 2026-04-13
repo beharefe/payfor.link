@@ -10,7 +10,7 @@ tags: ["buy button", "embed checkout", "sell on website", "blog monetization"]
 
 # How to Add a Buy Button to Any Website, Blog, or README
 
-If you have an article, documentation page, or GitHub README where people are already reading about something valuable — that's your highest-converting sales surface. Not a separate product page, not a link in a bio. The place where people are already engaged with your work.
+If you have an article, documentation page, or GitHub README where people are already reading about something valuable, that's your highest-converting sales surface. Not a separate product page, not a link in a bio. The place where people are already engaged with your work.
 
 The embed is two lines:
 
@@ -19,7 +19,7 @@ The embed is two lines:
 <unseal-button link="YOUR_LINK_ID"></unseal-button>
 ```
 
-That's it. A styled button renders, clicking it opens an overlay checkout — no redirect, payment happens inline — and the buyer gets access by email within 30 seconds.
+That's it. A styled button renders, clicking it opens an overlay checkout (no redirect, payment happens inline), and the buyer gets access by email within 30 seconds.
 
 ---
 
@@ -27,7 +27,7 @@ That's it. A styled button renders, clicking it opens an overlay checkout — no
 
 When someone clicks your button, a full-screen overlay opens with your product name, price, and a Stripe payment form. They enter email and card (or tap Apple Pay), payment processes, and the overlay shows a confirmation with their access link. Then it closes and they're back on your page.
 
-Zero redirects. Zero new tabs. The buyer never leaves your content. This matters more than it sounds — every redirect is an opportunity to second-guess the purchase. The inline checkout removes that gap entirely.
+Zero redirects. Zero new tabs. The buyer never leaves your content. This matters more than it sounds: every redirect is an opportunity to second-guess the purchase. The inline checkout removes that gap entirely.
 
 ---
 
@@ -36,7 +36,7 @@ Zero redirects. Zero new tabs. The buyer never leaves your content. This matters
 ```html
 <unseal-button
   link="abc123"
-  label="Get the Template — $29"
+  label="Get the Template for $29"
   theme="dark"
   color="#6366f1"
   size="lg"
@@ -45,7 +45,7 @@ Zero redirects. Zero new tabs. The buyer never leaves your content. This matters
 
 The `label` attribute sets the button text. `color` takes any hex value for the accent color. `theme` accepts `light`, `dark`, or `auto` (follows system preference). `size` takes `sm`, `md`, or `lg`.
 
-The button uses Shadow DOM — it renders consistently regardless of your page's CSS. Your stylesheet won't accidentally break the checkout UI, and the checkout UI won't accidentally override your page styles.
+The button uses Shadow DOM, rendering consistently regardless of your page's CSS. Your stylesheet won't accidentally break the checkout UI, and the checkout UI won't accidentally override your page styles.
 
 ---
 
@@ -59,7 +59,7 @@ HTML sites, WordPress (HTML block or Custom HTML widget), Webflow (Embed element
 [![Buy Now](https://img.shields.io/badge/Buy%20Now-$49-brightgreen)](https://unseal.link/l/your-id)
 ```
 
-This renders as a clickable green badge that's visible to every developer browsing your repo — effectively a buy button without script execution.
+This renders as a clickable green badge that's visible to every developer browsing your repo, effectively a buy button without script execution.
 
 **Substack emails:** Script embeds are stripped from newsletter emails. Your button works on Substack's web pages but not inside sent issues. For newsletter delivery, use a plain text link.
 
@@ -72,17 +72,17 @@ Load the script once, use as many `<unseal-button>` elements as you need:
 ```html
 <script async src="https://unseal.link/embed.js"></script>
 
-<unseal-button link="template-basic" label="Starter Template — $9"></unseal-button>
-<unseal-button link="template-pro" label="Pro Bundle — $29"></unseal-button>
+<unseal-button link="template-basic" label="Starter Template for $9"></unseal-button>
+<unseal-button link="template-pro" label="Pro Bundle for $29"></unseal-button>
 ```
 
-No performance penalty for multiple buttons — the script loads once and handles everything on the page.
+No performance penalty for multiple buttons: the script loads once and handles everything on the page.
 
 ---
 
 ## Why Not Just Use Stripe's Buy Button?
 
-Stripe's buy button handles the payment side but it doesn't deliver anything. After payment, the buyer gets a Stripe receipt — you'd still need to manually send them whatever they bought, or build a separate delivery system.
+Stripe's buy button handles the payment side but it doesn't deliver anything. After payment, the buyer gets a Stripe receipt. You'd still need to manually send them whatever they bought, or build a separate delivery system.
 
 unseal.link's embed handles both. Payment processes via Stripe, and your content URL is delivered to the buyer's email automatically within 30 seconds of payment confirming. The difference between "payment tool" and "payment + delivery tool" is the whole point.
 
@@ -95,7 +95,7 @@ import { UnsealButton } from '@unseal/react'
 
 <UnsealButton
   linkId="abc123"
-  label="Buy Now — $29"
+  label="Buy Now for $29"
   color="#6366f1"
 />
 ```
@@ -108,7 +108,7 @@ Available via `npm install @unseal/react`. Same behavior as the HTML embed, Reac
 
 ### Does the overlay work on mobile?
 
-Yes, the overlay is fully responsive. On mobile it takes up most of the screen with a close button at the top — standard modal UX.
+Yes, the overlay is fully responsive. On mobile it takes up most of the screen with a close button at the top, standard modal UX.
 
 ### What if the buyer's JavaScript is disabled?
 
@@ -116,7 +116,7 @@ The `<unseal-button>` element gracefully degrades to a standard anchor link poin
 
 ### Can I remove the "Powered by unseal.link" attribution?
 
-On paid plans, yes. On free accounts, a small attribution link appears below each button. It's how unseal.link grows — honest tradeoff.
+On paid plans, yes. On free accounts, a small attribution link appears below each button. It's how unseal.link grows. Honest tradeoff.
 
 ---
 
