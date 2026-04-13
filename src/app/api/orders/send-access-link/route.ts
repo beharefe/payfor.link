@@ -52,23 +52,27 @@ export async function POST(request: NextRequest) {
         .limit(1)
         .maybeSingle();
 
-      if (!recentToken) {
-        const { raw, hash, expiresAt } = generateAccessToken();
-        const { error: insertError } = await service.from(TABLES.ACCESS_TOKENS).insert({
-          order_id: order.id,
-          token_hash: hash,
-          expires_at: expiresAt.toISOString(),
-        });
+      if (recentToken) {
+        // A token was just issued — tell the client without burning an attempt.
+        return NextResponse.json({ ok: true, sent: false });
+      }
 
-        if (!insertError) {
-          const accessLink = `${appUrl}/orders/access?t=${raw}&oid=${order.id}`;
-          sendBuyerAccessEmail({
-            to: order.buyer_email,
-            accessLink,
-            productTitle: order.product_title,
-            orderUrl: `${appUrl}/orders/${order.id}`,
-          }).catch((err) => log.error("send-access-link: email failed", { error: String(err) }));
-        }
+      const { raw, hash, expiresAt } = generateAccessToken();
+      const { error: insertError } = await service.from(TABLES.ACCESS_TOKENS).insert({
+        order_id: order.id,
+        token_hash: hash,
+        expires_at: expiresAt.toISOString(),
+      });
+
+      if (!insertError) {
+        const accessLink = `${appUrl}/orders/access?t=${raw}&oid=${order.id}`;
+        sendBuyerAccessEmail({
+          to: order.buyer_email,
+          accessLink,
+          productTitle: order.product_title,
+          orderUrl: `${appUrl}/orders/${order.id}`,
+        }).catch((err) => log.error("send-access-link: email failed", { error: String(err) }));
+        return NextResponse.json({ ok: true, sent: true });
       }
     }
   } else {

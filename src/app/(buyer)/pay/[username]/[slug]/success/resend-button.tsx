@@ -11,7 +11,7 @@ export function ResendAccessButton({
   email: string;
   orderId: string;
 }) {
-  const [state, setState] = useState<"idle" | "sent" | "error">("idle");
+  const [state, setState] = useState<"idle" | "sent" | "recentlySent" | "error">("idle");
   const [loading, setLoading] = useState(false);
   const [attempts, setAttempts] = useState(0);
 
@@ -24,8 +24,19 @@ export function ResendAccessButton({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, oid: orderId }),
       });
+      if (!res.ok) {
+        setAttempts((n) => n + 1);
+        setState("error");
+        return;
+      }
+      const data = await res.json();
+      if (data.sent === false) {
+        // Rate limited — email was just sent moments ago. Don't burn an attempt.
+        setState("recentlySent");
+        return;
+      }
       setAttempts((n) => n + 1);
-      setState(res.ok ? "sent" : "error");
+      setState("sent");
     } catch {
       setAttempts((n) => n + 1);
       setState("error");
@@ -43,6 +54,24 @@ export function ResendAccessButton({
         </a>
         .
       </p>
+    );
+  }
+
+  if (state === "recentlySent") {
+    return (
+      <div className="text-center">
+        <p className="text-sm text-muted-foreground">
+          Your link was just sent — give it a minute to arrive, then check spam.
+        </p>
+        <button
+          type="button"
+          onClick={handleResend}
+          disabled={loading}
+          className="text-xs text-muted-foreground underline underline-offset-2 hover:opacity-70 transition-opacity mt-1 bg-transparent border-none cursor-pointer p-0"
+        >
+          Try again
+        </button>
+      </div>
     );
   }
 

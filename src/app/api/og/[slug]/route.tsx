@@ -1,7 +1,5 @@
 import { ImageResponse } from "next/og";
 
-export const runtime = "edge";
-
 // Convert Supabase public URL to a transform URL for resizing at the CDN level.
 // Requires Supabase Pro. Falls back to original URL on non-Pro plans (transform returns 400).
 function toTransformUrl(url: string, width: number, height: number): string {
