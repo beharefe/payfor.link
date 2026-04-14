@@ -10,9 +10,12 @@ const USE_CASES = [
 ];
 
 const COMPARE = [
-  { href: "/unseal-link-vs-gumroad-vs-payhip-2026", label: "vs Gumroad & Payhip" },
+  { href: "/vs-gumroad",                            label: "vs Gumroad" },
   { href: "/vs-lemon-squeezy",                      label: "vs Lemon Squeezy" },
+  { href: "/vs-stan-store",                         label: "vs Stan Store" },
+  { href: "/vs-ko-fi",                              label: "vs Ko-fi" },
   { href: "/vs-whop",                               label: "vs Whop" },
+  { href: "/gumroad-alternatives-lower-fees",       label: "Gumroad Alternatives" },
 ];
 
 const LEGAL = [
