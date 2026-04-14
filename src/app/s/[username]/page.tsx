@@ -1,6 +1,7 @@
 import { TABLES } from "@unseallink/lib/db";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -73,9 +74,11 @@ export default async function SellerProfilePage({ params }: Props) {
         <div className="max-w-5xl mx-auto px-6">
           <div className="flex items-center gap-5">
             {seller.avatar_url ? (
-              <img
+              <Image
                 src={seller.avatar_url}
                 alt={seller.name ?? username}
+                width={64}
+                height={64}
                 className="w-16 h-16 rounded-full object-cover shrink-0"
               />
             ) : (
@@ -115,11 +118,13 @@ export default async function SellerProfilePage({ params }: Props) {
                   className="border border-border rounded-2xl overflow-hidden no-underline text-foreground hover:border-foreground/30 transition-colors group bg-card"
                 >
                   {product.preview_image_url && (
-                    <div className="aspect-video w-full overflow-hidden bg-muted">
-                      <img
+                    <div className="aspect-video w-full overflow-hidden bg-muted relative">
+                      <Image
                         src={product.preview_image_url}
                         alt={product.title}
-                        className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 340px"
+                        className="object-cover group-hover:scale-[1.02] transition-transform duration-300"
                       />
                     </div>
                   )}

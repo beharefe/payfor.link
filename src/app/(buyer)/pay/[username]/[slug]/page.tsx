@@ -6,6 +6,7 @@ import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { Clock, LockKeyhole, Mail, Timer } from "lucide-react";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AbuseReportForm } from "../../abuse-report-form";
@@ -199,11 +200,13 @@ export default async function PaywallPage({ params }: Props) {
 
         {/* Preview image */}
         {link.preview_image_url && (
-          <div className="aspect-video w-full overflow-hidden rounded-2xl bg-muted">
-            <img
+          <div className="aspect-video w-full overflow-hidden rounded-2xl bg-muted relative">
+            <Image
               src={link.preview_image_url}
               alt={link.title}
-              className="w-full h-full object-cover"
+              fill
+              sizes="(max-width: 640px) 100vw, 384px"
+              className="object-cover"
             />
           </div>
         )}
