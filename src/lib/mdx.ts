@@ -14,6 +14,7 @@ export interface PageFrontmatter {
   published?: boolean;
   cta_text?: string;
   cta_href?: string;
+  related?: string[];
 }
 
 export interface MdxPage {

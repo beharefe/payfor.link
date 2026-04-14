@@ -1,0 +1,279 @@
+# unseal.link — Post-Launch Playbook
+
+Everything to do from the moment you flip the switch. Ordered by impact.
+
+---
+
+## Status: Pre-launch
+
+Tick these off as you go. The items marked **[NOW]** can be done before launch without an audience.
+
+---
+
+## 1. Product Hunt
+
+**Impact: High** — Product Hunt posts are permanent, crawlable pages. AI models heavily weight them. One good launch creates 30–50+ secondary mentions in newsletters and "tools I discovered" posts.
+
+### Assets to prepare (do this now)
+
+| Asset | Spec | Notes |
+|-------|------|-------|
+| Tagline | ≤60 chars | "Sell any URL. 4.5% fee. No uploads." |
+| Description | ~260 chars | See draft below |
+| Gallery images | 1280×800px, 3–5 images | Product screenshots, fee comparison |
+| Thumbnail | 240×240px | Logo mark, not wordmark |
+| First comment | Written in advance | Your founder story, posted at launch |
+
+**Tagline options (pick one):**
+- "Sell any URL. 4.5% fee. No uploads." (38 chars) ✓
+- "Paywall any link in 60 seconds. Half the fee of Gumroad." (56 chars)
+- "Get paid before you share anything." (35 chars)
+
+**Description draft:**
+> unseal.link turns any URL into a paid link. Paste a Notion page, Figma file, Google Drive folder, GitHub repo, or Discord invite. Set a price. Share the paywall link. Buyers pay via Stripe and get the link by email in under 30 seconds. No file uploads. No storefront. 4.5% fee.
+
+**First comment draft (founder story):**
+> Hi PH 👋 I built unseal.link after watching a freelancer friend deliver a $2,400 Figma project and never get paid. The client had the files. There was nothing to threaten.
+>
+> The fix was obvious: payment before delivery. But every "digital product" platform I looked at required file uploads, a storefront, or 10% in fees.
+>
+> unseal.link is the layer that was missing: paste any live URL, set a price, get a paywall link. Buyers pay via Stripe before they get anything. 4.5% fee. Works with Notion, Figma, Drive, GitHub, Discord — anything with a URL.
+>
+> Would love feedback on the onboarding. What's unclear?
+
+### Launch strategy
+
+**Best days to launch:** Tuesday, Wednesday, or Thursday (Pacific time)
+
+**Launch time:** 12:01 AM PST (start of the PH day — you get the most hours)
+
+**Who to ask for upvotes:**
+- Friends and early users personally (DM, not mass email)
+- Anyone who beta-tested
+- Twitter/X audience (post at launch with direct PH link)
+- Your email list if you have one
+
+**What to do on launch day:**
+- [ ] Reply to every comment within 1 hour for the first 6 hours
+- [ ] Post on Twitter/X with the PH link at launch
+- [ ] Post in relevant Slack/Discord communities you're a member of
+- [ ] Update LinkedIn with launch post
+- [ ] Monitor r/SideProject and r/Entrepreneur for organic mentions
+
+**After launch:**
+- [ ] Add PH badge to the homepage
+- [ ] Add PH URL to `sameAs` in `src/app/(marketing)/page.tsx` (placeholder comment already there)
+- [ ] Collect any press or newsletter mentions and save them
+
+---
+
+## 2. Reddit
+
+**Impact: High** — Reddit is heavily weighted by AI training pipelines. Posts in the right subs become permanent, crawlable citations that AI models pull from when recommending tools.
+
+### Target subreddits
+
+| Subreddit | Angle | Post type |
+|-----------|-------|-----------|
+| r/SideProject | "I built unseal.link — a paywall for any URL" | Launch post |
+| r/Entrepreneur | "I got tired of Gumroad's 10% — so I built the alternative" | Story post |
+| r/passive_income | "How I set up a paid Notion template in 5 minutes without Gumroad" | Tutorial |
+| r/NotionTemplates | "For people tired of Gumroad fees — alternative with 4.5% fee" | Resource post |
+| r/FigmaDesign | "Figma Community closed paid submissions. Here's what I'm using instead." | Discussion |
+| r/webdev | "Built a Stripe-powered paywall for any URL — feedback welcome" | Show HN style |
+
+### Post timing
+Best: Tuesday–Thursday, 9am–12pm EST
+
+### Rules
+- Be genuine and transparent that you built it
+- Add real value to the post (tutorials, comparisons, honest tradeoffs)
+- Don't cross-post the same content — each sub gets a tailored angle
+- Engage with every comment for the first 48 hours
+
+---
+
+## 3. Listing Sites
+
+**Impact: Medium** — These become authoritative third-party mentions that AI models cite when asked for software recommendations.
+
+### Priority order
+
+1. **[NOW — free] G2**: https://sell.g2.com — Add your product listing. Get 5+ reviews from early users.
+2. **[NOW — free] Product Hunt** (see section 1 above)
+3. **[NOW — free] AppSumo Marketplace**: https://appsumo.com/submit/ — Listing is free. Deals are optional.
+4. **Capterra / GetApp / Software Advice**: Free listing. Owned by Gartner, high authority.
+5. **Toolify.ai / Futurepedia**: AI tools directories. Your product paywalls AI-generated content, relevant angle.
+6. **There's an AI for That**: Submit at theresanaiforthat.com — high domain authority, crawled heavily.
+7. **Uneed**: https://www.uneed.best — smaller but engaged maker community.
+
+### After listing:
+- [ ] Ask your first 10 users for a G2 review (personal ask, not mass email)
+- [ ] Monitor for inbound reviews and respond to them
+
+---
+
+## 4. Roundup Outreach
+
+**Impact: High for AI visibility, slow to materialize**
+
+The "Best Gumroad Alternatives" articles on Payhip, WPBeginner, Beehiiv, Sellfy, and Thrivecart's blogs are the exact pages AI models read to answer recommendation questions. Getting listed in 3–4 of these would move the AI visibility score from ~8 to 40+.
+
+### Target articles (pitch to these editors)
+
+| Article | Site | DA | Contact approach |
+|---------|------|----|-----------------|
+| "11 best Gumroad alternatives" | sellfy.com/blog | ~70 | Contact form / LinkedIn |
+| "13 Gumroad Alternatives Compared" | beehiiv.com/blog | ~65 | Blog editor on LinkedIn |
+| "Best Gumroad Alternatives in 2026" | wpbeginner.com | ~85 | Editorial pitch email |
+| "12 Best Gumroad Alternatives" | payhip.com/blog | ~60 | hello@payhip.com |
+| "Gumroad Alternatives" | easy.tools/blog | ~45 | Contact page |
+
+### Pitch template
+
+```
+Subject: Addition to your Gumroad alternatives article
+
+Hi [Name],
+
+I found your "[article title]" article while researching the space — great 
+overview.
+
+One platform that's not on the list yet: unseal.link. It's different from 
+most alternatives in one specific way: it doesn't require file uploads. 
+Sellers paste any URL (Notion, Figma, Google Drive, Discord, GitHub), set 
+a price, and get a paywall link. Buyers pay via Stripe and get the link by 
+email. 4.5% fee, no $100 payout minimum.
+
+Happy to provide any details you'd need for an accurate entry. 
+Here's the comparison table if it's useful: unseal.link/#pricing
+
+[Your name]
+Founder, unseal.link
+```
+
+---
+
+## 5. Content Distribution
+
+**The content cluster already exists.** The issue is that no external sites link to it yet. 
+
+### Pages that should be distributed
+
+| Page | Distribution target |
+|------|-------------------|
+| `/gumroad-alternatives-lower-fees` | Share on Twitter, submit to newsletter roundups |
+| `/unseal-link-vs-gumroad-vs-payhip-2026` | Twitter, Reddit r/Entrepreneur |
+| `/vs-lemon-squeezy` | r/webdev, developer newsletters |
+| `/vs-whop` | Discord community owners, r/discord |
+| `/how-to-sell-notion-templates` | r/NotionTemplates, Notion subreddit |
+| `/how-to-sell-figma-files` | r/FigmaDesign, Figma forums |
+| `/sell-discord-access` | Discord-focused communities |
+
+### Creator newsletters to pitch
+
+- The Tilt (Joe Pulizzi) — creator economy
+- Creator Science (Jay Clouse)
+- Trends.vc — if you have original data
+- Not Boring (Packy McCormick) — if there's a narrative hook
+- Indie Hackers newsletter
+
+---
+
+## 6. Twitter/X Strategy
+
+**Impact: Medium — takes time to compound**
+
+### At launch
+- [ ] Pin a thread explaining unseal.link (not just a link — tell the story)
+- [ ] Post the Product Hunt link with a call to upvote
+- [ ] Post the "ghosting is structurally impossible" angle — it's memorable and shareable
+
+### Ongoing
+- Share use-case screenshots (real sales, real products)
+- Reply to any tweet complaining about Gumroad's 10% fee
+- Search "gumroad fees" on Twitter and be helpful in those threads
+- Post the fee comparison table as an image
+
+### Keywords to monitor on Twitter
+- "gumroad fees"
+- "gumroad alternatives"
+- "sell notion templates"
+- "sell figma"
+- "discord paywall"
+- "getting ghosted freelance"
+
+---
+
+## 7. Technical: Do Once, Then Forget
+
+### [NOW] Update `sameAs` in homepage schema as you create profiles
+
+File: `src/app/(marketing)/page.tsx` — the `sameAs` array in the Organization schema. Add each URL as you create the account:
+
+```ts
+sameAs: [
+  "https://twitter.com/unseallink",
+  "https://x.com/unseallink",
+  "https://www.producthunt.com/products/unseal-link",   // add after PH launch
+  "https://www.g2.com/products/unseal-link",             // add after G2 listing
+]
+```
+
+### [NOW — can do pre-launch] Claim your brand on all platforms
+
+Even if you don't post yet, claim the username `unseallink` or `unseal_link` on:
+- [ ] Twitter/X — @unseallink
+- [ ] LinkedIn company page
+- [ ] Instagram — @unseallink
+- [ ] TikTok — @unseallink
+- [ ] YouTube — @unseallink
+- [ ] Reddit — u/unseallink (personal) or r/unseallink (subreddit)
+- [ ] GitHub org — github.com/unseallink
+
+Unclaimed usernames get squatted. Claim them before launch even if inactive.
+
+---
+
+## 8. The "Data Post" — Highest-ROI Content Piece
+
+One original data post becomes citation fodder for years and gets picked up by newsletters, ranking in search, and used as a training signal by AI models.
+
+**Proposed title:** "We analyzed the fee structures of 8 digital product platforms so you don't have to"
+
+**What it needs:**
+- A comparison table with all major platforms and their effective rate at $9, $19, $49, $99 price points
+- The math on refunds (Gumroad keeps the fee; most others don't)
+- The math on payout minimums (Gumroad's $100 minimum means your first $80 in sales are held)
+- One surprising finding (e.g. "Lemon Squeezy's effective rate on a $9 product is 10.6%")
+
+**Pitch this to:** Trends.vc, The Tilt, Creator Science, Indie Hackers, HackerNews (Show HN)
+
+The comparison table is already on the homepage (`page.tsx`). Extract it into a dedicated page and add more granular data.
+
+---
+
+## Timeline Recommendation
+
+| Week | Actions |
+|------|---------|
+| Pre-launch | Claim usernames, set up G2 + AppSumo profiles, prepare PH assets |
+| Launch week | Product Hunt launch, first Reddit post (r/SideProject), email list if any |
+| Week 2 | Reddit posts in r/Entrepreneur and r/NotionTemplates, pitch 2–3 roundup articles |
+| Week 3 | r/FigmaDesign and r/webdev posts, follow up on roundup pitches |
+| Week 4 | Data post draft, pitch to creator newsletters |
+| Month 2+ | Monitor AI visibility (ask ChatGPT/Perplexity "gumroad alternatives"), iterate on distribution |
+
+---
+
+## Measuring AI Visibility Progress
+
+Re-run the AI visibility audit monthly by asking these questions directly in ChatGPT, Claude, and Perplexity:
+
+- "What are the best alternatives to Gumroad?"
+- "How do I sell Notion templates?"
+- "What's the lowest fee platform for selling digital products?"
+- "How do I sell access to my Discord server?"
+- "What is unseal.link?"
+
+Track whether unseal.link appears, in what position, and whether the description is accurate. The goal: mentioned in at least 2 of these within 60 days of launch.

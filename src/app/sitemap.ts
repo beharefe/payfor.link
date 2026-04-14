@@ -1,5 +1,5 @@
 import { TABLES } from "@unseallink/lib/db";
-import { getAllPageSlugs } from "@unseallink/lib/mdx";
+import { getAllPageSlugs, getPageBySlug } from "@unseallink/lib/mdx";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import type { MetadataRoute } from "next";
 
@@ -8,14 +8,20 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: APP_URL, changeFrequency: "weekly", priority: 1.0 },
+    { url: `${APP_URL}/about`, changeFrequency: "monthly", priority: 0.5 },
   ];
 
-  // MDX content/SEO pages (statically generated at build time)
-  const mdxRoutes: MetadataRoute.Sitemap = getAllPageSlugs().map((slug) => ({
-    url: `${APP_URL}/${slug}`,
-    changeFrequency: "monthly",
-    priority: 0.7,
-  }));
+  // MDX content/SEO pages — exclude noindex pages (privacy, terms, etc.)
+  const mdxRoutes: MetadataRoute.Sitemap = getAllPageSlugs()
+    .filter((slug) => {
+      const page = getPageBySlug(slug);
+      return page && !page.frontmatter.noindex;
+    })
+    .map((slug) => ({
+      url: `${APP_URL}/${slug}`,
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    }));
 
   // Active paywall product pages — indexable by search engines and AI crawlers
   let paywallRoutes: MetadataRoute.Sitemap = [];

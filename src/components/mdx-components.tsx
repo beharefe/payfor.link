@@ -220,6 +220,58 @@ export function InlineCTA({
   );
 }
 
+// 3-column comparison table: feature | colA | colB (colB highlighted as "winner" column)
+export function TwoColumnCompare({
+  colA = "Competitor",
+  colB = "unseal.link",
+  rows = [],
+}: {
+  colA?: string;
+  colB?: string;
+  rows?: { feature: string; a: string; b: string; bWins?: boolean }[];
+}) {
+  return (
+    <section className="px-6 py-10 max-w-3xl mx-auto w-full overflow-x-auto">
+      <div className="border border-[#E5E5E5] dark:border-[#2C2C2C] rounded-2xl overflow-hidden">
+        <table className="w-full border-collapse text-sm min-w-[380px]">
+          <thead>
+            <tr className="border-b border-[#E5E5E5] dark:border-[#2C2C2C]">
+              {["Feature", colA, colB].map((h, i) => (
+                <th
+                  key={h}
+                  className={`px-4 py-3 text-left text-xs font-medium uppercase tracking-widest ${
+                    i === 2
+                      ? "text-[#111111] dark:text-[#F5F4EF] bg-[#F5F4EF] dark:bg-[#1C1C1C]"
+                      : "text-[#6B6B6B] dark:text-[#999999]"
+                  }`}
+                >
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, i) => (
+              <tr
+                key={row.feature}
+                className={i < rows.length - 1 ? "border-b border-[#E5E5E5] dark:border-[#2C2C2C]" : ""}
+              >
+                <td className="px-4 py-3 font-medium text-[#111111] dark:text-[#F5F4EF]">
+                  {row.feature}
+                </td>
+                <td className="px-4 py-3 text-[#6B6B6B] dark:text-[#999999]">{row.a}</td>
+                <td className={`px-4 py-3 bg-[#F5F4EF] dark:bg-[#1C1C1C] ${row.bWins ? "font-medium text-[#111111] dark:text-[#F5F4EF]" : "text-[#6B6B6B] dark:text-[#999999]"}`}>
+                  {row.b}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
 // 4-column comparison table: feature | Gumroad | Payhip | unseal.link
 export function CompareTable({
   rows = [],
@@ -300,6 +352,7 @@ export const mdxComponents: MDXComponents = {
   FeeCallout,
   CTA,
   InlineCTA,
+  TwoColumnCompare,
   CompareTable,
   FAQ,
   h1: (props) => (

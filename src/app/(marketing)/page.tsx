@@ -14,7 +14,7 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
 export const metadata: Metadata = {
   title: "unseal.link: Sell Any URL. Lowest Fee. No Uploads. No Minimum.",
   description:
-    "Turn any Notion, Figma, Drive, GitHub, or Discord URL into a paid link in 60 seconds. Buyers pay via Stripe before they get access. Half the fee of Gumroad. No file uploads, no storefront, no $100 payout minimum.",
+    "Paste any URL, set a price, share a paywall link. Buyers pay via Stripe and get instant access. 4.5% fee — half of Gumroad. No uploads, no $100 minimum.",
   alternates: { canonical: APP_URL },
   openGraph: {
     title: "unseal.link: Sell Any URL in 60 Seconds",
@@ -198,17 +198,39 @@ const jsonLd = {
     priceCurrency: "USD",
     description: "Free to list. 4.5% platform fee per sale.",
   },
-  publisher: { "@type": "Organization", name: "unseal.link", url: APP_URL },
+  publisher: {
+    "@type": "Organization",
+    name: "unseal.link",
+    url: APP_URL,
+    sameAs: [
+      "https://twitter.com/unseallink",
+      "https://x.com/unseallink",
+      // Add after launch: "https://www.producthunt.com/products/unseal-link"
+      // Add after launch: "https://www.reddit.com/r/unseallink" (if created)
+    ],
+  },
+};
+
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqItems.map((item) => ({
+    "@type": "Question",
+    name: item.q,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: item.a.replace(/\n\n/g, " "),
+    },
+  })),
 };
 
 export default function HomePage() {
   return (
     <>
-      <script
-        type="application/ld+json"
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: controlled JSON-LD
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      {/* biome-ignore lint/security/noDangerouslySetInnerHtml: controlled JSON-LD */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      {/* biome-ignore lint/security/noDangerouslySetInnerHtml: controlled JSON-LD */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
 
       {/* ── Hero ─────────────────────────────────────────────────────── */}
       <section className="pt-20 pb-16 px-6 max-w-5xl mx-auto">

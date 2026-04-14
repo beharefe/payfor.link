@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const { data: link } = await supabase
     .from(TABLES.PRODUCTS)
-    .select("title, description, price, currency, preview_image_url, sellers!inner(username, name)")
+    .select("title, description, price, currency, preview_image_url, expires_at, max_orders, total_sales, sellers!inner(username, name)")
     .eq("slug", slug)
     .eq("sellers.username", username)
     .not("status", "in", '("deleted","suspended")')
@@ -37,6 +37,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // biome-ignore lint/suspicious/noExplicitAny: Supabase join type
   const sellerData = link.sellers as any;
   const sellerName: string = sellerData?.name ?? sellerData?.username ?? "unseal.link";
+
+  const isUnavailable =
+    (link.expires_at && new Date(link.expires_at) < new Date()) ||
+    (link.max_orders !== null && link.max_orders !== undefined && (link.total_sales ?? 0) >= link.max_orders);
 
   const baseUrl = await getBaseUrl();
   const priceLabel = `$${Number(link.price).toFixed(2)}`;
@@ -60,6 +64,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     themeColor: "#111111",
     metadataBase: new URL(baseUrl),
     alternates: { canonical },
+    robots: isUnavailable ? { index: false, follow: false } : { index: true, follow: true },
     openGraph: {
       title,
       description,

@@ -15,11 +15,11 @@ export const viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
   title: {
-    default: "unseal.link: Sell Any URL. 4.5% Fee. No Uploads. No $100 Minimum.",
+    default: "unseal.link: Sell Any URL. 4.5% Fee. No Uploads.",
     template: "%s | unseal.link",
   },
   description:
-    "Turn any Notion, Figma, Drive, GitHub, or Discord URL into a paid link in 60 seconds. Buyers pay via Stripe before they get access. 4.5% fee, half of Gumroad. No file uploads, no storefront, no $100 payout minimum.",
+    "Turn any URL into a paid link in 60 seconds. Buyers pay via Stripe first, then get instant access. 4.5% fee — half of Gumroad. No uploads, no $100 minimum.",
   openGraph: {
     title: "unseal.link: Sell Any URL in 60 Seconds",
     description: "No uploads. No 10% tax. No ghosting. Paste your URL, set a price, get paid first. 4.5% fee, no minimums.",
@@ -30,6 +30,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
+    site: "@unseallink",
     title: "unseal.link: Sell Any URL in 60 Seconds",
     description: "No uploads. No 10% tax. No ghosting. Paste your URL, set a price, get paid first. 4.5% fee, no minimums.",
     images: ["/api/og"],

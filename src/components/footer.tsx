@@ -9,6 +9,12 @@ const USE_CASES = [
   { href: "/gumroad-alternatives-lower-fees", label: "Gumroad Alternatives" },
 ];
 
+const COMPARE = [
+  { href: "/unseal-link-vs-gumroad-vs-payhip-2026", label: "vs Gumroad & Payhip" },
+  { href: "/vs-lemon-squeezy",                      label: "vs Lemon Squeezy" },
+  { href: "/vs-whop",                               label: "vs Whop" },
+];
+
 const LEGAL = [
   { href: "/terms",   label: "Terms" },
   { href: "/privacy", label: "Privacy" },
@@ -34,8 +40,8 @@ export function Footer() {
             </span>
           </div>
 
-          {/* Link columns — always 2 columns side by side */}
-          <div className="grid grid-cols-2 gap-8 sm:gap-16 shrink-0">
+          {/* Link columns */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 sm:gap-12 shrink-0">
 
             {/* Use cases */}
             <div className="flex flex-col gap-2.5">
@@ -43,6 +49,22 @@ export function Footer() {
                 Sell
               </p>
               {USE_CASES.map(({ href, label }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors no-underline"
+                >
+                  {label}
+                </Link>
+              ))}
+            </div>
+
+            {/* Compare */}
+            <div className="flex flex-col gap-2.5">
+              <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-1">
+                Compare
+              </p>
+              {COMPARE.map(({ href, label }) => (
                 <Link
                   key={href}
                   href={href}

@@ -41,9 +41,9 @@ export default function AboutPage() {
       </p>
 
       <div className="space-y-6">
-        <p className="text-2xl md:text-3xl font-medium tracking-tight text-foreground leading-snug">
+        <h1 className="text-2xl md:text-3xl font-medium tracking-tight text-foreground leading-snug">
           unseal.link is payment-gated delivery for anything that lives online.
-        </p>
+        </h1>
 
         <p className="text-base text-muted-foreground leading-relaxed">
           Not a storefront. Not a marketplace. Not a file host.
@@ -52,7 +52,7 @@ export default function AboutPage() {
         <p className="text-base text-muted-foreground leading-relaxed">
           It's the missing layer between "I have a URL" and "I want to charge
           for it, without rebuilding your entire workflow around a new
-          platform.
+          platform."
         </p>
 
         <p className="text-base text-muted-foreground leading-relaxed">
