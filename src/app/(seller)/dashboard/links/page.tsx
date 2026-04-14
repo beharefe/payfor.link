@@ -82,12 +82,12 @@ export default async function LinksPage() {
             <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
               <LockKeyhole className="w-5 h-5 text-muted-foreground" aria-hidden="true" />
             </div>
-            <div>
+            <div className="text-center">
               <p className="font-medium text-foreground mb-1">Ready to sell your first link?</p>
-              <p className="text-sm text-muted-foreground max-w-xs mb-3">
+              <p className="text-sm text-muted-foreground max-w-xs mx-auto mb-3">
                 Paste your link below. Buyers pay via Stripe. You get paid directly. We take 4.5%.
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground max-w-sm mx-auto">
                 Works with: Notion templates · Figma files · Google Drive · GitHub repos · Discord servers · Any URL
               </p>
             </div>
