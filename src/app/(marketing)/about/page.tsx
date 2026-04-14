@@ -90,7 +90,7 @@ export default function AboutPage() {
           The fee
         </p>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          4.5% per sale. No monthly fee. No $100 payout minimum.
+          4.5% per sale. No monthly fee. No payout minimum.
         </p>
         <p className="text-sm text-muted-foreground leading-relaxed">
           Gumroad charges 10% + $0.50. We charge 4.5%. On $10,000 in sales,

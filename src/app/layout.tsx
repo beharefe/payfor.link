@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     template: "%s | unseal.link",
   },
   description:
-    "Turn any URL into a paid link in 60 seconds. Buyers pay via Stripe first, then get instant access. 4.5% fee — half of Gumroad. No uploads, no $100 minimum.",
+    "Turn any URL into a paid link in 60 seconds. Buyers pay via Stripe first, then get instant access. 4.5% fee — half of Gumroad. No uploads, no payout minimum.",
   openGraph: {
     title: "unseal.link: Sell Any URL in 60 Seconds",
     description: "No uploads. No 10% tax. No ghosting. Paste your URL, set a price, get paid first. 4.5% fee, no minimums.",

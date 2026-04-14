@@ -14,7 +14,7 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
 export const metadata: Metadata = {
   title: "unseal.link: Sell Any URL. Lowest Fee. No Uploads. No Minimum.",
   description:
-    "Paste any URL, set a price, share a paywall link. Buyers pay via Stripe and get instant access. 4.5% fee — half of Gumroad. No uploads, no $100 minimum.",
+    "Paste any URL, set a price, share a paywall link. Buyers pay via Stripe and get instant access. 4.5% fee — half of Gumroad. No uploads, no $10 minimum.",
   alternates: { canonical: APP_URL },
   openGraph: {
     title: "unseal.link: Sell Any URL in 60 Seconds",
@@ -36,7 +36,7 @@ const steps = [
   {
     n: "02",
     title: "Set a price",
-    body: "Minimum $9.99. Connect Stripe once and every payout lands directly in your bank. No $100 minimum. No weekly batch.",
+    body: "Minimum $9.99. Connect Stripe once and every payout lands directly in your bank. No payout minimum. No weekly batch.",
   },
   {
     n: "03",
@@ -54,7 +54,7 @@ const features: { Icon: LucideIcon; title: string; body: string }[] = [
   {
     Icon: Percent,
     title: "Lowest fee. No surprises.",
-    body: "No monthly costs. No $100 payout minimum. No hidden fees. Half the cut of Gumroad. Money lands directly in your Stripe account per sale.",
+    body: "No monthly costs. No $10 payout minimum. No hidden fees. Half the cut of Gumroad. Money lands directly in your Stripe account per sale.",
   },
   {
     Icon: Lock,
@@ -112,9 +112,9 @@ const comparisonRows = [
   {
     feature: "Payout minimum",
     us: "$0",
-    gumroadDirect: "$100",
-    gumroadDiscover: "$100",
-    lemon: "$100",
+    gumroadDirect: "$10",
+    gumroadDiscover: "$10",
+    lemon: "$50",
   },
   {
     feature: "Fee on refund",
@@ -176,7 +176,7 @@ const faqItems = [
   },
   {
     q: "What's the minimum payout?",
-    a: "$0. Every sale pays out directly to your connected Stripe account. No weekly batch. No $100 threshold like Gumroad. Your first sale pays out immediately.",
+    a: "$0. Every sale pays out directly to your connected Stripe account. No weekly batch. No $10 threshold like Gumroad. Your first sale pays out immediately.",
   },
   {
     q: "Can I use unseal.link alongside Gumroad?",
@@ -191,7 +191,7 @@ const jsonLd = {
   applicationCategory: "BusinessApplication",
   url: APP_URL,
   description:
-    "Turn any URL into a paid link in 60 seconds. 4.5% fee, no uploads, no storefront, no $100 payout minimum.",
+    "Turn any URL into a paid link in 60 seconds. 4.5% fee, no uploads, no storefront, no payout minimum.",
   offers: {
     "@type": "Offer",
     price: "0",
@@ -512,8 +512,6 @@ export default function HomePage() {
               product and pay the platform fee.
             </p>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              And you can't withdraw anything until you've made $100. Your first
-              $80 in sales? Held. Indefinitely.
             </p>
             <p className="text-sm font-medium text-foreground">
               With unseal.link: on refunds you get the fee back. Minimum payout: $0.
@@ -594,7 +592,7 @@ export default function HomePage() {
         </h2>
         <p className="text-muted-foreground mb-8 max-w-sm mx-auto text-sm leading-relaxed">
           Paste your link, set a price, and your first paywall is live in under
-          60 seconds. No storefront. No uploads. No $100 minimum.
+          60 seconds. No storefront. No uploads. No payout minimum.
         </p>
         <Link
           href="/auth"
