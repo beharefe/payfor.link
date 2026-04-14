@@ -14,7 +14,7 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
 export const metadata: Metadata = {
   title: "unseal.link: Sell Any URL. Lowest Fee. No Uploads. No Minimum.",
   description:
-    "Paste any URL, set a price, share a paywall link. Buyers pay via Stripe and get instant access. 4.5% fee — half of Gumroad. No uploads, no $10 minimum.",
+    "Paste any URL, set a price, share a paywall link. Buyers pay via Stripe and get instant access. 4.5% fee — half of Gumroad. No uploads, no payout minimum.",
   alternates: { canonical: APP_URL },
   openGraph: {
     title: "unseal.link: Sell Any URL in 60 Seconds",
@@ -54,7 +54,7 @@ const features: { Icon: LucideIcon; title: string; body: string }[] = [
   {
     Icon: Percent,
     title: "Lowest fee. No surprises.",
-    body: "No monthly costs. No $10 payout minimum. No hidden fees. Half the cut of Gumroad. Money lands directly in your Stripe account per sale.",
+    body: "No monthly costs. No payout minimum. No hidden fees. Half the cut of Gumroad. Money lands directly in your Stripe account per sale.",
   },
   {
     Icon: Lock,
@@ -234,52 +234,102 @@ export default function HomePage() {
 
       {/* ── Hero ─────────────────────────────────────────────────────── */}
       <section className="pt-20 pb-16 px-6 max-w-5xl mx-auto">
-        <div className="max-w-2xl">
-          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-6">
-            The paywall for any link
-          </p>
+        <div className="lg:grid lg:grid-cols-[1fr_340px] lg:gap-16 lg:items-start">
 
-          <h1 className="text-4xl md:text-6xl font-medium tracking-tight text-foreground mb-6 leading-[1.1]">
-            No uploads.
-            <br />
-            No 10% tax.
-            <br />
-            No ghosting.
-          </h1>
+          {/* Left: copy + CTAs */}
+          <div>
+            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-6">
+              The paywall for any link
+            </p>
 
-          {/*
-            Subheadline A/B variants — swap in analytics/flag system:
-            A (current): platform list + 60 seconds
-            B: "Stripe takes the payment. unseal.link delivers the access.
-               Paste your URL → set price → buyer pays → gets your link by email.
-               Works with Notion, Figma, Drive, GitHub, Discord. 4.5% fee."
-            C: "No uploads. No 10% discovery tax. No ghosting.
-               Paste any live URL, set a price, share.
-               Buyers pay via Stripe and get instant access. 4.5% fee."
-          */}
-          <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-lg leading-relaxed">
-            Paste a URL, set a price, share your paywall link. Buyers pay once
-            and get instant access by email. No accounts. No friction.
-          </p>
+            <h1 className="text-4xl md:text-6xl font-medium tracking-tight text-foreground mb-6 leading-[1.1]">
+              No uploads.
+              <br />
+              No 10% tax.
+              <br />
+              No ghosting.
+            </h1>
 
-          <div className="flex flex-wrap gap-3 mb-5">
-            <Link
-              href="/auth"
-              className="inline-flex items-center px-6 py-3 bg-primary text-primary-foreground rounded-full font-medium text-sm hover:opacity-90 transition-opacity no-underline"
-            >
-              Create your first paid link →
-            </Link>
+            {/*
+              Subheadline A/B variants — swap in analytics/flag system:
+              A (current): platform list + 60 seconds
+              B: "Stripe takes the payment. unseal.link delivers the access.
+                 Paste your URL → set price → buyer pays → gets your link by email.
+                 Works with Notion, Figma, Drive, GitHub, Discord. 4.5% fee."
+              C: "No uploads. No 10% discovery tax. No ghosting.
+                 Paste any live URL, set a price, share.
+                 Buyers pay via Stripe and get instant access. 4.5% fee."
+            */}
+            <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-lg leading-relaxed">
+              Paste a URL, set a price, share your paywall link. Buyers pay once
+              and get instant access by email. No accounts. No friction.
+            </p>
+
+            <div className="flex flex-wrap gap-3 mb-5">
+              <Link
+                href="/auth"
+                className="inline-flex items-center px-6 py-3 bg-primary text-primary-foreground rounded-full font-medium text-sm hover:opacity-90 transition-opacity no-underline"
+              >
+                Create your first paid link →
+              </Link>
+            </div>
+
+            <p className="text-xs text-muted-foreground mb-10">
+              First 100 sellers get their first $500 in sales fee-free: no
+              platform cut, no Stripe fees.{" "}
+              <Link href="/auth" className="text-foreground underline hover:no-underline">
+                Claim your spot →
+              </Link>
+            </p>
+
+            <TrustBar />
           </div>
 
-          <p className="text-xs text-muted-foreground mb-10">
-            First 100 sellers get their first $500 in sales fee-free: no
-            platform cut, no Stripe fees.{" "}
-            <Link href="/auth" className="text-foreground underline hover:no-underline">
-              Claim your spot →
-            </Link>
-          </p>
+          {/* Right: paywall card mockup — desktop only */}
+          <div className="hidden lg:block lg:pt-10">
+            <div className="rounded-2xl border border-border bg-card overflow-hidden">
+              {/* Simulated preview / content area */}
+              <div
+                className="h-36 bg-muted/40 border-b border-border flex items-center justify-center"
+                style={{
+                  backgroundImage:
+                    "radial-gradient(circle, hsl(var(--border)) 1px, transparent 1px)",
+                  backgroundSize: "18px 18px",
+                }}
+              >
+                <Lock className="size-8 text-muted-foreground/20" />
+              </div>
+              {/* Product details */}
+              <div className="p-5 space-y-4">
+                <div>
+                  <p className="text-xs text-muted-foreground mb-0.5">@alexdesign</p>
+                  <p className="font-medium text-foreground leading-snug">
+                    Figma UI Kit 2024
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    100+ components · dark + light mode
+                  </p>
+                </div>
+                <div className="flex items-end justify-between">
+                  <span className="text-2xl font-medium text-foreground">$49</span>
+                  <span className="text-xs text-muted-foreground">+ Stripe fees</span>
+                </div>
+                <div className="space-y-2">
+                  <div className="w-full py-2.5 bg-foreground text-background rounded-full text-sm font-medium text-center select-none">
+                    Pay via Stripe →
+                  </div>
+                  <p className="text-xs text-muted-foreground text-center">
+                    Instant access by email
+                  </p>
+                </div>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1.5">
+              <span className="size-1.5 rounded-full bg-emerald-500 inline-block shrink-0" />
+              Your content URL never appears in page source
+            </p>
+          </div>
 
-          <TrustBar />
         </div>
       </section>
 
@@ -291,14 +341,20 @@ export default function HomePage() {
           </p>
           <div className="grid sm:grid-cols-3 gap-10">
             {steps.map((step) => (
-              <div key={step.n}>
-                <span className="text-xs font-medium text-muted-foreground font-mono">
+              <div key={step.n} className="relative">
+                <span
+                  aria-hidden="true"
+                  className="absolute -top-3 -left-1 text-[88px] font-medium leading-none select-none pointer-events-none text-foreground/[0.05]"
+                >
                   {step.n}
                 </span>
-                <h3 className="text-lg font-medium mt-3 mb-2 text-foreground">
+                <span className="relative text-xs font-medium text-muted-foreground font-mono">
+                  {step.n}
+                </span>
+                <h3 className="relative text-lg font-medium mt-3 mb-2 text-foreground">
                   {step.title}
                 </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
+                <p className="relative text-sm text-muted-foreground leading-relaxed">
                   {step.body}
                 </p>
               </div>
@@ -337,7 +393,9 @@ export default function HomePage() {
                 key={f.title}
                 className="border border-border rounded-2xl p-6 bg-background"
               >
-                <f.Icon className="size-5 text-muted-foreground mb-3" />
+                <div className="size-9 rounded-xl bg-muted/60 flex items-center justify-center mb-4">
+                  <f.Icon className="size-4 text-muted-foreground" />
+                </div>
                 <h3 className="font-medium text-foreground mb-2 text-sm">
                   {f.title}
                 </h3>
@@ -395,10 +453,10 @@ export default function HomePage() {
             Who it's for
           </p>
           <div className="grid sm:grid-cols-2 gap-6">
-            {useCases.map((uc) => (
+            {useCases.map((uc, i) => (
               <div
                 key={uc.audience}
-                className="border border-border rounded-2xl p-6 bg-card flex flex-col gap-3"
+                className={`border border-border rounded-2xl p-6 bg-card flex flex-col gap-3${i === useCases.length - 1 && useCases.length % 2 !== 0 ? " sm:col-span-2" : ""}`}
               >
                 <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
                   {uc.audience}
@@ -511,8 +569,6 @@ export default function HomePage() {
               They also keep their fee when you refund a customer. You lose the
               product and pay the platform fee.
             </p>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-            </p>
             <p className="text-sm font-medium text-foreground">
               With unseal.link: on refunds you get the fee back. Minimum payout: $0.
               First sale pays out immediately.
@@ -586,21 +642,27 @@ export default function HomePage() {
       </section>
 
       {/* ── Final CTA ────────────────────────────────────────────────── */}
-      <section className="border-t border-border py-24 px-6 text-center">
-        <h2 className="text-3xl md:text-4xl font-medium tracking-tight text-foreground mb-4">
+      <section className="border-t border-border py-24 px-6 text-center relative overflow-hidden">
+        {/* Decorative rings — matches OG image motif */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[640px] h-[640px] rounded-full border border-border/40" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[420px] rounded-full border border-border/30" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[230px] h-[230px] rounded-full border border-border/20" />
+        </div>
+        <h2 className="relative text-3xl md:text-4xl font-medium tracking-tight text-foreground mb-4">
           Stop delivering first.
         </h2>
-        <p className="text-muted-foreground mb-8 max-w-sm mx-auto text-sm leading-relaxed">
+        <p className="relative text-muted-foreground mb-8 max-w-sm mx-auto text-sm leading-relaxed">
           Paste your link, set a price, and your first paywall is live in under
           60 seconds. No storefront. No uploads. No payout minimum.
         </p>
         <Link
           href="/auth"
-          className="inline-flex items-center px-7 py-3.5 bg-primary text-primary-foreground rounded-full font-medium text-base hover:opacity-90 transition-opacity no-underline"
+          className="relative inline-flex items-center px-7 py-3.5 bg-primary text-primary-foreground rounded-full font-medium text-base hover:opacity-90 transition-opacity no-underline"
         >
           Create your first paid link →
         </Link>
-        <p className="mt-4 text-xs text-muted-foreground">
+        <p className="relative mt-4 text-xs text-muted-foreground">
           Free to list. 4.5% per sale. First $500 fee-free for new sellers.
         </p>
       </section>
