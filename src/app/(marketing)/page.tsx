@@ -12,7 +12,7 @@ const ProductScroll = dynamic(() =>
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
 
 export const metadata: Metadata = {
-  title: "unseal.link: Sell Any URL. Lowest Fee. No Uploads. No Minimum.",
+  title: "unseal.link: Sell Any URL Behind a Paywall. 4.5% Fee.",
   description:
     "Paste any URL, set a price, share a paywall link. Buyers pay via Stripe and get instant access. 4.5% fee — half of Gumroad. No uploads, no payout minimum.",
   alternates: { canonical: APP_URL },
@@ -181,6 +181,18 @@ const faqItems = [
   {
     q: "Can I use unseal.link alongside Gumroad?",
     a: "Yes. Run both. Use unseal.link for new products and your own audience, keep Gumroad where you have existing customers.",
+  },
+  {
+    q: "What's my actual take-home on a $50 sale?",
+    a: "On a $50 sale: unseal.link takes $2.25 (4.5%). Stripe takes approximately $1.75 (2.9% + $0.30). You keep about $46.\n\nGumroad (direct) takes $5 (10%) on the same sale, leaving you about $43. Gumroad Discover takes $15 (30%), leaving you about $33.\n\nEvery sale pays out directly to your connected Stripe account. No weekly batch. No minimum balance. Your first sale pays out immediately.",
+  },
+  {
+    q: "Do buyers need an account to purchase?",
+    a: "No. Buyers click your paywall link, enter their email and card in Stripe Checkout, and receive your content URL by email. That's the entire flow.\n\nNo account creation. No password. No profile. The buyer experience is frictionless by design — just a payment and an email.",
+  },
+  {
+    q: "Can I update my content URL after publishing?",
+    a: "Yes. You can edit your link's destination URL at any time from your dashboard.\n\nBuyers who already purchased received a snapshot of the URL at the time of their purchase. If you've made a significant update, you can resend access to existing buyers from the link detail page — they'll get a fresh access email with the current URL.",
   },
 ];
 
@@ -554,6 +566,38 @@ export default function HomePage() {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Take-home breakdown — platform fee only, same Stripe fees apply everywhere */}
+          <div className="border border-border rounded-2xl overflow-hidden max-w-2xl mb-6 bg-card">
+            <div className="px-5 py-4 border-b border-border">
+              <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+                What you actually keep (platform fee only)
+              </p>
+            </div>
+            <div className="divide-y divide-border">
+              {[
+                { sale: "$20 sale", us: "$19.10", gumroad: "$18.00", discover: "$14.00" },
+                { sale: "$50 sale", us: "$47.75", gumroad: "$45.00", discover: "$35.00" },
+                { sale: "$100 sale", us: "$95.50", gumroad: "$90.00", discover: "$70.00" },
+              ].map((row) => (
+                <div key={row.sale} className="grid grid-cols-4 items-center px-5 py-3 text-xs gap-2">
+                  <span className="text-muted-foreground">{row.sale}</span>
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">{row.us}</span>
+                  <span className="text-muted-foreground">{row.gumroad}</span>
+                  <span className="text-muted-foreground">{row.discover}</span>
+                </div>
+              ))}
+            </div>
+            <div className="grid grid-cols-4 gap-2 px-5 py-3 border-t border-border bg-muted/30 text-xs font-medium text-muted-foreground">
+              <span />
+              <span className="text-foreground">unseal.link</span>
+              <span>Gumroad</span>
+              <span>Gumroad Disc.</span>
+            </div>
+            <p className="px-5 py-3 text-xs text-muted-foreground border-t border-border">
+              Stripe fees (~2.9% + $0.30) are identical on all platforms and not included above.
+            </p>
           </div>
 
           <div className="border border-border rounded-2xl p-6 space-y-3 max-w-2xl bg-card">
