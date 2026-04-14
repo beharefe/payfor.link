@@ -49,66 +49,37 @@ export default async function LinkDetailPage({
     ? `${appUrl}/@${seller.username}/${link.slug}`
     : null;
 
-  const isDeleted = link.status === "deleted";
-  const isArchived = link.status === "archived";
+  const isDeleted   = link.status === "deleted";
+  const isArchived  = link.status === "archived";
   const isSuspended = link.status === "suspended";
-  const isSoldOut = link.max_orders !== null && link.total_sales >= link.max_orders;
-  const canEdit = !isDeleted && !isSuspended;
+  const isSoldOut   = link.max_orders !== null && link.total_sales >= link.max_orders;
+  const canEdit     = !isDeleted && !isSuspended;
 
   const effectiveStatus = isSoldOut ? "sold_out" : link.status;
 
   const statusStyles: Record<string, string> = {
-    active:   "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
-    draft:    "bg-muted text-muted-foreground",
-    archived: "bg-muted text-muted-foreground",
-    suspended:"bg-destructive/10 text-destructive",
-    deleted:  "bg-destructive/10 text-destructive",
-    sold_out: "bg-muted text-muted-foreground",
+    active:    "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+    draft:     "bg-muted text-muted-foreground",
+    archived:  "bg-muted text-muted-foreground",
+    suspended: "bg-destructive/10 text-destructive",
+    deleted:   "bg-destructive/10 text-destructive",
+    sold_out:  "bg-muted text-muted-foreground",
   };
 
   return (
     <main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-8">
 
-        {/* Back link */}
-        <Link
-          href="/dashboard/links"
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors no-underline"
-        >
-          ← Links
-        </Link>
-
-        {/* Title row — mobile: title + paywall arrow button side by side */}
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 mb-2 flex-wrap">
-              <h1 className="text-xl font-medium tracking-tight text-foreground leading-snug">
-                {link.title}
-              </h1>
-              {/* Mobile-only: black arrow button for paywall URL */}
-              {!isDeleted && paywallUrl && (
-                <a
-                  href={paywallUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="sm:hidden flex items-center justify-center w-8 h-8 bg-primary text-primary-foreground rounded-full shrink-0 hover:opacity-90 transition-opacity"
-                  title="Open paywall"
-                >
-                  <ArrowUpRight className="w-4 h-4" />
-                </a>
-              )}
-            </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusStyles[effectiveStatus] ?? statusStyles.draft}`}>
-                {effectiveStatus === "sold_out" ? "Sold out" : effectiveStatus.charAt(0).toUpperCase() + effectiveStatus.slice(1)}
-              </span>
-              <span className="text-sm text-muted-foreground">${link.price.toFixed(2)}</span>
-              <span className="text-muted-foreground/40">·</span>
-              <span className="text-xs text-muted-foreground">v{link.version}</span>
-            </div>
-          </div>
+        {/* Top row: back link + actions */}
+        <div className="flex items-center justify-between gap-4">
+          <Link
+            href="/dashboard/links"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors no-underline"
+          >
+            ← Links
+          </Link>
           {canEdit && (
-            <div className="flex items-center gap-2 flex-wrap shrink-0">
+            <div className="flex items-center gap-2 flex-wrap">
               <Link
                 href={`/dashboard/links/${id}/edit`}
                 className="inline-flex items-center px-4 py-2 border border-border rounded-full text-sm font-medium text-foreground no-underline hover:bg-muted transition-colors"
@@ -121,9 +92,25 @@ export default async function LinkDetailPage({
           )}
         </div>
 
-        {link.description && (
-          <p className="text-muted-foreground text-sm leading-relaxed">{link.description}</p>
-        )}
+        {/* Title + status + description */}
+        <div className="space-y-3">
+          <h1 className="text-2xl font-medium tracking-tight text-foreground leading-snug">
+            {link.title}
+          </h1>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${statusStyles[effectiveStatus] ?? statusStyles.draft}`}>
+              {effectiveStatus === "sold_out"
+                ? "Sold out"
+                : effectiveStatus.charAt(0).toUpperCase() + effectiveStatus.slice(1)}
+            </span>
+            <span className="text-sm font-medium text-foreground">${link.price.toFixed(2)}</span>
+            <span className="text-muted-foreground/40">·</span>
+            <span className="text-xs text-muted-foreground">v{link.version}</span>
+          </div>
+          {link.description && (
+            <p className="text-sm text-muted-foreground leading-relaxed">{link.description}</p>
+          )}
+        </div>
 
         {/* Stripe connect prompt */}
         {!seller?.stripe_connected && (
@@ -136,12 +123,12 @@ export default async function LinkDetailPage({
           </div>
         )}
 
-        {/* Paywall URL — desktop only (mobile uses arrow button in title row) */}
+        {/* Paywall URL — single responsive block, no mobile/desktop duplication */}
         {!isDeleted && paywallUrl && (
-          <div className="hidden sm:block border border-border rounded-2xl p-5 bg-card space-y-3">
+          <div className="border border-border rounded-2xl p-5 bg-card space-y-3">
             <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Paywall URL</p>
             <p className="break-all font-mono text-sm text-foreground">{paywallUrl}</p>
-            <div className="flex gap-2 flex-wrap pt-1">
+            <div className="flex gap-2 flex-wrap">
               {!isSoldOut && <CopyLinkButton url={paywallUrl} price={link.price} />}
               <Link
                 href={`/preview/${link.id}`}
@@ -149,38 +136,38 @@ export default async function LinkDetailPage({
               >
                 Preview
               </Link>
+              <a
+                href={paywallUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-4 py-2 border border-border rounded-full text-sm font-medium text-foreground no-underline hover:bg-muted transition-colors"
+              >
+                Open
+                <ArrowUpRight className="size-3.5" />
+              </a>
             </div>
-          </div>
-        )}
-
-        {/* Mobile: copy + preview buttons (separate from URL card) */}
-        {!isDeleted && paywallUrl && (
-          <div className="sm:hidden flex gap-2">
-            {!isSoldOut && <CopyLinkButton url={paywallUrl} price={link.price} />}
-            <Link
-              href={`/preview/${link.id}`}
-              className="inline-flex items-center gap-1.5 px-4 py-2 border border-border rounded-full text-sm font-medium text-foreground no-underline hover:bg-muted transition-colors"
-            >
-              Preview
-            </Link>
           </div>
         )}
 
         {/* Stats */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="border border-border rounded-2xl px-4 py-4 bg-card">
+          <div className="border border-border rounded-2xl px-5 py-4 bg-card">
             <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-2">Total sales</p>
-            <p className="text-2xl font-medium text-foreground">
-              {link.max_orders !== null ? `${link.total_sales} / ${link.max_orders}` : link.total_sales}
+            <p className="text-2xl font-medium text-foreground tabular-nums">
+              {link.max_orders !== null
+                ? `${link.total_sales} / ${link.max_orders}`
+                : link.total_sales}
             </p>
           </div>
-          <div className="border border-border rounded-2xl px-4 py-4 bg-card">
+          <div className="border border-border rounded-2xl px-5 py-4 bg-card">
             <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-2">Revenue</p>
-            <p className="text-2xl font-medium text-foreground">${link.total_revenue.toFixed(2)}</p>
+            <p className="text-2xl font-medium text-foreground tabular-nums">
+              ${link.total_revenue.toFixed(2)}
+            </p>
           </div>
         </div>
 
-        {/* Sales */}
+        {/* Sales list */}
         <div>
           <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-4">Sales</p>
           {!orders?.length ? (
@@ -191,31 +178,37 @@ export default async function LinkDetailPage({
             <div className="border border-border rounded-2xl overflow-hidden bg-card">
               <div className="divide-y divide-border">
                 {orders.map((order) => (
-                  <div key={order.id} className="px-4 sm:px-5 py-4 flex flex-col gap-2">
-                    <div className="flex items-start justify-between gap-3 min-w-0">
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-foreground truncate">{order.buyer_email}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {new Date(order.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                          {" · "}net ${(order.price_paid - order.platform_fee).toFixed(2)}
-                        </p>
-                      </div>
-                      <div className="shrink-0 text-right">
-                        <p className="text-sm font-medium text-foreground tabular-nums">${order.price_paid.toFixed(2)}</p>
-                      </div>
+                  <div key={order.id} className="px-5 py-4 flex items-center gap-3">
+                    {/* Email + date */}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{order.buyer_email}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {new Date(order.created_at).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                        {" · "}net ${(order.price_paid - order.platform_fee).toFixed(2)}
+                      </p>
                     </div>
-                    <div className="flex items-center gap-2">
+                    {/* Status + refund */}
+                    <div className="flex items-center gap-2 shrink-0">
                       <OrderStatusBadge status={order.status} />
                       {order.status === "paid" && (
                         <RefundButton orderId={order.id} buyerEmail={order.buyer_email} />
                       )}
                     </div>
+                    {/* Amount */}
+                    <p className="text-sm font-medium text-foreground tabular-nums shrink-0">
+                      ${order.price_paid.toFixed(2)}
+                    </p>
                   </div>
                 ))}
               </div>
             </div>
           )}
         </div>
+
       </div>
     </main>
   );
@@ -223,10 +216,10 @@ export default async function LinkDetailPage({
 
 function OrderStatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
-    paid: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+    paid:     "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
     refunded: "bg-muted text-muted-foreground",
     disputed: "bg-destructive/10 text-destructive",
-    fraud: "bg-destructive/10 text-destructive",
+    fraud:    "bg-destructive/10 text-destructive",
   };
   return (
     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${styles[status] ?? styles.refunded}`}>
