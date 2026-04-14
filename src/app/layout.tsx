@@ -24,14 +24,14 @@ export const metadata: Metadata = {
     url: APP_URL,
     siteName: "unseal.link",
     type: "website",
-    images: [{ url: "/api/og", width: 1200, height: 630, alt: "unseal.link: Sell any URL in 60 seconds" }],
+    images: [{ url: `/api/og?title=${encodeURIComponent("Sell Any URL. 4.5% Fee.")}`, width: 1200, height: 630, alt: "unseal.link: Sell Any URL. 4.5% Fee." }],
   },
   twitter: {
     card: "summary_large_image",
     site: "@unseallink",
     title: "unseal.link: Sell Any URL in 60 Seconds",
     description: "No uploads. No 10% tax. No ghosting. Paste your URL, set a price, get paid first. 4.5% fee, no minimums.",
-    images: ["/api/og"],
+    images: [`/api/og?title=${encodeURIComponent("Sell Any URL. 4.5% Fee.")}`],
   },
   robots: { index: true, follow: true },
 };
