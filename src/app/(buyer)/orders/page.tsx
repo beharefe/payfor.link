@@ -1,7 +1,9 @@
+import { verifySessionValue } from "@unseallink/lib/buyer-token";
 import { TABLES } from "@unseallink/lib/db";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { ChevronDown } from "lucide-react";
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { ClearSessionButton } from "./clear-session-button";
 import { PersistOrderId } from "./persist-order-id";
 
@@ -204,9 +206,33 @@ export default async function OrdersPage({
     );
   }
 
-  // ─── Case 2: email lookup ─────────────────────────────────────────────────
+  // ─── Case 2: email lookup — requires valid buyer_session cookie ───────────
   if (email) {
     const normalized = email.toLowerCase().trim();
+
+    // Security: anyone can construct ?email=victim@example.com — verify
+    // the requester has a signed session token for this specific email.
+    const cookieStore = await cookies();
+    const session = verifySessionValue(cookieStore.get("buyer_session")?.value ?? "");
+    if (!session || session.email.toLowerCase() !== normalized) {
+      // No valid session for this email — fall through to the email form (Case 3)
+      return (
+        <main className="min-h-dvh flex flex-col items-center justify-center px-6 py-16 bg-background">
+          <div className="w-full max-w-sm">
+            <div className="mb-8 text-center">
+              <Logo />
+              <h1 className="text-3xl font-medium tracking-tight text-foreground mt-6 mb-2">
+                Your purchases
+              </h1>
+              <p className="text-muted-foreground text-sm">
+                Enter the email you used at checkout.
+              </p>
+            </div>
+            <EmailForm />
+          </div>
+        </main>
+      );
+    }
 
     const { data: orders } = await supabase
       .from(TABLES.ORDERS)
