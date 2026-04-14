@@ -75,7 +75,7 @@ export async function GET(request: Request) {
             {displayTitle}
           </div>
           {seller && (
-            <div style={{ fontSize: "27px", fontStyle: "italic", fontWeight: 400, color: MUTED, letterSpacing: "-0.4px" }}>
+            <div style={{ display: "flex", fontSize: "27px", fontStyle: "italic", fontWeight: 400, color: MUTED, letterSpacing: "-0.4px" }}>
               by {seller}
             </div>
           )}
