@@ -56,7 +56,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   ogUrl.searchParams.set("t", link.title);
   ogUrl.searchParams.set("p", priceLabel);
   if (sellerName && sellerName !== "unseal.link") ogUrl.searchParams.set("s", sellerName);
-  if (link.preview_image_url) ogUrl.searchParams.set("i", link.preview_image_url);
   const ogImage = ogUrl.toString();
 
   return {
