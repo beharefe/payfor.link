@@ -26,11 +26,14 @@ export async function GET(request: NextRequest) {
   // oid → direct content access (purchase email flow)
   // next → return to a specific page (sign-in redirect flow); only relative paths allowed
   const isRelative = next && next.startsWith("/") && !next.startsWith("//");
+  const fallback = new URL("/orders", appUrl);
+  fallback.searchParams.set("email", payload.email);
+
   const destination = orderId
     ? new URL(`/api/orders/${orderId}/access`, appUrl)
     : isRelative
     ? new URL(next, appUrl)
-    : new URL("/orders", appUrl);
+    : fallback;
 
   const response = NextResponse.redirect(destination);
   response.cookies.set("buyer_session", createSessionValue(payload.email), {
