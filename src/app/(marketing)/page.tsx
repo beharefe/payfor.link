@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     url: APP_URL,
     siteName: "unseal.link",
     type: "website",
-    images: [{ url: `${APP_URL}/api/og?title=${encodeURIComponent("Sell Any URL. 4.5% Fee.")}`, width: 1200, height: 630 }],
+    images: [{ url: `${APP_URL}/api/og`, width: 1200, height: 630 }],
   },
 };
 
