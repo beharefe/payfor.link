@@ -6,6 +6,7 @@
 import { render } from "@react-email/render";
 import { AbuseReportAlert } from "@unseallink/emails/abuse-report-alert";
 import { AccessLinkEmail } from "@unseallink/emails/access-link";
+import { BuyerDisputeAlert } from "@unseallink/emails/buyer-dispute-alert";
 import { DisputeAlert } from "@unseallink/emails/dispute-alert";
 import { MagicLinkEmail } from "@unseallink/emails/magic-link";
 import { MissedSaleEmail } from "@unseallink/emails/missed-sale";
@@ -173,6 +174,33 @@ export async function sendDisputeAlert(opts: {
     to: opts.to,
     subject: `[Dispute] ${opts.productTitle} · $${opts.amount.toFixed(2)}: respond before deadline`,
     html: await render(DisputeAlert(opts)),
+  });
+}
+
+/** Buyer dispute alert — sent to info@unseal.link when a buyer reports a problem after purchase. */
+export async function sendBuyerDisputeAlert(opts: {
+  buyerEmail: string;
+  issueType: string;
+  productName: string;
+  sellerUsername: string;
+  amountPaid: number;
+  currency: string;
+  paymentIntentId: string;
+  orderId: string;
+  tag: "SUPPORT" | "ABUSE";
+}) {
+  const timestamp = new Date().toLocaleString("en-US", {
+    timeZone: "UTC",
+    dateStyle: "medium",
+    timeStyle: "short",
+  }) + " UTC";
+
+  const subjectTag = opts.tag === "ABUSE" ? "[Abuse Report]" : "[Buyer Dispute]";
+  return resend.emails.send({
+    from: FROM,
+    to: "info@unseal.link",
+    subject: `${subjectTag} ${opts.productName} — ${opts.issueType}`,
+    html: await render(BuyerDisputeAlert({ ...opts, timestamp })),
   });
 }
 

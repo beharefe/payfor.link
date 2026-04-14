@@ -6,6 +6,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SuccessPoller } from "./success-page-client";
 import { ResendAccessButton } from "./resend-button";
+import { DisputeForm } from "./dispute-form";
 
 export const metadata: Metadata = {
   robots: { index: false },
@@ -71,7 +72,7 @@ export default async function PaymentSuccessPage({
   const supabase = createServiceClient();
   const { data: order } = await supabase
     .from(TABLES.ORDERS)
-    .select("id, product_title, price_paid, currency, created_at, seller_id, product_version")
+    .select("id, product_title, price_paid, currency, created_at, seller_id, product_version, stripe_payment_id")
     .eq("stripe_checkout_session_id", session.id)
     .single();
 
@@ -156,6 +157,17 @@ export default async function PaymentSuccessPage({
 
         {/* Resend */}
         <ResendAccessButton email={customerEmail} orderId={order.id} />
+
+        {/* Dispute form */}
+        <DisputeForm
+          buyerEmail={customerEmail}
+          productName={order.product_title}
+          sellerUsername={seller?.name ?? "unknown"}
+          amountPaid={order.price_paid}
+          currency={order.currency}
+          paymentIntentId={order.stripe_payment_id ?? session.id}
+          orderId={order.id}
+        />
 
         {/* Footer */}
         <p className="text-center text-xs text-muted-foreground">
