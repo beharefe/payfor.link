@@ -22,7 +22,7 @@ export default async function LinkDetailPage({
 
   const { data: link } = await supabase
     .from(TABLES.PRODUCTS)
-    .select("id, title, description, slug, status, price, total_sales, total_revenue, seller_id, version, preview_image_url")
+    .select("id, title, description, slug, status, price, total_sales, total_revenue, seller_id, version, preview_image_url, max_orders")
     .eq("id", id)
     .single();
 
@@ -52,14 +52,18 @@ export default async function LinkDetailPage({
   const isDeleted = link.status === "deleted";
   const isArchived = link.status === "archived";
   const isSuspended = link.status === "suspended";
+  const isSoldOut = link.max_orders !== null && link.total_sales >= link.max_orders;
   const canEdit = !isDeleted && !isSuspended;
 
+  const effectiveStatus = isSoldOut ? "sold_out" : link.status;
+
   const statusStyles: Record<string, string> = {
-    active: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
-    draft: "bg-muted text-muted-foreground",
+    active:   "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+    draft:    "bg-muted text-muted-foreground",
     archived: "bg-muted text-muted-foreground",
-    suspended: "bg-destructive/10 text-destructive",
-    deleted: "bg-destructive/10 text-destructive",
+    suspended:"bg-destructive/10 text-destructive",
+    deleted:  "bg-destructive/10 text-destructive",
+    sold_out: "bg-muted text-muted-foreground",
   };
 
   return (
@@ -95,8 +99,8 @@ export default async function LinkDetailPage({
               )}
             </div>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusStyles[link.status] ?? statusStyles.draft}`}>
-                {link.status.charAt(0).toUpperCase() + link.status.slice(1)}
+              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusStyles[effectiveStatus] ?? statusStyles.draft}`}>
+                {effectiveStatus === "sold_out" ? "Sold out" : effectiveStatus.charAt(0).toUpperCase() + effectiveStatus.slice(1)}
               </span>
               <span className="text-sm text-muted-foreground">${link.price.toFixed(2)}</span>
               <span className="text-muted-foreground/40">·</span>
@@ -138,7 +142,7 @@ export default async function LinkDetailPage({
             <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Paywall URL</p>
             <p className="break-all font-mono text-sm text-foreground">{paywallUrl}</p>
             <div className="flex gap-2 flex-wrap pt-1">
-              <CopyLinkButton url={paywallUrl} price={link.price} />
+              {!isSoldOut && <CopyLinkButton url={paywallUrl} price={link.price} />}
               <Link
                 href={`/preview/${link.id}`}
                 className="inline-flex items-center gap-1.5 px-4 py-2 border border-border rounded-full text-sm font-medium text-foreground no-underline hover:bg-muted transition-colors"
@@ -152,7 +156,7 @@ export default async function LinkDetailPage({
         {/* Mobile: copy + preview buttons (separate from URL card) */}
         {!isDeleted && paywallUrl && (
           <div className="sm:hidden flex gap-2">
-            <CopyLinkButton url={paywallUrl} price={link.price} />
+            {!isSoldOut && <CopyLinkButton url={paywallUrl} price={link.price} />}
             <Link
               href={`/preview/${link.id}`}
               className="inline-flex items-center gap-1.5 px-4 py-2 border border-border rounded-full text-sm font-medium text-foreground no-underline hover:bg-muted transition-colors"
@@ -166,7 +170,9 @@ export default async function LinkDetailPage({
         <div className="grid grid-cols-2 gap-3">
           <div className="border border-border rounded-2xl px-4 py-4 bg-card">
             <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-2">Total sales</p>
-            <p className="text-2xl font-medium text-foreground">{link.total_sales}</p>
+            <p className="text-2xl font-medium text-foreground">
+              {link.max_orders !== null ? `${link.total_sales} / ${link.max_orders}` : link.total_sales}
+            </p>
           </div>
           <div className="border border-border rounded-2xl px-4 py-4 bg-card">
             <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-2">Revenue</p>
