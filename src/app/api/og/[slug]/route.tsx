@@ -46,15 +46,15 @@ export async function GET(request: Request) {
           flex: 1,
           display: "flex",
           flexDirection: "column",
-          justifyContent: "space-between",
-          paddingTop: "60px",
+          justifyContent: "flex-start",
+          paddingTop: "52px",
           paddingRight: "80px",
-          paddingBottom: "60px",
+          paddingBottom: "88px",
           paddingLeft: "80px",
         }}
       >
         {/* Top: unseal.link badge */}
-        <div style={{ display: "flex" }}>
+        <div style={{ display: "flex", marginBottom: "28px" }}>
           <div
             style={{
               display: "flex",
@@ -69,8 +69,8 @@ export async function GET(request: Request) {
           </div>
         </div>
 
-        {/* Middle: title + seller */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        {/* Title + seller */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "40px" }}>
           <div style={{ fontSize: "72px", fontWeight: 700, color: FG, lineHeight: 1.1, letterSpacing: "-1.5px" }}>
             {displayTitle}
           </div>
@@ -81,7 +81,7 @@ export async function GET(request: Request) {
           )}
         </div>
 
-        {/* Bottom: price + Buy now */}
+        {/* Price + Buy now */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ fontSize: "88px", fontWeight: 700, color: FG, letterSpacing: "-2.5px", lineHeight: 1 }}>
             {price}
@@ -91,11 +91,11 @@ export async function GET(request: Request) {
               display: "flex",
               background: FG,
               color: BG,
-              fontSize: "23px",
+              fontSize: "34px",
               fontWeight: 500,
-              padding: "15px 30px",
+              padding: "22px 44px",
               borderRadius: 100,
-              letterSpacing: "-0.2px",
+              letterSpacing: "-0.3px",
             }}
           >
             Buy now →
