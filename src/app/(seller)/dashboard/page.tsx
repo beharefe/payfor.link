@@ -57,39 +57,57 @@ export default async function DashboardPage() {
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-  const [{ data: recentOrders }, { data: recentRefunds }, { data: latestLinks }, { data: latestOrders }] =
-    await Promise.all([
-      supabase
-        .from(TABLES.ORDERS)
-        .select("created_at, price_paid")
-        .eq("seller_id", user.id)
-        .eq("status", "paid")
-        .gte("created_at", thirtyDaysAgo.toISOString()),
-      supabase
-        .from(TABLES.ORDERS)
-        .select("refunded_at, price_paid")
-        .eq("seller_id", user.id)
-        .eq("status", "refunded")
-        .gte("created_at", thirtyDaysAgo.toISOString()),
-      supabase
-        .from(TABLES.PRODUCTS)
-        .select("id, title, slug, status, total_sales, price")
-        .eq("seller_id", user.id)
-        .neq("status", "deleted")
-        .order("created_at", { ascending: false })
-        .limit(5),
-      supabase
-        .from(TABLES.ORDERS)
-        .select("id, product_title, buyer_email, price_paid, created_at, status")
-        .eq("seller_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(5),
-    ]);
+  const [
+    { data: recentOrders },
+    { data: recentRefunds },
+    { data: latestLinks },
+    { data: latestOrders },
+    { count: allTimeSales },
+    { count: allTimeLinksCount },
+  ] = await Promise.all([
+    supabase
+      .from(TABLES.ORDERS)
+      .select("created_at, price_paid")
+      .eq("seller_id", user.id)
+      .eq("status", "paid")
+      .gte("created_at", thirtyDaysAgo.toISOString()),
+    supabase
+      .from(TABLES.ORDERS)
+      .select("refunded_at, price_paid")
+      .eq("seller_id", user.id)
+      .eq("status", "refunded")
+      .gte("created_at", thirtyDaysAgo.toISOString()),
+    supabase
+      .from(TABLES.PRODUCTS)
+      .select("id, title, slug, status, total_sales, price")
+      .eq("seller_id", user.id)
+      .neq("status", "deleted")
+      .order("created_at", { ascending: false })
+      .limit(5),
+    supabase
+      .from(TABLES.ORDERS)
+      .select("id, product_title, buyer_email, price_paid, created_at, status")
+      .eq("seller_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(5),
+    // Count all-time paid orders (survives product deletion)
+    supabase
+      .from(TABLES.ORDERS)
+      .select("id", { count: "exact", head: true })
+      .eq("seller_id", user.id)
+      .eq("status", "paid"),
+    // Count all-time products including deleted (for onboarding step)
+    supabase
+      .from(TABLES.PRODUCTS)
+      .select("id", { count: "exact", head: true })
+      .eq("seller_id", user.id),
+  ]);
 
   const chartData = buildChartData(recentOrders ?? [], recentRefunds ?? []);
-  const totalSales = latestLinks?.reduce((s, l) => s + (l.total_sales ?? 0), 0) ?? 0;
+  const totalSales = allTimeSales ?? 0;
   const totalEarned = seller.total_earned ?? 0;
   const hasLinks = (latestLinks?.length ?? 0) > 0;
+  const hasEverCreatedLink = (allTimeLinksCount ?? 0) > 0;
 
   return (
     <main>
@@ -100,7 +118,7 @@ export default async function DashboardPage() {
         <PromotionBanners sellerId={user.id} />
 
         {/* Setup card — shown until Stripe is connected AND first link exists */}
-        {(!seller.stripe_connected || !hasLinks) && (
+        {(!seller.stripe_connected || !hasEverCreatedLink) && (
           <div className="border border-border rounded-2xl p-6 bg-card">
             <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-6">
               Getting started
