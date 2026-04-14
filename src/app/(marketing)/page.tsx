@@ -245,16 +245,16 @@ export default function HomePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
 
       {/* ── Hero ─────────────────────────────────────────────────────── */}
-      <section className="pt-20 pb-16 px-6 max-w-5xl mx-auto">
+      <section className="pt-24 pb-20 px-6 max-w-5xl mx-auto relative overflow-hidden">
         <div className="lg:grid lg:grid-cols-[1fr_340px] lg:gap-16 lg:items-start">
 
           {/* Left: copy + CTAs */}
           <div>
-            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-6">
+            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-8">
               The paywall for any link
             </p>
 
-            <h1 className="text-4xl md:text-6xl font-medium tracking-tight text-foreground mb-6 leading-[1.1]">
+            <h1 className="text-4xl md:text-6xl font-medium tracking-tight text-foreground mb-8 leading-[1.1]">
               No uploads.
               <br />
               No 10% tax.
@@ -298,36 +298,39 @@ export default function HomePage() {
           </div>
 
           {/* Right: paywall card mockup — desktop only */}
-          <div className="hidden lg:block lg:pt-10">
-            <div className="rounded-2xl border border-border bg-card overflow-hidden">
-              {/* Simulated preview / content area */}
-              <div
-                className="h-36 bg-muted/40 border-b border-border flex items-center justify-center"
-                style={{
-                  backgroundImage:
-                    "radial-gradient(circle, hsl(var(--border)) 1px, transparent 1px)",
-                  backgroundSize: "18px 18px",
-                }}
-              >
-                <Lock className="size-8 text-muted-foreground/20" />
+          <div className="hidden lg:block lg:pt-4 relative">
+            {/* Atmosphere rings radiating from behind the card */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ top: "24px" }}>
+              <div className="absolute w-[560px] h-[560px] rounded-full border border-border/[0.13] animate-pulse" style={{ animationDuration: "5s" }} />
+              <div className="absolute w-[420px] h-[420px] rounded-full border border-border/[0.18]" />
+              <div className="absolute w-[290px] h-[290px] rounded-full border border-border/[0.22] animate-pulse" style={{ animationDuration: "3s", animationDelay: "0.8s" }} />
+            </div>
+
+            <div className="rounded-2xl border border-border bg-card overflow-hidden relative">
+              {/* Preview area — rings signal locked content */}
+              <div className="h-44 bg-muted/20 border-b border-border flex items-center justify-center relative overflow-hidden">
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="absolute w-52 h-52 rounded-full border border-border/25 animate-pulse" style={{ animationDuration: "3.5s" }} />
+                  <div className="absolute w-36 h-36 rounded-full border border-border/35" />
+                  <div className="absolute w-20 h-20 rounded-full border border-border/45" />
+                </div>
+                <Lock className="size-5 text-muted-foreground/50 relative z-10" />
               </div>
-              {/* Product details */}
-              <div className="p-5 space-y-4">
+
+              {/* Product details — kept abstract */}
+              <div className="p-6 space-y-5">
                 <div>
-                  <p className="text-xs text-muted-foreground mb-0.5">@alexdesign</p>
+                  <p className="text-xs text-muted-foreground mb-1.5">@alexdesign</p>
                   <p className="font-medium text-foreground leading-snug">
                     Figma UI Kit 2024
                   </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    100+ components · dark + light mode
-                  </p>
                 </div>
-                <div className="flex items-end justify-between">
-                  <span className="text-2xl font-medium text-foreground">$49</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-3xl font-medium text-foreground tracking-tight">$49</span>
                   <span className="text-xs text-muted-foreground">+ Stripe fees</span>
                 </div>
-                <div className="space-y-2">
-                  <div className="w-full py-2.5 bg-foreground text-background rounded-full text-sm font-medium text-center select-none">
+                <div className="space-y-2.5">
+                  <div className="w-full py-3 bg-foreground text-background rounded-full text-sm font-medium text-center select-none">
                     Pay via Stripe →
                   </div>
                   <p className="text-xs text-muted-foreground text-center">
@@ -336,7 +339,8 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-            <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1.5">
+
+            <p className="text-xs text-muted-foreground mt-4 flex items-center gap-1.5">
               <span className="size-1.5 rounded-full bg-emerald-500 inline-block shrink-0" />
               Your content URL never appears in page source
             </p>
@@ -687,11 +691,13 @@ export default function HomePage() {
 
       {/* ── Final CTA ────────────────────────────────────────────────── */}
       <section className="border-t border-border py-24 px-6 text-center relative overflow-hidden">
-        {/* Decorative rings — matches OG image motif */}
+        {/* Decorative rings */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[640px] h-[640px] rounded-full border border-border/40" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[420px] rounded-full border border-border/30" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[230px] h-[230px] rounded-full border border-border/20" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[940px] h-[940px] rounded-full border border-border/[0.12] animate-pulse" style={{ animationDuration: "5s" }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[720px] h-[720px] rounded-full border border-border/[0.18]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[520px] h-[520px] rounded-full border border-border/[0.25]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] h-[340px] rounded-full border border-border/[0.32] animate-pulse" style={{ animationDuration: "3.5s", animationDelay: "0.6s" }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[190px] h-[190px] rounded-full border border-border/[0.40]" />
         </div>
         <h2 className="relative text-3xl md:text-4xl font-medium tracking-tight text-foreground mb-4">
           Stop delivering first.
