@@ -3,7 +3,8 @@
 import { updateProfile } from "@unseallink/app/actions/settings";
 import { Input } from "@unseallink/components/ui/input";
 import { Camera, Loader2, Pencil, Trash2, X } from "lucide-react";
-import { useActionState, useRef, useState, useTransition } from "react";
+import { useActionState, useEffect, useRef, useState, useTransition } from "react";
+import { toast } from "sonner";
 
 const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -46,6 +47,11 @@ export function SettingsForm({ currentName, currentBio, currentAvatarUrl }: Prop
     },
     null,
   );
+
+  useEffect(() => {
+    if (state === "saved") toast.success("Profile saved");
+    else if (state) toast.error(state);
+  }, [state]);
 
   function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -193,7 +199,7 @@ export function SettingsForm({ currentName, currentBio, currentAvatarUrl }: Prop
         <p className="text-xs text-muted-foreground mt-1.5">Max 300 characters.</p>
       </div>
 
-      <div className="flex items-center gap-4 pt-1">
+      <div className="pt-1">
         <button
           type="submit"
           disabled={isPending || uploadPending}
@@ -202,12 +208,6 @@ export function SettingsForm({ currentName, currentBio, currentAvatarUrl }: Prop
           {isPending && <Loader2 className="animate-spin size-4 shrink-0" />}
           {isPending ? "Saving…" : "Save changes"}
         </button>
-        {state === "saved" && (
-          <span className="text-emerald-600 dark:text-emerald-400 text-sm font-medium">Saved ✓</span>
-        )}
-        {state && state !== "saved" && (
-          <span className="text-destructive text-sm">{state}</span>
-        )}
       </div>
     </form>
   );

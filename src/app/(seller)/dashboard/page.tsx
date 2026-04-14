@@ -3,7 +3,9 @@ import { createClient } from "@unseallink/lib/supabase/server";
 import { Check } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import { InitiateStripeConnectButton } from "./dashboard-actions";
+import { DashboardPoller } from "./dashboard-poller";
 import { PromotionBanners } from "./promotion-banners";
 import { SellerRealtimeNotifier } from "./realtime-notifier";
 import dynamic from "next/dynamic";
@@ -112,6 +114,7 @@ export default async function DashboardPage() {
   return (
     <main>
       <SellerRealtimeNotifier sellerId={user.id} />
+      <Suspense><DashboardPoller /></Suspense>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-6">
         {/* Active promotions — shown when seller has fee waivers or credits */}
@@ -138,7 +141,7 @@ export default async function DashboardPage() {
                   <div className="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
                     <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
                   </div>
-                  <p className="text-sm text-muted-foreground line-through">Connect Stripe</p>
+                  <p className="text-sm text-muted-foreground line-through">Set up payouts</p>
                 </div>
               ) : (
                 <div className="flex items-start sm:items-center gap-4">
@@ -146,12 +149,12 @@ export default async function DashboardPage() {
                     2
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground">Connect Stripe</p>
+                    <p className="text-sm font-medium text-foreground">Set up payouts</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      Takes 2 minutes. Payments go directly to your bank. We never touch your funds.
+                      Connect your bank via Stripe — takes 2 minutes. Earnings go directly to you.
                     </p>
                   </div>
-                  <InitiateStripeConnectButton variant="outline" />
+                  <InitiateStripeConnectButton label="Connect bank" variant="outline" />
                 </div>
               )}
 

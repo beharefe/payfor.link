@@ -4,7 +4,7 @@ import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { CheckCircle } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { SuccessPoller } from "./success-page-client";
+import { ConfettiOnMount, SuccessPoller } from "./success-page-client";
 import { ResendAccessButton } from "./resend-button";
 import { DisputeForm } from "./dispute-form";
 
@@ -104,6 +104,7 @@ export default async function PaymentSuccessPage({
   return (
     <main className="min-h-dvh flex items-center justify-center px-6 py-16 bg-background">
       <div className="w-full max-w-sm flex flex-col gap-5">
+        <ConfettiOnMount />
 
           {/* Success header */}
         <div className="flex flex-col items-center text-center gap-2">

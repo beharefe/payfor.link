@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { AnalyticsProvider } from "@unseallink/components/analytics-provider";
 import { ThemeProvider } from "@unseallink/components/theme-provider";
+import { Toaster } from "@unseallink/components/ui/sonner";
 import "./globals.css";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
@@ -45,6 +46,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <AnalyticsProvider />
           {children}
+          <Toaster richColors position="bottom-right" />
         </ThemeProvider>
       </body>
     </html>

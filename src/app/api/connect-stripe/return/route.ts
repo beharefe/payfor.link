@@ -27,6 +27,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", appUrl));
   }
 
+  let connected = false;
   try {
     const account = await stripe.accounts.retrieve(seller.stripe_account_id);
     const chargesEnabled = account.charges_enabled ?? false;
@@ -42,6 +43,7 @@ export async function GET(request: NextRequest) {
       .eq("id", user.id);
 
     if (chargesEnabled) {
+      connected = true;
       await supabase
         .from(TABLES.PRODUCTS)
         .update({ status: "active" })
@@ -60,5 +62,6 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  return NextResponse.redirect(new URL("/dashboard", appUrl));
+  const dest = connected ? "/dashboard?stripe=connected" : "/dashboard";
+  return NextResponse.redirect(new URL(dest, appUrl));
 }
