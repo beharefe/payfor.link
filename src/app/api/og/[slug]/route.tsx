@@ -1,6 +1,8 @@
 import { getDMSansFonts } from "@unseallink/lib/og-font";
 import { ImageResponse } from "next/og";
 
+export const runtime = "edge";
+
 // Convert Supabase public URL to a transform URL for resizing at the CDN level.
 // Requires Supabase Pro. Falls back to original URL on non-Pro plans (transform returns 400).
 function toTransformUrl(url: string, width: number, height: number): string {
@@ -46,8 +48,14 @@ export async function GET(request: Request) {
   let resolvedImg: string | null = null;
   if (imgSrc) {
     const transformedUrl = toTransformUrl(imgSrc, IMAGE_W, IMAGE_H);
-    const reachable = await isImageReachable(transformedUrl);
-    resolvedImg = reachable ? transformedUrl : null;
+    if (transformedUrl !== imgSrc) {
+      // Try CDN transform (Supabase Pro); fall back to original on failure
+      const transformOk = await isImageReachable(transformedUrl);
+      resolvedImg = transformOk ? transformedUrl : imgSrc;
+    } else {
+      const ok = await isImageReachable(imgSrc);
+      resolvedImg = ok ? imgSrc : null;
+    }
   }
 
   let fonts: Awaited<ReturnType<typeof getDMSansFonts>> | null = null;
