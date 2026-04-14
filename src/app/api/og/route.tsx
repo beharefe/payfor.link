@@ -5,7 +5,6 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const rawTitle = searchParams.get("title") ?? "Sell any link, instantly.";
   const seller   = searchParams.get("seller") ?? "";
-  // Tighter truncation at larger font size
   const title = rawTitle.length > 46 ? `${rawTitle.slice(0, 44)}…` : rawTitle;
 
   let fonts: Awaited<ReturnType<typeof getDMSansFonts>> | null = null;
@@ -21,43 +20,96 @@ export async function GET(request: Request) {
         display: "flex",
         height: "100%",
         width: "100%",
-        alignItems: "center",
-        justifyContent: "flex-start",
         background: "#F5F4EF",
-        paddingLeft: "80px",
-        paddingRight: "80px",
         fontFamily: fonts ? "DM Sans" : "sans-serif",
-        letterSpacing: "-0.02em",
+        position: "relative",
+        overflow: "hidden",
       }}
     >
-      {/* Top-left: wordmark */}
+      {/* Decorative concentric rings — bottom-right corner */}
+      <div
+        style={{
+          position: "absolute", right: -155, bottom: -198,
+          width: 580, height: 580, borderRadius: 9999,
+          border: "2px solid rgba(17,17,17,0.065)", display: "flex",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute", right: -75, bottom: -125,
+          width: 400, height: 400, borderRadius: 9999,
+          border: "1.5px solid rgba(17,17,17,0.05)", display: "flex",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute", right: 14, bottom: -62,
+          width: 242, height: 242, borderRadius: 9999,
+          border: "1px solid rgba(17,17,17,0.038)", display: "flex",
+        }}
+      />
+
+      {/* Top row: wordmark left · fee badge right */}
       <div
         style={{
           position: "absolute",
-          left: 42,
-          top: 42,
+          top: 52,
+          left: 64,
+          right: 64,
           display: "flex",
           alignItems: "center",
+          justifyContent: "space-between",
         }}
       >
-        <span style={{ fontSize: 30, fontWeight: 500, color: "#111111" }}>
+        <span
+          style={{
+            fontSize: 28,
+            fontWeight: 500,
+            color: "#111111",
+            letterSpacing: "-0.5px",
+          }}
+        >
           unseal.link
         </span>
+        <div
+          style={{
+            display: "flex",
+            border: "1.5px solid rgba(17,17,17,0.17)",
+            borderRadius: 100,
+            padding: "9px 22px",
+          }}
+        >
+          <span
+            style={{
+              fontSize: 21,
+              fontWeight: 500,
+              color: "#6B6B6B",
+              letterSpacing: "-0.3px",
+            }}
+          >
+            4.5% per sale
+          </span>
+        </div>
       </div>
 
-      {/* Center (vertically) — title, with optional seller name above */}
+      {/* Main content: optional seller italic + headline */}
       <div
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "12px",
-          maxWidth: "1000px",
+          justifyContent: "center",
+          paddingLeft: 64,
+          paddingRight: 120,
+          paddingTop: 140,
+          paddingBottom: 110,
+          height: "100%",
+          gap: 14,
         }}
       >
         {seller && (
           <div
             style={{
-              fontSize: "52px",
+              fontSize: 48,
               fontWeight: 400,
               fontStyle: "italic",
               color: "#999999",
@@ -70,38 +122,58 @@ export async function GET(request: Request) {
         )}
         <div
           style={{
-            fontSize: "108px",
+            fontSize: seller ? 88 : 108,
             fontWeight: 700,
             color: "#111111",
-            lineHeight: 1.05,
+            lineHeight: 1.02,
             letterSpacing: "-3px",
+            maxWidth: "980px",
           }}
         >
           {title}
         </div>
       </div>
 
-      {/* Bottom-left: CTA pill */}
+      {/* Bottom bar: separator + CTA pill + tagline */}
       <div
         style={{
           position: "absolute",
-          left: 80,
-          bottom: 60,
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 108,
+          borderTop: "1px solid rgba(17,17,17,0.1)",
+          paddingLeft: 64,
+          paddingRight: 64,
           display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
         }}
       >
         <div
           style={{
             background: "#111111",
             color: "#F5F4EF",
-            fontSize: "30px",
+            fontSize: 26,
             fontWeight: 500,
-            padding: "20px 40px",
-            borderRadius: "100px",
+            padding: "14px 32px",
+            borderRadius: 100,
+            display: "flex",
+            letterSpacing: "-0.3px",
           }}
         >
           Start Selling →
         </div>
+        <span
+          style={{
+            fontSize: 20,
+            fontWeight: 500,
+            color: "#9E9A93",
+            letterSpacing: "-0.3px",
+          }}
+        >
+          No uploads · No payout minimum
+        </span>
       </div>
     </div>,
     {

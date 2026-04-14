@@ -61,6 +61,10 @@ export async function GET(request: Request) {
     // Falls back to system sans-serif
   }
 
+  const contentPad = resolvedImg
+    ? { top: "52px", right: "64px", bottom: "52px", left: "44px" }
+    : { top: "64px", right: "80px", bottom: "56px", left: "80px" };
+
   const imageResponse = new ImageResponse(
     <div
       style={{
@@ -69,8 +73,33 @@ export async function GET(request: Request) {
         display: "flex",
         background: "#F5F4EF",
         fontFamily: fonts ? "DM Sans" : "sans-serif",
+        overflow: "hidden",
+        position: "relative",
       }}
     >
+      {/* Decorative concentric rings — top-right corner (visible in content panel) */}
+      <div
+        style={{
+          position: "absolute", right: -112, top: -152,
+          width: 440, height: 440, borderRadius: 9999,
+          border: "2px solid rgba(17,17,17,0.065)", display: "flex",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute", right: -48, top: -88,
+          width: 292, height: 292, borderRadius: 9999,
+          border: "1.5px solid rgba(17,17,17,0.05)", display: "flex",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute", right: 20, top: -32,
+          width: 166, height: 166, borderRadius: 9999,
+          border: "1px solid rgba(17,17,17,0.038)", display: "flex",
+        }}
+      />
+
       {/* Left: preview image panel */}
       {resolvedImg && (
         <div
@@ -94,23 +123,26 @@ export async function GET(request: Request) {
             style={{
               position: "absolute",
               inset: 0,
-              background: "linear-gradient(to right, transparent 60%, #F5F4EF 100%)",
+              background: "linear-gradient(to right, transparent 50%, #F5F4EF 96%)",
             }}
           />
         </div>
       )}
 
-      {/* Right: content */}
+      {/* Right (or full): content panel */}
       <div
         style={{
           flex: 1,
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          padding: resolvedImg ? "56px 64px 56px 44px" : "72px 80px",
+          paddingTop: contentPad.top,
+          paddingRight: contentPad.right,
+          paddingBottom: contentPad.bottom,
+          paddingLeft: contentPad.left,
         }}
       >
-        {/* Top: badge */}
+        {/* Top: badge pill */}
         <div style={{ display: "flex" }}>
           <div
             style={{
@@ -120,20 +152,22 @@ export async function GET(request: Request) {
               fontWeight: 500,
               padding: "9px 24px",
               borderRadius: "100px",
+              display: "flex",
+              letterSpacing: "-0.2px",
             }}
           >
             unseal.link
           </div>
         </div>
 
-        {/* Title + seller */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+        {/* Middle: title + seller */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           <div
             style={{
               fontSize: resolvedImg ? "63px" : "84px",
               fontWeight: 700,
               color: "#111111",
-              lineHeight: 1.1,
+              lineHeight: 1.08,
               letterSpacing: "-1.5px",
             }}
           >
@@ -154,34 +188,56 @@ export async function GET(request: Request) {
           )}
         </div>
 
-        {/* Price */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "flex-end",
-            justifyContent: "space-between",
-          }}
-        >
+        {/* Bottom: separator + price · wordmark badge */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+          {/* Separator */}
           <div
             style={{
-              fontSize: "66px",
-              fontWeight: 700,
-              color: "#111111",
-              letterSpacing: "-1.5px",
+              width: "100%",
+              height: "1px",
+              background: "rgba(17,17,17,0.1)",
+              display: "flex",
+              flexShrink: 0,
             }}
-          >
-            {price}
-          </div>
+          />
+          {/* Price row */}
           <div
             style={{
-              fontFamily: fonts ? "DM Sans" : "sans-serif",
-              fontSize: "27px",
-              fontWeight: 500,
-              color: "#3D3530",
-              letterSpacing: "-0.3px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
             }}
           >
-            unseal.link
+            <div
+              style={{
+                fontSize: "66px",
+                fontWeight: 700,
+                color: "#111111",
+                letterSpacing: "-2px",
+                lineHeight: 1,
+              }}
+            >
+              {price}
+            </div>
+            <div
+              style={{
+                display: "flex",
+                border: "1.5px solid rgba(17,17,17,0.17)",
+                borderRadius: 100,
+                padding: "9px 22px",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "22px",
+                  fontWeight: 500,
+                  color: "#3D3530",
+                  letterSpacing: "-0.3px",
+                }}
+              >
+                unseal.link
+              </span>
+            </div>
           </div>
         </div>
       </div>
