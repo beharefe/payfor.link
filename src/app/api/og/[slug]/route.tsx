@@ -4,13 +4,11 @@ import { ImageResponse } from "next/og";
 // Convert Supabase public URL to a transform URL for resizing at the CDN level.
 // Requires Supabase Pro. Falls back to original URL on non-Pro plans (transform returns 400).
 function toTransformUrl(url: string, width: number, height: number): string {
-  // e.g. https://xxx.supabase.co/storage/v1/object/public/bucket/path
-  //   → https://xxx.supabase.co/storage/v1/render/image/public/bucket/path?width=…
   try {
     const u = new URL(url);
     const objectIdx = u.pathname.indexOf("/object/public/");
     if (objectIdx === -1) return url;
-    const rest = u.pathname.slice(objectIdx + "/object".length); // /public/bucket/path
+    const rest = u.pathname.slice(objectIdx + "/object".length);
     u.pathname = `/storage/v1/render/image${rest}`;
     u.searchParams.set("width", String(width));
     u.searchParams.set("height", String(height));
@@ -45,8 +43,6 @@ export async function GET(request: Request) {
   const IMAGE_W = 420;
   const IMAGE_H = 630;
 
-  // Validate image before rendering — broken URLs leave an empty panel.
-  // Try a transform URL first (CDN resize), fall back to original if unreachable.
   let resolvedImg: string | null = null;
   if (imgSrc) {
     const transformedUrl = toTransformUrl(imgSrc, IMAGE_W, IMAGE_H);
@@ -61,9 +57,24 @@ export async function GET(request: Request) {
     // Falls back to system sans-serif
   }
 
-  const contentPad = resolvedImg
-    ? { top: "52px", right: "64px", bottom: "52px", left: "44px" }
-    : { top: "64px", right: "80px", bottom: "56px", left: "80px" };
+  // Dark palette — high contrast against all social platform backgrounds
+  const BG     = "#111111";
+  const FG     = "#F5F4EF"; // cream: primary text + CTA pill
+  const MUTED  = "#888888"; // secondary text
+  const RING   = "rgba(245,244,239,0.065)";
+
+  // Truncate title to 2 lines: narrower panel (with image) needs fewer chars
+  const truncAt = resolvedImg ? 32 : 38;
+  const displayTitle = title.length > truncAt ? `${title.slice(0, truncAt - 1)}…` : title;
+
+  // Content padding: tighter when sharing space with the image
+  const pad = resolvedImg
+    ? { t: "52px", r: "60px", b: "52px", l: "40px" }
+    : { t: "60px", r: "80px", b: "60px", l: "80px" };
+
+  // Font sizes adapt to available panel width
+  const titleSize = resolvedImg ? "58px" : "72px";
+  const priceSize = resolvedImg ? "74px" : "88px";
 
   const imageResponse = new ImageResponse(
     <div
@@ -71,34 +82,16 @@ export async function GET(request: Request) {
         width: "1200px",
         height: "630px",
         display: "flex",
-        background: "#F5F4EF",
+        background: BG,
         fontFamily: fonts ? "DM Sans" : "sans-serif",
         overflow: "hidden",
         position: "relative",
       }}
     >
-      {/* Decorative concentric rings — top-right corner (visible in content panel) */}
-      <div
-        style={{
-          position: "absolute", right: -112, top: -152,
-          width: 440, height: 440, borderRadius: 9999,
-          border: "2px solid rgba(17,17,17,0.065)", display: "flex",
-        }}
-      />
-      <div
-        style={{
-          position: "absolute", right: -48, top: -88,
-          width: 292, height: 292, borderRadius: 9999,
-          border: "1.5px solid rgba(17,17,17,0.05)", display: "flex",
-        }}
-      />
-      <div
-        style={{
-          position: "absolute", right: 20, top: -32,
-          width: 166, height: 166, borderRadius: 9999,
-          border: "1px solid rgba(17,17,17,0.038)", display: "flex",
-        }}
-      />
+      {/* Decorative rings — top-right — cream on dark */}
+      <div style={{ position: "absolute", right: -120, top: -160, width: 460, height: 460, borderRadius: 9999, border: `1.5px solid ${RING}`, display: "flex" }} />
+      <div style={{ position: "absolute", right: -52,  top: -92,  width: 304, height: 304, borderRadius: 9999, border: `1px solid ${RING}`,   display: "flex" }} />
+      <div style={{ position: "absolute", right:  18,  top: -36,  width: 172, height: 172, borderRadius: 9999, border: `1px solid rgba(245,244,239,0.04)`, display: "flex" }} />
 
       {/* Left: preview image panel */}
       {resolvedImg && (
@@ -118,69 +111,74 @@ export async function GET(request: Request) {
             alt=""
             style={{ width: `${IMAGE_W}px`, height: `${IMAGE_H}px`, objectFit: "cover" }}
           />
-          {/* Gradient fade → blends image into content panel */}
+          {/* Fade image into the dark content panel */}
           <div
             style={{
               position: "absolute",
               inset: 0,
-              background: "linear-gradient(to right, transparent 50%, #F5F4EF 96%)",
+              background: `linear-gradient(to right, transparent 45%, ${BG} 94%)`,
             }}
           />
         </div>
       )}
 
-      {/* Right (or full): content panel */}
+      {/* Content panel */}
       <div
         style={{
           flex: 1,
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          paddingTop: contentPad.top,
-          paddingRight: contentPad.right,
-          paddingBottom: contentPad.bottom,
-          paddingLeft: contentPad.left,
+          paddingTop: pad.t,
+          paddingRight: pad.r,
+          paddingBottom: pad.b,
+          paddingLeft: pad.l,
         }}
       >
-        {/* Top: badge pill */}
+        {/* Top: unseal.link badge — small, outlined, unobtrusive */}
         <div style={{ display: "flex" }}>
           <div
             style={{
-              background: "#111111",
-              color: "#F5F4EF",
-              fontSize: "21px",
-              fontWeight: 500,
-              padding: "9px 24px",
-              borderRadius: "100px",
               display: "flex",
-              letterSpacing: "-0.2px",
+              border: `1.5px solid rgba(245,244,239,0.18)`,
+              borderRadius: 100,
+              padding: "8px 20px",
             }}
           >
-            unseal.link
+            <span
+              style={{
+                fontSize: "19px",
+                fontWeight: 500,
+                color: MUTED,
+                letterSpacing: "-0.2px",
+              }}
+            >
+              unseal.link
+            </span>
           </div>
         </div>
 
-        {/* Middle: title + seller */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        {/* Middle: product title + seller */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           <div
             style={{
-              fontSize: resolvedImg ? "63px" : "84px",
+              fontSize: titleSize,
               fontWeight: 700,
-              color: "#111111",
-              lineHeight: 1.08,
+              color: FG,
+              lineHeight: 1.1,
               letterSpacing: "-1.5px",
             }}
           >
-            {title.length > 38 ? `${title.slice(0, 36)}…` : title}
+            {displayTitle}
           </div>
           {seller && (
             <div
               style={{
-                fontSize: "33px",
+                fontSize: "27px",
                 fontStyle: "italic",
                 fontWeight: 400,
-                color: "#999999",
-                letterSpacing: "-0.5px",
+                color: MUTED,
+                letterSpacing: "-0.4px",
               }}
             >
               by {seller}
@@ -188,56 +186,41 @@ export async function GET(request: Request) {
           )}
         </div>
 
-        {/* Bottom: separator + price · wordmark badge */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-          {/* Separator */}
+        {/* Bottom: price (dominant) + Buy now CTA pill */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          {/* Price — the biggest, most visible element */}
           <div
             style={{
-              width: "100%",
-              height: "1px",
-              background: "rgba(17,17,17,0.1)",
-              display: "flex",
-              flexShrink: 0,
-            }}
-          />
-          {/* Price row */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
+              fontSize: priceSize,
+              fontWeight: 700,
+              color: FG,
+              letterSpacing: "-2.5px",
+              lineHeight: 1,
             }}
           >
-            <div
-              style={{
-                fontSize: "66px",
-                fontWeight: 700,
-                color: "#111111",
-                letterSpacing: "-2px",
-                lineHeight: 1,
-              }}
-            >
-              {price}
-            </div>
-            <div
-              style={{
-                display: "flex",
-                border: "1.5px solid rgba(17,17,17,0.17)",
-                borderRadius: 100,
-                padding: "9px 22px",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "22px",
-                  fontWeight: 500,
-                  color: "#3D3530",
-                  letterSpacing: "-0.3px",
-                }}
-              >
-                unseal.link
-              </span>
-            </div>
+            {price}
+          </div>
+
+          {/* CTA pill — cream on dark, inverted from the site's normal dark-on-cream */}
+          <div
+            style={{
+              display: "flex",
+              background: FG,
+              color: BG,
+              fontSize: "23px",
+              fontWeight: 500,
+              padding: "15px 30px",
+              borderRadius: 100,
+              letterSpacing: "-0.2px",
+            }}
+          >
+            Buy now →
           </div>
         </div>
       </div>
@@ -247,15 +230,14 @@ export async function GET(request: Request) {
       height: 630,
       fonts: fonts
         ? [
-            { name: "DM Sans", data: fonts.medium, weight: 500, style: "normal" },
-            { name: "DM Sans", data: fonts.bold,   weight: 700, style: "normal" },
-            { name: "DM Sans", data: fonts.italic, weight: 400, style: "italic" },
+            { name: "DM Sans", data: fonts.medium, weight: 500, style: "normal"  },
+            { name: "DM Sans", data: fonts.bold,   weight: 700, style: "normal"  },
+            { name: "DM Sans", data: fonts.italic, weight: 400, style: "italic"  },
           ]
         : [],
     },
   );
 
-  // Cache aggressively — crawlers hit this on every unfurl
   imageResponse.headers.set(
     "Cache-Control",
     "public, max-age=3600, stale-while-revalidate=86400",

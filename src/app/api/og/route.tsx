@@ -26,6 +26,15 @@ export async function GET(request: Request) {
         overflow: "hidden",
       }}
     >
+      {/* Inset border — gives the card a defined edge on white social platform backgrounds */}
+      <div
+        style={{
+          position: "absolute", inset: 0,
+          border: "2px solid rgba(17,17,17,0.1)",
+          display: "flex",
+        }}
+      />
+
       {/* Decorative concentric rings — bottom-right corner */}
       <div
         style={{
@@ -154,7 +163,7 @@ export async function GET(request: Request) {
           style={{
             background: "#111111",
             color: "#F5F4EF",
-            fontSize: 26,
+            fontSize: 28,
             fontWeight: 500,
             padding: "14px 32px",
             borderRadius: 100,
@@ -166,7 +175,7 @@ export async function GET(request: Request) {
         </div>
         <span
           style={{
-            fontSize: 20,
+            fontSize: 22,
             fontWeight: 500,
             color: "#9E9A93",
             letterSpacing: "-0.3px",
