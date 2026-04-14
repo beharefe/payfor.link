@@ -100,7 +100,7 @@ export function DisputeForm({
           Didn&apos;t receive your access link?
         </p>
         <p className="text-xs text-muted-foreground mb-4">
-          Check your spam folder first — emails sometimes land there.
+          Check your spam folder first. Emails sometimes land there.
           Still nothing after 5 minutes?
         </p>
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">

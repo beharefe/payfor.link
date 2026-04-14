@@ -151,7 +151,7 @@ export default async function DashboardPage() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground">Set up payouts</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      Connect your bank via Stripe — takes 2 minutes. Earnings go directly to you.
+                      Connect your bank via Stripe. Takes 2 minutes. Earnings go directly to you.
                     </p>
                   </div>
                   <InitiateStripeConnectButton label="Connect bank" variant="outline" />

@@ -199,7 +199,7 @@ export async function sendBuyerDisputeAlert(opts: {
   return resend.emails.send({
     from: FROM,
     to: "info@unseal.link",
-    subject: `${subjectTag} ${opts.productName} — ${opts.issueType}`,
+    subject: `${subjectTag} ${opts.productName}: ${opts.issueType}`,
     html: await render(BuyerDisputeAlert({ ...opts, timestamp })),
   });
 }

@@ -32,7 +32,7 @@ export function BuyerDisputeAlert({
   const labelColor = isAbuse ? "#92400E" : "#1E40AF";
 
   return (
-    <EmailLayout preview={`[${tag}] ${productName} — ${issueType}`}>
+    <EmailLayout preview={`[${tag}] ${productName}: ${issueType}`}>
       <Text style={{ fontSize: "24px", fontWeight: 700, color: "#3D3530", margin: "0 0 8px" }}>
         {isAbuse ? "Abuse report" : "Buyer dispute"}
       </Text>

@@ -14,7 +14,7 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
 export const metadata: Metadata = {
   title: "unseal.link: Sell Any URL Behind a Paywall. 4.5% Fee.",
   description:
-    "Paste any URL, set a price, share a paywall link. Buyers pay via Stripe and get instant access. 4.5% fee — half of Gumroad. No uploads, no payout minimum.",
+    "Paste any URL, set a price, share a paywall link. Buyers pay via Stripe and get instant access. 4.5% fee, half of Gumroad. No uploads, no payout minimum.",
   alternates: { canonical: APP_URL },
   openGraph: {
     title: "unseal.link: Sell Any URL in 60 Seconds",
@@ -188,11 +188,11 @@ const faqItems = [
   },
   {
     q: "Do buyers need an account to purchase?",
-    a: "No. Buyers click your paywall link, enter their email and card in Stripe Checkout, and receive your content URL by email. That's the entire flow.\n\nNo account creation. No password. No profile. The buyer experience is frictionless by design — just a payment and an email.",
+    a: "No. Buyers click your paywall link, enter their email and card in Stripe Checkout, and receive your content URL by email. That's the entire flow.\n\nNo account creation. No password. No profile. The buyer experience is frictionless by design: just a payment and an email.",
   },
   {
     q: "Can I update my content URL after publishing?",
-    a: "Yes. You can edit your link's destination URL at any time from your dashboard.\n\nBuyers who already purchased received a snapshot of the URL at the time of their purchase. If you've made a significant update, you can resend access to existing buyers from the link detail page — they'll get a fresh access email with the current URL.",
+    a: "Yes. You can edit your link's destination URL at any time from your dashboard.\n\nBuyers who already purchased received a snapshot of the URL at the time of their purchase. If you've made a significant update, you can resend access to existing buyers from the link detail page. They'll get a fresh access email with the current URL.",
   },
 ];
 
