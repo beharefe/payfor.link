@@ -5,6 +5,7 @@ import { ChevronDown } from "lucide-react";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { ClearSessionButton } from "./clear-session-button";
+import { OrdersSignIn } from "./orders-sign-in";
 import { PersistOrderId } from "./persist-order-id";
 
 export const dynamic = "force-dynamic";
@@ -228,7 +229,7 @@ export default async function OrdersPage({
                 Enter the email you used at checkout.
               </p>
             </div>
-            <EmailForm />
+            <OrdersSignIn />
           </div>
         </main>
       );
@@ -255,7 +256,7 @@ export default async function OrdersPage({
                 Nothing for <strong>{normalized}</strong>. Check the email address you used at checkout.
               </p>
             </div>
-            <EmailForm />
+            <OrdersSignIn />
           </div>
         </main>
       );
@@ -304,28 +305,9 @@ export default async function OrdersPage({
             Enter the email you used at checkout.
           </p>
         </div>
-        <EmailForm />
+        <OrdersSignIn />
       </div>
     </main>
   );
 }
 
-function EmailForm() {
-  return (
-    <form action="/orders" method="GET" className="flex flex-col gap-3">
-      <input
-        type="email"
-        name="email"
-        required
-        placeholder="you@example.com"
-        className="h-11 w-full rounded-xl border border-input bg-background px-4 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-      />
-      <button
-        type="submit"
-        className="w-full h-11 flex items-center justify-center bg-primary text-primary-foreground rounded-full font-medium text-base hover:opacity-90 transition-opacity"
-      >
-        View purchases
-      </button>
-    </form>
-  );
-}
