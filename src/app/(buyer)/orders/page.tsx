@@ -1,4 +1,4 @@
-import { verifySessionValue } from "@unseallink/lib/buyer-token";
+import { createBuyerToken, verifySessionValue } from "@unseallink/lib/buyer-token";
 import { TABLES } from "@unseallink/lib/db";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { ChevronDown } from "lucide-react";
@@ -193,8 +193,10 @@ export default async function OrdersPage({
           <Logo />
           <FeaturedCard order={order} sellerName={seller?.name} />
           <OtherOrdersAccordion orders={otherOrders ?? []} />
+          {/* Route through verify so the buyer_session cookie is set before
+              landing on the email view — oid proves identity, token grants session */}
           <a
-            href={`/orders?email=${encodeURIComponent(order.buyer_email)}`}
+            href={`/api/orders/verify?token=${createBuyerToken(order.buyer_email)}&next=${encodeURIComponent(`/orders?email=${encodeURIComponent(order.buyer_email)}`)}`}
             className="text-xs text-center text-muted-foreground hover:text-foreground transition-colors no-underline"
           >
             All purchases for {order.buyer_email}
