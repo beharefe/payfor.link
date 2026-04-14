@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const displayName = seller.name ?? username;
   const description = seller.bio ?? `Buy digital products from ${displayName} on unseal.link`;
   const ogTitle = `${displayName} on unseal.link`;
-  const ogImage = `${APP_URL}/api/og?title=${encodeURIComponent(ogTitle)}`;
+  const ogImage = `${APP_URL}/api/og?title=on+unseal.link&seller=${encodeURIComponent(displayName)}`;
 
   return {
     title: displayName,

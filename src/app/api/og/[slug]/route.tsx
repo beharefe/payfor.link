@@ -116,9 +116,9 @@ export async function GET(request: Request) {
             style={{
               background: "#111111",
               color: "#F5F4EF",
-              fontSize: "14px",
+              fontSize: "21px",
               fontWeight: 500,
-              padding: "6px 16px",
+              padding: "9px 24px",
               borderRadius: "100px",
             }}
           >
@@ -127,20 +127,28 @@ export async function GET(request: Request) {
         </div>
 
         {/* Title + seller */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
           <div
             style={{
-              fontSize: resolvedImg ? "42px" : "56px",
+              fontSize: resolvedImg ? "63px" : "84px",
               fontWeight: 700,
               color: "#111111",
-              lineHeight: 1.15,
-              letterSpacing: "-1px",
+              lineHeight: 1.1,
+              letterSpacing: "-1.5px",
             }}
           >
-            {title.length > 58 ? `${title.slice(0, 56)}…` : title}
+            {title.length > 38 ? `${title.slice(0, 36)}…` : title}
           </div>
           {seller && (
-            <div style={{ fontSize: "22px", color: "#6B6B6B", fontWeight: 400 }}>
+            <div
+              style={{
+                fontSize: "33px",
+                fontStyle: "italic",
+                fontWeight: 400,
+                color: "#999999",
+                letterSpacing: "-0.5px",
+              }}
+            >
               by {seller}
             </div>
           )}
@@ -156,10 +164,10 @@ export async function GET(request: Request) {
         >
           <div
             style={{
-              fontSize: "44px",
+              fontSize: "66px",
               fontWeight: 700,
               color: "#111111",
-              letterSpacing: "-1px",
+              letterSpacing: "-1.5px",
             }}
           >
             {price}
@@ -167,7 +175,7 @@ export async function GET(request: Request) {
           <div
             style={{
               fontFamily: fonts ? "DM Sans" : "sans-serif",
-              fontSize: "18px",
+              fontSize: "27px",
               fontWeight: 500,
               color: "#3D3530",
               letterSpacing: "-0.3px",
@@ -184,7 +192,8 @@ export async function GET(request: Request) {
       fonts: fonts
         ? [
             { name: "DM Sans", data: fonts.medium, weight: 500, style: "normal" },
-            { name: "DM Sans", data: fonts.bold, weight: 700, style: "normal" },
+            { name: "DM Sans", data: fonts.bold,   weight: 700, style: "normal" },
+            { name: "DM Sans", data: fonts.italic, weight: 400, style: "italic" },
           ]
         : [],
     },
