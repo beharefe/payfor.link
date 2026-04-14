@@ -250,11 +250,7 @@ export default function HomePage() {
 
           {/* Left: copy + CTAs */}
           <div>
-            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-8">
-              The paywall for any link
-            </p>
-
-            <h1 className="text-4xl md:text-6xl font-medium tracking-tight text-foreground mb-8 leading-[1.1]">
+            <h1 className="text-4xl md:text-6xl font-medium tracking-tight text-foreground mb-6 leading-[1.1]">
               No uploads.
               <br />
               No 10% tax.
@@ -262,22 +258,12 @@ export default function HomePage() {
               No ghosting.
             </h1>
 
-            {/*
-              Subheadline A/B variants — swap in analytics/flag system:
-              A (current): platform list + 60 seconds
-              B: "Stripe takes the payment. unseal.link delivers the access.
-                 Paste your URL → set price → buyer pays → gets your link by email.
-                 Works with Notion, Figma, Drive, GitHub, Discord. 4.5% fee."
-              C: "No uploads. No 10% discovery tax. No ghosting.
-                 Paste any live URL, set a price, share.
-                 Buyers pay via Stripe and get instant access. 4.5% fee."
-            */}
-            <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-lg leading-relaxed">
-              Paste a URL, set a price, share your paywall link. Buyers pay once
-              and get instant access by email. No accounts. No friction.
+            <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-lg leading-relaxed">
+              Paste any URL, set a price, share your paywall link. Buyers pay
+              via Stripe and get instant access by email.
             </p>
 
-            <div className="flex flex-wrap gap-3 mb-5">
+            <div className="flex flex-wrap gap-3 mb-3">
               <Link
                 href="/auth"
                 className="inline-flex items-center px-6 py-3 bg-primary text-primary-foreground rounded-full font-medium text-sm hover:opacity-90 transition-opacity no-underline"
@@ -287,8 +273,7 @@ export default function HomePage() {
             </div>
 
             <p className="text-xs text-muted-foreground mb-10">
-              First 100 sellers get their first $500 in sales fee-free: no
-              platform cut, no Stripe fees.{" "}
+              Fee-free for first 100 sellers.{" "}
               <Link href="/auth" className="text-foreground underline hover:no-underline">
                 Claim your spot →
               </Link>
