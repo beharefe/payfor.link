@@ -22,15 +22,24 @@ function toTransformUrl(url: string, width: number, height: number): string {
   }
 }
 
-async function isImageReachable(url: string): Promise<boolean> {
+// Fetch image bytes and return an inlined base64 data URL.
+// Using a data URL means Satori never makes a remote fetch — eliminates HEAD/GET
+// discrepancies (Supabase storage often 405s on HEAD), CORS surprises, and
+// Satori's own silent fetch failures on Edge runtime.
+// Edge runtime has no Node Buffer — use Uint8Array + btoa instead.
+async function fetchAsDataUrl(url: string): Promise<string | null> {
   try {
-    const res = await fetch(url, {
-      method: "HEAD",
-      signal: AbortSignal.timeout(2000),
-    });
-    return res.ok;
+    const res = await fetch(url, { signal: AbortSignal.timeout(4000) });
+    if (!res.ok) return null;
+    const contentType = res.headers.get("content-type") ?? "image/jpeg";
+    if (!contentType.startsWith("image/")) return null;
+    const buf = await res.arrayBuffer();
+    const bytes = new Uint8Array(buf);
+    let binary = "";
+    for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+    return `data:${contentType};base64,${btoa(binary)}`;
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -48,13 +57,11 @@ export async function GET(request: Request) {
   let resolvedImg: string | null = null;
   if (imgSrc) {
     const transformedUrl = toTransformUrl(imgSrc, IMAGE_W, IMAGE_H);
-    if (transformedUrl !== imgSrc) {
-      // Try CDN transform (Supabase Pro); fall back to original on failure
-      const transformOk = await isImageReachable(transformedUrl);
-      resolvedImg = transformOk ? transformedUrl : imgSrc;
-    } else {
-      const ok = await isImageReachable(imgSrc);
-      resolvedImg = ok ? imgSrc : null;
+    // Try CDN transform first (Supabase Pro), fall back to original URL
+    const candidates = transformedUrl !== imgSrc ? [transformedUrl, imgSrc] : [imgSrc];
+    for (const url of candidates) {
+      const data = await fetchAsDataUrl(url);
+      if (data) { resolvedImg = data; break; }
     }
   }
 
