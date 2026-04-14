@@ -30,11 +30,19 @@ export async function generateMetadata({
       url: `${APP_URL}/${page.slug}`,
       type: "website",
       siteName: "unseal.link",
+      images: [
+        {
+          url: `${APP_URL}/api/og?title=${encodeURIComponent(frontmatter.og_title ?? frontmatter.title)}`,
+          width: 1200,
+          height: 630,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title: frontmatter.og_title ?? frontmatter.title,
       description: frontmatter.og_description ?? frontmatter.description,
+      images: [`${APP_URL}/api/og?title=${encodeURIComponent(frontmatter.og_title ?? frontmatter.title)}`],
     },
   };
 }

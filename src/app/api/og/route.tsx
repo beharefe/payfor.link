@@ -1,45 +1,61 @@
+import { getDMSansFonts } from "@unseallink/lib/og-font";
 import { ImageResponse } from "next/og";
 
-export function GET() {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const rawTitle = searchParams.get("title") ?? "Sell any link, instantly.";
+  const title = rawTitle.length > 68 ? `${rawTitle.slice(0, 66)}…` : rawTitle;
+
+  let fonts: Awaited<ReturnType<typeof getDMSansFonts>> | null = null;
+  try {
+    fonts = await getDMSansFonts();
+  } catch {
+    // If font loading fails, ImageResponse falls back to system sans-serif
+  }
+
   const res = new ImageResponse(
     <div
       style={{
-        width: "1200px",
-        height: "630px",
         display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
+        height: "100%",
+        width: "100%",
+        alignItems: "center",
+        justifyContent: "flex-start",
         background: "#F5F4EF",
-        padding: "80px",
-        fontFamily: "sans-serif",
+        paddingLeft: "80px",
+        paddingRight: "80px",
+        fontFamily: fonts ? "DM Sans" : "sans-serif",
+        letterSpacing: "-0.02em",
       }}
     >
-      {/* Top tag */}
+      {/* Top-left: wordmark */}
       <div
         style={{
+          position: "absolute",
+          left: 42,
+          top: 42,
           display: "flex",
+          alignItems: "center",
         }}
       >
-        <div
+        <span
           style={{
-            background: "#111111",
-            color: "#F5F4EF",
-            fontSize: "16px",
+            fontSize: 20,
             fontWeight: 500,
-            padding: "8px 20px",
-            borderRadius: "100px",
+            color: "#111111",
           }}
         >
           unseal.link
-        </div>
+        </span>
       </div>
 
-      {/* Middle headline */}
+      {/* Center (vertically) — page title */}
       <div
         style={{
           display: "flex",
           flexDirection: "column",
           gap: "16px",
+          maxWidth: "900px",
         }}
       >
         <div
@@ -51,42 +67,45 @@ export function GET() {
             letterSpacing: "-2px",
           }}
         >
-          Sell any link,
-          <br />
-          instantly.
-        </div>
-        <div
-          style={{
-            fontSize: "28px",
-            color: "#6B6B6B",
-            fontWeight: 400,
-          }}
-        >
-          Paste a link, set a price, get paid.
+          {title}
         </div>
       </div>
 
-      {/* Bottom trust */}
+      {/* Bottom-left: CTA pill */}
       <div
         style={{
+          position: "absolute",
+          left: 80,
+          bottom: 60,
           display: "flex",
-          alignItems: "center",
-          gap: "24px",
         }}
       >
         <div
           style={{
-            fontSize: "18px",
-            color: "#6B6B6B",
+            background: "#111111",
+            color: "#F5F4EF",
+            fontSize: "20px",
+            fontWeight: 500,
+            padding: "14px 28px",
+            borderRadius: "100px",
           }}
         >
-          No monthly fees · Payments by{" "}
-          <span style={{ color: "#635BFF", fontWeight: 600 }}>Stripe</span>
+          Start Selling →
         </div>
       </div>
     </div>,
-    { width: 1200, height: 630 },
+    {
+      width: 1200,
+      height: 630,
+      fonts: fonts
+        ? [
+            { name: "DM Sans", data: fonts.medium, weight: 500, style: "normal" },
+            { name: "DM Sans", data: fonts.bold, weight: 700, style: "normal" },
+          ]
+        : [],
+    },
   );
+
   res.headers.set("Cache-Control", "public, max-age=86400, stale-while-revalidate=604800");
   return res;
 }

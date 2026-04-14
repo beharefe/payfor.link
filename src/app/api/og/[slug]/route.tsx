@@ -1,3 +1,4 @@
+import { getDMSansFonts } from "@unseallink/lib/og-font";
 import { ImageResponse } from "next/og";
 
 // Convert Supabase public URL to a transform URL for resizing at the CDN level.
@@ -53,6 +54,13 @@ export async function GET(request: Request) {
     resolvedImg = reachable ? transformedUrl : null;
   }
 
+  let fonts: Awaited<ReturnType<typeof getDMSansFonts>> | null = null;
+  try {
+    fonts = await getDMSansFonts();
+  } catch {
+    // Falls back to system sans-serif
+  }
+
   const imageResponse = new ImageResponse(
     <div
       style={{
@@ -60,7 +68,7 @@ export async function GET(request: Request) {
         height: "630px",
         display: "flex",
         background: "#F5F4EF",
-        fontFamily: "sans-serif",
+        fontFamily: fonts ? "DM Sans" : "sans-serif",
       }}
     >
       {/* Left: preview image panel */}
@@ -158,9 +166,9 @@ export async function GET(request: Request) {
           </div>
           <div
             style={{
-              fontFamily: "Georgia, serif",
+              fontFamily: fonts ? "DM Sans" : "sans-serif",
               fontSize: "18px",
-              fontWeight: 600,
+              fontWeight: 500,
               color: "#3D3530",
               letterSpacing: "-0.3px",
             }}
@@ -170,7 +178,16 @@ export async function GET(request: Request) {
         </div>
       </div>
     </div>,
-    { width: 1200, height: 630 },
+    {
+      width: 1200,
+      height: 630,
+      fonts: fonts
+        ? [
+            { name: "DM Sans", data: fonts.medium, weight: 500, style: "normal" },
+            { name: "DM Sans", data: fonts.bold, weight: 700, style: "normal" },
+          ]
+        : [],
+    },
   );
 
   // Cache aggressively — crawlers hit this on every unfurl

@@ -1,11 +1,36 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
+const OG_TITLE = "About unseal.link";
+
 export const metadata: Metadata = {
   title: { absolute: "About · unseal.link" },
   description:
     "unseal.link is payment-gated delivery for anything that lives online. Not a storefront, not a marketplace, not a file host.",
   robots: { index: true, follow: true },
+  openGraph: {
+    title: OG_TITLE,
+    description:
+      "unseal.link is payment-gated delivery for anything that lives online. Not a storefront, not a marketplace, not a file host.",
+    url: `${APP_URL}/about`,
+    siteName: "unseal.link",
+    type: "website",
+    images: [
+      {
+        url: `${APP_URL}/api/og?title=${encodeURIComponent(OG_TITLE)}`,
+        width: 1200,
+        height: 630,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: OG_TITLE,
+    description:
+      "unseal.link is payment-gated delivery for anything that lives online. Not a storefront, not a marketplace, not a file host.",
+    images: [`${APP_URL}/api/og?title=${encodeURIComponent(OG_TITLE)}`],
+  },
 };
 
 export default function AboutPage() {

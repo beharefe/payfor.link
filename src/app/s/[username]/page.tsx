@@ -4,6 +4,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
+
 type Props = { params: Promise<{ username: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -17,9 +19,28 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!seller) return { title: "Not found" };
 
+  const displayName = seller.name ?? username;
+  const description = seller.bio ?? `Buy digital products from ${displayName} on unseal.link`;
+  const ogTitle = `${displayName} on unseal.link`;
+  const ogImage = `${APP_URL}/api/og?title=${encodeURIComponent(ogTitle)}`;
+
   return {
-    title: seller.name ?? username,
-    description: seller.bio ?? `Buy digital products from ${seller.name ?? username} on unseal.link`,
+    title: displayName,
+    description,
+    openGraph: {
+      title: ogTitle,
+      description,
+      url: `${APP_URL}/s/${username}`,
+      siteName: "unseal.link",
+      type: "website",
+      images: [{ url: ogImage, width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: ogTitle,
+      description,
+      images: [ogImage],
+    },
   };
 }
 
