@@ -51,11 +51,11 @@ export default async function SettingsPage() {
               </>
             ) : (
               <>
-                <p className="text-sm font-medium text-foreground">Connect Stripe to get paid</p>
+                <p className="text-sm font-medium text-foreground">Set up payouts</p>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  We use Stripe to process payments and send you payouts. You keep 95.5% of every sale. No monthly fees.
+                  Set up payouts to start receiving your earnings. Payouts are handled by Stripe.
                 </p>
-                <InitiateStripeConnectButton />
+                <InitiateStripeConnectButton label="Set up payouts" />
               </>
             )}
           </div>

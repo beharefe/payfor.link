@@ -154,7 +154,7 @@ export default async function DashboardPage() {
                       Connect your bank via Stripe. Takes 2 minutes. Earnings go directly to you.
                     </p>
                   </div>
-                  <InitiateStripeConnectButton label="Connect bank" variant="outline" />
+                  <InitiateStripeConnectButton label="Set up payouts" variant="outline" />
                 </div>
               )}
 
