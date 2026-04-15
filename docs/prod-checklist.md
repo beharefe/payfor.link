@@ -20,21 +20,21 @@ Set all of these in Vercel → Project → Settings → Environment Variables fo
 - [x] `NEXT_PUBLIC_AXIOM_DATASET` — Axiom dataset name
 - [x] `NEXT_PUBLIC_AXIOM_TOKEN` — Axiom ingest token
 - [x] `NEXT_PUBLIC_AMPLITUDE_API_KEY` — Amplitude project API key
-- [?] `SENTRY_DSN` — Sentry project DSN
+- [x] `SENTRY_DSN` — Sentry project DSN
 - [x] `SENTRY_AUTH_TOKEN` — Sentry auth token for source maps
-- [?] `GOOGLE_SAFE_BROWSING_API_KEY` — Google Cloud Console → Safe Browsing API
-- [ ] `NEXT_PUBLIC_APP_URL` — `https://unseal.link`
+- [..] `GOOGLE_SAFE_BROWSING_API_KEY` — Google Cloud Console → Safe Browsing API
+- [x] `NEXT_PUBLIC_APP_URL` — `https://unseal.link`
 
 ---
 
 ## 2. Database (Supabase)
 
-- [ ] All tables created in production: `sellers`, `products`, `orders`, `access_tokens`, `reports`
-- [ ] `access_tokens` table confirmed present (single-use token system depends on it)
-- [ ] RPC functions deployed: `increment_product_stats`, `increment_seller_stats`
-- [ ] DB trigger deployed: `products.version` auto-increment on seller edit
-- [ ] Row Level Security (RLS) enabled and policies set on all tables
-- [ ] Case-insensitive unique index on `sellers.name`:
+- [x] All tables created in production: `sellers`, `products`, `orders`, `access_tokens`, `reports`
+- [x] `access_tokens` table confirmed present (single-use token system depends on it)
+- [x] RPC functions deployed: `increment_product_stats`, `increment_seller_stats`
+- [x] DB trigger deployed: `products.version` auto-increment on seller edit
+- [x] Row Level Security (RLS) enabled and policies set on all tables
+- [x] Case-insensitive unique index on `sellers.name`:
   ```sql
   CREATE UNIQUE INDEX sellers_name_lower_idx ON sellers (lower(name));
   ```
@@ -64,11 +64,11 @@ CREATE INDEX        IF NOT EXISTS idx_access_tokens_order_id   ON access_tokens(
 CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_stripe_payment_id ON orders(stripe_payment_id);
 ```
 
-- [ ] All indexes above created in production
+- [x] All indexes above created in production
 
 ---
 
-- [ ] Supabase Auth → Email → OTP Expiry set to match `ACCESS_TOKEN_DAYS` in code (7 days)
+- [x] Supabase Auth → Email → OTP Expiry set to match `ACCESS_TOKEN_DAYS` in code (7 days)
 - [ ] Supabase Auth → Email templates customised with unseal.link branding (magic link email)
 - [ ] Supabase Auth → Redirect URLs: add `https://unseal.link/**`
 - [ ] Supabase SMTP configured to use Resend (https://supabase.com/docs/guides/auth/auth-smtp)
@@ -90,8 +90,8 @@ By default Supabase uses a shared low-volume SMTP service that rate-limits at ~3
 4. Send a test email from the Supabase UI to confirm delivery
 5. Verify magic-link emails arrive promptly from `noreply@unseal.link`
 
-- [ ] Custom SMTP configured in Supabase Auth (Resend, port 465)
-- [ ] Test magic-link email delivered successfully via Resend SMTP
+- [x] Custom SMTP configured in Supabase Auth (Resend, port 465)
+- [x] Test magic-link email delivered successfully via Resend SMTP
 
 ### Supabase Storage — preview image uploads
 
@@ -117,53 +117,53 @@ The `/api/upload-preview` endpoint requires a Supabase Storage bucket.
 5. Optionally set a **file size limit** (2 MB) and allowed MIME types (`image/jpeg`, `image/png`, `image/webp`) in the bucket settings
 6. Confirm the bucket URL matches what `upload-preview` returns — typically `https://<project>.supabase.co/storage/v1/object/public/previews/<filename>`
 
-- [ ] `previews` bucket created in Supabase Storage (public)
-- [ ] Storage RLS policies applied (authenticated upload, public read)
-- [ ] Test image upload via the create-link form in production
+- [x] `preview-images` bucket created in Supabase Storage (public)
+- [x] Storage RLS policies applied (authenticated upload, public read)
+- [x] Test image upload via the create-link form in production
 
 ---
 
 ## 3. Stripe
 
-- [ ] Switch from test keys (`sk_test_`, `pk_test_`) to live keys (`sk_live_`, `pk_live_`)
-- [ ] Create production webhook endpoint: `https://unseal.link/api/stripe-webhook`
-- [ ] Register all 3 events on the webhook:
+- [x] Switch from test keys (`sk_test_`, `pk_test_`) to live keys (`sk_live_`, `pk_live_`)
+- [x] Create production webhook endpoint: `https://unseal.link/api/stripe-webhook`
+- [x] Register all 3 events on the webhook:
   - `checkout.session.completed`
   - `account.updated`
   - `charge.dispute.created`
-- [ ] Copy production `STRIPE_WEBHOOK_SECRET` into Vercel env vars
-- [ ] Stripe Connect platform profile complete (business name, URL, support email, icon)
-- [ ] Stripe Connect redirect URLs set to production domain
-- [ ] Optional: Stripe Dashboard → Settings → Emails → enable "Successful payments" for Stripe's own receipts (buyers get both Stripe receipt + our access link email)
+- [x] Copy production `STRIPE_WEBHOOK_SECRET` into Vercel env vars
+- [x] Stripe Connect platform profile complete (business name, URL, support email, icon)
+- [x] Stripe Connect redirect URLs set to production domain
+- [x] Optional: Stripe Dashboard → Settings → Emails → enable "Successful payments" for Stripe's own receipts (buyers get both Stripe receipt + our access link email)
 
 ---
 
 ## 4. Resend (Email)
 
-- [ ] Domain `unseal.link` verified in Resend (DNS records: SPF, DKIM, DMARC)
-- [ ] `noreply@unseal.link` confirmed as sending address
-- [ ] `info@unseal.link` inbox confirmed (receives abuse reports + dispute alerts)
-- [ ] Send a test email to verify delivery in production
+- [x] Domain `unseal.link` verified in Resend (DNS records: SPF, DKIM, DMARC)
+- [x] `noreply@unseal.link` confirmed as sending address
+- [x] `info@unseal.link` inbox confirmed (receives abuse reports + dispute alerts)
+- [x] Send a test email to verify delivery in production
 
 ---
 
 ## 5. Monitoring
 
-- [ ] **Axiom**: create dataset, add ingest token to env vars, confirm logs flowing
-- [ ] **Amplitude**: create project, add API key, confirm `paywall_viewed` event tracked
-- [ ] **Sentry**: create project, add DSN + auth token, confirm errors captured
-- [ ] **Sentry**: set up alerts for critical errors (webhook failures, payment errors)
-- [ ] **Google Safe Browsing**: enable API in Google Cloud Console, add key to env vars
+- [x] **Axiom**: create dataset, add ingest token to env vars, confirm logs flowing
+- [x] **Amplitude**: create project, add API key, confirm `paywall_viewed` event tracked
+- [x] **Sentry**: create project, add DSN + auth token, confirm errors captured
+- [x] **Sentry**: set up alerts for critical errors (webhook failures, payment errors)
+- [?] **Google Safe Browsing**: enable API in Google Cloud Console, add key to env vars
 
 ---
 
 ## 6. Security
 
-- [ ] `BUYER_SESSION_SECRET` is a strong random value (≥32 chars), not reused from dev
-- [ ] All Supabase RLS policies verified — buyers cannot read other buyers' orders
-- [ ] Stripe webhook signature verification confirmed working (returns 400 on bad signatures)
-- [ ] No `.env` or secrets committed to git (`git log --all --full-history -- .env`)
-- [ ] Vercel preview deployments restricted to team only (not publicly accessible)
+- [x] `BUYER_SESSION_SECRET` is a strong random value (≥32 chars), not reused from dev
+- [x] All Supabase RLS policies verified — buyers cannot read other buyers' orders
+- [x] Stripe webhook signature verification confirmed working (returns 400 on bad signatures)
+- [x] No `.env` or secrets committed to git (`git log --all --full-history -- .env`)
+- [x] Vercel preview deployments restricted to team only (not publicly accessible)
 
 ---
 
@@ -171,37 +171,37 @@ The `/api/upload-preview` endpoint requires a Supabase Storage bucket.
 
 These require a public staging or production URL (not Vercel-auth-protected):
 
-- [ ] TC-006: Navbar state — logged-out visitor sees "Start selling"
-- [ ] TC-024: Preview page — not logged in redirects to /auth
-- [ ] TC-025: View active paywall as anonymous buyer
-- [ ] TC-039: Order detail — unauthenticated redirects correctly
-- [ ] TC-040: Refunded order shows correct state to buyer
-- [ ] TC-041: Missed sale email fires when draft link visited
-- [ ] TC-042: No missed sale email for active links
-- [ ] TC-062: Sign out works correctly
-- [ ] TC-064: Paywall on mobile (real device)
-- [ ] TC-065: Dashboard on mobile (real device)
-- [ ] TC-066: OTP input on mobile (real device)
-- [ ] TC-067: Public seller profile page `/@username`
-- [ ] End-to-end: purchase → single-use access link → confirm consumed on second click
-- [ ] End-to-end: refund → buyer email received → seller email received
-- [ ] End-to-end: abuse report → `info@unseal.link` alert received
-- [ ] End-to-end: Stripe test dispute → order marked `disputed` → emails received
+- [x] TC-006: Navbar state — logged-out visitor sees "Start selling"
+- [x] TC-024: Preview page — not logged in redirects to /auth
+- [x] TC-025: View active paywall as anonymous buyer
+- [x] TC-039: Order detail — unauthenticated redirects correctly
+- [x] TC-040: Refunded order shows correct state to buyer
+- [x] TC-041: Missed sale email fires when draft link visited
+- [x] TC-042: No missed sale email for active links
+- [x] TC-062: Sign out works correctly
+- [x] TC-064: Paywall on mobile (real device)
+- [x] TC-065: Dashboard on mobile (real device)
+- [x] TC-066: OTP input on mobile (real device)
+- [x] TC-067: Public seller profile page `/@username`
+- [x] End-to-end: purchase → single-use access link → confirm consumed on second click
+- [x] End-to-end: refund → buyer email received → seller email received
+- [x] End-to-end: abuse report → `info@unseal.link` alert received
+- [x] End-to-end: Stripe test dispute → order marked `disputed` → emails received
 
 ---
 
 ## 8. Legal & Privacy (GDPR)
 
-- [ ] `/privacy` page written and live — must cover:
+- [x] `/privacy` page written and live — must cover:
   - What data you collect (email, purchase history)
   - Why (contract performance — delivering purchased content)
   - Who you share it with (Stripe, Supabase, Resend, Amplitude, Axiom, Sentry)
   - How long you keep it
   - How to request deletion (email: info@unseal.link)
-- [ ] `/terms` page written and live — cover: acceptable use, no refund policy exceptions, platform fees, seller responsibilities
-- [ ] Both pages linked in site footer
-- [ ] Stripe Dashboard → Settings → Business → add `https://unseal.link/privacy` and `https://unseal.link/terms` (shown on Stripe-hosted pages)
-- [ ] Stripe checkout `after_submit` text already links to both ✓ (done in code)
+- [x] `/terms` page written and live — cover: acceptable use, no refund policy exceptions, platform fees, seller responsibilities
+- [x] Both pages linked in site footer
+- [x] Stripe Dashboard → Settings → Business → add `https://unseal.link/privacy` and `https://unseal.link/terms` (shown on Stripe-hosted pages)
+- [x] Stripe checkout `after_submit` text already links to both ✓ (done in code)
 
 ### Amplitude — Cookie Consent
 Amplitude uses cookies for session tracking which requires consent under GDPR/ePrivacy for EU visitors.
@@ -216,30 +216,30 @@ This switches Amplitude to localStorage only — no consent banner needed. You l
 **Option B — Consent banner (do later, when real EU traffic warrants it)**
 Use a library like `cookie-consent` or `CookieYes`. Only initialise Amplitude after consent is given.
 
-- [ ] Decide: Option A (disable cookies, no banner) or Option B (banner)
-- [ ] If Option A: update `src/lib/amplitude.tsx` to add `cookieOptions: { disable: true }`
-- [ ] If Option B: add consent banner before EU launch
+- [x] Decide: Option A (disable cookies, no banner) or Option B (banner)
+- [x] If Option A: update `src/lib/amplitude.tsx` to add `cookieOptions: { disable: true }`
+- [?] If Option B: add consent banner before EU launch
 
 ---
 
 ## 9. Pre-Launch Polish
 
 
-- [ ] `NEXT_PUBLIC_APP_URL` set to `https://unseal.link` (affects OG images, access links, email links)
-- [ ] OG image endpoint (`/api/og/[slug]`) tested at production domain
-- [ ] Custom domain configured in Vercel and DNS propagated
-- [ ] `sitemap.xml` and `robots.txt` verified (Next.js generates these from `app/sitemap.ts` / `app/robots.ts` if present — add if missing)
-- [ ] Privacy policy and Terms pages reviewed for accuracy (`/privacy`, `/terms`)
-- [ ] Google Safe Browsing tested with a known-safe URL (verify it doesn't block valid links)
-- [ ] Test Stripe Connect onboarding flow on production (deferred KYC path)
-- [ ] Confirm seller KYC → `account.updated` webhook fires → `stripe_charges_enabled` synced → draft links activate
+- [x] `NEXT_PUBLIC_APP_URL` set to `https://unseal.link` (affects OG images, access links, email links)
+- [x] OG image endpoint (`/api/og/[slug]`) tested at production domain
+- [x] Custom domain configured in Vercel and DNS propagated
+- [x] `sitemap.xml` and `robots.txt` verified (Next.js generates these from `app/sitemap.ts` / `app/robots.ts` if present — add if missing)
+- [x] Privacy policy and Terms pages reviewed for accuracy (`/privacy`, `/terms`)
+- [x] Google Safe Browsing tested with a known-safe URL (verify it doesn't block valid links)
+- [x] Test Stripe Connect onboarding flow on production (deferred KYC path)
+- [x] Confirm seller KYC → `account.updated` webhook fires → `stripe_charges_enabled` synced → draft links activate
 
 ---
 
 ## 10. Post-Launch
 
-- [ ] Monitor Axiom logs for errors in first 24h
-- [ ] Monitor Sentry for any unexpected crashes
-- [ ] Verify Amplitude events are recording (`paywall_viewed`, `purchase_completed`)
-- [ ] Check Stripe dashboard for first real payment
-- [ ] Confirm first access link email delivered to real buyer
+- [x] Monitor Axiom logs for errors in first 24h
+- [x] Monitor Sentry for any unexpected crashes
+- [x] Verify Amplitude events are recording (`paywall_viewed`, `purchase_completed`)
+- [x] Check Stripe dashboard for first real payment
+- [x] Confirm first access link email delivered to real buyer
