@@ -144,8 +144,12 @@ export async function grantPromotionToSeller(
     .select("*, promotion:promotions(*)")
     .maybeSingle();
 
-  // Increment redemption count — awaited so the serverless function doesn't drop it
-  await supabase.rpc("increment_promotion_redemptions", { promotion_id: promotionId }).catch(() => undefined);
+  // Increment redemption count — direct update bypasses RLS (service client)
+  await supabase
+    .from(TABLES.PROMOTIONS)
+    .update({ redemption_count: promotion.redemption_count + 1 })
+    .eq("id", promotionId)
+    .catch(() => undefined);
 
   // biome-ignore lint/suspicious/noExplicitAny: Supabase join type
   return (data as any) ?? null;
