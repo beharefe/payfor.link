@@ -3,6 +3,7 @@ import { TABLES } from "@unseallink/lib/db";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { ChevronDown } from "lucide-react";
 import type { Metadata } from "next";
+import { ExpandableOrderRow } from "./expandable-order-row";
 import { cookies } from "next/headers";
 import { ClearSessionButton } from "./clear-session-button";
 import { OrdersSignIn } from "./orders-sign-in";
@@ -114,29 +115,7 @@ function OtherOrdersAccordion({ orders }: { orders: Order[] }) {
       </summary>
       <div className="border-t border-border divide-y divide-border">
         {orders.map((order) => (
-          <div key={order.id} className="px-5 py-3.5 flex items-center gap-3">
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">
-                {order.product_title}
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {formatDate(order.created_at)} · ${order.price_paid.toFixed(2)}{" "}
-                {order.currency.toUpperCase()}
-              </p>
-            </div>
-            {order.status === "refunded" ? (
-              <span className="text-xs text-muted-foreground border border-border rounded-full px-3 py-1 shrink-0">
-                Refunded
-              </span>
-            ) : (
-              <a
-                href={`/api/orders/${order.id}/access`}
-                className="text-xs font-medium text-foreground hover:opacity-60 transition-opacity shrink-0 no-underline"
-              >
-                Open →
-              </a>
-            )}
-          </div>
+          <ExpandableOrderRow key={order.id} order={order} />
         ))}
       </div>
     </details>
