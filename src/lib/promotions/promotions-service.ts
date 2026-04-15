@@ -32,6 +32,8 @@ export interface Promotion {
   config: Record<string, unknown>;
   auto_apply_on_signup: boolean;
   valid_until: string | null;
+  max_redemptions: number | null;
+  redemption_count: number;
 }
 
 export interface SellerPromotion {
@@ -79,7 +81,11 @@ export async function grantSignupPromotions(sellerId: string): Promise<void> {
 
   if (!promotions?.length) return;
 
-  for (const promotion of promotions) {
+  const eligible = promotions.filter(
+    (p) => p.max_redemptions === null || p.redemption_count < p.max_redemptions,
+  );
+
+  for (const promotion of eligible) {
     await grantPromotionToSeller(sellerId, promotion.id, "system");
   }
 }
@@ -104,6 +110,14 @@ export async function grantPromotionToSeller(
     .single();
 
   if (!promotion) return null;
+
+  // Check redemption cap before granting
+  if (
+    promotion.max_redemptions !== null &&
+    promotion.redemption_count >= promotion.max_redemptions
+  ) {
+    return null;
+  }
 
   // biome-ignore lint/suspicious/noExplicitAny: promotion config is JSONB
   const { max_value, expires_at } = computeGrantParams(promotion as any);
@@ -130,8 +144,8 @@ export async function grantPromotionToSeller(
     .select("*, promotion:promotions(*)")
     .maybeSingle();
 
-  // Increment redemption count (best-effort — non-critical, ignore errors)
-  void supabase.rpc("increment_promotion_redemptions", { promotion_id: promotionId });
+  // Increment redemption count — awaited so the serverless function doesn't drop it
+  await supabase.rpc("increment_promotion_redemptions", { promotion_id: promotionId }).catch(() => undefined);
 
   // biome-ignore lint/suspicious/noExplicitAny: Supabase join type
   return (data as any) ?? null;
