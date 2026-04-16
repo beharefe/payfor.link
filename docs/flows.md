@@ -155,8 +155,12 @@ Stripe fires account.updated
     stripe_charges_enabled = account.charges_enabled
     stripe_payouts_enabled = account.payouts_enabled
     stripe_details_submitted = account.details_submitted
-→ if payouts_enabled just became true:
-    → send seller email: "Identity verified — you can now withdraw"
+→ if charges_enabled = true AND welcome_email_sent = false:
+    → mark welcome_email_sent = true (before sending — prevents double-send on concurrent webhooks)
+    → fetch seller's active promotions
+    → send seller welcome email via Resend (from: RESEND_FOUNDER_EMAIL)
+        subject: "You're live on unseal.link"
+        includes promotions block if seller has active promotions
 → return 200
 ```
 

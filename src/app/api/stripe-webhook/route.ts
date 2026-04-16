@@ -1,4 +1,4 @@
-import { sendBuyerAccessEmail, sendDisputeAlert, sendSaleNotificationEmail } from "@unseallink/lib/email";
+import { sendBuyerAccessEmail, sendDisputeAlert, sendSaleNotificationEmail, sendSellerWelcomeEmail } from "@unseallink/lib/email";
 import { generateAccessToken } from "@unseallink/lib/access-token";
 import { trackServer } from "@unseallink/lib/amplitude-server";
 import { TABLES } from "@unseallink/lib/db";
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
         appUrl,
       );
     } else if (event.type === "account.updated") {
-      await handleAccountUpdated(event.data.object as Stripe.Account);
+      await handleAccountUpdated(event.data.object as Stripe.Account, appUrl);
     } else if (event.type === "charge.dispute.created") {
       await handleDisputeCreated(event.data.object as Stripe.Dispute);
     } else if (event.type === "charge.refunded") {
@@ -380,11 +380,11 @@ async function handleDisputeCreated(dispute: Stripe.Dispute) {
   log.info("charge.dispute.created: handled", { order_id: order.id, dispute_id: dispute.id });
 }
 
-async function handleAccountUpdated(account: Stripe.Account) {
+async function handleAccountUpdated(account: Stripe.Account, appUrl: string) {
   const supabase = createServiceClient();
   const { data: seller } = await supabase
     .from(TABLES.SELLERS)
-    .select("id, stripe_connected, stripe_payouts_enabled")
+    .select("id, email, name, stripe_connected, stripe_payouts_enabled, welcome_email_sent")
     .eq("stripe_account_id", account.id)
     .single();
   if (!seller) return;
@@ -410,5 +410,40 @@ async function handleAccountUpdated(account: Stripe.Account) {
       .update({ status: "active" })
       .eq("seller_id", seller.id)
       .eq("status", "draft");
+  }
+
+  // Send one-time welcome email on first charges_enabled signal.
+  if (chargesEnabled && !seller.welcome_email_sent && seller.email) {
+    // Mark sent before dispatching — prevents a second concurrent webhook from double-sending.
+    await supabase
+      .from(TABLES.SELLERS)
+      .update({ welcome_email_sent: true })
+      .eq("id", seller.id);
+
+    // Fetch active promotions so the email can show a promotion block.
+    const now = new Date().toISOString();
+    const { data: sellerPromotions } = await supabase
+      .from(TABLES.SELLER_PROMOTIONS)
+      .select("promotion:promotions(name, description)")
+      .eq("seller_id", seller.id)
+      .eq("status", "active")
+      .or(`expires_at.is.null,expires_at.gt.${now}`);
+
+    const promotions = (sellerPromotions ?? [])
+      // biome-ignore lint/suspicious/noExplicitAny: Supabase join type
+      .map((sp: any) => sp.promotion)
+      .filter(Boolean) as Array<{ name: string; description: string | null }>;
+
+    sendSellerWelcomeEmail({
+      to: seller.email,
+      sellerName: seller.name ?? null,
+      dashboardUrl: `${appUrl}/dashboard`,
+      promotions,
+    }).catch((err) =>
+      log.error("seller_welcome_email_failed", {
+        seller_id: seller.id,
+        error: serializeError(err),
+      }),
+    );
   }
 }

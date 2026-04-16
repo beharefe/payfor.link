@@ -13,8 +13,9 @@ import { MissedSaleEmail } from "@unseallink/emails/missed-sale";
 import { RefundBuyerEmail } from "@unseallink/emails/refund-buyer";
 import { RefundSellerEmail } from "@unseallink/emails/refund-seller";
 import { SaleNotificationEmail } from "@unseallink/emails/sale-notification";
+import { SellerWelcomeEmail } from "@unseallink/emails/seller-welcome";
 import { ACCESS_TOKEN_DAYS } from "./buyer-token";
-import { FROM, resend } from "./resend";
+import { FOUNDER_EMAIL, FOUNDER_FROM, FROM, resend } from "./resend";
 
 // Supabase magic link expiry is configured in the Supabase dashboard (Auth → Email → OTP Expiry).
 // Keep this in sync with that setting.
@@ -201,6 +202,28 @@ export async function sendBuyerDisputeAlert(opts: {
     to: "info@unseal.link",
     subject: `${subjectTag} ${opts.productName}: ${opts.issueType}`,
     html: await render(BuyerDisputeAlert({ ...opts, timestamp })),
+  });
+}
+
+/** Welcome email — sent to seller once when Stripe Connect activates (charges_enabled first time). */
+export async function sendSellerWelcomeEmail(opts: {
+  to: string;
+  sellerName: string | null;
+  dashboardUrl: string;
+  promotions?: Array<{ name: string; description: string | null }>;
+}) {
+  return resend.emails.send({
+    from: FOUNDER_FROM,
+    replyTo: FOUNDER_EMAIL,
+    to: opts.to,
+    subject: "You're live on unseal.link",
+    html: await render(
+      SellerWelcomeEmail({
+        sellerName: opts.sellerName,
+        dashboardUrl: opts.dashboardUrl,
+        promotions: opts.promotions,
+      }),
+    ),
   });
 }
 
