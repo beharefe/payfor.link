@@ -259,8 +259,9 @@ export default function HomePage() {
             </h1>
 
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-lg leading-relaxed">
-              Paste any URL, set a price, share your paywall link. Buyers pay
-              via Stripe and get instant access.
+              Paste any URL, set a price, share your paywall link.{" "}
+              <br className="hidden sm:block" />
+              Buyers pay via Stripe and get instant access.
             </p>
 
             <div className="flex flex-wrap gap-3 mb-3">
