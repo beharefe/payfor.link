@@ -1,13 +1,13 @@
 # unseal.link
 
-> Payment-gated link platform. Sellers paste any URL, set a price, and share a paywall link. Buyers pay via Stripe and receive email-based access in under 30 seconds. No storefront, no file uploads, no buyer account required.
+> Payment-gated link platform. Sellers paste any URL, set a price, and share a paywall link. Buyers pay via Stripe and get instant access on the confirmation page. No storefront, no file uploads, no buyer account required.
 
 ## What it does
 
 - Sellers paste any URL (Notion, Figma, Google Drive, GitHub, Discord, Canva, Dropbox, Loom, Airtable, or any HTTPS link)
 - Set a price (minimum $9.99)
 - Get a shareable paywall link at unseal.link/l/slug
-- Buyers pay via Stripe Checkout and receive an access link by email within 30 seconds
+- Buyers pay via Stripe Checkout and get instant access on the confirmation page
 - One-time access, no buyer account required
 - Sellers keep 95.5% (4.5% platform fee, no monthly costs)
 - Payment happens before delivery — eliminates ghosting for freelancers
@@ -98,7 +98,7 @@
 - Purchases are immutable snapshots (delivery URL captured at purchase time)
 - Stripe is source of truth for payouts
 - Buyer auth via HMAC-signed tokens (no Supabase session for buyers)
-- Content URL never exposed in HTML/JS — only delivered via authenticated server-to-email path after Stripe webhook confirmation
+- Content URL never exposed in HTML/JS — only unlocked server-side after Stripe webhook confirmation, then shown on confirmation page
 - Webhook idempotency enforced throughout (promotion_usage_log, welcome_email_sent flags)
 - Google Safe Browsing API integration for URL validation
 

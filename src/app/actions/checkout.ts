@@ -80,7 +80,7 @@ export async function createCheckoutSession(
     },
     custom_text: {
       submit: {
-        message: "Your access link will be sent to the email address above.",
+        message: "You'll get instant access right after payment. We'll also email you a backup link.",
       },
     },
     success_url: `${paywallUrl}/success?session_id={CHECKOUT_SESSION_ID}`,

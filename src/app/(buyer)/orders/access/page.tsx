@@ -113,7 +113,7 @@ function ErrorState({
               href={`/orders?oid=${orderId}`}
               className="inline-flex items-center px-6 py-3 bg-primary text-primary-foreground no-underline rounded-full font-medium hover:opacity-90 transition-opacity text-sm"
             >
-              Resend access email →
+              Resend access link →
             </Link>
           )}
           <Link

@@ -3,8 +3,8 @@
 import { useState } from "react";
 
 const ISSUE_OPTIONS = [
-  "I never received the email",
-  "The link in my email doesn't work",
+  "I can't access my purchase",
+  "My access link doesn't work",
   "I was charged but payment shows as failed",
   "The content isn't what was described",
   "Other",
@@ -55,7 +55,7 @@ export function DisputeForm({
           onClick={() => setOpen(true)}
           className="text-xs text-muted-foreground hover:text-foreground transition-colors bg-transparent border-none cursor-pointer p-0 underline underline-offset-2"
         >
-          Didn&apos;t receive your access link?
+          Having trouble accessing your purchase?
         </button>
       </div>
     );
@@ -97,7 +97,7 @@ export function DisputeForm({
     <div className="border border-border rounded-2xl bg-card overflow-hidden">
       <div className="p-5">
         <p className="text-sm font-medium text-foreground mb-1">
-          Didn&apos;t receive your access link?
+          Having trouble accessing your purchase?
         </p>
         <p className="text-xs text-muted-foreground mb-4">
           Check your spam folder first. Emails sometimes land there.

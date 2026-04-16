@@ -41,7 +41,7 @@ const steps = [
   {
     n: "03",
     title: "Share the paywall",
-    body: "Buyers pay via Stripe and get the link by email. Instant. No account required.",
+    body: "Buyers pay via Stripe and get instant access on the confirmation page. No account required.",
   },
 ];
 
@@ -64,7 +64,7 @@ const features: { Icon: LucideIcon; title: string; body: string }[] = [
   {
     Icon: Mail,
     title: "Instant access to every buyer",
-    body: "Buyer pays → Stripe webhook fires → email with your link arrives. No manual work. No follow-up. Done.",
+    body: "Buyer pays → Stripe confirms → buyer gets instant access. No manual work. No follow-up. Done.",
   },
   {
     Icon: Share2,
@@ -172,7 +172,7 @@ const faqItems = [
   },
   {
     q: "How does unseal.link keep my content URL private?",
-    a: "Your URL never appears in the page HTML, JavaScript, or network requests of your paywall page.\n\n1. Buyer opens your unseal.link and sees product name, price, Stripe checkout. Your content URL: not present anywhere.\n2. Buyer pays. Stripe processes the charge.\n3. Stripe fires a signed webhook to our server. We verify the signature cryptographically.\n4. Only after verification: your content URL travels over an encrypted server-to-email path to the buyer's inbox.\n5. Buyer gets the email instantly. You get notified. Done.\n\nView-source won't reveal your URL. Network inspection won't reveal your URL. The only way to get it is to pay.",
+    a: "Your URL never appears in the page HTML, JavaScript, or network requests of your paywall page.\n\n1. Buyer opens your unseal.link and sees product name, price, Stripe checkout. Your content URL: not present anywhere.\n2. Buyer pays. Stripe processes the charge.\n3. Stripe fires a signed webhook to our server. We verify the signature cryptographically.\n4. Only after verification: your content URL is unlocked for that buyer. They get instant access on the confirmation page, and a backup link by email.\n5. Buyer clicks through. You get notified. Done.\n\nView-source won't reveal your URL. Network inspection won't reveal your URL. The only way to get it is to pay.",
   },
   {
     q: "What's the minimum payout?",
@@ -188,11 +188,11 @@ const faqItems = [
   },
   {
     q: "Do buyers need an account to purchase?",
-    a: "No. Buyers click your paywall link, enter their email and card in Stripe Checkout, and receive your content URL by email. That's the entire flow.\n\nNo account creation. No password. No profile. The buyer experience is frictionless by design: just a payment and an email.",
+    a: "No. Buyers click your paywall link, enter their email and card in Stripe Checkout, and get instant access on the confirmation page. That's the entire flow.\n\nNo account creation. No password. No profile. The buyer experience is frictionless by design: just a payment and a click.",
   },
   {
     q: "Can I update my content URL after publishing?",
-    a: "Yes. You can edit your link's destination URL at any time from your dashboard.\n\nBuyers who already purchased received a snapshot of the URL at the time of their purchase. If you've made a significant update, you can resend access to existing buyers from the link detail page. They'll get a fresh access email with the current URL.",
+    a: "Yes. You can edit your link's destination URL at any time from your dashboard.\n\nBuyers who already purchased received a snapshot of the URL at the time of their purchase. If you've made a significant update, you can resend access to existing buyers from the link detail page. They'll get a fresh access link with the current URL.",
   },
 ];
 
@@ -260,7 +260,7 @@ export default function HomePage() {
 
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-lg leading-relaxed">
               Paste any URL, set a price, share your paywall link. Buyers pay
-              via Stripe and get instant access by email.
+              via Stripe and get instant access.
             </p>
 
             <div className="flex flex-wrap gap-3 mb-3">
@@ -319,7 +319,7 @@ export default function HomePage() {
                     Pay via Stripe →
                   </div>
                   <p className="text-xs text-muted-foreground text-center">
-                    Instant access by email
+                    Instant access after payment
                   </p>
                 </div>
               </div>
@@ -426,8 +426,8 @@ export default function HomePage() {
                 "Buyer opens your unseal.link and sees product name, price, Stripe checkout. Your content URL: not present anywhere.",
                 "Buyer pays. Stripe processes the charge.",
                 "Stripe fires a signed webhook to our server. We verify the signature cryptographically.",
-                "Only after verification: your content URL travels over an encrypted server-to-email path to the buyer's inbox.",
-                "Buyer gets the email instantly. You get notified. Done.",
+                "Only after verification: your content URL is unlocked. Buyer gets instant access on the confirmation page plus a backup link by email.",
+                "Buyer clicks through. You get notified. Done.",
               ].map((step, i) => (
                 <li key={i} className="flex gap-4">
                   <span className="text-xs font-mono font-medium text-muted-foreground mt-0.5 shrink-0 w-5">

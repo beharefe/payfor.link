@@ -98,7 +98,7 @@ export function ResendAccessButton({
   return (
     <div className="text-center">
       <p className="text-xs text-muted-foreground mb-2">
-        Didn&apos;t receive the email?
+        Need the link again?
       </p>
       <button
         type="button"
