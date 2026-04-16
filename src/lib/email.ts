@@ -15,7 +15,7 @@ import { RefundSellerEmail } from "@unseallink/emails/refund-seller";
 import { SaleNotificationEmail } from "@unseallink/emails/sale-notification";
 import { SellerWelcomeEmail } from "@unseallink/emails/seller-welcome";
 import { ACCESS_TOKEN_DAYS } from "./buyer-token";
-import { FOUNDER_EMAIL, FOUNDER_FROM, FROM, resend } from "./resend";
+import { FOUNDER_EMAIL, FROM, resend } from "./resend";
 
 // Supabase magic link expiry is configured in the Supabase dashboard (Auth → Email → OTP Expiry).
 // Keep this in sync with that setting.
@@ -213,7 +213,7 @@ export async function sendSellerWelcomeEmail(opts: {
   promotions?: Array<{ name: string; description: string | null }>;
 }) {
   return resend.emails.send({
-    from: FOUNDER_FROM,
+    from: FROM,
     replyTo: FOUNDER_EMAIL,
     to: opts.to,
     subject: "You're live on unseal.link",
