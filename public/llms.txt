@@ -1,54 +1,113 @@
 # unseal.link
 
-> A minimal paywall platform. Sellers paste any link, set a price, and share a paywall URL. Buyers pay via Stripe and receive email-based access. No storefront, no platform lock-in.
+> Payment-gated link platform. Sellers paste any URL, set a price, and share a paywall link. Buyers pay via Stripe and receive email-based access in under 30 seconds. No storefront, no file uploads, no buyer account required.
 
 ## What it does
 
-- Sellers paste any URL (Notion, Figma, Google Drive, GitHub, Discord, Airtable, Loom, etc.)
-- Set a price ($9.99 minimum)
-- Get a shareable paywall at unseal.link/@username/slug
-- Buyers pay via Stripe Checkout and receive an access link by email
+- Sellers paste any URL (Notion, Figma, Google Drive, GitHub, Discord, Canva, Dropbox, Loom, Airtable, or any HTTPS link)
+- Set a price (minimum $9.99)
+- Get a shareable paywall link at unseal.link/l/slug
+- Buyers pay via Stripe Checkout and receive an access link by email within 30 seconds
 - One-time access, no buyer account required
 - Sellers keep 95.5% (4.5% platform fee, no monthly costs)
-- Payment happens before delivery -- eliminates ghosting for freelancers
+- Payment happens before delivery — eliminates ghosting for freelancers
+- Money goes directly to seller's connected Stripe account (unseal.link never holds funds)
+- No $100 payout minimum (unlike Gumroad)
+- Launch promotion: first $500 in sales fee-free for early sellers
+
+## Who it's for
+
+- Notion template creators selling systems and workspaces
+- Figma designers selling UI kits, icon sets, and components (Figma closed paid file submissions to new individual creators in late 2023)
+- Developers selling GitHub boilerplates and starter kits
+- Freelancers delivering files to clients after payment confirmation
+- Discord community owners selling server access without bot infrastructure
+- Educators selling course content, video access, and guides
+- Data professionals selling spreadsheets, datasets, and Airtable bases
+
+## Key differentiators vs competitors
+
+- Gumroad: 10% fee + $0.50, requires file uploads, $100 payout minimum, keeps fee on refunds, 30% for Discover marketplace traffic
+- Lemon Squeezy: 5% + $0.50, requires file uploads and storefront setup
+- Payhip: 5%, requires file uploads
+- unseal.link: 4.5%, works with any URL, no uploads, no minimum payout, fee returned on refunds
 
 ## Key pages
 
-- /                                                   -> Homepage
-- /how-it-works                                       -> Step-by-step explanation
-- /pricing                                            -> Transparent fee structure (4.5%)
-- /auth                                               -> Seller signup / login (magic link, no password)
+- /                                                         -> Homepage
+- /how-it-works                                             -> Step-by-step explanation
+- /pricing                                                  -> Transparent fee structure (4.5%)
+- /auth                                                     -> Seller signup / login (magic link, no password)
+- /dashboard                                                -> Seller dashboard with revenue chart, sales history, order management
+- /terms                                                    -> Terms of Service
+- /privacy                                                  -> Privacy Policy
 
-## Guides and blog posts
+## Blog posts and guides
 
-- /sell-notion-template                               -> How to sell Notion templates
-- /sell-figma-template                                -> How to sell Figma files
-- /sell-discord-access                                -> How to sell Discord community access
-- /sell-github-repo                                   -> How to sell GitHub repo access
-- /sell-course                                        -> How to sell course content
-- /how-to-paywall-any-link                            -> How to paywall any link and get paid instantly
-- /sell-notion-templates-without-gumroad-fees         -> Sell Notion templates without Gumroad fees
-- /stop-getting-ghosted-get-paid-before-delivering    -> Get paid before delivering files or commissions
-- /unseal-link-vs-gumroad-vs-payhip-2026              -> unseal.link vs Gumroad vs Payhip (2026)
-- /get-paid-before-sharing                            -> Get paid before sharing any file or link
-- /freelance-file-delivery                            -> Deliver freelance files through a paywall
-- /sell-google-drive-files                            -> Sell Google Drive files and folders
-- /sell-with-stripe-without-store                     -> Accept Stripe payments without building a store
+- /sell-notion-template                                     -> How to sell Notion templates
+- /sell-figma-template                                      -> How to sell Figma files
+- /sell-discord-access                                      -> How to sell Discord community access
+- /sell-github-repo                                         -> How to sell GitHub repo access
+- /sell-course                                              -> How to sell course content
+- /how-to-paywall-any-link                                  -> How to paywall any link and get paid instantly
+- /sell-notion-templates-without-gumroad-fees               -> Sell Notion templates without Gumroad fees
+- /stop-getting-ghosted-get-paid-before-delivering          -> Get paid before delivering files or commissions
+- /unseal-link-vs-gumroad-vs-payhip-2026                    -> unseal.link vs Gumroad vs Payhip (2026)
+- /get-paid-before-sharing                                  -> Get paid before sharing any file or link
+- /freelance-file-delivery                                  -> Deliver freelance files through a paywall
+- /sell-google-drive-files                                  -> Sell Google Drive files and folders
+- /sell-with-stripe-without-store                           -> Accept Stripe payments without building a store
+- /how-to-sell-canva-template-link                          -> How to sell a Canva template link
+- /how-to-sell-figma-files                                  -> How to sell Figma files when Figma won't let you
+- /how-to-sell-notion-templates                             -> How to sell Notion templates without a storefront
+- /get-paid-before-delivering-freelance-work                -> How to get paid before delivering freelance work
+- /gumroad-alternatives-lower-fees                          -> Gumroad alternatives with lower fees (2026 comparison)
+- /sell-access-discord-server                               -> How to sell access to a Discord server
+- /sell-github-repo-code-boilerplate                        -> How to sell a GitHub repo or code boilerplate
+- /link-preview-storefront-guide                            -> Why your link preview is your storefront
+- /add-buy-button-website-blog                              -> How to add a buy button to any website or blog
+- /share-paid-links-discord-slack-whatsapp-telegram         -> How to share paid links on Discord, Slack, WhatsApp, Telegram
+- /sell-google-drive-file-folder                            -> How to sell a Google Drive file or folder
+- /sell-content-twitter-x                                   -> How to sell your content on Twitter/X
+- /monetize-newsletter-paid-links                           -> How to monetize your newsletter with paid links
+- /what-is-a-paywall-link                                   -> What is a paywall link?
 
 ## Pricing
 
 - Platform fee: 4.5% per sale
 - Stripe processing: ~2.9% + $0.30 per transaction (separate, billed by Stripe)
 - No monthly fees, no setup costs, no contracts
-- Compared to: Gumroad (10%), Payhip (5%), Lemon Squeezy (5%)
+- No minimum payout threshold
+- Fee is returned to seller on refunds
+- Launch promotion: first $500 in sales completely fee-free for first 100 sellers
+
+## Features
+
+- Dynamic OG image generation for every paid link (title + price + seller) — renders correctly on Twitter, Discord, Slack, WhatsApp, Telegram, iMessage, LinkedIn
+- Embeddable buy button: <unseal-button link="id"> Web Component
+- Dashboard: revenue chart, sales history, order management, refund control, link archiving
+- Promotions system: generic fee waiver / credit system per seller account
+- Abuse reporting on every paywall page
+- Seller public profile page at unseal.link/@username
 
 ## Technical
 
-- Built with Next.js 15 App Router, Supabase, Stripe Connect Express, Resend
-- No content is hosted -- platform controls access, sellers own their content
+- Built with Next.js 15 App Router, Supabase (Postgres), Stripe Connect Express, Resend, Vercel, Amplitude, Axiom, Sentry
+- OG images generated with @vercel/og (Satori) at edge in <100ms
+- No content hosted — platform controls access, sellers own their content
 - Purchases are immutable snapshots (delivery URL captured at purchase time)
-- Stripe is the source of truth for payouts
+- Stripe is source of truth for payouts
 - Buyer auth via HMAC-signed tokens (no Supabase session for buyers)
+- Content URL never exposed in HTML/JS — only delivered via authenticated server-to-email path after Stripe webhook confirmation
+- Webhook idempotency enforced throughout (promotion_usage_log, welcome_email_sent flags)
+- Google Safe Browsing API integration for URL validation
+
+## Company
+
+- Operated by Trana, Inc., Delaware C-Corp (incorporated via Stripe Atlas)
+- Address: 1111B S Governors Ave STE 39117, Dover, DE 19904, United States
+- Contact: info@unseal.link
+- Founded: April 2026
 
 ## Sitemap
 
