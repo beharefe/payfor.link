@@ -24,31 +24,34 @@ Next.js App Router (Vercel)
 
 ### Seller creates a product
 ```
-Browser → POST /api/create-product
-  → Supabase: insert products row
+Browser → Server Action: createProductAction()
   → Google Safe Browsing: validate URL
-  ← return { slug, paywall_url }
+  → Supabase: insert products row
+  ← redirect to /dashboard/links/[id]
 ```
 
 ### Buyer pays
 ```
-Browser → POST /api/create-checkout
-  → Stripe: create Checkout Session
-  ← return { url }
-Browser → redirect to Stripe hosted checkout
+Browser → Server Action: createCheckoutSession()
+  → calculateFee() applies any active promotions
+  → Stripe: create Checkout Session with fee + metadata
+  ← redirect to Stripe hosted checkout
 Stripe → POST /api/stripe-webhook (checkout.session.completed)
-  → Supabase: insert orders row
-  → Resend: send OTP email to buyer
+  → Supabase: insert orders row (delivery_url snapshot)
+  → Supabase: insert access_tokens row
+  → Resend: send access email to buyer
   ← 200 OK
-Browser → /pay/[slug]/success
+Browser → /@username/slug/success
 ```
 
 ### Buyer unlocks
 ```
-Email link → GET /unlock?token=xxx
-  → Supabase: validate access_tokens
-  → mark token used
-  ← 302 redirect → delivery_url (e.g. notion.so/template)
+Email link → GET /orders/access?t=xxx&oid=uuid
+  → Supabase: validate access_tokens (hash + order_id)
+  → show confirmation screen (do NOT consume on GET)
+Buyer clicks "Open link →" → Server Action: consumeToken()
+  → mark token used_at = now() WHERE used_at IS NULL
+  ← 302 redirect → order.delivery_url (snapshot)
 ```
 
 ### Seller withdraws
@@ -114,18 +117,31 @@ Platform never duplicates data that external services own authoritatively.
 
 ---
 
+## Server Actions
+
+Product and checkout flows use Next.js Server Actions (not REST endpoints):
+
+```
+createProductAction()        seller creates link
+updateProductAction()        seller edits link
+createCheckoutSession()      buyer initiates payment
+```
+
 ## API Routes
 
 ```
-POST /api/create-product          seller creates link
-POST /api/create-checkout         buyer initiates payment
-POST /api/stripe-webhook          Stripe events (checkout.completed, account.updated)
-POST /api/connect-stripe          seller initiates Stripe Connect
-GET  /api/connect-stripe/return   post-OAuth return handler
-GET  /api/connect-stripe/refresh  re-trigger onboarding if expired
-POST /api/resend-unlock           resend unlock email
-POST /api/report-abuse            buyer reports product
-GET  /api/purchases               seller fetches their sales
+POST /api/stripe-webhook              Stripe events (4 — see flows.md)
+POST /api/connect-stripe              seller initiates Stripe Connect
+GET  /api/connect-stripe/return       post-OAuth return handler
+GET  /api/connect-stripe/refresh      re-trigger onboarding if expired
+POST /api/orders/send-access-link     resend access email to buyer
+POST /api/orders/consume-token        mark token used, redirect to delivery URL
+GET  /api/orders/[id]/access          validate session + redirect to delivery URL
+POST /api/orders/verify               set buyer_session cookie from order token
+POST /api/report-abuse                buyer reports product
+GET  /api/og/[slug]                   OG image for product paywall links
+POST /api/upload-avatar               seller avatar upload
+POST /api/upload-preview              product preview image upload
 ```
 
 ---
@@ -133,19 +149,23 @@ GET  /api/purchases               seller fetches their sales
 ## Page Routes
 
 ```
-/                           marketing homepage
-/how-it-works               education page
-/pricing                    fee structure
+/                               marketing homepage
+/about                          about page
 
-/auth                       magic link login (sellers)
-/dashboard                  seller home
-/create                     create new product
-/product/[id]               product detail + management
-/settings                   account settings
+/auth                           magic link login (sellers)
+/dashboard                      seller home + onboarding checklist
+/dashboard/links/new            create new product
+/dashboard/links/[id]           product detail + management
+/dashboard/links/[id]/edit      edit product
+/dashboard/orders               seller order history
+/dashboard/settings             account settings
+/onboarding/name                username setup (post-signup)
 
-/pay/[slug]                 public paywall page (buyer)
-/pay/[slug]/success         post-payment confirmation
-/unlock                     token validation + redirect
-/unlock-request             request new unlock link
-/library                    buyer purchase history
+/@username                      public seller profile
+/@username/[slug]               public paywall page (buyer)
+/@username/[slug]/success       post-payment confirmation
+
+/orders                         buyer purchase history (cookie-auth)
+/orders/[order_id]              buyer order detail
+/orders/access                  access token validation + delivery redirect
 ```

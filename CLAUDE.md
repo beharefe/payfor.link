@@ -122,10 +122,12 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - Browser-side confirmation before consuming (prevents email scanner pre-click)
 - Separate `access_tokens` table — never store on `orders`
 
-### Webhooks (2 events only)
+### Webhooks (4 events)
 ```
-checkout.session.completed  → create order → generate custom OTP (SHA-256 hashed) → send via Resend → buyer verifies on success page → then access token + email
+checkout.session.completed  → create order → generate access token → send access email via Resend (no OTP — token sent directly)
 account.updated             → sync Stripe Connect status → notify seller on KYC complete
+charge.dispute.created      → set order status = 'disputed' → alert seller + admin
+charge.refunded             → set order status = 'refunded' → reverse promotion usage
 ```
 
 ### Payouts
@@ -181,10 +183,7 @@ id uuid PK
 product_id uuid FK → products.id
 seller_id uuid FK → sellers.id
 buyer_email text
-buyer_email_verified boolean DEFAULT false
-otp_hash text                                 -- SHA-256 of OTP code (cleared after verify)
-otp_expires_at timestamptz
-otp_attempts integer DEFAULT 0
+buyer_email_verified boolean DEFAULT false    -- set true immediately by webhook
 stripe_payment_id text UNIQUE                 -- idempotency
 stripe_checkout_session_id text
 delivery_url text NOT NULL                    -- snapshot, never from products table
