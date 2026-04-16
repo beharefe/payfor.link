@@ -148,8 +148,7 @@ export async function grantPromotionToSeller(
   await supabase
     .from(TABLES.PROMOTIONS)
     .update({ redemption_count: promotion.redemption_count + 1 })
-    .eq("id", promotionId)
-    .catch(() => undefined);
+    .eq("id", promotionId);
 
   // biome-ignore lint/suspicious/noExplicitAny: Supabase join type
   return (data as any) ?? null;
