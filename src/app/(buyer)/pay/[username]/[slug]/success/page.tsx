@@ -1,3 +1,4 @@
+import { generateAccessToken } from "@unseallink/lib/access-token";
 import { TABLES } from "@unseallink/lib/db";
 import { stripe } from "@unseallink/lib/stripe";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
@@ -94,6 +95,16 @@ export default async function PaymentSuccessPage({
     .eq("id", order.seller_id)
     .single();
 
+  // Generate a fresh single-use token so the buyer can access immediately — no email required.
+  // Email is still sent by the webhook as a backup.
+  const { raw, hash, expiresAt } = generateAccessToken();
+  const { error: tokenError } = await supabase.from(TABLES.ACCESS_TOKENS).insert({
+    order_id: order.id,
+    token_hash: hash,
+    expires_at: expiresAt.toISOString(),
+  });
+  const accessUrl = tokenError ? null : `/orders/access?t=${raw}&oid=${order.id}`;
+
   const shortId = order.id.slice(0, 8).toUpperCase();
   const purchasedOn = new Date(order.created_at).toLocaleDateString("en-US", {
     year: "numeric",
@@ -115,10 +126,21 @@ export default async function PaymentSuccessPage({
             Payment confirmed
           </h1>
           <p className="text-muted-foreground text-sm">
-            Your access link is on its way to{" "}
-            <span className="font-medium text-foreground">{customerEmail}</span>
+            {accessUrl
+              ? <>We also sent a link to <span className="font-medium text-foreground">{customerEmail}</span></>
+              : <>Your access link is on its way to <span className="font-medium text-foreground">{customerEmail}</span></>
+            }
           </p>
         </div>
+
+        {accessUrl && (
+          <Link
+            href={accessUrl}
+            className="w-full flex items-center justify-center px-6 py-3 bg-primary text-primary-foreground rounded-full font-medium text-sm no-underline hover:opacity-90 transition-opacity"
+          >
+            Access your purchase →
+          </Link>
+        )}
 
         {/* Receipt card */}
         <div className="border border-border rounded-2xl bg-card overflow-hidden">
@@ -151,7 +173,10 @@ export default async function PaymentSuccessPage({
           </div>
           <div className="bg-muted/40 border-t border-border px-5 py-3.5">
             <p className="text-xs text-muted-foreground text-center">
-              Check your inbox and click the link to access your purchase
+              {accessUrl
+                ? "An access link was also sent to your inbox as a backup"
+                : "Check your inbox and click the link to access your purchase"
+              }
             </p>
           </div>
         </div>
