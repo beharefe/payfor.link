@@ -34,13 +34,13 @@ export default async function AccessPage({ searchParams }: Props) {
   }
 
   if (token.used_at) {
-    return <ErrorState message="This link has already been used." orderId={orderId} showResend />;
+    return <ErrorState message="Access already used." orderId={orderId} showResend />;
   }
 
   if (new Date(token.expires_at) < new Date()) {
     return (
       <ErrorState
-        message="This link has expired (valid for 24 hours)."
+        message="Access expired."
         orderId={orderId}
         showResend
       />
@@ -113,7 +113,7 @@ function ErrorState({
               href={`/orders?oid=${orderId}`}
               className="inline-flex items-center px-6 py-3 bg-primary text-primary-foreground no-underline rounded-full font-medium hover:opacity-90 transition-opacity text-sm"
             >
-              Request a new link →
+              Resend access email →
             </Link>
           )}
           <Link
