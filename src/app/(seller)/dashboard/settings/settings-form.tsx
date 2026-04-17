@@ -13,15 +13,26 @@ type Props = {
   currentName: string;
   currentBio: string;
   currentAvatarUrl: string | null;
+  currentTwitterHandle: string | null;
+  currentWebsiteUrl: string | null;
+  currentProfilePublic: boolean;
 };
 
-export function SettingsForm({ currentName, currentBio, currentAvatarUrl }: Props) {
+export function SettingsForm({
+  currentName,
+  currentBio,
+  currentAvatarUrl,
+  currentTwitterHandle,
+  currentWebsiteUrl,
+  currentProfilePublic,
+}: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(currentAvatarUrl);
   const [avatarRemoved, setAvatarRemoved] = useState(false);
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const [avatarModalOpen, setAvatarModalOpen] = useState(false);
+  const [profilePublic, setProfilePublic] = useState(currentProfilePublic);
   const [uploadPending, _startUpload] = useTransition();
 
   const [state, formAction, isPending] = useActionState(
@@ -41,6 +52,7 @@ export function SettingsForm({ currentName, currentBio, currentAvatarUrl }: Prop
       } else {
         formData.set("avatar_url", currentAvatarUrl ?? "");
       }
+      formData.set("profile_public", String(profilePublic));
       const result = await updateProfile(formData);
       if ("error" in result) return result.error;
       return "saved";
@@ -161,7 +173,6 @@ export function SettingsForm({ currentName, currentBio, currentAvatarUrl }: Prop
         </div>
       )}
 
-
       {/* Display name */}
       <div>
         <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1.5">
@@ -197,6 +208,66 @@ export function SettingsForm({ currentName, currentBio, currentAvatarUrl }: Prop
           className="block w-full px-3 py-2.5 border border-input rounded-xl text-sm bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring outline-none resize-none"
         />
         <p className="text-xs text-muted-foreground mt-1.5">Max 300 characters.</p>
+      </div>
+
+      {/* Twitter/X handle */}
+      <div>
+        <label htmlFor="twitter_handle" className="block text-sm font-medium text-foreground mb-1.5">
+          Twitter / X handle <span className="font-normal text-muted-foreground">(optional)</span>
+        </label>
+        <Input
+          id="twitter_handle"
+          name="twitter_handle"
+          type="text"
+          defaultValue={currentTwitterHandle ?? ""}
+          maxLength={50}
+          placeholder="@handle"
+          className="rounded-xl h-11"
+        />
+        <p className="text-xs text-muted-foreground mt-1.5">
+          Shown on your profile and paywall pages. Do not include the @.
+        </p>
+      </div>
+
+      {/* Website */}
+      <div>
+        <label htmlFor="website_url" className="block text-sm font-medium text-foreground mb-1.5">
+          Website <span className="font-normal text-muted-foreground">(optional)</span>
+        </label>
+        <Input
+          id="website_url"
+          name="website_url"
+          type="url"
+          defaultValue={currentWebsiteUrl ?? ""}
+          placeholder="https://yoursite.com"
+          className="rounded-xl h-11"
+        />
+        <p className="text-xs text-muted-foreground mt-1.5">Must start with https://</p>
+      </div>
+
+      {/* Profile visibility */}
+      <div className="flex items-start justify-between gap-4 py-1">
+        <div>
+          <p className="text-sm font-medium text-foreground leading-snug">Public profile</p>
+          <p className="text-xs text-muted-foreground mt-0.5 max-w-xs leading-relaxed">
+            Anyone with your link can see your profile page. Turn off to hide it.
+          </p>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={profilePublic}
+          onClick={() => setProfilePublic((v) => !v)}
+          className={`relative shrink-0 mt-0.5 w-9 h-5 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring border-none cursor-pointer ${
+            profilePublic ? "bg-foreground" : "bg-input"
+          }`}
+        >
+          <span
+            className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-background shadow-sm transition-transform ${
+              profilePublic ? "translate-x-4" : "translate-x-0"
+            }`}
+          />
+        </button>
       </div>
 
       <div className="pt-1">

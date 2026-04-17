@@ -13,7 +13,7 @@ export default async function SettingsPage() {
 
   const { data: seller } = await supabase
     .from(TABLES.SELLERS)
-    .select("name, email, bio, avatar_url, stripe_connected, username")
+    .select("name, email, bio, avatar_url, stripe_connected, username, twitter_handle, website_url, profile_public")
     .eq("id", user.id)
     .single();
 
@@ -30,6 +30,9 @@ export default async function SettingsPage() {
               currentName={seller.name ?? ""}
               currentBio={seller.bio ?? ""}
               currentAvatarUrl={seller.avatar_url ?? null}
+              currentTwitterHandle={seller.twitter_handle ?? null}
+              currentWebsiteUrl={seller.website_url ?? null}
+              currentProfilePublic={seller.profile_public ?? true}
             />
           </div>
         </div>

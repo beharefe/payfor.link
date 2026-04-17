@@ -1,5 +1,6 @@
 import { TABLES } from "@unseallink/lib/db";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
+import { ArrowUpRight } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -14,7 +15,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const service = createServiceClient();
   const { data: seller } = await service
     .from(TABLES.SELLERS)
-    .select("name, bio")
+    .select("name, bio, profile_public")
     .eq("username", username)
     .single();
 
@@ -52,11 +53,13 @@ export default async function SellerProfilePage({ params }: Props) {
 
   const { data: seller } = await service
     .from(TABLES.SELLERS)
-    .select("id, name, username, bio, avatar_url")
+    .select("id, name, username, bio, avatar_url, twitter_handle, website_url, profile_public")
     .eq("username", username)
     .single();
 
   if (!seller) notFound();
+
+  if (seller.profile_public === false) notFound();
 
   const { data: products } = await service
     .from(TABLES.PRODUCTS)
@@ -98,6 +101,32 @@ export default async function SellerProfilePage({ params }: Props) {
               </p>
               {seller.bio && (
                 <p className="text-sm text-muted-foreground mt-2 max-w-md">{seller.bio}</p>
+              )}
+              {(seller.twitter_handle || seller.website_url) && (
+                <div className="flex items-center gap-4 mt-2">
+                  {seller.twitter_handle && (
+                    <a
+                      href={`https://x.com/${seller.twitter_handle}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      @{seller.twitter_handle}
+                      <ArrowUpRight className="size-3.5" aria-hidden="true" />
+                    </a>
+                  )}
+                  {seller.website_url && (
+                    <a
+                      href={seller.website_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      Website
+                      <ArrowUpRight className="size-3.5" aria-hidden="true" />
+                    </a>
+                  )}
+                </div>
               )}
             </div>
           </div>

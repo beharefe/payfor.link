@@ -1,7 +1,7 @@
 "use client";
 
 import { createProductAction } from "@unseallink/app/actions/product";
-import { Clock, Loader2, LockKeyhole, Mail, Timer } from "lucide-react";
+import { Clock, Loader2, LockKeyhole, Mail, Timer, X } from "lucide-react";
 import { useRef, useState, useTransition } from "react";
 
 const PRICE_PRESETS = [9.99, 19, 29, 49];
@@ -135,12 +135,37 @@ export function NewLinkForm() {
   const [mobileTab, setMobileTab] = useState<"edit" | "preview">("edit");
   const [limitToOneSale, setLimitToOneSale] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [subtitle, setSubtitle] = useState("");
+  const [includes, setIncludes] = useState<string[]>([]);
+  const [faq, setFaq] = useState<Array<{ q: string; a: string }>>([]);
   const [isPending, startTransition] = useTransition();
   const priceInputRef = useRef<HTMLInputElement>(null);
   const prevObjectUrl = useRef<string | null>(null);
 
   const priceNum = parseFloat(priceValue);
   const priceInvalid = priceValue !== "" && (isNaN(priceNum) || priceNum < MIN_PRICE);
+
+  // Includes helpers
+  function addInclude() {
+    if (includes.length < 8) setIncludes((prev) => [...prev, ""]);
+  }
+  function updateInclude(i: number, val: string) {
+    setIncludes((prev) => prev.map((item, idx) => (idx === i ? val : item)));
+  }
+  function removeInclude(i: number) {
+    setIncludes((prev) => prev.filter((_, idx) => idx !== i));
+  }
+
+  // FAQ helpers
+  function addFaqItem() {
+    if (faq.length < 5) setFaq((prev) => [...prev, { q: "", a: "" }]);
+  }
+  function updateFaqItem(i: number, field: "q" | "a", val: string) {
+    setFaq((prev) => prev.map((item, idx) => (idx === i ? { ...item, [field]: val } : item)));
+  }
+  function removeFaqItem(i: number) {
+    setFaq((prev) => prev.filter((_, idx) => idx !== i));
+  }
 
   async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     if (prevObjectUrl.current) {
@@ -200,6 +225,9 @@ export function NewLinkForm() {
         formData.set("expires_at", new Date(expiresAt).toISOString());
       }
       formData.set("terms_accepted", termsAccepted ? "true" : "false");
+      formData.set("subtitle", subtitle);
+      formData.set("includes", JSON.stringify(includes.filter((s) => s.trim())));
+      formData.set("faq", JSON.stringify(faq.filter((item) => item.q.trim() && item.a.trim())));
 
       if (imageFile) {
         const uploadBody = new FormData();
@@ -298,6 +326,118 @@ export function NewLinkForm() {
               placeholder="Short description shown on the paywall page"
               className={inputClass}
             />
+          </div>
+
+          {/* Tagline / Subtitle */}
+          <div>
+            <label htmlFor="subtitle" className={labelClass}>
+              Tagline{" "}
+              <span className="font-normal text-muted-foreground">optional</span>
+            </label>
+            <input
+              id="subtitle"
+              type="text"
+              value={subtitle}
+              onChange={(e) => setSubtitle(e.target.value)}
+              maxLength={120}
+              placeholder="One-line summary shown under the title on the paywall"
+              className={inputClass}
+            />
+            <p className={hintClass}>{subtitle.length}/120</p>
+          </div>
+
+          {/* What's included */}
+          <div>
+            <p className={labelClass}>
+              What&apos;s included{" "}
+              <span className="font-normal text-muted-foreground">optional</span>
+            </p>
+            <p className={`${hintClass} mb-3`}>Up to 8 bullet points shown on the paywall page.</p>
+            <div className="flex flex-col gap-2">
+              {includes.map((item, i) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: positional list
+                <div key={i} className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={item}
+                    onChange={(e) => updateInclude(i, e.target.value)}
+                    maxLength={120}
+                    placeholder={`Item ${i + 1}`}
+                    className={inputClass}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeInclude(i)}
+                    className="shrink-0 p-1.5 text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label="Remove item"
+                  >
+                    <X className="size-4" aria-hidden="true" />
+                  </button>
+                </div>
+              ))}
+            </div>
+            {includes.length < 8 && (
+              <button
+                type="button"
+                onClick={addInclude}
+                className="mt-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                + Add item
+              </button>
+            )}
+          </div>
+
+          {/* FAQ */}
+          <div>
+            <p className={labelClass}>
+              FAQ{" "}
+              <span className="font-normal text-muted-foreground">optional</span>
+            </p>
+            <p className={`${hintClass} mb-3`}>Up to 5 Q&amp;A pairs shown on the paywall page.</p>
+            <div className="flex flex-col gap-4">
+              {faq.map((item, i) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: positional list
+                <div key={i} className="border border-border rounded-xl p-4 space-y-2.5 relative">
+                  <button
+                    type="button"
+                    onClick={() => removeFaqItem(i)}
+                    className="absolute top-3 right-3 p-1 text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label="Remove FAQ item"
+                  >
+                    <X className="size-4" aria-hidden="true" />
+                  </button>
+                  <div>
+                    <label className="block text-xs text-muted-foreground mb-1">Question</label>
+                    <input
+                      type="text"
+                      value={item.q}
+                      onChange={(e) => updateFaqItem(i, "q", e.target.value)}
+                      placeholder="e.g. Can I use this commercially?"
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-muted-foreground mb-1">Answer</label>
+                    <textarea
+                      value={item.a}
+                      onChange={(e) => updateFaqItem(i, "a", e.target.value)}
+                      rows={2}
+                      placeholder="Your answer…"
+                      className={`${inputClass} resize-none`}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+            {faq.length < 5 && (
+              <button
+                type="button"
+                onClick={addFaqItem}
+                className="mt-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                + Add question
+              </button>
+            )}
           </div>
 
           {/* Price */}

@@ -19,7 +19,7 @@ export default async function EditLinkPage({
   const { data: link } = await supabase
     .from(TABLES.PRODUCTS)
     .select(
-      "id, title, description, destination_url, price, preview_image_url, expires_at, status, seller_id",
+      "id, title, description, destination_url, price, preview_image_url, expires_at, status, seller_id, subtitle, includes, faq",
     )
     .eq("id", id)
     .single();
@@ -51,6 +51,11 @@ export default async function EditLinkPage({
             price: link.price,
             preview_image_url: link.preview_image_url ?? null,
             expires_at: link.expires_at ?? null,
+            subtitle: link.subtitle ?? null,
+            // biome-ignore lint/suspicious/noExplicitAny: JSONB from Supabase
+            includes: (link.includes as string[] | null) ?? null,
+            // biome-ignore lint/suspicious/noExplicitAny: JSONB from Supabase
+            faq: (link.faq as Array<{ q: string; a: string }> | null) ?? null,
           }}
         />
       </div>
