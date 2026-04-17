@@ -215,7 +215,13 @@ export function NewLinkForm() {
       try {
         const result = await createProductAction(null, formData);
         if (result) setError(result);
-      } catch (err) {
+      } catch (err: unknown) {
+        // Re-throw Next.js redirect errors — they are intentional navigation, not failures
+        if (err && typeof err === "object" && "digest" in err &&
+            typeof (err as { digest: unknown }).digest === "string" &&
+            (err as { digest: string }).digest.startsWith("NEXT_REDIRECT")) {
+          throw err;
+        }
         setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
       }
     });
