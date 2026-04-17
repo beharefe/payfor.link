@@ -1,34 +1,31 @@
-import { GoogleAuth } from "google-auth-library";
+import { JWT } from "google-auth-library";
 
 const ENDPOINT = "https://webrisk.googleapis.com/v1/uris:search";
 const THREAT_TYPES = ["MALWARE", "SOCIAL_ENGINEERING", "UNWANTED_SOFTWARE"];
 const SCOPES = ["https://www.googleapis.com/auth/cloud-platform"];
 
-// Lazy-init auth client — reused across invocations in the same process.
-let auth: GoogleAuth | null = null;
+// Lazy-init JWT client — reused across invocations in the same process.
+let jwtClient: JWT | null = null;
 
-function getAuth(): GoogleAuth | null {
+function getClient(): JWT | null {
   const json = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
   if (!json) return null;
-  if (!auth) {
-    auth = new GoogleAuth({
-      credentials: JSON.parse(json),
-      scopes: SCOPES,
-    });
+  if (!jwtClient) {
+    const sa = JSON.parse(json) as { client_email: string; private_key: string };
+    jwtClient = new JWT({ email: sa.client_email, key: sa.private_key, scopes: SCOPES });
   }
-  return auth;
+  return jwtClient;
 }
 
 export async function checkUrlSafe(
   url: string,
 ): Promise<{ safe: boolean; error?: string }> {
-  const authClient = getAuth();
-  if (!authClient) return { safe: true };
+  const client = getClient();
+  if (!client) return { safe: true };
 
   try {
-    const client = await authClient.getClient();
-    const tokenResponse = await client.getAccessToken();
-    const token = tokenResponse?.token;
+    const tokenResponse = await client.authorize();
+    const token = tokenResponse.access_token;
     if (!token) return { safe: true, error: "Could not obtain access token" };
 
     const params = new URLSearchParams({ uri: url.trim() });
