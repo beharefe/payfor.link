@@ -30,6 +30,16 @@ const nextConfig: NextConfig = {
   experimental: {
     turbopackUseSystemTlsCerts: true,
   },
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.unseal.link" }],
+        destination: "https://unseal.link/:path*",
+        permanent: true,
+      },
+    ];
+  },
   async rewrites() {
     return [
       // /@username  → seller profile page
