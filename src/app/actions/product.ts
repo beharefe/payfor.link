@@ -20,6 +20,7 @@ type CreateProductInput = {
   preview_image_url?: string;
   expires_at?: string | null;
   max_orders?: number | null;
+  terms_accepted: boolean;
 };
 
 type ActionResult = { error: string } | { id: string };
@@ -46,6 +47,8 @@ export async function createProduct(
     return { error: "Preview image URL must start with https://" };
   if (input.price < MIN_PRICE)
     return { error: `Minimum price is $${MIN_PRICE}` };
+  if (!input.terms_accepted)
+    return { error: "You must accept the terms before publishing." };
 
   const { safe } = await checkUrlSafe(input.destination_url);
   if (!safe) return { error: "This link was flagged. Use a different URL." };
@@ -100,6 +103,7 @@ export async function createProduct(
       preview_image_url: input.preview_image_url?.trim() || null,
       expires_at: input.expires_at || null,
       max_orders: input.max_orders ?? null,
+      terms_accepted_at: new Date().toISOString(),
       status,
     })
     .select("id")
@@ -149,6 +153,7 @@ export async function createProductAction(
     preview_image_url: formData.get("preview_image_url")?.toString() || undefined,
     expires_at: formData.get("expires_at")?.toString() || null,
     max_orders: formData.get("max_orders") === "1" ? 1 : null,
+    terms_accepted: formData.get("terms_accepted") === "true",
   });
   if ("error" in result) return result.error;
   return null; // createProduct redirects on success

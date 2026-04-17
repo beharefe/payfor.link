@@ -81,6 +81,7 @@ describe("createProduct — validation", () => {
       description: "",
       destination_url: "https://notion.so/page",
       price: 10,
+      terms_accepted: true,
     });
 
     expect(result).toEqual({ error: "Unauthorized" });
@@ -96,6 +97,7 @@ describe("createProduct — validation", () => {
       description: "",
       destination_url: "https://notion.so/page",
       price: 10,
+      terms_accepted: true,
     });
 
     expect(result).toEqual({ error: "Title is required" });
@@ -111,6 +113,7 @@ describe("createProduct — validation", () => {
       description: "",
       destination_url: "  ",
       price: 10,
+      terms_accepted: true,
     });
 
     expect(result).toEqual({ error: "URL is required" });
@@ -126,6 +129,7 @@ describe("createProduct — validation", () => {
       description: "",
       destination_url: "https://notion.so/page",
       price: 1,
+      terms_accepted: true,
     });
 
     expect(result).toEqual({ error: "Minimum price is $9.99" });
@@ -144,6 +148,7 @@ describe("createProduct — status", () => {
         description: "A great template",
         destination_url: "https://notion.so/page",
         price: 10,
+        terms_accepted: true,
       }),
     ).rejects.toThrow("NEXT_REDIRECT:/dashboard/links/link-abc");
   });

@@ -134,6 +134,7 @@ export function NewLinkForm() {
   const [descriptionValue, setDescriptionValue] = useState<string>("");
   const [mobileTab, setMobileTab] = useState<"edit" | "preview">("edit");
   const [limitToOneSale, setLimitToOneSale] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [isPending, startTransition] = useTransition();
   const priceInputRef = useRef<HTMLInputElement>(null);
   const prevObjectUrl = useRef<string | null>(null);
@@ -198,6 +199,7 @@ export function NewLinkForm() {
       if (expiresAt) {
         formData.set("expires_at", new Date(expiresAt).toISOString());
       }
+      formData.set("terms_accepted", termsAccepted ? "true" : "false");
 
       if (imageFile) {
         const uploadBody = new FormData();
@@ -431,9 +433,25 @@ export function NewLinkForm() {
 
           {error && <p className="text-destructive text-sm">{error}</p>}
 
+          <label className="flex items-start gap-3 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={termsAccepted}
+              onChange={(e) => setTermsAccepted(e.target.checked)}
+              className="mt-0.5 shrink-0 accent-foreground size-4 cursor-pointer"
+            />
+            <span className="text-sm text-muted-foreground leading-snug">
+              I accept the{" "}
+              <a href="/terms" target="_blank" className="text-foreground underline underline-offset-2 hover:opacity-70 transition-opacity">
+                terms of service
+              </a>{" "}
+              and confirm I have the right to sell access to this link.
+            </span>
+          </label>
+
           <button
             type="submit"
-            disabled={isPending || priceInvalid}
+            disabled={isPending || priceInvalid || !termsAccepted}
             className="inline-flex items-center justify-center gap-2 w-full py-3.5 bg-primary text-primary-foreground rounded-full text-base font-medium cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed border-none mt-2"
           >
             {isPending && <Loader2 className="animate-spin size-4 shrink-0" />}
