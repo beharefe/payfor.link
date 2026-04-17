@@ -55,6 +55,16 @@ export async function updateProfile(
   const bio = formData.get("bio")?.toString()?.trim() ?? null;
   const avatar_url = formData.get("avatar_url")?.toString()?.trim() || null;
 
+  const rawTwitter = formData.get("twitter_handle")?.toString()?.trim() ?? null;
+  const twitter_handle = rawTwitter ? rawTwitter.replace(/^@+/, "").slice(0, 50) || null : null;
+
+  const rawWebsite = formData.get("website_url")?.toString()?.trim() || null;
+  if (rawWebsite && !rawWebsite.startsWith("https://"))
+    return { error: "Website URL must start with https://" };
+  const website_url = rawWebsite || null;
+
+  const profile_public = formData.get("profile_public") !== "false";
+
   if (!name) return { error: "Name is required" };
   if (name.length > 60) return { error: "Name must be 60 characters or less" };
   if (bio && bio.length > 300)
@@ -74,7 +84,7 @@ export async function updateProfile(
 
   const { error } = await supabase
     .from(TABLES.SELLERS)
-    .update({ name, bio, avatar_url })
+    .update({ name, bio, avatar_url, twitter_handle, website_url, profile_public })
     .eq("id", user.id);
 
   if (error) {

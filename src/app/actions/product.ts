@@ -12,6 +12,14 @@ import slugify from "slugify";
 
 const MIN_PRICE = 9.99;
 
+function parseJsonArray<T>(raw: FormDataEntryValue | null): T[] | null {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw.toString());
+    return Array.isArray(parsed) ? parsed : null;
+  } catch { return null; }
+}
+
 type CreateProductInput = {
   title: string;
   description: string;
@@ -21,6 +29,10 @@ type CreateProductInput = {
   expires_at?: string | null;
   max_orders?: number | null;
   terms_accepted: boolean;
+  subtitle?: string | null;
+  includes?: string[] | null;
+  faq?: Array<{ q: string; a: string }> | null;
+  preview_image_key?: string | null;
 };
 
 type ActionResult = { error: string } | { id: string };
@@ -49,6 +61,12 @@ export async function createProduct(
     return { error: `Minimum price is $${MIN_PRICE}` };
   if (!input.terms_accepted)
     return { error: "You must accept the terms before publishing." };
+  if (input.subtitle && input.subtitle.length > 120)
+    return { error: "Tagline must be 120 characters or less" };
+  if (input.includes && input.includes.length > 8)
+    return { error: "Includes list must have 8 items or fewer" };
+  if (input.faq && input.faq.length > 5)
+    return { error: "FAQ must have 5 items or fewer" };
 
   const { safe } = await checkUrlSafe(input.destination_url);
   if (!safe) return { error: "This link was flagged. Use a different URL." };
@@ -105,6 +123,10 @@ export async function createProduct(
       max_orders: input.max_orders ?? null,
       terms_accepted_at: new Date().toISOString(),
       status,
+      subtitle: input.subtitle?.trim() || null,
+      includes: input.includes?.length ? input.includes : null,
+      faq: input.faq?.length ? input.faq : null,
+      preview_image_key: input.preview_image_key?.trim() || null,
     })
     .select("id")
     .single();
@@ -154,6 +176,9 @@ export async function createProductAction(
     expires_at: formData.get("expires_at")?.toString() || null,
     max_orders: formData.get("max_orders") === "1" ? 1 : null,
     terms_accepted: formData.get("terms_accepted") === "true",
+    subtitle: formData.get("subtitle")?.toString() || null,
+    includes: parseJsonArray<string>(formData.get("includes")),
+    faq: parseJsonArray<{ q: string; a: string }>(formData.get("faq")),
   });
   if ("error" in result) return result.error;
   return null; // createProduct redirects on success
@@ -167,6 +192,10 @@ type UpdateProductInput = {
   price: number;
   preview_image_url?: string;
   expires_at?: string | null;
+  subtitle?: string | null;
+  includes?: string[] | null;
+  faq?: Array<{ q: string; a: string }> | null;
+  preview_image_key?: string | null;
 };
 
 export async function updateProduct(
@@ -190,6 +219,12 @@ export async function updateProduct(
     return { error: "Preview image URL must start with https://" };
   if (input.price < MIN_PRICE)
     return { error: `Minimum price is $${MIN_PRICE}` };
+  if (input.subtitle && input.subtitle.length > 120)
+    return { error: "Tagline must be 120 characters or less" };
+  if (input.includes && input.includes.length > 8)
+    return { error: "Includes list must have 8 items or fewer" };
+  if (input.faq && input.faq.length > 5)
+    return { error: "FAQ must have 5 items or fewer" };
 
   // Verify ownership
   const { data: existing } = await supabase
@@ -217,6 +252,10 @@ export async function updateProduct(
       product_type: productType,
       preview_image_url: input.preview_image_url?.trim() || null,
       expires_at: input.expires_at || null,
+      subtitle: input.subtitle?.trim() || null,
+      includes: input.includes?.length ? input.includes : null,
+      faq: input.faq?.length ? input.faq : null,
+      preview_image_key: input.preview_image_key?.trim() || null,
     })
     .eq("id", input.id)
     .eq("seller_id", user.id);
@@ -254,6 +293,9 @@ export async function updateProductAction(
     price: Number.isFinite(price) ? price : MIN_PRICE,
     preview_image_url: formData.get("preview_image_url")?.toString() || undefined,
     expires_at: formData.get("expires_at")?.toString() || null,
+    subtitle: formData.get("subtitle")?.toString() || null,
+    includes: parseJsonArray<string>(formData.get("includes")),
+    faq: parseJsonArray<{ q: string; a: string }>(formData.get("faq")),
   });
   if ("error" in result) return result.error;
   return null;

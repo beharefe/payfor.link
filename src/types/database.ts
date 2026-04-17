@@ -29,6 +29,9 @@ export interface Seller {
   username: string | null;
   avatar_url: string | null;
   bio: string | null;
+  twitter_handle: string | null;
+  website_url: string | null;
+  profile_public: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -53,6 +56,10 @@ export interface Product {
   total_revenue: number;
   reported_at: string | null;
   suspended_reason: string | null;
+  subtitle: string | null;
+  includes: string[] | null;
+  faq: Array<{ q: string; a: string }>;
+  preview_image_key: string | null;
   created_at: string;
   updated_at: string;
 }
