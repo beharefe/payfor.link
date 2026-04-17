@@ -22,7 +22,7 @@ Set all of these in Vercel → Project → Settings → Environment Variables fo
 - [x] `NEXT_PUBLIC_AMPLITUDE_API_KEY` — Amplitude project API key
 - [x] `SENTRY_DSN` — Sentry project DSN
 - [x] `SENTRY_AUTH_TOKEN` — Sentry auth token for source maps
-- [..] `GOOGLE_SAFE_BROWSING_API_KEY` — Google Cloud Console → Safe Browsing API
+- [..] `GOOGLE_SERVICE_ACCOUNT_JSON` — Google Cloud Console → Web Risk API → service account JSON
 - [x] `NEXT_PUBLIC_APP_URL` — `https://unseal.link`
 
 ---

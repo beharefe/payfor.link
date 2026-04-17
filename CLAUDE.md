@@ -74,8 +74,8 @@ NEXT_PUBLIC_AMPLITUDE_API_KEY=
 SENTRY_DSN=
 SENTRY_AUTH_TOKEN=
 
-# Google Safe Browsing
-GOOGLE_SAFE_BROWSING_API_KEY=
+# Google Web Risk (service account JSON — paste as single-line string)
+GOOGLE_SERVICE_ACCOUNT_JSON=
 
 # App
 NEXT_PUBLIC_APP_URL=http://localhost:3000
