@@ -78,21 +78,23 @@ The trade-off is clear: you pay 4.5% to not build and maintain the payment infra
 <InlineCTA
   text="Accept Stripe payments in 5 minutes"
   href="/auth"
-  note="Connect your Stripe account once. All products use it automatically."
+  note="No Stripe account needed to start. Enable payouts in 2 minutes when you're ready."
 />
 
-## The Stripe Connect setup (once only)
+## How payouts work (and why you don't need Stripe upfront)
 
-When you sign up for unseal.link, you connect your Stripe account via Stripe Connect Express. This is the same OAuth flow used by Shopify, Airbnb, and Lyft for their sellers.
+You don't need a Stripe account to start. Create your products, share your paywall links, and when you're ready to receive payments, click "Enable payouts" in your dashboard.
+
+At that point, unseal.link creates a Stripe Express account for you automatically — the same Stripe Connect OAuth flow used by Shopify, Airbnb, and Lyft. The whole setup takes about 2 minutes.
 
 What this means:
-- You have your own Stripe account
-- Payments from buyers go to your account directly
+- No prior Stripe account needed — we create it for you
+- Payments from buyers go directly to your account
 - unseal.link takes its 4.5% platform fee via Stripe's application fees API
 - We never hold your money
 - You can withdraw on your own schedule
 
-Connecting Stripe takes about 2 minutes. Once connected, all your products use it automatically.
+Once payouts are enabled, all your products use it automatically.
 
 ## What you can sell
 
@@ -113,24 +115,20 @@ Any product with a shareable URL:
       body: "Sign up with your email (magic link, no password). Takes 30 seconds.",
     },
     {
-      title: "Connect Stripe",
-      body: "Go through the Stripe Connect OAuth flow. Takes 2 minutes. This is the only setup you do once.",
-    },
-    {
       title: "Create a product",
-      body: "Paste your URL, write a title, set a price. Your paywall is live immediately.",
+      body: "Paste your URL, write a title, set a price. Your paywall is live immediately — no payment setup required yet.",
     },
     {
-      title: "Share your paywall link",
-      body: "Share unseal.link/@yourname/product-name anywhere. Buyers pay via Stripe Checkout. Delivery is automatic.",
+      title: "Enable payouts when ready",
+      body: "Click 'Enable payouts' in your dashboard. We create your payment account automatically in 2 minutes — no existing Stripe account needed. Then share unseal.link/@yourname/product-name anywhere.",
     },
   ]}
 />
 
 <InlineCTA
-  text="Connect Stripe and go live"
+  text="Start selling — enable payouts when ready"
   href="/auth"
-  note="4.5% per sale. Stripe's standard processing fees apply separately."
+  note="No Stripe account needed to start. 4.5% per sale."
 />
 
 ## Stripe's checkout, not ours

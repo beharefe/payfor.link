@@ -36,7 +36,7 @@ const steps = [
   {
     n: "02",
     title: "Set a price",
-    body: "Minimum $9.99. Connect Stripe once and every payout lands directly in your bank. No payout minimum. No weekly batch.",
+    body: "Minimum $9.99. When you're ready to get paid, we create your payment account automatically in 2 minutes — no Stripe account needed to start. No payout minimum. No weekly batch.",
   },
   {
     n: "03",
