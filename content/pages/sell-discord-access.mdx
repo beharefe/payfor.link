@@ -1,40 +1,48 @@
 ---
 title: Sell Access to Your Discord Server
-description: Monetize your Discord community. Sell permanent or gated invite links behind a paywall. Keep 95.5% of every sale.
+description: Monetize your Discord community without bots or subscription software. Paywall your invite link, keep 95.5% of every sale, and let buyers join in under 60 seconds.
 og_title: "Sell Discord Server Access: Keep 95.5%"
-og_description: Turn your Discord community into a revenue stream. Paywall your invite link and get paid via Stripe.
-schema_type: WebPage
+og_description: Turn your Discord community into a revenue stream. Paywall your invite link, get paid via Stripe. No bots, no Whop, no monthly fees.
+schema_type: Article
 published: true
 related:
-  - discord
+  - sell-link-online
   - vs-whop
   - gumroad-alternatives-lower-fees
 ---
 
 <Hero
   title="Sell access to your Discord. Keep 95.5%."
-  subtitle="Gate your community behind a paywall. Buyers pay once via Stripe and receive your invite link by email."
+  subtitle="A Discord invite link is just a URL. Put it behind a Stripe payment wall. Buyers pay once, get the link by email, and join. The whole setup takes under 60 seconds — no bots, no role management, no monthly software."
   cta="Start selling access"
   ctaHref="/auth"
-  note="Works with any Discord invite link, temporary or permanent."
+  note="Works with any Discord invite link. No bot required."
 />
+
+## Why you don't need a bot
+
+The standard advice for paid Discord communities is Whop, Memberful, or a custom bot that verifies payment and auto-assigns roles. That setup takes hours, requires ongoing maintenance, and has a monthly cost.
+
+But a Discord invite link is just a URL. Put that URL behind a payment wall. Buyers pay, get the invite link delivered to their inbox instantly, and join your server. No infrastructure to maintain. No ongoing software bill.
+
+This works for most paid communities — especially those priced under $200 and run by one person. If you need per-member role management at scale, a bot is worth it. For everyone else, this is simpler and cheaper.
 
 <FeatureList
   items={[
     {
       icon: "lock",
-      title: "Gate your community",
-      body: "Keep free-riders out. Only paying members get your Discord invite link.",
+      title: "Gate your community without infrastructure",
+      body: "Keep free-riders out. Paying members get the invite link — delivered on screen immediately and by email as backup. No bots, no webhooks.",
     },
     {
       icon: "banknote",
-      title: "One-time or recurring",
-      body: "Sell lifetime access with a permanent invite, or rotate your link to enforce renewal.",
+      title: "One-time pricing that converts",
+      body: "Sell lifetime access with a permanent invite. One-time pricing converts better than monthly subscriptions for most communities.",
     },
     {
       icon: "rocket",
-      title: "No bots required",
-      body: "No Discord bots, no role management. Just a paywall link and a Stripe account.",
+      title: "Works for Slack too",
+      body: "Paste any invite URL — Discord or Slack. The workflow is identical. Buyers pay, get the link, join.",
     },
   ]}
 />
@@ -42,43 +50,90 @@ related:
 <Steps
   items={[
     {
-      title: "Create a Discord invite link",
-      body: "In your Discord server, create an invite. Set it to never expire for lifetime access, or 1 use per link rotation.",
+      title: "Create your Discord invite link",
+      body: "Right-click the channel you want new members to land in, click Invite People, then Edit invite link. Set expiration to Never and max uses to No limit. Copy the link (discord.gg/yourcode). Keep it out of public posts — this is what buyers receive.",
     },
     {
-      title: "Build your paywall",
-      body: "Paste the Discord invite URL, write what members get, set your price.",
+      title: "Build your paywall on unseal.link",
+      body: "Paste the Discord invite URL, write a short description of what members get, and set your price. Connect Stripe once — takes 2 minutes. Your paywall is live immediately.",
     },
     {
-      title: "Share your paywall",
-      body: "Post your unseal.link paywall URL everywhere you promote your community.",
+      title: "Share your paywall link",
+      body: "Post your unseal.link paywall URL everywhere you promote your community — Twitter, newsletters, YouTube descriptions, bio links. It works anywhere a URL works.",
     },
     {
       title: "Members pay and join",
-      body: "Stripe handles payment. Members receive the invite link by email and join your server.",
+      body: "Stripe handles payment. The invite link appears on screen immediately after payment and arrives in their inbox within 30 seconds. They click it, join, done. No buyer account required.",
     },
   ]}
 />
 
 <FeeCallout keep="95.5" />
 
+---
+
+## One-time vs. recurring: why one-time often wins
+
+Most Discord monetization guides default to subscriptions. For many communities, one-time pricing is actually better.
+
+Recurring subscriptions have churn. Every month some percentage of members cancel — which means you're constantly replacing them just to stay flat. One-time pricing creates a different dynamic: members feel ownership rather than tenancy. They're more engaged, they stay longer, and the community compounds instead of churning.
+
+Lifetime access also converts better at the point of sale. "Pay $49 once" beats "pay $12/month" for communities that aren't delivering fresh structured content on a strict weekly schedule.
+
+The exception: if your community delivers weekly signals, live calls, or curated research — content that has an obvious time value — subscriptions make sense. For general interest, niche professional, or coaching communities, one-time wins.
+
+---
+
+## What to charge
+
+Pricing depends on community type and how actively you engage:
+
+- **Hobby and interest communities**: $5–$15 one-time
+- **Niche professional communities**: $15–$49
+- **Trading signals, investment research, or deal flow**: $49–$199
+- **Coaching plus community bundles**: $99–$499
+
+The single biggest lever: how actively do you show up? A community where you post daily and answer questions commands meaningfully higher prices than one that runs itself. Your participation is the product.
+
+---
+
+## Protecting your invite link
+
+You can't fully prevent link sharing — Discord invite links aren't single-use by default. What actually works:
+
+**Price as a deterrent.** Someone who paid $79 is unlikely to hand that link to a friend. Price your community at a level where sharing feels costly.
+
+**Rotate periodically.** Generate a new invite link, update your unseal.link product, and the old link stops working. Any shared copies are instantly dead. This is the lowest-effort protection and works for most communities.
+
+**Batch-limit for high-value communities.** For communities priced at $100+, limit invite link uses to batches of 20–30. When a batch fills, generate a new one. Natural scarcity, no bot infrastructure.
+
+---
+
 <FAQ
   items={[
     {
-      q: "How do I handle recurring access?",
-      a: "Create a new invite link periodically and update your paywall. Members who paid in a previous period would need to repurchase, which works well for monthly paid communities.",
+      q: "Can I handle recurring membership without a bot?",
+      a: "For annual or per-cohort renewals: generate a new invite link, update your paywall, and members who want to continue repurchase. This works well for annual pricing. For strict monthly subscriptions with automatic renewal, a bot like Whop is better suited.",
     },
     {
-      q: "What if someone shares the invite link?",
-      a: "Create single-use invites to prevent sharing. Each buyer purchase should ideally get a unique invite; contact us about per-purchase link generation.",
+      q: "Can I sell different tiers at different prices?",
+      a: "Yes. Create separate invite links per tier, then create one unseal.link product per tier with its own price. Each tier gets its own paywall URL. Share different links with different audiences.",
     },
     {
-      q: "Can I sell access to multiple tiers?",
-      a: "Create a separate paywall link for each tier (e.g. Basic at $9.99, Pro at $49). Share different links with different audiences.",
+      q: "What if I want to remove a member?",
+      a: "Remove them from the server. unseal.link handles payment; Discord handles membership. They're separate — revoking access in Discord doesn't trigger a refund automatically.",
     },
     {
-      q: "Is this against Discord's terms?",
-      a: "Selling community access is permitted. Discord restricts selling in-game items and misrepresentation. A paid community invite is widely used.",
+      q: "Is selling paid community access against Discord's terms?",
+      a: "Selling community access is permitted. Discord restricts selling in-game items and misrepresentation. Paid invite communities are widely used and explicitly within Discord's terms.",
+    },
+    {
+      q: "Does this work for Slack?",
+      a: "Exactly the same workflow. Paste a Slack workspace invite URL into unseal.link and it works identically.",
+    },
+    {
+      q: "What if someone shares the invite link with others?",
+      a: "Rotate your invite link periodically — generate a new one, update your unseal.link, and the old link stops working. For higher-priced communities, limit invite batches to 20–30 uses, then rotate.",
     },
   ]}
 />
@@ -86,5 +141,5 @@ related:
 <CTA
   text="Monetize your Discord community"
   href="/auth"
-  sub="Free to list. 4.5% fee per sale."
+  sub="Free to list. 4.5% fee per sale. No bot required."
 />

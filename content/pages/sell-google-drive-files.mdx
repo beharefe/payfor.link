@@ -5,6 +5,12 @@ og_title: "Sell Google Drive Files and Folders Instantly"
 og_description: Paywall any Google Drive link. Buyers pay once and get instant access by email. No file uploads, no storefront, 4.5% per sale.
 schema_type: Article
 published: true
+related:
+  - sell-link-online
+  - sell-spreadsheet-templates
+  - sell-loom-video
+  - sell-dropbox-files
+  - vs-gumroad
 ---
 
 <Hero
@@ -75,7 +81,7 @@ That is what unseal.link does. You keep your files on Drive. We add the paywall.
     },
     {
       title: "Copy the shareable link",
-      body: "Click 'Copy link' in the sharing dialog. It should look like: drive.google.com/drive/folders/... or docs.google.com/...",
+      body: "Click 'Copy link' in the sharing dialog. It should look like: drive.google.com/drive/folders/... or docs.google.com/... For individual files, you can also use the direct download format to skip Drive's preview screen: https://drive.google.com/uc?export=download&id=FILE_ID — replace FILE_ID with the alphanumeric string between /d/ and /view in your sharing URL.",
     },
     {
       title: "Create your paywall",
@@ -129,6 +135,8 @@ With Drive + unseal.link:
 - Buyers get a more familiar experience (Google Drive is ubiquitous)
 - You pay 4.5% instead of 10%
 
+On a $49 product sold 200 times, unseal.link's 4.5% fee means you keep $8,813 versus $7,553 on Gumroad. That $1,260 difference is the compounding cost of Gumroad's extra 5.5% — real money that scales with every product you sell.
+
 <CompareTable
   rows={[
     { feature: "Platform fee", a: "10%", b: "5%", c: "4.5%", cWins: true },
@@ -142,6 +150,14 @@ With Drive + unseal.link:
 
 <FeeCallout keep="95.5" />
 
+## A real limitation: large files and Google's 25MB threshold
+
+Files over 25MB sometimes prompt buyers to sign into a Google account before downloading, depending on their browser and Google's bandwidth throttling. In practice, most buyers have Google accounts, so this rarely causes friction.
+
+For very large files — video courses, full asset libraries, files over 100MB — Dropbox direct download links are more reliable for anonymous download. The workflow on unseal.link is identical; just paste a Dropbox shared link instead of a Drive link.
+
+---
+
 ## Privacy considerations
 
 When you share a Google Drive file as "anyone with the link," anyone who has that link can access it. The paywall controls who receives the link, but once someone has it, they can share it.
@@ -151,6 +167,8 @@ For most creators, this is acceptable. Template buyers sharing the template with
 For higher-value or more sensitive files:
 - Create a version of the template for paid buyers (a separate copy) and change the sharing URL after each sale
 - Use a more controlled access method (like a private GitHub repo where you add buyers manually)
+
+A practical middle ground: rotate your Drive link periodically — generate a new shareable link, update your unseal.link product, and the old link stops working. This invalidates any shared copies without affecting your files. For products over $100, a quarterly rotation is reasonable.
 
 <FAQ
   items={[
