@@ -702,6 +702,35 @@ export default function HomePage() {
           Free to list. 4.5% per sale. First $500 fee-free for new sellers.
         </p>
       </section>
+
+      {/* ── Internal links ───────────────────────────────────────────── */}
+      <section className="py-12 border-t border-border">
+        <div className="max-w-4xl mx-auto px-6">
+          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-6 text-center">Guides & use cases</p>
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-3">
+            {[
+              { href: "/sell-link-online", label: "Sell any link online" },
+              { href: "/sell-notion-template", label: "Sell Notion templates" },
+              { href: "/sell-figma-template", label: "Sell Figma files" },
+              { href: "/sell-google-drive-files", label: "Sell Google Drive files" },
+              { href: "/sell-discord-access", label: "Sell Discord access" },
+              { href: "/sell-github-repo", label: "Sell GitHub repos" },
+              { href: "/sell-ai-prompts", label: "Sell AI prompts" },
+              { href: "/get-paid-before-delivering-freelance-work", label: "Get paid before delivering" },
+              { href: "/how-to-paywall-any-link", label: "How to paywall any link" },
+              { href: "/what-is-a-paywall-link", label: "What is a paywall link?" },
+            ].map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors no-underline"
+              >
+                {label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
     </>
   );
 }
