@@ -25,7 +25,6 @@ Optional:
 - `NEXT_PUBLIC_AXIOM_DATASET`, `NEXT_PUBLIC_AXIOM_TOKEN` — Axiom logging
 - `NEXT_PUBLIC_AMPLITUDE_API_KEY` — Amplitude analytics
 - `SENTRY_DSN`, `SENTRY_AUTH_TOKEN` — Sentry (run `npx @sentry/wizard@latest -i nextjs`)
-- `GOOGLE_SERVICE_ACCOUNT_JSON` — Google Web Risk API service account JSON (paste as single-line string)
 
 ---
 
