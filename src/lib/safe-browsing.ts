@@ -26,7 +26,9 @@ export async function checkUrlSafe(
   if (!authClient) return { safe: true };
 
   try {
-    const token = await authClient.getAccessToken();
+    const client = await authClient.getClient();
+    const tokenResponse = await client.getAccessToken();
+    const token = tokenResponse?.token;
     if (!token) return { safe: true, error: "Could not obtain access token" };
 
     const params = new URLSearchParams({ uri: url.trim() });
