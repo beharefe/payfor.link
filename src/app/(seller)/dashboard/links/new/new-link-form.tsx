@@ -489,26 +489,34 @@ export function NewLinkForm() {
 
           {/* Preview image */}
           <div>
-            <label className={labelClass}>
+            <label htmlFor="preview_image" className={labelClass}>
               Preview image{" "}
               <span className="text-[11px] font-normal text-muted-foreground bg-muted px-1.5 py-0.5 rounded-md ml-0.5">optional</span>
             </label>
-            <p className={`${hintClass} mb-2`}>
-              Recommended: 1200×630px (1.91:1). Max 2MB. JPG, PNG, or WebP. Shown at the top of your paywall page.
+            <p className={`${hintClass} mb-3`}>
+              Landscape image shown at the top of your paywall page. 1200×630px recommended, max 2MB.
             </p>
-            {imagePreviewUrl && (
-              <img
-                src={imagePreviewUrl}
-                alt="Preview"
-                className="w-full max-w-xs rounded-xl object-cover mb-3"
-                style={{ aspectRatio: "1.91/1" }}
-              />
-            )}
             <label
               htmlFor="preview_image"
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm border border-border rounded-xl cursor-pointer text-muted-foreground hover:text-foreground hover:border-foreground transition-colors"
+              className={`flex flex-col items-center justify-center w-full border-2 border-dashed rounded-2xl cursor-pointer transition-colors select-none
+                ${imagePreviewUrl
+                  ? "border-border p-0 overflow-hidden"
+                  : "border-border hover:border-foreground hover:bg-muted/30 active:bg-muted/50 px-4 py-8"
+                }`}
             >
-              {imagePreviewUrl ? "Change image" : "Upload image"}
+              {imagePreviewUrl ? (
+                <img
+                  src={imagePreviewUrl}
+                  alt="Preview"
+                  className="w-full object-cover"
+                  style={{ aspectRatio: "1.91/1" }}
+                />
+              ) : (
+                <div className="text-center">
+                  <p className="text-sm font-medium text-foreground">Tap to upload image</p>
+                  <p className="text-xs text-muted-foreground mt-1">JPG, PNG, or WebP</p>
+                </div>
+              )}
             </label>
             <input
               id="preview_image"
@@ -517,11 +525,17 @@ export function NewLinkForm() {
               onChange={handleImageChange}
               className="sr-only"
             />
-            {imageFile && (
-              <p className="text-xs text-muted-foreground mt-1.5">{imageFile.name}</p>
+            {imagePreviewUrl && (
+              <button
+                type="button"
+                onClick={() => document.getElementById("preview_image")?.click()}
+                className="mt-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Change image
+              </button>
             )}
             {imageError && (
-              <p className="text-destructive text-xs mt-1.5">{imageError}</p>
+              <p className="text-destructive text-sm mt-2">{imageError}</p>
             )}
           </div>
 
