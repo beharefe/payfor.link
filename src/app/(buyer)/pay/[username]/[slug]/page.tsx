@@ -107,7 +107,7 @@ function PurchaseCard({
 }) {
   return (
     <div className="border border-border rounded-2xl bg-card overflow-hidden">
-      <div className="p-6 space-y-5">
+      <div className="p-5 space-y-4">
         {/* Badges: expiry and/or scarcity */}
         {(expiresAt || link.max_orders !== null) && (
           <div className="flex flex-wrap gap-2">
@@ -132,18 +132,6 @@ function PurchaseCard({
           </div>
         )}
 
-        {/* Title */}
-        <div>
-          <h1 className="text-2xl font-medium tracking-tight text-foreground leading-snug">
-            {link.title}
-          </h1>
-          {link.subtitle && (
-            <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
-              {link.subtitle}
-            </p>
-          )}
-        </div>
-
         {/* Price */}
         <div className="flex items-baseline gap-2">
           <span className="text-4xl font-medium text-foreground tabular-nums">
@@ -160,14 +148,14 @@ function PurchaseCard({
         </div>
 
         {/* CTA */}
-        <PaywallCTA linkId={link.id} />
+        <PaywallCTA linkId={link.id} price={link.price} />
 
         {/* Trust row */}
         <div className="flex items-center justify-center gap-4 pt-1">
           {[
-            { icon: LockKeyhole, label: "Secure" },
-            { icon: Mail, label: "By email" },
-            { icon: Timer, label: "Instant" },
+            { icon: Timer, label: "Instant access" },
+            { icon: LockKeyhole, label: "Stripe-secured" },
+            { icon: Mail, label: "No account" },
           ].map(({ icon: Icon, label }) => (
             <div key={label} className="flex items-center gap-1.5">
               <Icon className="size-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
@@ -216,17 +204,23 @@ export default async function PaywallPage({ params }: Props) {
 
     return (
       <main className="min-h-dvh flex items-center justify-center px-6">
-        <div className="text-center max-w-xs">
-          <h1 className="text-xl font-medium text-foreground mb-2">
+        <div className="text-center max-w-xs space-y-3">
+          <h1 className="text-xl font-medium text-foreground">
             {isSoldOut ? "Sold out" : isExpired ? "Offer expired" : "No longer available"}
           </h1>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-muted-foreground text-sm leading-relaxed">
             {isSoldOut
-              ? "This was a one-buyer link. It has already been purchased."
+              ? "This link was limited to one buyer and has already been purchased."
               : isExpired
-              ? "This offer is no longer accepting payments."
-              : "This product has been removed or is paused."}
+              ? "This offer closed and is no longer accepting payments."
+              : "This product is paused or has been removed by the seller."}
           </p>
+          <Link
+            href="/"
+            className="inline-block text-xs text-muted-foreground hover:text-foreground transition-colors mt-2"
+          >
+            unseal.link
+          </Link>
         </div>
       </main>
     );
@@ -281,7 +275,7 @@ export default async function PaywallPage({ params }: Props) {
   };
 
   return (
-    <main className="min-h-dvh bg-background">
+    <main className="min-h-dvh bg-background pb-24 lg:pb-0">
       <script
         type="application/ld+json"
         // biome-ignore lint/security/noDangerouslySetInnerHtml: controlled JSON-LD
@@ -323,6 +317,38 @@ export default async function PaywallPage({ params }: Props) {
           {/* Left column */}
           <div className="space-y-8">
 
+            {/* Title + subtitle — always at top of left column */}
+            <div>
+              {/* Urgency badges on mobile (PurchaseCard is desktop-only) */}
+              {(expiresAt || link.max_orders !== null) && (
+                <div className="flex flex-wrap gap-2 mb-3 lg:hidden">
+                  {expiresAt && (
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full text-xs font-medium">
+                      <Clock className="w-3 h-3" aria-hidden="true" />
+                      Limited offer · expires in {formatTimeUntil(expiresAt)}
+                    </div>
+                  )}
+                  {link.max_orders !== null && link.max_orders !== undefined && (() => {
+                    const slotsLeft = link.max_orders - (link.total_sales ?? 0);
+                    return (
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 rounded-full text-xs font-medium">
+                        <span className="size-1.5 rounded-full bg-current shrink-0" />
+                        {slotsLeft === 1 ? "Only 1 spot remaining" : `${slotsLeft} spots remaining`}
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+              <h1 className="text-2xl sm:text-3xl font-medium tracking-tight text-foreground leading-snug">
+                {link.title}
+              </h1>
+              {link.subtitle && (
+                <p className="text-base text-muted-foreground mt-2 leading-relaxed">
+                  {link.subtitle}
+                </p>
+              )}
+            </div>
+
             {/* Preview image */}
             {link.preview_image_url && (
               <div className="aspect-video w-full overflow-hidden rounded-2xl bg-muted relative">
@@ -336,24 +362,11 @@ export default async function PaywallPage({ params }: Props) {
               </div>
             )}
 
-            {/* Mobile only: purchase card */}
-            <div className="lg:hidden">
-              <PurchaseCard
-                link={link}
-                expiresAt={expiresAt}
-                salesCount={salesCount}
-                formatTimeUntil={formatTimeUntil}
-              />
-            </div>
-
-            {/* About */}
+            {/* Description — no label, shown as primary copy */}
             {link.description && (
-              <div>
-                <p className={`${sectionLabel} mb-3`}>About</p>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {link.description}
-                </p>
-              </div>
+              <p className="text-base text-foreground leading-relaxed">
+                {link.description}
+              </p>
             )}
 
             {/* What's included */}
@@ -368,37 +381,31 @@ export default async function PaywallPage({ params }: Props) {
                       <span className="text-sm text-foreground leading-relaxed">{item}</span>
                     </li>
                   ))}
-                  <li className="flex items-start gap-2.5">
-                    <Check className="size-4 text-emerald-500 shrink-0 mt-0.5" aria-hidden="true" />
-                    <span className="text-sm text-muted-foreground leading-relaxed">
-                      Always the latest version. This links to your original content.
-                    </span>
-                  </li>
                 </ul>
               </div>
             )}
 
-            {/* After you pay */}
+            {/* How it works */}
             <div>
-              <p className={`${sectionLabel} mb-3`}>After you pay</p>
+              <p className={`${sectionLabel} mb-3`}>How it works</p>
               <div className="border border-border rounded-2xl bg-card overflow-hidden divide-y divide-border">
                 {[
                   {
                     icon: CreditCard,
-                    title: "Pay via Stripe",
-                    desc: "Card, Apple Pay, or Google Pay",
+                    title: "Pay securely with Stripe",
+                    desc: "Card, Apple Pay, or Google Pay. Your card details never touch our servers.",
                     badge: null,
                   },
                   {
                     icon: Mail,
-                    title: "Access link in your inbox",
+                    title: "Get your access link by email",
                     desc: "Sent to the email you enter at checkout",
                     badge: "Under 30 sec",
                   },
                   {
                     icon: LockKeyhole,
-                    title: "Click to unlock",
-                    desc: "No account required",
+                    title: "Click the link to get access",
+                    desc: "No account or password needed",
                     badge: null,
                   },
                 ].map(({ icon: Icon, title, desc, badge }, i) => (
@@ -426,7 +433,7 @@ export default async function PaywallPage({ params }: Props) {
             {/* FAQ */}
             {faqItems.length > 0 && (
               <div>
-                <p className={`${sectionLabel} mb-3`}>Questions</p>
+                <p className={`${sectionLabel} mb-3`}>FAQ</p>
                 <div className="border border-border rounded-2xl bg-card overflow-hidden divide-y divide-border">
                   {faqItems.map((item, i) => (
                     // biome-ignore lint/suspicious/noArrayIndexKey: static list
@@ -523,6 +530,24 @@ export default async function PaywallPage({ params }: Props) {
             </div>
           </div>
 
+        </div>
+      </div>
+
+      {/* Mobile sticky bottom bar */}
+      <div
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-background/95 backdrop-blur-sm px-4 pt-3"
+        style={{ paddingBottom: "max(12px, env(safe-area-inset-bottom))" }}
+      >
+        <div className="flex items-center gap-3 max-w-sm mx-auto">
+          <div className="shrink-0 text-center">
+            <p className="text-xl font-medium tabular-nums text-foreground leading-none">
+              ${link.price.toFixed(2)}
+            </p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">one-time</p>
+          </div>
+          <div className="flex-1">
+            <PaywallCTA linkId={link.id} price={link.price} />
+          </div>
         </div>
       </div>
     </main>

@@ -204,13 +204,14 @@ export function EditLinkForm({ id, defaultValues }: Props) {
           defaultValue={defaultValues.title}
           className={inputClass}
         />
+        <p className={hintClass}>Keep it short and descriptive. Shown as the page heading and in search results.</p>
       </div>
 
       {/* Description */}
       <div>
         <label htmlFor="description" className={labelClass}>
           Description{" "}
-          <span className="font-normal text-muted-foreground">optional</span>
+          <span className="text-[11px] font-normal text-muted-foreground bg-muted px-1.5 py-0.5 rounded-md ml-0.5">optional</span>
         </label>
         <textarea
           id="description"
@@ -219,13 +220,14 @@ export function EditLinkForm({ id, defaultValues }: Props) {
           defaultValue={defaultValues.description}
           className={`${inputClass} resize-none`}
         />
+        <p className={hintClass}>Shown below the title on your paywall page. Also used as the SEO meta description.</p>
       </div>
 
       {/* Tagline / Subtitle */}
       <div>
         <label htmlFor="subtitle" className={labelClass}>
           Tagline{" "}
-          <span className="font-normal text-muted-foreground">optional</span>
+          <span className="text-[11px] font-normal text-muted-foreground bg-muted px-1.5 py-0.5 rounded-md ml-0.5">optional</span>
         </label>
         <input
           id="subtitle"
@@ -236,14 +238,14 @@ export function EditLinkForm({ id, defaultValues }: Props) {
           placeholder="One-line summary shown under the title on the paywall"
           className={inputClass}
         />
-        <p className={hintClass}>{subtitle.length}/120</p>
+        <p className={hintClass}>{subtitle.length}/120 — appears directly under the title in smaller text.</p>
       </div>
 
       {/* What's included */}
       <div>
         <p className={labelClass}>
           What&apos;s included{" "}
-          <span className="font-normal text-muted-foreground">optional</span>
+          <span className="text-[11px] font-normal text-muted-foreground bg-muted px-1.5 py-0.5 rounded-md ml-0.5">optional</span>
         </p>
         <p className={`${hintClass} mb-3`}>Up to 8 bullet points shown on the paywall page.</p>
         <div className="flex flex-col gap-2">
@@ -284,7 +286,7 @@ export function EditLinkForm({ id, defaultValues }: Props) {
       <div>
         <p className={labelClass}>
           FAQ{" "}
-          <span className="font-normal text-muted-foreground">optional</span>
+          <span className="text-[11px] font-normal text-muted-foreground bg-muted px-1.5 py-0.5 rounded-md ml-0.5">optional</span>
         </p>
         <p className={`${hintClass} mb-3`}>Up to 5 Q&amp;A pairs shown on the paywall page.</p>
         <div className="flex flex-col gap-4">
@@ -345,6 +347,7 @@ export function EditLinkForm({ id, defaultValues }: Props) {
           placeholder="https://"
           className={inputClass}
         />
+        <p className={hintClass}>The private URL buyers receive in their email after paying.</p>
       </div>
 
       {/* Price */}
@@ -382,10 +385,10 @@ export function EditLinkForm({ id, defaultValues }: Props) {
       <div>
         <label className={labelClass}>
           Preview image{" "}
-          <span className="font-normal text-muted-foreground">optional</span>
+          <span className="text-[11px] font-normal text-muted-foreground bg-muted px-1.5 py-0.5 rounded-md ml-0.5">optional</span>
         </label>
         <p className={hintClass + " mb-2"}>
-          Recommended: 1200×630px (1.91:1). Max 2MB. JPG, PNG, or WebP.
+          Recommended: 1200×630px (1.91:1). Max 2MB. JPG, PNG, or WebP. Shown at the top of your paywall page.
         </p>
         {imagePreviewUrl && (
           <img
@@ -421,7 +424,7 @@ export function EditLinkForm({ id, defaultValues }: Props) {
       <div>
         <label htmlFor="expires_at" className={labelClass}>
           Expiry date{" "}
-          <span className="font-normal text-muted-foreground">optional</span>
+          <span className="text-[11px] font-normal text-muted-foreground bg-muted px-1.5 py-0.5 rounded-md ml-0.5">optional</span>
         </label>
         <p className={hintClass + " mb-2"}>Link stops accepting payments after this date.</p>
         <input
