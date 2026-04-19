@@ -107,7 +107,7 @@ function PurchaseCard({
 }) {
   return (
     <div className="border border-border rounded-2xl bg-card overflow-hidden">
-      <div className="p-6 space-y-5">
+      <div className="p-5 space-y-4">
         {/* Badges: expiry and/or scarcity */}
         {(expiresAt || link.max_orders !== null) && (
           <div className="flex flex-wrap gap-2">
@@ -131,18 +131,6 @@ function PurchaseCard({
             })()}
           </div>
         )}
-
-        {/* Title */}
-        <div>
-          <h1 className="text-2xl font-medium tracking-tight text-foreground leading-snug">
-            {link.title}
-          </h1>
-          {link.subtitle && (
-            <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
-              {link.subtitle}
-            </p>
-          )}
-        </div>
 
         {/* Price */}
         <div className="flex items-baseline gap-2">
@@ -281,7 +269,7 @@ export default async function PaywallPage({ params }: Props) {
   };
 
   return (
-    <main className="min-h-dvh bg-background">
+    <main className="min-h-dvh bg-background pb-24 lg:pb-0">
       <script
         type="application/ld+json"
         // biome-ignore lint/security/noDangerouslySetInnerHtml: controlled JSON-LD
@@ -323,6 +311,38 @@ export default async function PaywallPage({ params }: Props) {
           {/* Left column */}
           <div className="space-y-8">
 
+            {/* Title + subtitle — always at top of left column */}
+            <div>
+              {/* Urgency badges on mobile (PurchaseCard is desktop-only) */}
+              {(expiresAt || link.max_orders !== null) && (
+                <div className="flex flex-wrap gap-2 mb-3 lg:hidden">
+                  {expiresAt && (
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full text-xs font-medium">
+                      <Clock className="w-3 h-3" aria-hidden="true" />
+                      Limited offer · expires in {formatTimeUntil(expiresAt)}
+                    </div>
+                  )}
+                  {link.max_orders !== null && link.max_orders !== undefined && (() => {
+                    const slotsLeft = link.max_orders - (link.total_sales ?? 0);
+                    return (
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 rounded-full text-xs font-medium">
+                        <span className="size-1.5 rounded-full bg-current shrink-0" />
+                        {slotsLeft === 1 ? "Only 1 spot remaining" : `${slotsLeft} spots remaining`}
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+              <h1 className="text-2xl sm:text-3xl font-medium tracking-tight text-foreground leading-snug">
+                {link.title}
+              </h1>
+              {link.subtitle && (
+                <p className="text-base text-muted-foreground mt-2 leading-relaxed">
+                  {link.subtitle}
+                </p>
+              )}
+            </div>
+
             {/* Preview image */}
             {link.preview_image_url && (
               <div className="aspect-video w-full overflow-hidden rounded-2xl bg-muted relative">
@@ -335,16 +355,6 @@ export default async function PaywallPage({ params }: Props) {
                 />
               </div>
             )}
-
-            {/* Mobile only: purchase card */}
-            <div className="lg:hidden">
-              <PurchaseCard
-                link={link}
-                expiresAt={expiresAt}
-                salesCount={salesCount}
-                formatTimeUntil={formatTimeUntil}
-              />
-            </div>
 
             {/* About */}
             {link.description && (
@@ -523,6 +533,26 @@ export default async function PaywallPage({ params }: Props) {
             </div>
           </div>
 
+        </div>
+      </div>
+
+      {/* Mobile sticky bottom bar */}
+      <div
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-background/95 backdrop-blur-sm px-4 pt-3"
+        style={{ paddingBottom: "max(12px, env(safe-area-inset-bottom))" }}
+      >
+        <div className="flex items-center gap-3 max-w-sm mx-auto">
+          <div className="shrink-0">
+            <p className="text-xl font-medium tabular-nums text-foreground">
+              ${link.price.toFixed(2)}
+            </p>
+            <p className="text-[11px] text-muted-foreground leading-none mt-0.5">
+              {link.currency.toUpperCase()} · one-time
+            </p>
+          </div>
+          <div className="flex-1">
+            <PaywallCTA linkId={link.id} />
+          </div>
         </div>
       </div>
     </main>
