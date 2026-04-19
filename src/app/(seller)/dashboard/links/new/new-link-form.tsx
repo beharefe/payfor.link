@@ -6,20 +6,8 @@ import { useRef, useState, useTransition } from "react";
 
 const PRICE_PRESETS = [9.99, 19, 29, 49];
 const MIN_PRICE = 9.99;
-const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
-const MIN_RATIO = 1.5;
-const MAX_RATIO = 2.4;
-
-function getImageRatio(file: File): Promise<number> {
-  return new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload = () => { URL.revokeObjectURL(url); resolve(img.width / img.height); };
-    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Could not read image")); };
-    img.src = url;
-  });
-}
 
 function formatExpiryPreview(value: string): string {
   const ms = new Date(value).getTime() - Date.now();
@@ -167,7 +155,7 @@ export function NewLinkForm() {
     setFaq((prev) => prev.filter((_, idx) => idx !== i));
   }
 
-  async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     if (prevObjectUrl.current) {
       URL.revokeObjectURL(prevObjectUrl.current);
       prevObjectUrl.current = null;
@@ -186,23 +174,7 @@ export function NewLinkForm() {
       return;
     }
     if (file.size > MAX_IMAGE_SIZE) {
-      setImageError("Image must be under 2MB");
-      setImageFile(null);
-      setImagePreviewUrl(null);
-      return;
-    }
-    try {
-      const ratio = await getImageRatio(file);
-      if (ratio < MIN_RATIO || ratio > MAX_RATIO) {
-        setImageError(
-          `Image must be landscape ~1.91:1 (e.g. 1200×630px). Your image: ${ratio.toFixed(2)}:1`,
-        );
-        setImageFile(null);
-        setImagePreviewUrl(null);
-        return;
-      }
-    } catch {
-      setImageError("Could not read image dimensions");
+      setImageError("Image must be under 5MB");
       setImageFile(null);
       setImagePreviewUrl(null);
       return;
@@ -494,7 +466,7 @@ export function NewLinkForm() {
               <span className="text-[11px] font-normal text-muted-foreground bg-muted px-1.5 py-0.5 rounded-md ml-0.5">optional</span>
             </label>
             <p className={`${hintClass} mb-3`}>
-              Landscape image shown at the top of your paywall page. 1200×630px recommended, max 2MB.
+              Any image works. Max 5MB — JPG, PNG, or WebP.
             </p>
             <label
               htmlFor="preview_image"

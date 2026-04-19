@@ -5,7 +5,7 @@ import {
 import { type NextRequest, NextResponse } from "next/server";
 
 const BUCKET = "preview-images";
-const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+const MAX_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_MIME = new Set(["image/jpeg", "image/png", "image/webp"]);
 const EXT_MAP: Record<string, string> = {
   "image/jpeg": "jpg",
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
 
   if (file.size > MAX_SIZE) {
     return NextResponse.json(
-      { error: "Image must be under 2MB" },
+      { error: "Image must be under 5MB" },
       { status: 400 },
     );
   }
