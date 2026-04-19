@@ -153,9 +153,9 @@ function PurchaseCard({
         {/* Trust row */}
         <div className="flex items-center justify-center gap-4 pt-1">
           {[
+            { icon: Timer, label: "Instant access" },
             { icon: LockKeyhole, label: "Stripe-secured" },
-            { icon: Mail, label: "Email delivery" },
-            { icon: Timer, label: "No account" },
+            { icon: Mail, label: "No account" },
           ].map(({ icon: Icon, label }) => (
             <div key={label} className="flex items-center gap-1.5">
               <Icon className="size-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
