@@ -107,6 +107,18 @@ function PurchaseCard({
 }) {
   return (
     <div className="border border-border rounded-2xl bg-card overflow-hidden">
+      {/* Cover image — top half of card */}
+      {link.preview_image_url && (
+        <div className="aspect-video w-full overflow-hidden relative border-b border-border">
+          <Image
+            src={link.preview_image_url}
+            alt={link.title}
+            fill
+            sizes="360px"
+            className="object-cover object-top"
+          />
+        </div>
+      )}
       <div className="p-5 space-y-4">
         {/* Badges: expiry and/or scarcity */}
         {(expiresAt || link.max_orders !== null) && (
@@ -349,15 +361,15 @@ export default async function PaywallPage({ params }: Props) {
               )}
             </div>
 
-            {/* Preview image */}
+            {/* Preview image — mobile only (desktop shows it in the purchase card) */}
             {link.preview_image_url && (
-              <div className="aspect-video w-full overflow-hidden rounded-2xl bg-muted relative">
+              <div className="lg:hidden aspect-video w-full overflow-hidden rounded-2xl bg-muted relative">
                 <Image
                   src={link.preview_image_url}
                   alt={link.title}
                   fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 680px"
-                  className="object-cover"
+                  sizes="100vw"
+                  className="object-cover object-top"
                 />
               </div>
             )}

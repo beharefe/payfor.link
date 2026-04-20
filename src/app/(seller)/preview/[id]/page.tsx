@@ -263,6 +263,19 @@ export default async function PreviewPage({ params }: Props) {
               )}
             </div>
 
+            {/* Preview image — mobile only (desktop shows it in the purchase card) */}
+            {link.preview_image_url && (
+              <div className="lg:hidden aspect-video w-full overflow-hidden rounded-2xl bg-muted relative">
+                <Image
+                  src={link.preview_image_url}
+                  alt={link.title}
+                  fill
+                  sizes="100vw"
+                  className="object-cover object-top"
+                />
+              </div>
+            )}
+
             {/* Description */}
             {link.description && (
               <p className="text-base text-foreground leading-relaxed">
