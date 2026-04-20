@@ -293,20 +293,20 @@ export default async function PreviewPage({ params }: Props) {
                 {[
                   {
                     icon: CreditCard,
-                    title: "Pay securely with Stripe",
-                    desc: "Card, Apple Pay, or Google Pay. Your card details never touch our servers.",
+                    title: "Enter your email and pay once",
+                    desc: "Card, Apple Pay, or Google Pay via Stripe. No account needed — just your email for delivery.",
                     badge: null,
                   },
                   {
                     icon: Mail,
-                    title: "Get your access link by email",
-                    desc: "Sent to the email you enter at checkout",
+                    title: "Your access link arrives in seconds",
+                    desc: "A one-time unlock link sent to your inbox. Usually there before you switch tabs.",
                     badge: "Under 30 sec",
                   },
                   {
                     icon: LockKeyhole,
-                    title: "Click the link to get access",
-                    desc: "No account or password needed",
+                    title: "Click once, access immediately",
+                    desc: "One click and you're in. No login, no password, no waiting.",
                     badge: null,
                   },
                 ].map(({ icon: Icon, title, desc, badge }, i) => (
