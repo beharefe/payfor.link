@@ -12,14 +12,14 @@ const ProductScroll = dynamic(() =>
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
 
 export const metadata: Metadata = {
-  title: "unseal.link: Sell Any URL Behind a Paywall. 4.5% Fee.",
+  title: "unseal.link — Turn any URL into a paid access link",
   description:
-    "Paste any URL, set a price, share a paywall link. Buyers pay via Stripe and get instant access. 4.5% fee, half of Gumroad. No uploads, no payout minimum.",
+    "Paste a Notion, Figma, Drive or Discord link, set a price, and buyers unlock it instantly after payment. 4.5% fee. No uploads, no storefront, no buyer account.",
   alternates: { canonical: APP_URL },
   openGraph: {
-    title: "unseal.link: Sell Any URL in 60 Seconds",
+    title: "Turn any URL into a paid access link",
     description:
-      "No uploads. No 10% tax. No ghosting. Paste your URL, set a price, get paid first. 4.5% fee, no minimums.",
+      "Paste URL → set price → buyer pays → instant unlock. Works with Notion, Figma, Drive, GitHub, Discord. 4.5% fee. No uploads, no storefront.",
     url: APP_URL,
     siteName: "unseal.link",
     type: "website",
@@ -47,29 +47,29 @@ const steps = [
 
 const features: { Icon: LucideIcon; title: string; body: string }[] = [
   {
-    Icon: Globe,
-    title: "Works with any URL",
-    body: "Notion, Figma, Canva, Google Drive, GitHub, Discord, Dropbox, Loom. If it has a link, you can sell it. No file uploads ever.",
-  },
-  {
-    Icon: Percent,
-    title: "Lowest fee. No surprises.",
-    body: "No monthly costs. No payout minimum. No hidden fees. Half the cut of Gumroad. Money lands directly in your Stripe account per sale.",
-  },
-  {
     Icon: Lock,
     title: "Buyers pay before they get anything",
     body: "Your link is never exposed until Stripe confirms payment. No more delivering first and hoping. Ghosting is structurally impossible.",
   },
   {
+    Icon: Globe,
+    title: "Works with any URL",
+    body: "Notion, Figma, Canva, Google Drive, GitHub, Discord, Dropbox, Loom. If it has a link, you can sell it. No file uploads ever.",
+  },
+  {
     Icon: Mail,
-    title: "Instant access to every buyer",
-    body: "Buyer pays → Stripe confirms → buyer gets instant access. No manual work. No follow-up. Done.",
+    title: "Instant unlock after payment",
+    body: "Buyer pays → Stripe confirms → buyer gets instant access on the confirmation page. Backup link sent by email too. No manual work.",
   },
   {
     Icon: Share2,
     title: "Previews everywhere automatically",
     body: "Share on X, Discord, Slack, WhatsApp, Telegram. Preview cards show your product name and price automatically.",
+  },
+  {
+    Icon: Percent,
+    title: "Lowest fee. No surprises.",
+    body: "No monthly costs. No payout minimum. No hidden fees. Half the cut of Gumroad. Money lands directly in your Stripe account per sale.",
   },
 ];
 
@@ -203,7 +203,7 @@ const jsonLd = {
   applicationCategory: "BusinessApplication",
   url: APP_URL,
   description:
-    "Turn any URL into a paid link in 60 seconds. 4.5% fee, no uploads, no storefront, no payout minimum.",
+    "Turn any URL into a paid access link. Paste a link, set a price, buyers unlock instantly after payment. 4.5% fee, no uploads, no storefront.",
   offers: {
     "@type": "Offer",
     price: "0",
@@ -251,17 +251,15 @@ export default function HomePage() {
           {/* Left: copy + CTAs */}
           <div>
             <h1 className="text-4xl md:text-6xl font-medium tracking-tight text-foreground mb-6 leading-[1.1]">
-              No uploads.
+              Turn any URL into
               <br />
-              No 10% tax.
-              <br />
-              No ghosting.
+              a paid access link.
             </h1>
 
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-lg leading-relaxed">
-              Paste any URL, set a price, share your paywall link.{" "}
+              Paste a Notion, Figma, Drive or Discord link, set a price, and buyers unlock it instantly after payment.{" "}
               <br className="hidden sm:block" />
-              Buyers pay via Stripe and get instant access.
+              No uploads. No storefront. No buyer account.
             </p>
 
             <div className="flex flex-wrap gap-3 mb-3">
