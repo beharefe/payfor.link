@@ -226,6 +226,20 @@ export default async function PreviewPage({ params }: Props) {
         </div>
       </nav>
 
+      {/* Hero image — mobile only, full-bleed, no border */}
+      {link.preview_image_url && (
+        <div className="lg:hidden aspect-video w-full overflow-hidden relative">
+          <Image
+            src={link.preview_image_url}
+            alt={link.title}
+            fill
+            sizes="100vw"
+            className="object-cover object-top"
+            priority
+          />
+        </div>
+      )}
+
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 lg:py-12">
         <div className="lg:grid lg:grid-cols-[1fr_360px] lg:gap-12 lg:items-start">
 
@@ -262,19 +276,6 @@ export default async function PreviewPage({ params }: Props) {
                 </p>
               )}
             </div>
-
-            {/* Preview image — mobile only (desktop shows it in the purchase card) */}
-            {link.preview_image_url && (
-              <div className="lg:hidden aspect-video w-full overflow-hidden rounded-2xl bg-muted relative">
-                <Image
-                  src={link.preview_image_url}
-                  alt={link.title}
-                  fill
-                  sizes="100vw"
-                  className="object-cover object-top"
-                />
-              </div>
-            )}
 
             {/* Description */}
             {link.description && (
