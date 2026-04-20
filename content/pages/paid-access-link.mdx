@@ -1,0 +1,125 @@
+---
+title: "Paid Access Link: Turn Any URL Into a Paid Product"
+description: "A paid access link puts a Stripe payment gate in front of any URL. Buyers pay once and unlock instantly — no storefront, no file hosting, no platform fees."
+og_title: "Paid Access Link — Turn Any URL Into a Paid Product"
+og_description: "Paste any URL. Set a price. Share your paid access link. Buyers unlock instantly after payment. 4.5% fee, no monthly cost."
+schema_type: WebPage
+published: true
+related:
+  - what-is-a-paywall-link
+  - sell-link-online
+  - how-to-paywall-any-link
+  - sell-notion-template
+  - sell-figma-template
+  - get-paid-before-delivering-freelance-work
+---
+
+<Hero
+  title="Turn any URL into a paid access link."
+  subtitle="Paste your link, set a price, share. Buyers pay via Stripe and unlock instantly on the confirmation page. No storefront, no file uploads, no platform markup."
+  cta="Create your paid access link"
+  ctaHref="/auth"
+  note="4.5% per sale. No monthly fees. No credit card to list."
+/>
+
+## What is a paid access link?
+
+A paid access link is a URL that gates another URL behind a Stripe payment. You have content somewhere — a Notion template, a Figma file, a Google Drive folder, a Discord server, a GitHub repo — and you want to charge for access to it.
+
+Instead of building a checkout flow or setting up a storefront, you create a paid access link: a public-facing URL that holds your content URL behind a payment form. Buyers visit the link, see your title and price, pay, and the destination unlocks instantly.
+
+Your content stays exactly where it already lives. The paid access link is just the payment gate in front of it.
+
+<FeatureList
+  items={[
+    {
+      icon: "lock",
+      title: "Any URL works",
+      body: "Notion pages, Figma files, Google Drive folders, Discord invites, GitHub repos, Canva templates, Loom videos, Dropbox files. If it has an HTTPS URL, you can paywall it.",
+    },
+    {
+      icon: "zap",
+      title: "Instant unlock after payment",
+      body: "Buyers see the link on screen the moment Stripe confirms payment — no waiting for email. A backup link arrives in their inbox too. No buyer account needed.",
+    },
+    {
+      icon: "banknote",
+      title: "4.5% flat. No surprises.",
+      body: "No per-transaction fee. No monthly cost. No payout minimum. Payments go directly to your Stripe account — we never hold your money.",
+    },
+  ]}
+/>
+
+<Steps
+  items={[
+    {
+      title: "Get your content URL",
+      body: "Make your content shareable: in Notion, enable 'Share to web'; in Figma, set 'Anyone with link can view'; in Google Drive, set to 'Anyone with the link'. Copy the URL. That is what buyers receive after paying.",
+    },
+    {
+      title: "Create your paid access link",
+      body: "Go to unseal.link, paste your URL, write a title and description, set your price. Minimum $9.99. Your paid access link is live in under 2 minutes — no Stripe setup needed yet.",
+    },
+    {
+      title: "Share it anywhere",
+      body: "Your paid access link works wherever a URL works: Twitter, a newsletter, your link-in-bio, a Discord channel, a Notion page, a Reddit post. The preview card shows your product name and price automatically on every platform.",
+    },
+    {
+      title: "Buyer pays, unlocks instantly",
+      body: "Stripe handles payment. Buyers land on a confirmation page with immediate access to your content URL. Backup link sent by email too. No manual step from you, ever.",
+    },
+  ]}
+/>
+
+<FeeCallout keep="95.5" />
+
+## Who uses paid access links
+
+**Template creators** — Notion systems, Figma UI kits, Canva templates, Google Sheets models. The product lives at a URL. The paid access link is the payment gate.
+
+**Freelancers** — Final deliverables go into a Google Drive folder. The folder link goes behind a paid access link. Client pays, client gets the files. No invoice chasing, no delivery before payment.
+
+**Educators** — Course videos in a Google Drive folder, curriculum in Notion, recorded workshops on Loom. A single paid access link gates the whole thing without a course platform.
+
+**Community builders** — Discord server invites, private newsletter access, gated Slack groups. A paid access link makes any invite URL a product.
+
+**Developers** — Boilerplates and starter kits, private repos, deployment guides, license files. Link buyers directly to what they're buying.
+
+## How this is different from other tools
+
+**vs. Gumroad**: Gumroad requires file uploads and charges 10%. Paid access links work with any URL and charge 4.5%. If your product already lives at a URL, you're paying 5.5% extra for a file-upload workflow you don't need.
+
+**vs. Stripe Payment Links**: Stripe Payment Links processes payments. It delivers nothing. You'd still manually email every buyer. A paid access link automates the entire delivery.
+
+**vs. building a checkout**: Writing a Stripe integration from scratch takes days. Creating a paid access link takes 2 minutes. Same Stripe infrastructure, zero code.
+
+<FAQ
+  items={[
+    {
+      q: "What types of URLs can I use as a paid access link?",
+      a: "Any HTTPS URL where the destination is accessible to anyone who has the link. Notion pages, Figma files, Google Drive files and folders (set to 'anyone with link'), Discord invite links, GitHub repos, Loom videos, Dropbox shared links, Canva template links. The one requirement: the destination should not demand a separate login from the buyer on top of your payment gate.",
+    },
+    {
+      q: "Is a paid access link the same as a paywall link?",
+      a: "Yes — same concept, different names. 'Paid access link', 'paywall link', 'gated link': they all describe a URL that requires payment before revealing the destination. We use the terms interchangeably.",
+    },
+    {
+      q: "Can buyers share the destination URL after unlocking?",
+      a: "You control that at the source. For Notion and Figma, set permissions to 'view only' — the link will work but buyers can't edit or duplicate without your permission. For Discord invite links, set usage limits or expiry in Discord's invite settings. For sensitive content, you can periodically rotate the destination URL in your dashboard.",
+    },
+    {
+      q: "How fast is access after payment?",
+      a: "Instantly. The moment Stripe confirms payment, buyers land on a confirmation page with a direct 'Open link →' button. The same link arrives in their inbox within 30 seconds as a permanent reference.",
+    },
+    {
+      q: "Do I need a Stripe account to start?",
+      a: "No. You can create your paid access link and share it before any payment setup. When you're ready to receive money, click 'Enable payouts' in your dashboard — we create your payment account automatically in about 2 minutes.",
+    },
+  ]}
+/>
+
+<CTA
+  text="Create your paid access link"
+  href="/auth"
+  sub="Free to list. 4.5% per sale. Instant unlock for buyers."
+/>
