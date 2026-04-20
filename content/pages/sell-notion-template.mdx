@@ -5,6 +5,10 @@ og_title: "Sell Your Notion Template: Keep 95.5%"
 og_description: Paste your Notion link, set a price, share your paywall. Start selling in 2 minutes.
 schema_type: WebPage
 published: true
+related:
+  - how-to-sell-notion-templates
+  - sell-notion-templates-without-gumroad-fees
+  - gumroad-alternatives-lower-fees
 ---
 
 <Hero
@@ -24,13 +28,13 @@ published: true
     },
     {
       icon: "lock",
-      title: "Buyers pay, then get the link",
-      body: "Your Notion URL stays hidden behind the paywall. Buyers receive it by email after payment.",
+      title: "Buyers pay, then get instant access",
+      body: "Your Notion URL stays hidden behind the paywall. Buyers unlock it instantly on the confirmation page after payment — backup link sent by email too.",
     },
     {
       icon: "banknote",
       title: "Instant payouts",
-      body: "Money goes straight to your Stripe account. No waiting periods, no platform holds.",
+      body: "Money goes straight to your Stripe account. No waiting periods, no platform holds. We never touch your funds.",
     },
   ]}
 />
@@ -39,21 +43,27 @@ published: true
   items={[
     {
       title: "Paste your Notion link",
-      body: "Make your Notion page public (view only). Copy the URL and paste it into unseal.link.",
+      body: "Make your Notion page public (view only) by going to Share → Share to web in Notion. Copy the URL — it looks like yourname.notion.site/Template-Name-abc123. That's what buyers receive after paying; they duplicate it into their own workspace.",
     },
     {
       title: "Set your price",
-      body: "Minimum $9.99. You decide what your template is worth.",
+      body: "Minimum $9.99. You decide what your template is worth. Single-purpose templates (habit trackers, reading logs) typically sell for $9–$19. Multi-database workspace systems go for $29–$79. If your template replaces real software or saves buyers hours of setup, price accordingly.",
     },
     {
       title: "Share your paywall link",
-      body: "You get a link like unseal.link/pay/your-template. Share it anywhere: Twitter, newsletter, Gumroad profile.",
+      body: "You get a link like unseal.link/pay/your-template. Share it anywhere: Twitter, your newsletter, Reddit's r/Notion self-promotion thread, or your existing Gumroad profile. The preview card shows your product name, price, and image automatically on every platform.",
     },
     {
       title: "Buyer pays, gets access",
-      body: "Stripe handles the payment. Buyer receives your Notion link by email within seconds.",
+      body: "Stripe handles the payment. The buyer unlocks your Notion link instantly on the confirmation page — backup link sent by email too. The whole thing takes under 30 seconds from payment to access. You don't need to do anything manually.",
     },
   ]}
+/>
+
+<InlineCTA
+  text="Start selling your Notion template today"
+  href="/auth"
+  note="Free to list. No Stripe account needed upfront. 4.5% fee per sale."
 />
 
 <FeeCallout keep="95.5" />
@@ -61,20 +71,20 @@ published: true
 <FAQ
   items={[
     {
-      q: "Do I need to host my Notion template on unseal.link?",
-      a: "No. Your Notion page stays on Notion. We just control who gets the link.",
+      q: "Do I need to leave Gumroad to use this?",
+      a: "No. Run both in parallel. Gumroad gives you marketplace discovery. unseal.link gives you direct sales where you keep 95.5% instead of 90%. Many sellers find that once they have their own audience, direct sales outperform Gumroad even at lower traffic — because conversion is higher with warm audiences.",
     },
     {
-      q: "Can buyers share my template link with others?",
-      a: "You control access through Notion's share settings. Set it to view-only and link-based so sharing the link doesn't give edit access.",
+      q: "What if someone shares my Notion link with others?",
+      a: "Notion template links aren't single-use, so technically a buyer could share it. In practice, most don't. The practical approach: add a brief license notice to your template's cover page, and periodically generate a new share link for high-volume products to invalidate old ones. Over-engineering protection costs more than it saves.",
     },
     {
-      q: "What if I update my template after buyers purchase?",
-      a: "Updates to your Notion page are instantly available to all buyers who have the link. No re-delivery needed.",
+      q: "How do I update my template after selling?",
+      a: "Edit your Notion page normally. All buyers who already have the link get the updated version automatically — because it's just a URL pointing to your content. No re-delivery needed, no notifying buyers. If you make a major structural change, consider keeping the old version live and creating a new paywall for the updated one.",
     },
     {
-      q: "How do I get paid?",
-      a: "We create your payment account automatically — no existing Stripe account needed. Click 'Enable payouts' in your dashboard, complete the 2-minute setup, and revenue goes directly to your bank after each sale.",
+      q: "What price should I charge for my template?",
+      a: "The Notion template market has a wide range. Simple single-purpose templates go $9–$19. Multi-database workspace systems that replace real software go $29–$79. Full business operating systems go $49–$149. The creators making real money aren't competing on price — they're competing on niche specificity. A generic project manager template competes with hundreds of others. A Notion CRM specifically for freelance video editors has almost no competition and can charge more.",
     },
   ]}
 />

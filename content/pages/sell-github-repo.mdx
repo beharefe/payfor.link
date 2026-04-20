@@ -32,9 +32,9 @@ related:
       body: "GitHub repo invite links, Dropbox ZIPs, Google Drive folders, private documentation, anything with a URL.",
     },
     {
-      icon: "mail-check",
-      title: "Delivery by email",
-      body: "Buyer pays > receives the link by email. No manual onboarding, no GitHub invite management (unless you want it).",
+      icon: "zap",
+      title: "Instant access after payment",
+      body: "Buyer pays and unlocks the link instantly on the confirmation page. Backup link sent by email too. No manual onboarding needed.",
     },
   ]}
 />
@@ -43,19 +43,19 @@ related:
   items={[
     {
       title: "Decide your delivery method",
-      body: "Private repo invitation link, a ZIP on Google Drive, a PDF setup guide, or an invite to your private docs site.",
+      body: "You have a few options: a private repo invitation link (buyers get added as collaborators), a ZIP exported to Google Drive, a PDF setup guide, or an invite to your private docs site. A ZIP on Drive is the simplest — one link, no manual invite management. A private repo link is more premium and gives buyers direct access to future commits.",
     },
     {
       title: "Create your paywall",
-      body: "Paste your delivery URL, write a clear description of what buyers get, set your price.",
+      body: "Paste your delivery URL into unseal.link, write a clear title and description that explains what the codebase includes, what it builds, and what stack it uses. Set your price. Developers buying boilerplates are professionals — be specific about what's included, what isn't, and what skill level the buyer needs.",
     },
     {
       title: "Share on developer channels",
-      body: "Post on Hacker News, IndieHackers, Twitter/X, dev newsletters, or your own blog.",
+      body: "Post on Hacker News (Show HN), IndieHackers, Twitter/X dev community, or relevant dev newsletters. GitHub README badges work well too — add a 'Buy' badge that links to your paywall. Developers find products through search and community, so write a clear title that matches what they'd type.",
     },
     {
-      title: "Buyers get access instantly",
-      body: "Payment goes to your Stripe. Buyer receives the link by email. You add them to the repo (if needed).",
+      title: "Buyers unlock instantly",
+      body: "Buyer pays via Stripe and unlocks the link instantly on the confirmation page. Backup link sent by email too. If you're using a private repo invite link, you'll need to manually add them as a collaborator after payment — your dashboard shows each buyer's email. For ZIP delivery, everything is fully automated with no manual steps.",
     },
   ]}
 />
@@ -65,20 +65,20 @@ related:
 <FAQ
   items={[
     {
-      q: "Can I deliver the actual GitHub repo access?",
-      a: "You can deliver a GitHub invitation link, or a link to a private gist, or instructions to email you for an invite. The delivery URL is whatever link you want buyers to receive.",
+      q: "Can I sell a public repo?",
+      a: "Technically yes, but it doesn't make much sense to paywall something anyone can already access for free. The better approach for public repos: sell a companion resource — a comprehensive setup guide, a video walkthrough, a deployment checklist, or a private fork with premium additions. The public repo builds trust and drives traffic. The paid companion is what people pay for.",
     },
     {
-      q: "What if I update the codebase after purchase?",
-      a: "If you're delivering a repo link, all buyers with access automatically get updates. If you use a ZIP link, update the ZIP and buyers keep the old version unless you resend.",
+      q: "What happens if I want to update the repo after selling?",
+      a: "If buyers have a private repo invite link, they're already collaborators and get updates automatically via git pull. If you used a ZIP file on Google Drive, update the ZIP and future buyers get the new version — existing buyers have the old one. If the update is significant, you can export your buyer list from your dashboard and email them with a note about the update.",
     },
     {
-      q: "Can I sell a SaaS boilerplate?",
-      a: "Yes. Many developers sell $99-$499 boilerplates this way. Set your price, deliver a private repo link.",
+      q: "Do buyers need a GitHub account?",
+      a: "Only if you're delivering via a GitHub repo invite link. For ZIP-based delivery, buyers just need an email address — they download the file directly from Google Drive or wherever you host it. Most developers buying boilerplates already have GitHub accounts, so this isn't usually a friction point in practice.",
     },
     {
-      q: "Is there a limit on how many copies I can sell?",
-      a: "No limit by default. Purchase limits (max buyers per product) are coming in a future update.",
+      q: "How is this different from GitHub Sponsors?",
+      a: "GitHub Sponsors is a recurring donation model — supporters pay monthly to support your open source work. unseal.link is a one-time product sale — buyers pay once and get a specific thing. They're not substitutes. If you maintain open source work and want ongoing support, Sponsors makes sense. If you're selling a discrete product (a boilerplate, a course, a codebase), a one-time paywall sale is the right fit.",
     },
   ]}
 />
