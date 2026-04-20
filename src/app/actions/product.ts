@@ -124,8 +124,8 @@ export async function createProduct(
       terms_accepted_at: new Date().toISOString(),
       status,
       subtitle: input.subtitle?.trim() || null,
-      includes: input.includes?.length ? input.includes : null,
-      faq: input.faq?.length ? input.faq : null,
+      includes: input.includes?.length ? input.includes : [],
+      faq: input.faq?.length ? input.faq : [],
       preview_image_key: input.preview_image_key?.trim() || null,
     })
     .select("id")
@@ -253,8 +253,8 @@ export async function updateProduct(
       preview_image_url: input.preview_image_url?.trim() || null,
       expires_at: input.expires_at || null,
       subtitle: input.subtitle?.trim() || null,
-      includes: input.includes?.length ? input.includes : null,
-      faq: input.faq?.length ? input.faq : null,
+      includes: input.includes?.length ? input.includes : [],
+      faq: input.faq?.length ? input.faq : [],
       preview_image_key: input.preview_image_key?.trim() || null,
     })
     .eq("id", input.id)
