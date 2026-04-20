@@ -133,7 +133,7 @@ export default async function LinksPage() {
                           </div>
                           <p className="text-sm text-muted-foreground">
                             {link.status === "draft" && !seller.stripe_connected
-                              ? "Connect Stripe to activate"
+                              ? "Enable payouts to activate"
                               : `${link.total_sales} sales · $${(link.total_revenue ?? 0).toFixed(2)} earned`}
                             {link.expires_at && !isExpired(link.expires_at) && (() => {
                               const ms = new Date(link.expires_at).getTime() - Date.now();
@@ -143,6 +143,9 @@ export default async function LinksPage() {
                             })()}
                           </p>
                         </div>
+                        <span className="text-sm font-medium text-foreground shrink-0 mr-1">
+                          ${link.price % 1 === 0 ? link.price.toFixed(0) : link.price.toFixed(2)}
+                        </span>
                         <ChevronRight className="size-4 text-muted-foreground shrink-0" aria-hidden="true" />
                       </Link>
 
@@ -191,6 +194,9 @@ export default async function LinksPage() {
                             {`${link.total_sales} sales · $${(link.total_revenue ?? 0).toFixed(2)} earned`}
                           </p>
                         </div>
+                        <span className="text-sm font-medium text-foreground shrink-0 mr-1">
+                          ${link.price % 1 === 0 ? link.price.toFixed(0) : link.price.toFixed(2)}
+                        </span>
                         <ChevronRight className="size-4 text-muted-foreground shrink-0" aria-hidden="true" />
                       </Link>
                     </div>
