@@ -73,7 +73,7 @@ function PreviewPurchaseCard({
             alt={link.title}
             fill
             sizes="360px"
-            className="object-cover"
+            className="object-cover object-top"
           />
         </div>
       )}
@@ -189,22 +189,13 @@ export default async function PreviewPage({ params }: Props) {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-10 flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <Eye className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" aria-hidden="true" />
-            <span className="text-xs font-medium text-amber-700 dark:text-amber-300">
-              Preview mode — this is how your paywall looks to buyers
-            </span>
-            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-              link.status === "active"
-                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-                : "bg-muted text-muted-foreground border border-border"
-            }`}>
-              {link.status}
-            </span>
+            <span className="text-xs font-medium text-amber-700 dark:text-amber-300">Preview mode</span>
           </div>
           <Link
             href={`/dashboard/links/${link.id}`}
-            className="text-xs text-amber-700 dark:text-amber-300 hover:text-amber-900 dark:hover:text-amber-100 transition-colors no-underline shrink-0 font-medium"
+            className="flex items-center gap-1 text-xs text-amber-700 dark:text-amber-300 hover:text-amber-900 dark:hover:text-amber-100 transition-colors no-underline shrink-0 font-medium"
           >
-            ← Back to dashboard
+            ← Back
           </Link>
         </div>
       </div>
@@ -271,19 +262,6 @@ export default async function PreviewPage({ params }: Props) {
                 </p>
               )}
             </div>
-
-            {/* Preview image — left column (below title, above description) */}
-            {link.preview_image_url && (
-              <div className="aspect-video w-full overflow-hidden rounded-2xl bg-muted relative">
-                <Image
-                  src={link.preview_image_url}
-                  alt={link.title}
-                  fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 680px"
-                  className="object-cover"
-                />
-              </div>
-            )}
 
             {/* Description */}
             {link.description && (
