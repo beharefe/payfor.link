@@ -1,3 +1,4 @@
+import { signOutToAuth } from "@unseallink/app/actions/auth";
 import { TABLES } from "@unseallink/lib/db";
 import { createClient } from "@unseallink/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -38,6 +39,17 @@ export default async function OnboardingNamePage({
           </p>
         </div>
         <NameForm defaultName={seller?.name ?? ""} error={error} detail={detail} />
+        <form action={signOutToAuth} className="mt-6 text-center">
+          <p className="text-xs text-muted-foreground mb-1">
+            Signed in as <span className="font-medium text-foreground">{user.email}</span>
+          </p>
+          <button
+            type="submit"
+            className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground transition-colors"
+          >
+            Use a different email
+          </button>
+        </form>
       </div>
     </main>
   );
