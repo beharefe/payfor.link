@@ -293,20 +293,20 @@ export default async function PreviewPage({ params }: Props) {
                 {[
                   {
                     icon: CreditCard,
-                    title: "Enter your email and pay once",
-                    desc: "Card, Apple Pay, or Google Pay via Stripe. No account needed — just your email for delivery.",
+                    title: "Pay with card, Apple Pay, or Google Pay",
+                    desc: "Enter your email at checkout. No account needed.",
                     badge: null,
                   },
                   {
-                    icon: Mail,
-                    title: "Your access link arrives in seconds",
-                    desc: "A one-time unlock link sent to your inbox. Usually there before you switch tabs.",
-                    badge: "Under 30 sec",
+                    icon: LockKeyhole,
+                    title: "Instant access on the next page",
+                    desc: "Payment done — your content is one click away before you close the tab.",
+                    badge: "Instant",
                   },
                   {
-                    icon: LockKeyhole,
-                    title: "Click once, access immediately",
-                    desc: "One click and you're in. No login, no password, no waiting.",
+                    icon: Mail,
+                    title: "Backup link sent to your inbox too",
+                    desc: "So you can always return to what you bought.",
                     badge: null,
                   },
                 ].map(({ icon: Icon, title, desc, badge }, i) => (
