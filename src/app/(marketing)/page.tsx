@@ -1,4 +1,3 @@
-import { TrustBar } from "@unseallink/components/trust-bar";
 import { CredibilityBar } from "@unseallink/components/credibility-bar";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -279,7 +278,6 @@ export default function HomePage() {
               </Link>
             </p>
 
-            <TrustBar />
           </div>
 
           {/* Right: paywall card mockup — desktop only */}
