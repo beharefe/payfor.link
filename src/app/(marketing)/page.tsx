@@ -272,7 +272,7 @@ export default function HomePage() {
             </div>
 
             <p className="text-xs text-muted-foreground mb-10">
-              Fee-free for first 100 sellers.{" "}
+              First $500 fee-free for new sellers.{" "}
               <Link href="/auth" className="text-foreground underline hover:no-underline">
                 Claim your spot →
               </Link>

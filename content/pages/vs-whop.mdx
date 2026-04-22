@@ -22,7 +22,7 @@ related:
 ## The short version
 
 - **Whop**: Purpose-built for subscription-based Discord communities, recurring memberships, and role management. Software platform fee on top of payment processing.
-- **unseal.link**: Built for one-time Discord access. Paste your invite link, set a price. Buyers pay via Stripe and get the link by email. No bot, no role sync, no monthly software cost.
+- **unseal.link**: Built for one-time Discord access. Paste your invite link, set a price. Buyers pay via Stripe and unlock the invite instantly on the confirmation page. No bot, no role sync, no monthly software cost.
 
 If your Discord runs on recurring monthly memberships and you want automated role assignment, Whop is built for that.
 
@@ -41,7 +41,7 @@ If you are selling lifetime or one-time access to your Discord — a $49 communi
 1. Go to your Discord server → Invite People → Create an invite link (set to no-expiry)
 2. On unseal.link: paste the invite link, set a price (e.g. $49), give it a title
 3. Share your paywall link on Twitter, your newsletter, or anywhere
-4. Buyer pays via Stripe → invite link arrives in their email in under 30 seconds
+4. Buyer pays via Stripe → invite link unlocks instantly on the confirmation page
 5. Done. No bot. No role setup. No Whop account. No monthly software fee.
 
 **Whop flow:**
@@ -68,7 +68,7 @@ Whop's setup is more involved but provides ongoing membership management. unseal
     { feature: "One-time / lifetime access", a: "Supported", b: "Native", bWins: false },
     { feature: "Setup time", a: "30–60 min", b: "Under 5 min", bWins: true },
     { feature: "Buyer account required", a: "Yes (Whop account)", b: "No — email only", bWins: true },
-    { feature: "Access delivery", a: "Discord role via bot", b: "Invite link by email", bWins: false },
+    { feature: "Access delivery", a: "Discord role via bot", b: "Instant on-page + email backup", bWins: false },
     { feature: "Payout minimum", a: "$20", b: "$0", bWins: true },
     { feature: "Works without Discord", a: "No (Discord-centric)", b: "Yes — any URL", bWins: true },
   ]}
@@ -172,7 +172,7 @@ A Discord invite link is just a URL. unseal.link turns any URL into a paywall in
   items={[
     {
       q: "What type of Discord invite link should I use?",
-      a: "Create a permanent invite (no expiry, unlimited uses) in your Discord server under Server Settings → Invites. This is the URL you paste into unseal.link. Every buyer who pays gets this same invite link delivered to their email.",
+      a: "Create a permanent invite (no expiry, unlimited uses) in your Discord server under Server Settings → Invites. This is the URL you paste into unseal.link. Every buyer who pays unlocks this invite link instantly on the confirmation page. Backup link also sent by email.",
     },
     {
       q: "Can buyers share the invite link with others?",

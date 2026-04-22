@@ -34,8 +34,8 @@ export function Footer() {
           <div className="flex flex-col gap-2 sm:flex-1">
             <span className="text-sm font-medium text-foreground">unseal.link</span>
             <p className="text-xs text-muted-foreground leading-relaxed max-w-xs">
-              Turn any link into a paywall. Buyers pay via Stripe and get instant
-              access by email. No uploads. No storefront. No minimum payout.
+              Turn any link into a paywall. Buyers pay via Stripe and unlock
+              access instantly. No uploads. No storefront. No minimum payout.
             </p>
             <span className="text-xs text-muted-foreground mt-1">
               © {new Date().getFullYear()} unseal.link · Payments by{" "}
