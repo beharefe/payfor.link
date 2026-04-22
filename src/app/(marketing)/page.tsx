@@ -1,4 +1,5 @@
 import { TrustBar } from "@unseallink/components/trust-bar";
+import { CredibilityBar } from "@unseallink/components/credibility-bar";
 import type { Metadata } from "next";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -332,6 +333,8 @@ export default function HomePage() {
 
         </div>
       </section>
+
+      <CredibilityBar />
 
       {/* ── How it works ─────────────────────────────────────────────── */}
       <section className="border-t border-border py-16 md:py-20 bg-card">
