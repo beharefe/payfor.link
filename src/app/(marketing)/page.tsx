@@ -217,8 +217,7 @@ const jsonLd = {
     sameAs: [
       "https://twitter.com/unseallink",
       "https://x.com/unseallink",
-      // Add after launch: "https://www.producthunt.com/products/unseal-link"
-      // Add after launch: "https://www.reddit.com/r/unseallink" (if created)
+      "https://www.producthunt.com/products/unseal-link",
     ],
   },
 };
@@ -262,7 +261,7 @@ export default function HomePage() {
               No uploads. No storefront. No buyer account.
             </p>
 
-            <div className="flex flex-wrap gap-3 mb-3">
+            <div className="flex flex-wrap gap-3 mb-5">
               <Link
                 href="/auth"
                 className="inline-flex items-center px-6 py-3 bg-primary text-primary-foreground rounded-full font-medium text-sm hover:opacity-90 transition-opacity no-underline"
@@ -270,6 +269,30 @@ export default function HomePage() {
                 Create your first paid link →
               </Link>
             </div>
+
+            <a
+              href="https://www.producthunt.com/products/unseal-link?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-unseal-link"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block mb-5"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                alt="unseal.link - Turn any URL into a paid access link | Product Hunt"
+                width={250}
+                height={54}
+                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1130231&theme=light&t=1776895213600"
+                className="dark:hidden"
+              />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                alt="unseal.link - Turn any URL into a paid access link | Product Hunt"
+                width={250}
+                height={54}
+                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1130231&theme=dark&t=1776895252622"
+                className="hidden dark:block"
+              />
+            </a>
 
             <p className="text-xs text-muted-foreground mb-10">
               First $500 fee-free for new sellers.{" "}
