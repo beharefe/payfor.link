@@ -171,6 +171,16 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.55 0.015 50);
 }
+/* Marquee animation for credibility bar */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@theme inline {
+  --animate-marquee: marquee 22s linear infinite;
+}
+
 /* Hide scrollbar while keeping scroll functionality */
 .scrollbar-none {
   scrollbar-width: none;
