@@ -270,30 +270,6 @@ export default function HomePage() {
               </Link>
             </div>
 
-            <a
-              href="https://www.producthunt.com/products/unseal-link?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-unseal-link"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block mb-5"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                alt="unseal.link - Turn any URL into a paid access link | Product Hunt"
-                width={250}
-                height={54}
-                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1130231&theme=light&t=1776895213600"
-                className="dark:hidden"
-              />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                alt="unseal.link - Turn any URL into a paid access link | Product Hunt"
-                width={250}
-                height={54}
-                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1130231&theme=dark&t=1776895252622"
-                className="hidden dark:block"
-              />
-            </a>
-
             <p className="text-xs text-muted-foreground mb-10">
               First $500 fee-free for new sellers.{" "}
               <Link href="/auth" className="text-foreground underline hover:no-underline">
