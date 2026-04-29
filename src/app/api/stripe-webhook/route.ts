@@ -3,6 +3,7 @@ import { generateAccessToken } from "@unseallink/lib/access-token";
 import { trackServer } from "@unseallink/lib/amplitude-server";
 import { TABLES } from "@unseallink/lib/db";
 import { log } from "@unseallink/lib/logger";
+import { isAtlasPromoCovered, calculateStripeFee } from "@unseallink/lib/pricing/fees";
 import { recordPaymentUsage, reversePaymentUsage } from "@unseallink/lib/promotions/promotions-service";
 import { platformFeeCents, stripe } from "@unseallink/lib/stripe";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
@@ -155,6 +156,35 @@ async function handleCheckoutSessionCompleted(
     // A silent return here would leave the order missing with no retry.
     throw new Error(`Order insert failed: ${insertError?.message ?? "no data returned"}`);
   }
+
+  // Fetch payment method type from Stripe charge (best-effort, non-blocking)
+  // Used to track Atlas promo coverage per transaction
+  void (async () => {
+    try {
+      const charges = await stripe.charges.list({ payment_intent: paymentIntentId, limit: 1 });
+      const charge = charges.data[0];
+      if (!charge) return;
+
+      const pmType = charge.payment_method_details?.type ?? 'card';
+      // Normalize wallet payments: apple_pay / google_pay appear as type 'card' with a wallet field
+      const walletType = (charge.payment_method_details as { card?: { wallet?: { type?: string } } } | undefined)?.card?.wallet?.type;
+      const normalizedType = walletType ?? pmType;
+
+      await supabase
+        .from(TABLES.ORDERS)
+        .update({
+          payment_method_type: normalizedType,
+          stripe_fee_covered: isAtlasPromoCovered(normalizedType),
+          stripe_fee_cents: calculateStripeFee(amountTotal, normalizedType),
+        })
+        .eq('id', insertedOrder.id);
+    } catch (err) {
+      log.error('order_payment_method_update_failed', {
+        order_id: insertedOrder.id,
+        error: serializeError(err),
+      });
+    }
+  })();
 
   void trackServer(
     {

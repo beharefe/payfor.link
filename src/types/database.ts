@@ -85,6 +85,9 @@ export interface Order {
   refunded_at: string | null;
   refund_reason: string | null;
   stripe_refund_id: string | null;
+  payment_method_type: string | null;
+  stripe_fee_covered: boolean;
+  stripe_fee_cents: number;
   created_at: string;
   updated_at: string;
 }

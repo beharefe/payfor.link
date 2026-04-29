@@ -1,16 +1,16 @@
 "use server";
 
-import crypto from "node:crypto";
 import { trackServer } from "@unseallink/lib/amplitude-server";
 import { TABLES } from "@unseallink/lib/db";
 import { log } from "@unseallink/lib/logger";
 import { detectProductType, isValidUrl } from "@unseallink/lib/product-utils";
 import { checkUrlSafe } from "@unseallink/lib/safe-browsing";
+import { generateSlug } from "@unseallink/lib/slugify";
 import { createClient } from "@unseallink/lib/supabase/server";
 import { redirect } from "next/navigation";
-import slugify from "slugify";
 
 const MIN_PRICE = 9.99;
+const ASCII_ONLY = /[^ -~]/;
 
 function parseJsonArray<T>(raw: FormDataEntryValue | null): T[] | null {
   if (!raw) return null;
@@ -18,6 +18,10 @@ function parseJsonArray<T>(raw: FormDataEntryValue | null): T[] | null {
     const parsed = JSON.parse(raw.toString());
     return Array.isArray(parsed) ? parsed : null;
   } catch { return null; }
+}
+
+function asciiError(field: string): { error: string } {
+  return { error: `${field} can only contain standard letters, numbers, and punctuation.` };
 }
 
 type CreateProductInput = {
@@ -48,38 +52,32 @@ export async function createProduct(
   if (!user) return { error: "Unauthorized" };
 
   if (!input.title?.trim()) return { error: "Title is required" };
-  if (input.title.trim().length > 200)
-    return { error: "Title must be 200 characters or less" };
-  if (input.description && input.description.length > 2000)
-    return { error: "Description must be 2000 characters or less" };
+  if (input.title.trim().length > 200) return { error: "Title must be 200 characters or less" };
+  if (ASCII_ONLY.test(input.title)) return asciiError("Title");
+  if (input.description && input.description.length > 2000) return { error: "Description must be 2000 characters or less" };
+  if (input.description && ASCII_ONLY.test(input.description)) return asciiError("Description");
   if (!input.destination_url?.trim()) return { error: "URL is required" };
-  if (!isValidUrl(input.destination_url))
-    return { error: "URL must start with https://" };
-  if (input.preview_image_url && !isValidUrl(input.preview_image_url))
-    return { error: "Preview image URL must start with https://" };
-  if (input.price < MIN_PRICE)
-    return { error: `Minimum price is $${MIN_PRICE}` };
-  if (!input.terms_accepted)
-    return { error: "You must accept the terms before publishing." };
-  if (input.subtitle && input.subtitle.length > 120)
-    return { error: "Tagline must be 120 characters or less" };
-  if (input.includes && input.includes.length > 8)
-    return { error: "Includes list must have 8 items or fewer" };
-  if (input.faq && input.faq.length > 5)
-    return { error: "FAQ must have 5 items or fewer" };
+  if (!isValidUrl(input.destination_url)) return { error: "URL must start with https://" };
+  if (input.preview_image_url && !isValidUrl(input.preview_image_url)) return { error: "Preview image URL must start with https://" };
+  if (input.price < MIN_PRICE) return { error: `Minimum price is $${MIN_PRICE}` };
+  if (!input.terms_accepted) return { error: "You must accept the terms before publishing." };
+  if (input.subtitle && input.subtitle.length > 120) return { error: "Tagline must be 120 characters or less" };
+  if (input.subtitle && ASCII_ONLY.test(input.subtitle)) return asciiError("Tagline");
+  if (input.includes && input.includes.length > 8) return { error: "Includes list must have 8 items or fewer" };
+  if (input.includes?.some(s => ASCII_ONLY.test(s))) return asciiError("Includes");
+  if (input.faq && input.faq.length > 5) return { error: "FAQ must have 5 items or fewer" };
+  if (input.faq?.some(item => ASCII_ONLY.test(item.q) || ASCII_ONLY.test(item.a))) return asciiError("FAQ");
 
   const { safe } = await checkUrlSafe(input.destination_url);
   if (!safe) return { error: "This link was flagged. Use a different URL." };
 
   const productType = detectProductType(input.destination_url);
 
-  // Auto-generate slug: title + 4-char random hex suffix → globally unique + readable
-  const baseSlug = slugify(input.title, { lower: true, strict: true });
+  // Auto-generate slug with 4-char random suffix, retry on collision
   let slug = "";
 
   for (let attempt = 0; attempt < 5; attempt++) {
-    const suffix = crypto.randomBytes(2).toString("hex");
-    const candidate = `${baseSlug}-${suffix}`;
+    const candidate = generateSlug(input.title);
     const { data: existing } = await supabase
       .from(TABLES.PRODUCTS)
       .select("id")
@@ -137,7 +135,6 @@ export async function createProduct(
       code: error.code,
       user_id: user.id,
     });
-    // Surface the actual error in dev so it's visible without Axiom
     const msg = process.env.NODE_ENV === "development"
       ? `Failed to create product: ${error.message}`
       : "Failed to create product. Please try again.";
@@ -208,23 +205,20 @@ export async function updateProduct(
   if (!user) return { error: "Unauthorized" };
 
   if (!input.title?.trim()) return { error: "Title is required" };
-  if (input.title.trim().length > 200)
-    return { error: "Title must be 200 characters or less" };
-  if (input.description && input.description.length > 2000)
-    return { error: "Description must be 2000 characters or less" };
+  if (input.title.trim().length > 200) return { error: "Title must be 200 characters or less" };
+  if (ASCII_ONLY.test(input.title)) return asciiError("Title");
+  if (input.description && input.description.length > 2000) return { error: "Description must be 2000 characters or less" };
+  if (input.description && ASCII_ONLY.test(input.description)) return asciiError("Description");
   if (!input.destination_url?.trim()) return { error: "URL is required" };
-  if (!isValidUrl(input.destination_url))
-    return { error: "URL must start with https://" };
-  if (input.preview_image_url && !isValidUrl(input.preview_image_url))
-    return { error: "Preview image URL must start with https://" };
-  if (input.price < MIN_PRICE)
-    return { error: `Minimum price is $${MIN_PRICE}` };
-  if (input.subtitle && input.subtitle.length > 120)
-    return { error: "Tagline must be 120 characters or less" };
-  if (input.includes && input.includes.length > 8)
-    return { error: "Includes list must have 8 items or fewer" };
-  if (input.faq && input.faq.length > 5)
-    return { error: "FAQ must have 5 items or fewer" };
+  if (!isValidUrl(input.destination_url)) return { error: "URL must start with https://" };
+  if (input.preview_image_url && !isValidUrl(input.preview_image_url)) return { error: "Preview image URL must start with https://" };
+  if (input.price < MIN_PRICE) return { error: `Minimum price is $${MIN_PRICE}` };
+  if (input.subtitle && input.subtitle.length > 120) return { error: "Tagline must be 120 characters or less" };
+  if (input.subtitle && ASCII_ONLY.test(input.subtitle)) return asciiError("Tagline");
+  if (input.includes && input.includes.length > 8) return { error: "Includes list must have 8 items or fewer" };
+  if (input.includes?.some(s => ASCII_ONLY.test(s))) return asciiError("Includes");
+  if (input.faq && input.faq.length > 5) return { error: "FAQ must have 5 items or fewer" };
+  if (input.faq?.some(item => ASCII_ONLY.test(item.q) || ASCII_ONLY.test(item.a))) return asciiError("FAQ");
 
   // Verify ownership
   const { data: existing } = await supabase

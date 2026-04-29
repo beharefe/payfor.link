@@ -4,6 +4,29 @@ import { Package } from "lucide-react";
 import { redirect } from "next/navigation";
 import { RefundButton } from "../links/[id]/link-actions";
 
+const PM_LABELS: Record<string, { label: string; icon: string }> = {
+  card: { label: "Card", icon: "💳" },
+  apple_pay: { label: "Apple Pay", icon: "🍎" },
+  google_pay: { label: "Google Pay", icon: "G" },
+  link: { label: "Link", icon: "🔗" },
+  blik: { label: "BLIK", icon: "🏦" },
+  sepa_debit: { label: "SEPA", icon: "🏦" },
+  us_bank_account: { label: "ACH", icon: "🏦" },
+  alipay: { label: "Alipay", icon: "💳" },
+  wechat_pay: { label: "WeChat Pay", icon: "💳" },
+  cashapp: { label: "Cash App", icon: "💸" },
+};
+
+function PaymentMethodBadge({ type }: { type: string | null }) {
+  if (!type) return null;
+  const info = PM_LABELS[type] ?? { label: type, icon: "💳" };
+  return (
+    <span className="text-[11px] px-1.5 py-0.5 bg-muted border border-border rounded text-muted-foreground font-normal">
+      {info.icon} {info.label}
+    </span>
+  );
+}
+
 export default async function DashboardOrdersPage() {
   const supabase = await createClient();
   const {
@@ -21,7 +44,7 @@ export default async function DashboardOrdersPage() {
 
   const { data: orders } = await supabase
     .from(TABLES.ORDERS)
-    .select("id, created_at, buyer_email, product_title, price_paid, currency, status, product_id")
+    .select("id, created_at, buyer_email, product_title, price_paid, currency, status, product_id, payment_method_type")
     .eq("seller_id", user.id)
     .order("created_at", { ascending: false })
     .limit(200);
@@ -66,7 +89,7 @@ export default async function DashboardOrdersPage() {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                       order.status === "paid"
                         ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
@@ -76,6 +99,7 @@ export default async function DashboardOrdersPage() {
                     }`}>
                       {order.status}
                     </span>
+                    <PaymentMethodBadge type={order.payment_method_type ?? null} />
                     {order.status === "paid" && (
                       <RefundButton orderId={order.id} buyerEmail={order.buyer_email} />
                     )}

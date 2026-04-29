@@ -1,6 +1,7 @@
 "use client";
 
 import { createProductAction } from "@unseallink/app/actions/product";
+import { hasUnicodeChars } from "@unseallink/lib/slugify";
 import { Clock, Loader2, LockKeyhole, Mail, Timer, X } from "lucide-react";
 import { useRef, useState, useTransition } from "react";
 
@@ -131,6 +132,12 @@ export function NewLinkForm() {
   const prevObjectUrl = useRef<string | null>(null);
 
   const priceNum = parseFloat(priceValue);
+  const hasAnyUnicodeError =
+    hasUnicodeChars(titleValue) ||
+    hasUnicodeChars(descriptionValue) ||
+    hasUnicodeChars(subtitle) ||
+    includes.some(hasUnicodeChars) ||
+    faq.some(item => hasUnicodeChars(item.q) || hasUnicodeChars(item.a));
   const priceInvalid = priceValue !== "" && (isNaN(priceNum) || priceNum < MIN_PRICE);
 
   // Includes helpers
@@ -268,6 +275,9 @@ export function NewLinkForm() {
               onChange={(e) => setTitleValue(e.target.value)}
               className={inputClass}
             />
+            {hasUnicodeChars(titleValue) && (
+              <p className="text-xs text-destructive mt-1">Only standard letters, numbers, and punctuation are allowed.</p>
+            )}
             <p className={hintClass}>Keep it short and descriptive. Shown as the page heading and in search results.</p>
           </div>
 
@@ -300,6 +310,9 @@ export function NewLinkForm() {
               placeholder="Short description shown on the paywall page"
               className={inputClass}
             />
+            {hasUnicodeChars(descriptionValue) && (
+              <p className="text-xs text-destructive mt-1">Only standard letters, numbers, and punctuation are allowed.</p>
+            )}
             <p className={hintClass}>Shown below the title on your paywall page. Also used as the SEO meta description.</p>
           </div>
 
@@ -318,6 +331,9 @@ export function NewLinkForm() {
               placeholder="One-line summary shown under the title on the paywall"
               className={inputClass}
             />
+            {hasUnicodeChars(subtitle) && (
+              <p className="text-xs text-destructive mt-1">Only standard letters, numbers, and punctuation are allowed.</p>
+            )}
             <p className={hintClass}>{subtitle.length}/120 — appears directly under the title in smaller text.</p>
           </div>
 
@@ -331,23 +347,28 @@ export function NewLinkForm() {
             <div className="flex flex-col gap-2">
               {includes.map((item, i) => (
                 // biome-ignore lint/suspicious/noArrayIndexKey: positional list
-                <div key={i} className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={item}
-                    onChange={(e) => updateInclude(i, e.target.value)}
-                    maxLength={120}
-                    placeholder={`Item ${i + 1}`}
-                    className={inputClass}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeInclude(i)}
-                    className="shrink-0 p-1.5 text-muted-foreground hover:text-foreground transition-colors"
-                    aria-label="Remove item"
-                  >
-                    <X className="size-4" aria-hidden="true" />
-                  </button>
+                <div key={i} className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={item}
+                      onChange={(e) => updateInclude(i, e.target.value)}
+                      maxLength={120}
+                      placeholder={`Item ${i + 1}`}
+                      className={inputClass}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeInclude(i)}
+                      className="shrink-0 p-1.5 text-muted-foreground hover:text-foreground transition-colors"
+                      aria-label="Remove item"
+                    >
+                      <X className="size-4" aria-hidden="true" />
+                    </button>
+                  </div>
+                  {hasUnicodeChars(item) && (
+                    <p className="text-xs text-destructive">Only standard letters, numbers, and punctuation are allowed.</p>
+                  )}
                 </div>
               ))}
             </div>
@@ -390,6 +411,9 @@ export function NewLinkForm() {
                       placeholder="e.g. Can I use this commercially?"
                       className={inputClass}
                     />
+                    {hasUnicodeChars(item.q) && (
+                      <p className="text-xs text-destructive mt-1">Only standard letters, numbers, and punctuation are allowed.</p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-xs text-muted-foreground mb-1">Answer</label>
@@ -400,6 +424,9 @@ export function NewLinkForm() {
                       placeholder="Your answer…"
                       className={`${inputClass} resize-none`}
                     />
+                    {hasUnicodeChars(item.a) && (
+                      <p className="text-xs text-destructive mt-1">Only standard letters, numbers, and punctuation are allowed.</p>
+                    )}
                   </div>
                 </div>
               ))}
@@ -580,7 +607,7 @@ export function NewLinkForm() {
 
           <button
             type="submit"
-            disabled={isPending || priceInvalid || !termsAccepted}
+            disabled={isPending || priceInvalid || !termsAccepted || hasAnyUnicodeError}
             className="inline-flex items-center justify-center gap-2 w-full py-3.5 bg-primary text-primary-foreground rounded-full text-base font-medium cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed border-none mt-2"
           >
             {isPending && <Loader2 className="animate-spin size-4 shrink-0" />}

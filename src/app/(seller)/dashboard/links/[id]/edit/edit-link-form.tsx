@@ -1,6 +1,7 @@
 "use client";
 
 import { updateProductAction } from "@unseallink/app/actions/product";
+import { hasUnicodeChars } from "@unseallink/lib/slugify";
 import { useRef, useState, useTransition } from "react";
 import { X } from "lucide-react";
 
@@ -52,10 +53,19 @@ export function EditLinkForm({ id, defaultValues }: Props) {
       ? new Date(defaultValues.expires_at).toISOString().slice(0, 16)
       : "",
   );
+  const [titleValue, setTitleValue] = useState(defaultValues.title);
+  const [descriptionValue, setDescriptionValue] = useState(defaultValues.description);
   const [subtitle, setSubtitle] = useState(defaultValues.subtitle ?? "");
   const [includes, setIncludes] = useState<string[]>(defaultValues.includes ?? []);
   const [faq, setFaq] = useState<Array<{ q: string; a: string }>>(defaultValues.faq ?? []);
   const [isPending, startTransition] = useTransition();
+
+  const hasAnyUnicodeError =
+    hasUnicodeChars(titleValue) ||
+    hasUnicodeChars(descriptionValue) ||
+    hasUnicodeChars(subtitle) ||
+    includes.some(hasUnicodeChars) ||
+    faq.some(item => hasUnicodeChars(item.q) || hasUnicodeChars(item.a));
   const priceInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const prevObjectUrl = useRef<string | null>(null);
@@ -168,9 +178,13 @@ export function EditLinkForm({ id, defaultValues }: Props) {
           id="title"
           name="title"
           required
-          defaultValue={defaultValues.title}
+          value={titleValue}
+          onChange={(e) => setTitleValue(e.target.value)}
           className={inputClass}
         />
+        {hasUnicodeChars(titleValue) && (
+          <p className="text-xs text-destructive mt-1">Only standard letters, numbers, and punctuation are allowed.</p>
+        )}
         <p className={hintClass}>Keep it short and descriptive. Shown as the page heading and in search results.</p>
       </div>
 
@@ -184,9 +198,13 @@ export function EditLinkForm({ id, defaultValues }: Props) {
           id="description"
           name="description"
           rows={3}
-          defaultValue={defaultValues.description}
+          value={descriptionValue}
+          onChange={(e) => setDescriptionValue(e.target.value)}
           className={`${inputClass} resize-none`}
         />
+        {hasUnicodeChars(descriptionValue) && (
+          <p className="text-xs text-destructive mt-1">Only standard letters, numbers, and punctuation are allowed.</p>
+        )}
         <p className={hintClass}>Shown below the title on your paywall page. Also used as the SEO meta description.</p>
       </div>
 
@@ -205,6 +223,9 @@ export function EditLinkForm({ id, defaultValues }: Props) {
           placeholder="One-line summary shown under the title on the paywall"
           className={inputClass}
         />
+        {hasUnicodeChars(subtitle) && (
+          <p className="text-xs text-destructive mt-1">Only standard letters, numbers, and punctuation are allowed.</p>
+        )}
         <p className={hintClass}>{subtitle.length}/120 — appears directly under the title in smaller text.</p>
       </div>
 
@@ -218,23 +239,28 @@ export function EditLinkForm({ id, defaultValues }: Props) {
         <div className="flex flex-col gap-2">
           {includes.map((item, i) => (
             // biome-ignore lint/suspicious/noArrayIndexKey: positional list
-            <div key={i} className="flex items-center gap-2">
-              <input
-                type="text"
-                value={item}
-                onChange={(e) => updateInclude(i, e.target.value)}
-                maxLength={120}
-                placeholder={`Item ${i + 1}`}
-                className={inputClass}
-              />
-              <button
-                type="button"
-                onClick={() => removeInclude(i)}
-                className="shrink-0 p-1.5 text-muted-foreground hover:text-foreground transition-colors"
-                aria-label="Remove item"
-              >
-                <X className="size-4" aria-hidden="true" />
-              </button>
+            <div key={i} className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={item}
+                  onChange={(e) => updateInclude(i, e.target.value)}
+                  maxLength={120}
+                  placeholder={`Item ${i + 1}`}
+                  className={inputClass}
+                />
+                <button
+                  type="button"
+                  onClick={() => removeInclude(i)}
+                  className="shrink-0 p-1.5 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label="Remove item"
+                >
+                  <X className="size-4" aria-hidden="true" />
+                </button>
+              </div>
+              {hasUnicodeChars(item) && (
+                <p className="text-xs text-destructive">Only standard letters, numbers, and punctuation are allowed.</p>
+              )}
             </div>
           ))}
         </div>
@@ -277,6 +303,9 @@ export function EditLinkForm({ id, defaultValues }: Props) {
                   placeholder="e.g. Can I use this commercially?"
                   className={inputClass}
                 />
+                {hasUnicodeChars(item.q) && (
+                  <p className="text-xs text-destructive mt-1">Only standard letters, numbers, and punctuation are allowed.</p>
+                )}
               </div>
               <div>
                 <label className="block text-xs text-muted-foreground mb-1">Answer</label>
@@ -287,6 +316,9 @@ export function EditLinkForm({ id, defaultValues }: Props) {
                   placeholder="Your answer…"
                   className={`${inputClass} resize-none`}
                 />
+                {hasUnicodeChars(item.a) && (
+                  <p className="text-xs text-destructive mt-1">Only standard letters, numbers, and punctuation are allowed.</p>
+                )}
               </div>
             </div>
           ))}
@@ -430,7 +462,7 @@ export function EditLinkForm({ id, defaultValues }: Props) {
       <div>
         <button
           type="submit"
-          disabled={isPending}
+          disabled={isPending || hasAnyUnicodeError}
           className="px-6 py-2.5 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer"
         >
           {isPending ? "Saving…" : "Save changes"}
