@@ -102,7 +102,7 @@ function renderBannerContent(sp: SellerPromotion): {
       const maxDollars = (sp.max_value / 100).toFixed(2);
       return {
         icon: "⚡",
-        description: `Your next $${remainingDollars} in sales are completely fee-free.`,
+        description: `Your next $${remainingDollars} in sales are platform fee-free (0% platform cut). Stripe card processing fees still apply.`,
         remainingLabel: `$${remainingDollars} fee-free left`,
         usedLabel: `$${usedDollars}`,
         maxLabel: `$${maxDollars}`,
