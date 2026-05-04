@@ -19,7 +19,7 @@ export default async function OrderPage({ params }: Props) {
   const { data: order } = await service
     .from(TABLES.ORDERS)
     .select(
-      "id, buyer_email, product_id, product_title, price_paid, currency, created_at, status, seller_id",
+      "id, buyer_email, product_id, product_title, price_paid, currency, created_at, status, seller_id, payment_processor, crypto_transaction_id",
     )
     .eq("id", order_id)
     .single();
@@ -148,6 +148,19 @@ export default async function OrderPage({ params }: Props) {
               <span>Amount</span>
               <span className="font-medium text-foreground">${order.price_paid.toFixed(2)} {order.currency.toUpperCase()}</span>
             </div>
+            {order.crypto_transaction_id && (
+              <div className="flex justify-between">
+                <span>Transaction</span>
+                <a
+                  href={`https://solscan.io/tx/${order.crypto_transaction_id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-mono text-foreground hover:underline"
+                >
+                  {order.crypto_transaction_id.slice(0, 8)}…{order.crypto_transaction_id.slice(-6)}
+                </a>
+              </div>
+            )}
           </div>
         </div>
 
@@ -170,7 +183,10 @@ export default async function OrderPage({ params }: Props) {
             ← All orders
           </Link>
           <p className="text-xs text-muted-foreground">
-            Payments &amp; refunds handled by <span className="font-medium text-foreground">Stripe</span>
+            {order.payment_processor === "solana"
+              ? "Paid on-chain via Solana"
+              : <>Payments &amp; refunds handled by <span className="font-medium text-foreground">Stripe</span></>
+            }
           </p>
         </div>
       </div>
