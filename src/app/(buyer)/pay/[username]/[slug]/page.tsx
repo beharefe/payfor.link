@@ -429,7 +429,9 @@ export default async function PaywallPage({ params }: Props) {
                 {[
                   {
                     icon: CreditCard,
-                    title: "Pay with card, Apple Pay, or Google Pay",
+                    title: showCrypto
+                      ? "Pay with card, Apple Pay, or Crypto on Solana"
+                      : "Pay with card, Apple Pay, or Google Pay",
                     desc: "Enter your email at checkout. No account needed.",
                     badge: null,
                   },

@@ -307,7 +307,7 @@ export default async function PreviewPage({ params }: Props) {
                 {[
                   {
                     icon: CreditCard,
-                    title: "Pay with card, Apple Pay, or Google Pay",
+                    title: "Pay with card, Apple Pay, or Crypto on Solana",
                     desc: "Enter your email at checkout. No account needed.",
                     badge: null,
                   },
