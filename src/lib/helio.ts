@@ -150,6 +150,9 @@ export async function prepareHelioTransaction(params: {
   const secret = helioSecretKey();
   const merchantId = helioMerchantId();
 
+  const appUrl =
+    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? "https://unseal.link";
+
   const response = await fetch(
     `${HELIO_API_BASE}/paylink/${params.paylinkId}/transaction`,
     {
@@ -158,6 +161,7 @@ export async function prepareHelioTransaction(params: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${secret}`,
         "x-merchant-id": merchantId,
+        Origin: appUrl,
       },
       body: JSON.stringify({ payer: params.payerWalletAddress }),
     },
