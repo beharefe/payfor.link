@@ -9,7 +9,7 @@ function SolanaLogo() {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-label="Solana"
-      className="h-[22px] w-auto text-foreground"
+      className="h-[26px] w-auto text-foreground"
     >
       <g clipPath="url(#solana-clip)">
         {/* Diamond mark — gradient stays, not theme-adaptive */}

@@ -11,6 +11,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AbuseReportForm } from "../../abuse-report-form";
+import { ActionCodeCTA } from "../../action-code-cta";
 import { CryptoCTA } from "../../crypto-cta";
 import { PaywallCTA } from "../../paywall-cta";
 
@@ -166,6 +167,7 @@ function PurchaseCard({
         {/* CTA */}
         <PaywallCTA linkId={link.id} price={link.price} />
         {showCrypto && <CryptoCTA linkId={link.id} />}
+        {showCrypto && <ActionCodeCTA linkId={link.id} />}
 
         {/* Trust row */}
         <div className="flex items-center justify-center gap-4 pt-1">
@@ -570,6 +572,7 @@ export default async function PaywallPage({ params }: Props) {
           <div className="flex-1 space-y-2">
             <PaywallCTA linkId={link.id} price={link.price} />
             {showCrypto && <CryptoCTA linkId={link.id} />}
+            {showCrypto && <ActionCodeCTA linkId={link.id} />}
           </div>
         </div>
       </div>

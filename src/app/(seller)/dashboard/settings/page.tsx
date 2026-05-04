@@ -15,11 +15,21 @@ export default async function SettingsPage() {
 
   const { data: seller } = await supabase
     .from(TABLES.SELLERS)
-    .select("name, email, bio, avatar_url, stripe_connected, stripe_charges_enabled, username, twitter_handle, website_url, profile_public, solana_wallet_address")
+    .select("name, email, bio, avatar_url, stripe_connected, stripe_charges_enabled, username, twitter_handle, website_url, profile_public")
     .eq("id", user.id)
     .single();
 
   if (!seller) redirect("/onboarding/name");
+
+  let solanaWalletAddress: string | null = null;
+  if (EXPERIMENTAL_CRYPTO_ENABLED) {
+    const { data: walletData } = await supabase
+      .from(TABLES.SELLERS)
+      .select("solana_wallet_address")
+      .eq("id", user.id)
+      .maybeSingle();
+    solanaWalletAddress = (walletData as { solana_wallet_address?: string | null } | null)?.solana_wallet_address ?? null;
+  }
 
   return (
     <main>
@@ -78,7 +88,7 @@ export default async function SettingsPage() {
             <div className="border border-border rounded-2xl p-6 bg-card">
               {seller.stripe_charges_enabled ? (
                 <CryptoWalletForm
-                  currentWallet={seller.solana_wallet_address ?? null}
+                  currentWallet={solanaWalletAddress}
                 />
               ) : (
                 <>
