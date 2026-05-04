@@ -19,11 +19,6 @@ const USDC_MINT = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
 const USDC_DECIMALS = 6;
 const PLATFORM_WALLET = process.env.NEXT_PUBLIC_PLATFORM_SOLANA_WALLET ?? "";
 
-// Build a Connection here so handlePay doesn't depend on useConnection(),
-// which uses NEXT_PUBLIC_SOLANA_RPC_URL and fails with 401 on bad API keys.
-const RPC_ENDPOINT =
-  process.env.NEXT_PUBLIC_SOLANA_RPC_URL || clusterApiUrl("mainnet-beta");
-
 type Step = "collapsed" | "email" | "connecting" | "ready" | "confirming" | "done";
 
 const SolanaIcon = () => (
@@ -99,10 +94,9 @@ export function CryptoCTA({
     setError(null);
     setStep("confirming");
 
-    // Always create a fresh Connection here — avoids the 401 that happens when
-    // NEXT_PUBLIC_SOLANA_RPC_URL has a bad/empty API key and the provider's
-    // connection is already broken.
-    const conn = new Connection(RPC_ENDPOINT, "confirmed");
+    // Always use public mainnet here — bypasses NEXT_PUBLIC_SOLANA_RPC_URL entirely
+    // so a bad/empty API key never causes a false "sender not found" from createTransfer.
+    const conn = new Connection(clusterApiUrl("mainnet-beta"), "confirmed");
 
     let txSignature: string;
     try {
@@ -135,7 +129,12 @@ export function CryptoCTA({
 
       txSignature = await sendTransaction(transaction as Transaction, conn);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Transaction failed. Try again.");
+      const msg = err instanceof Error ? err.message : "";
+      setError(
+        msg === "sender not found"
+          ? "Your wallet has no USDC account. Add USDC via Phantom Swap or an exchange first."
+          : msg || "Transaction failed. Try again.",
+      );
       setStep("ready");
       return;
     }
