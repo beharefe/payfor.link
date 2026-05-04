@@ -1,23 +1,28 @@
 "use client";
 
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { createTransfer, type Amount } from "@solana/pay";
-import { Keypair, PublicKey, Transaction } from "@solana/web3.js";
+import { clusterApiUrl, Connection, Keypair, PublicKey, Transaction } from "@solana/web3.js";
 import {
-  getAssociatedTokenAddressSync,
-  createTransferInstruction,
   createAssociatedTokenAccountIdempotentInstruction,
+  createTransferInstruction,
+  getAssociatedTokenAddressSync,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import BigNumber from "bignumber.js";
 import { ArrowRight, Loader2 } from "lucide-react";
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { splitMicroUsdc } from "@unseallink/lib/solana-tx";
 
 const USDC_MINT = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
 const USDC_DECIMALS = 6;
 const PLATFORM_WALLET = process.env.NEXT_PUBLIC_PLATFORM_SOLANA_WALLET ?? "";
+
+// Build a Connection here so handlePay doesn't depend on useConnection(),
+// which uses NEXT_PUBLIC_SOLANA_RPC_URL and fails with 401 on bad API keys.
+const RPC_ENDPOINT =
+  process.env.NEXT_PUBLIC_SOLANA_RPC_URL || clusterApiUrl("mainnet-beta");
 
 type Step = "collapsed" | "email" | "connecting" | "ready" | "confirming" | "done";
 
@@ -43,8 +48,7 @@ export function CryptoCTA({
   price: number;
   sellerWallet: string;
 }) {
-  const { connection } = useConnection();
-  const { connected, publicKey, sendTransaction } = useWallet();
+  const { wallet, connect, connected, publicKey, sendTransaction } = useWallet();
   const { setVisible } = useWalletModal();
 
   const [step, setStep] = useState<Step>("collapsed");
@@ -53,10 +57,20 @@ export function CryptoCTA({
   const inputRef = useRef<HTMLInputElement>(null);
   const reference = useMemo(() => Keypair.generate().publicKey, []);
 
-  // Wallet connected while waiting → advance to ready
+  // autoConnect={false} means the adapter selects the wallet from the modal but never
+  // calls connect(). We watch `wallet` (the selected adapter) and call it explicitly.
   useEffect(() => {
-    if (connected && step === "connecting") setStep("ready");
-  }, [connected, step]);
+    if (step !== "connecting" || !wallet || connected) return;
+    connect().catch(() => {
+      setError("Wallet connection failed. Try again.");
+      setStep("email");
+    });
+  }, [wallet, step, connected, connect]);
+
+  // Once connected, advance past the connecting screen.
+  useEffect(() => {
+    if (step === "connecting" && connected && publicKey) setStep("ready");
+  }, [connected, publicKey, step]);
 
   function reset() {
     setStep("collapsed");
@@ -72,7 +86,7 @@ export function CryptoCTA({
       return;
     }
     setError(null);
-    if (connected) {
+    if (connected && publicKey) {
       setStep("ready");
     } else {
       setStep("connecting");
@@ -85,16 +99,22 @@ export function CryptoCTA({
     setError(null);
     setStep("confirming");
 
+    // Always create a fresh Connection here — avoids the 401 that happens when
+    // NEXT_PUBLIC_SOLANA_RPC_URL has a bad/empty API key and the provider's
+    // connection is already broken.
+    const conn = new Connection(RPC_ENDPOINT, "confirmed");
+
     let txSignature: string;
     try {
       const totalMicroUsdc = BigInt(Math.round(price * 10 ** USDC_DECIMALS));
       const { seller: sellerMicroUsdc, platform: platformMicroUsdc } =
         splitMicroUsdc(totalMicroUsdc);
 
-      // createTransfer builds the seller leg and embeds the reference key for on-chain tracking.
+      // createTransfer builds the seller leg with the reference key embedded
+      // so validateTransfer can find this tx on-chain later.
       // biome-ignore lint/suspicious/noExplicitAny: BigNumber type conflict between bignumber.js and @solana/pay's nested copy
       const sellerAmount = new BigNumber(sellerMicroUsdc.toString()).dividedBy(10 ** USDC_DECIMALS) as unknown as Amount;
-      const transaction = await createTransfer(connection, publicKey, {
+      const transaction = await createTransfer(conn, publicKey, {
         recipient: new PublicKey(sellerWallet),
         amount: sellerAmount,
         splToken: USDC_MINT,
@@ -102,7 +122,7 @@ export function CryptoCTA({
         memo: `unseal:${linkId}`,
       });
 
-      // Append 4.5% platform fee to the same atomic transaction.
+      // Append 4.5% platform fee leg to the same atomic transaction.
       if (PLATFORM_WALLET && platformMicroUsdc > 0n) {
         const platform = new PublicKey(PLATFORM_WALLET);
         const buyerAta = getAssociatedTokenAddressSync(USDC_MINT, publicKey);
@@ -113,7 +133,7 @@ export function CryptoCTA({
         );
       }
 
-      txSignature = await sendTransaction(transaction as Transaction, connection);
+      txSignature = await sendTransaction(transaction as Transaction, conn);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Transaction failed. Try again.");
       setStep("ready");
@@ -197,7 +217,7 @@ export function CryptoCTA({
         <div className="space-y-1.5">
           <div className="w-full py-2.5 border border-border rounded-full flex items-center justify-center gap-2 text-sm text-muted-foreground">
             <Loader2 className="animate-spin size-4 shrink-0" />
-            Waiting for wallet…
+            Connecting wallet…
           </div>
           <button
             type="button"
@@ -206,6 +226,7 @@ export function CryptoCTA({
           >
             Reopen wallet selector
           </button>
+          {error && <p className="text-destructive text-xs px-1">{error}</p>}
         </div>
       )}
 
