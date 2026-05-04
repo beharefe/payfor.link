@@ -95,3 +95,45 @@ export async function updateProfile(
   revalidatePath("/dashboard", "layout");
   return { ok: true };
 }
+
+// Solana wallet address: base58, 32–44 chars, no special characters.
+const SOLANA_ADDRESS_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+
+export async function saveSolanaWallet(
+  formData: FormData,
+): Promise<SettingsResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Not signed in" };
+
+  const raw = formData.get("solana_wallet_address")?.toString()?.trim() ?? "";
+  const solana_wallet_address = raw || null;
+
+  if (solana_wallet_address !== null && !SOLANA_ADDRESS_RE.test(solana_wallet_address)) {
+    return { error: "Invalid Solana address. Must be 32–44 base58 characters." };
+  }
+
+  // Guard: seller must have completed Stripe KYC before enabling crypto payments.
+  // This ensures identity verification regardless of payment method.
+  const { data: seller } = await supabase
+    .from(TABLES.SELLERS)
+    .select("stripe_charges_enabled")
+    .eq("id", user.id)
+    .single();
+
+  if (!seller?.stripe_charges_enabled) {
+    return { error: "Complete Stripe setup before enabling crypto payments." };
+  }
+
+  const { error } = await supabase
+    .from(TABLES.SELLERS)
+    .update({ solana_wallet_address })
+    .eq("id", user.id);
+
+  if (error) return { error: "Failed to save. Please try again." };
+
+  revalidatePath("/dashboard/settings");
+  return { ok: true };
+}

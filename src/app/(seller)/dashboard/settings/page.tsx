@@ -1,7 +1,9 @@
 import { TABLES } from "@unseallink/lib/db";
+import { EXPERIMENTAL_CRYPTO_ENABLED } from "@unseallink/lib/feature-flags";
 import { createClient } from "@unseallink/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { InitiateStripeConnectButton, WithdrawButton } from "../dashboard-actions";
+import { CryptoWalletForm } from "./crypto-wallet-form";
 import { SettingsForm } from "./settings-form";
 
 export default async function SettingsPage() {
@@ -13,7 +15,7 @@ export default async function SettingsPage() {
 
   const { data: seller } = await supabase
     .from(TABLES.SELLERS)
-    .select("name, email, bio, avatar_url, stripe_connected, username, twitter_handle, website_url, profile_public")
+    .select("name, email, bio, avatar_url, stripe_connected, stripe_charges_enabled, username, twitter_handle, website_url, profile_public, solana_wallet_address")
     .eq("id", user.id)
     .single();
 
@@ -63,6 +65,33 @@ export default async function SettingsPage() {
             )}
           </div>
         </div>
+
+        {/* Crypto payments — experimental, gated by EXPERIMENTAL_CRYPTO_ENABLED */}
+        {EXPERIMENTAL_CRYPTO_ENABLED && (
+          <div>
+            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-6">
+              Crypto payments
+              <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">
+                Beta
+              </span>
+            </p>
+            <div className="border border-border rounded-2xl p-6 bg-card">
+              {seller.stripe_charges_enabled ? (
+                <CryptoWalletForm
+                  currentWallet={seller.solana_wallet_address ?? null}
+                />
+              ) : (
+                <>
+                  <p className="text-sm font-medium text-foreground">Stripe required first</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed mt-1">
+                    Set up Stripe payouts above before enabling crypto payments. This ensures your
+                    account is verified before you can accept any payment method.
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Account */}
         <div>
