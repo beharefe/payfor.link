@@ -49,6 +49,8 @@ export async function createHelioPayLink(params: {
   }
 
   const sellerShare = 100 - CRYPTO_PLATFORM_FEE_PERCENT;
+  const appUrl =
+    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? "https://unseal.link";
 
   const response = await fetch(`${HELIO_API_BASE}/paylink`, {
     method: "POST",
@@ -56,6 +58,7 @@ export async function createHelioPayLink(params: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${secret}`,
       "x-merchant-id": merchantId,
+      Origin: appUrl,
     },
     body: JSON.stringify({
       name: params.productTitle,
