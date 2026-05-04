@@ -139,6 +139,42 @@ export type HelioWebhookPayload = {
   sender?: { publicKey?: string };
 };
 
+// Fetches an unsigned Solana transaction for an existing pay link.
+// Helio's headless payments API builds the transaction (including splitWallets fee split)
+// so the buyer's wallet only needs to sign it.
+// Docs: https://docs.hel.io/docs/headless-payments
+export async function prepareHelioTransaction(params: {
+  paylinkId: string;
+  payerWalletAddress: string;
+}): Promise<string> {
+  const secret = helioSecretKey();
+  const merchantId = helioMerchantId();
+
+  const response = await fetch(
+    `${HELIO_API_BASE}/paylink/${params.paylinkId}/transaction`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${secret}`,
+        "x-merchant-id": merchantId,
+      },
+      body: JSON.stringify({ payer: params.payerWalletAddress }),
+    },
+  );
+
+  if (!response.ok) {
+    const body = await response.text().catch(() => "");
+    throw new Error(`Helio transaction API ${response.status}: ${body}`);
+  }
+
+  const data = (await response.json()) as { transaction: string };
+  if (!data.transaction) {
+    throw new Error("Helio transaction API returned no transaction field");
+  }
+  return data.transaction;
+}
+
 export function extractPaylinkId(payload: HelioWebhookPayload): string | null {
   return payload.paymentRequestId ?? null;
 }
