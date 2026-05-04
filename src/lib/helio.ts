@@ -2,24 +2,19 @@ import crypto from "node:crypto";
 
 const HELIO_API_BASE = "https://api.hel.io/v1";
 
-// Platform fee taken on every crypto payment, split on-chain via Helio's splitWallets.
-// Helio enforces shares as integers that must sum to 100.
+// 1% platform fee — collected off-chain (Helio's public API does not support on-chain splits).
 export const CRYPTO_PLATFORM_FEE_PERCENT = 1;
 
 function helioSecretKey(): string {
   return process.env.HELIO_API_SECRET_KEY ?? "";
 }
 
-function helioMerchantId(): string {
-  return process.env.HELIO_MERCHANT_ID ?? "";
+function helioPublicKey(): string {
+  return process.env.HELIO_API_PUBLIC_KEY ?? "";
 }
 
 function helioWebhookSecret(): string {
   return process.env.HELIO_WEBHOOK_SECRET ?? "";
-}
-
-function platformSolanaWallet(): string {
-  return process.env.PLATFORM_SOLANA_WALLET ?? "";
 }
 
 export type HelioPayLink = {
@@ -27,55 +22,69 @@ export type HelioPayLink = {
   checkoutUrl: string;
 };
 
-// Creates a single-use USDC pay link.
-// splitWallets routes CRYPTO_PLATFORM_FEE_PERCENT% to the platform wallet on-chain;
-// the seller receives the remainder atomically in the same transaction.
-// Field names verified against CreatePaylinkDto in https://api.dev.hel.io/v1/docs-json.
-// The `company` field is deprecated but remains in the required[] array of the schema.
+// Resolves the Helio internal ID for USDC on Solana.
+// Checks HELIO_USDC_CURRENCY_ID env var first to avoid the extra round-trip.
+// Set HELIO_USDC_CURRENCY_ID from your Helio dashboard → Currencies, or from GET /v1/currency/all.
+async function getUsdcCurrencyId(publicKey: string, secret: string): Promise<string> {
+  const envId = process.env.HELIO_USDC_CURRENCY_ID;
+  if (envId) return envId;
+
+  const url = new URL(`${HELIO_API_BASE}/currency/all`);
+  url.searchParams.set("apiKey", publicKey);
+  const res = await fetch(url.toString(), {
+    headers: { Authorization: `Bearer ${secret}` },
+  });
+  if (!res.ok) throw new Error(`Helio currencies fetch failed: ${res.status}`);
+  const currencies = (await res.json()) as Array<{
+    id: string;
+    symbol: string;
+    blockchain?: { engine?: { type?: string } };
+  }>;
+  const usdc = currencies.find(
+    (c) => c.symbol === "USDC" && c.blockchain?.engine?.type === "SOL",
+  );
+  if (!usdc) throw new Error("USDC on Solana not found in Helio currencies list");
+  return usdc.id;
+}
+
+// Creates a single-use USDC pay link via the Helio public API.
+// Endpoint: POST /v1/paylink/create/api-key  (requires HELIO_API_PUBLIC_KEY + HELIO_API_SECRET_KEY)
+// Price must be in USDC smallest unit (6 decimals): $9.99 → "9990000"
+// walletId in recipients accepts the raw Solana address per the public API.
 export async function createHelioPayLink(params: {
   productTitle: string;
   priceUsd: number;
   sellerWalletAddress: string;
 }): Promise<HelioPayLink> {
   const secret = helioSecretKey();
-  const merchantId = helioMerchantId();
-  const platformWallet = platformSolanaWallet();
+  const publicKey = helioPublicKey();
 
-  if (!secret || !merchantId) {
-    throw new Error("HELIO_API_SECRET_KEY and HELIO_MERCHANT_ID must be set");
-  }
-  if (!platformWallet) {
-    throw new Error("PLATFORM_SOLANA_WALLET must be set to collect the platform fee");
+  if (!secret || !publicKey) {
+    throw new Error("HELIO_API_SECRET_KEY and HELIO_API_PUBLIC_KEY must be set");
   }
 
-  const sellerShare = 100 - CRYPTO_PLATFORM_FEE_PERCENT;
-  const appUrl =
-    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? "https://unseal.link";
+  const currencyId = await getUsdcCurrencyId(publicKey, secret);
 
-  const response = await fetch(`${HELIO_API_BASE}/paylink`, {
+  // USDC has 6 decimal places on Solana: $9.99 → 9990000
+  const priceMinimalUnit = String(Math.round(params.priceUsd * 1_000_000));
+
+  const url = new URL(`${HELIO_API_BASE}/paylink/create/api-key`);
+  url.searchParams.set("apiKey", publicKey);
+
+  const response = await fetch(url.toString(), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${secret}`,
-      "x-merchant-id": merchantId,
-      Origin: appUrl,
     },
     body: JSON.stringify({
       name: params.productTitle,
-      pricingCurrency: "USDC",
-      price: params.priceUsd.toFixed(2),
+      price: priceMinimalUnit,
+      pricingCurrency: currencyId,
       template: "OTHER",
-      // Single-use: each checkout attempt gets its own pay link
       maxTransactions: 1,
-      // Helio splits proceeds atomically on-chain in the same transaction.
-      // Shares are integers that must sum to 100.
-      splitWallets: [
-        { walletAddress: params.sellerWalletAddress, share: sellerShare },
-        { walletAddress: platformWallet, share: CRYPTO_PLATFORM_FEE_PERCENT },
-      ],
       features: { canChangeQuantity: false, requireEmail: false },
-      // Deprecated but still required in CreatePaylinkDto schema
-      company: merchantId,
+      recipients: [{ currencyId, walletId: params.sellerWalletAddress }],
     }),
   });
 
@@ -84,8 +93,6 @@ export async function createHelioPayLink(params: {
     throw new Error(`Helio API ${response.status}: ${body}`);
   }
 
-  // The 201 response in the spec has no documented schema.
-  // Helio returns an object with at minimum an `id` field — verify with live API if needed.
   const data = (await response.json()) as { id: string };
   return {
     id: data.id,
@@ -122,19 +129,13 @@ export function verifyHelioWebhookSignature(params: {
     );
     return tokenMatches && hmacMatches;
   } catch {
-    // Buffer lengths differ → clear mismatch
     return false;
   }
 }
 
-// Helio webhook payload for CREATED events on a pay link.
-// Field names inferred from Helio's documented patterns and JS SDK.
-// Use the Helio dashboard's "Manual Replay" to verify exact field names against a real payload.
 export type HelioWebhookPayload = {
   event: "CREATED" | "STARTED" | "RENEWED" | "ENDED";
-  // The paylinkId we stored in pending_crypto_checkouts
   paymentRequestId?: string;
-  // Stable Solana transaction signature — used as crypto_transaction_id for idempotency
   transactionSignature?: string;
   transactionId?: string;
   normalizedTotalPrice?: string;
@@ -142,44 +143,37 @@ export type HelioWebhookPayload = {
   sender?: { publicKey?: string };
 };
 
-// Fetches an unsigned Solana transaction for an existing pay link.
-// Helio's headless payments API builds the transaction (including splitWallets fee split)
-// so the buyer's wallet only needs to sign it.
-// Docs: https://docs.hel.io/docs/headless-payments
+// Prepares an unsigned Solana transaction for an existing pay link.
+// Endpoint: POST /v1/transaction/headless/prepare
+// The buyer's wallet signs and broadcasts the transaction (via Action Codes or browser wallet).
 export async function prepareHelioTransaction(params: {
   paylinkId: string;
   payerWalletAddress: string;
 }): Promise<string> {
   const secret = helioSecretKey();
-  const merchantId = helioMerchantId();
 
-  const appUrl =
-    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? "https://unseal.link";
-
-  const response = await fetch(
-    `${HELIO_API_BASE}/paylink/${params.paylinkId}/transaction`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${secret}`,
-        "x-merchant-id": merchantId,
-        Origin: appUrl,
-      },
-      body: JSON.stringify({ payer: params.payerWalletAddress }),
+  const response = await fetch(`${HELIO_API_BASE}/transaction/headless/prepare`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${secret}`,
     },
-  );
+    body: JSON.stringify({
+      paymentRequestId: params.paylinkId,
+      senderPublicKey: params.payerWalletAddress,
+    }),
+  });
 
   if (!response.ok) {
     const body = await response.text().catch(() => "");
     throw new Error(`Helio transaction API ${response.status}: ${body}`);
   }
 
-  const data = (await response.json()) as { transaction: string };
-  if (!data.transaction) {
-    throw new Error("Helio transaction API returned no transaction field");
+  const data = (await response.json()) as { serializedTransaction?: string };
+  if (!data.serializedTransaction) {
+    throw new Error("Helio transaction API returned no serializedTransaction");
   }
-  return data.transaction;
+  return data.serializedTransaction;
 }
 
 export function extractPaylinkId(payload: HelioWebhookPayload): string | null {
