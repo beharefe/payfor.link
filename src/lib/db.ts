@@ -8,5 +8,4 @@ export const TABLES = {
   PROMOTIONS: "promotions",
   SELLER_PROMOTIONS: "seller_promotions",
   PROMOTION_USAGE_LOG: "promotion_usage_log",
-  PENDING_CRYPTO_CHECKOUTS: "pending_crypto_checkouts",
 } as const;
