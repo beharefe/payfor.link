@@ -1,26 +1,25 @@
 "use client";
 
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { PhantomWalletName, SolflareWalletName, CoinbaseWalletName } from "@solana/wallet-adapter-wallets";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { createTransfer, type Amount } from "@solana/pay";
 import { Keypair, PublicKey, Transaction } from "@solana/web3.js";
-import { getAssociatedTokenAddressSync, createTransferInstruction, createAssociatedTokenAccountIdempotentInstruction, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import {
+  getAssociatedTokenAddressSync,
+  createTransferInstruction,
+  createAssociatedTokenAccountIdempotentInstruction,
+  TOKEN_PROGRAM_ID,
+} from "@solana/spl-token";
 import BigNumber from "bignumber.js";
 import { ArrowRight, Loader2 } from "lucide-react";
-import { useRef, useState, useMemo } from "react";
-import type { WalletName } from "@solana/wallet-adapter-base";
-import { PLATFORM_FEE_BPS, splitMicroUsdc } from "@unseallink/lib/solana-tx";
+import { useEffect, useRef, useState, useMemo } from "react";
+import { splitMicroUsdc } from "@unseallink/lib/solana-tx";
 
 const USDC_MINT = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
+const USDC_DECIMALS = 6;
 const PLATFORM_WALLET = process.env.NEXT_PUBLIC_PLATFORM_SOLANA_WALLET ?? "";
 
 type Step = "collapsed" | "email" | "connecting" | "ready" | "confirming" | "done";
-
-const WALLET_OPTIONS: { name: WalletName; label: string }[] = [
-  { name: PhantomWalletName, label: "Phantom" },
-  { name: SolflareWalletName, label: "Solflare" },
-  { name: CoinbaseWalletName, label: "Coinbase" },
-];
 
 const SolanaIcon = () => (
   <svg viewBox="0 0 128 128" className="h-4 w-4 shrink-0" aria-hidden="true">
@@ -45,18 +44,25 @@ export function CryptoCTA({
   sellerWallet: string;
 }) {
   const { connection } = useConnection();
-  const { select, connect, connected, publicKey, sendTransaction } = useWallet();
+  const { connected, publicKey, sendTransaction } = useWallet();
+  const { setVisible } = useWalletModal();
 
   const [step, setStep] = useState<Step>("collapsed");
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  // Fresh reference keypair per mount — uniquely identifies this payment attempt on-chain.
   const reference = useMemo(() => Keypair.generate().publicKey, []);
 
-  const truncateAddress = (addr: string) =>
-    `${addr.slice(0, 4)}…${addr.slice(-4)}`;
+  // Wallet connected while waiting → advance to ready
+  useEffect(() => {
+    if (connected && step === "connecting") setStep("ready");
+  }, [connected, step]);
+
+  function reset() {
+    setStep("collapsed");
+    setError(null);
+    setEmail("");
+  }
 
   function handleEmailSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -66,18 +72,11 @@ export function CryptoCTA({
       return;
     }
     setError(null);
-    setStep("connecting");
-  }
-
-  async function handleWalletSelect(name: WalletName) {
-    setError(null);
-    try {
-      select(name);
-      // connect() fires after select resolves; wallet adapter handles the async flow.
-      await connect();
+    if (connected) {
       setStep("ready");
-    } catch {
-      setError("Could not connect wallet. Try again.");
+    } else {
+      setStep("connecting");
+      setVisible(true);
     }
   }
 
@@ -88,12 +87,11 @@ export function CryptoCTA({
 
     let txSignature: string;
     try {
-      const USDC_DECIMALS = 6;
       const totalMicroUsdc = BigInt(Math.round(price * 10 ** USDC_DECIMALS));
       const { seller: sellerMicroUsdc, platform: platformMicroUsdc } =
         splitMicroUsdc(totalMicroUsdc);
 
-      // createTransfer builds the seller leg with the reference key for on-chain tracking.
+      // createTransfer builds the seller leg and embeds the reference key for on-chain tracking.
       // biome-ignore lint/suspicious/noExplicitAny: BigNumber type conflict between bignumber.js and @solana/pay's nested copy
       const sellerAmount = new BigNumber(sellerMicroUsdc.toString()).dividedBy(10 ** USDC_DECIMALS) as unknown as Amount;
       const transaction = await createTransfer(connection, publicKey, {
@@ -104,7 +102,7 @@ export function CryptoCTA({
         memo: `unseal:${linkId}`,
       });
 
-      // Append 4.5% platform fee leg to the same atomic transaction.
+      // Append 4.5% platform fee to the same atomic transaction.
       if (PLATFORM_WALLET && platformMicroUsdc > 0n) {
         const platform = new PublicKey(PLATFORM_WALLET);
         const buyerAta = getAssociatedTokenAddressSync(USDC_MINT, publicKey);
@@ -122,15 +120,14 @@ export function CryptoCTA({
       return;
     }
 
-    // Poll until the server confirms and creates the order.
     const poll = async (): Promise<void> => {
-      const params = new URLSearchParams({
+      const qs = new URLSearchParams({
         txSignature,
         linkId,
         email: email.trim().toLowerCase(),
         reference: reference.toBase58(),
       });
-      const res = await fetch(`/api/solana-confirm?${params.toString()}`);
+      const res = await fetch(`/api/solana-confirm?${qs.toString()}`);
       if (!res.ok) {
         setError("Payment sent but confirmation failed. Check your email for access.");
         setStep("done");
@@ -141,7 +138,6 @@ export function CryptoCTA({
         window.location.href = `/orders/${data.orderId}`;
         return;
       }
-      // Still pending — wait 2s and retry.
       await new Promise((r) => setTimeout(r, 2000));
       return poll();
     };
@@ -199,20 +195,17 @@ export function CryptoCTA({
 
       {step === "connecting" && (
         <div className="space-y-1.5">
-          <p className="text-xs text-muted-foreground px-1">Choose your wallet</p>
-          <div className="flex flex-col gap-1.5">
-            {WALLET_OPTIONS.map(({ name, label }) => (
-              <button
-                key={name}
-                type="button"
-                onClick={() => handleWalletSelect(name)}
-                className="w-full py-2.5 border border-border rounded-full text-sm font-medium text-foreground hover:bg-muted/50 transition-colors"
-              >
-                {label}
-              </button>
-            ))}
+          <div className="w-full py-2.5 border border-border rounded-full flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="animate-spin size-4 shrink-0" />
+            Waiting for wallet…
           </div>
-          {error && <p className="text-destructive text-xs px-1">{error}</p>}
+          <button
+            type="button"
+            onClick={() => setVisible(true)}
+            className="w-full text-center text-xs text-muted-foreground hover:text-foreground transition-colors py-0.5"
+          >
+            Reopen wallet selector
+          </button>
         </div>
       )}
 
@@ -226,8 +219,8 @@ export function CryptoCTA({
             Pay ${price.toFixed(2)} USDC
           </button>
           {publicKey && (
-            <p className="text-xs text-muted-foreground text-center">
-              {truncateAddress(publicKey.toBase58())}
+            <p className="text-xs text-muted-foreground text-center tabular-nums">
+              {publicKey.toBase58().slice(0, 4)}…{publicKey.toBase58().slice(-4)}
             </p>
           )}
           {error && <p className="text-destructive text-xs px-1">{error}</p>}
@@ -247,17 +240,15 @@ export function CryptoCTA({
         </div>
       )}
 
-      <button
-        type="button"
-        onClick={() => {
-          setStep("collapsed");
-          setError(null);
-          setEmail("");
-        }}
-        className="w-full text-center text-xs text-muted-foreground hover:text-foreground transition-colors py-0.5"
-      >
-        Cancel
-      </button>
+      {(step === "email" || step === "connecting" || step === "ready") && (
+        <button
+          type="button"
+          onClick={reset}
+          className="w-full text-center text-xs text-muted-foreground hover:text-foreground transition-colors py-0.5"
+        >
+          Cancel
+        </button>
+      )}
     </div>
   );
 }
