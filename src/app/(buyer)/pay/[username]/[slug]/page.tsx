@@ -1,5 +1,6 @@
 import { TABLES } from "@unseallink/lib/db";
 import { sendMissedSaleEmail } from "@unseallink/lib/email";
+import { EXPERIMENTAL_CRYPTO_ENABLED } from "@unseallink/lib/feature-flags";
 import { log } from "@unseallink/lib/logger";
 import { trackServer } from "@unseallink/lib/amplitude-server";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
@@ -10,6 +11,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AbuseReportForm } from "../../abuse-report-form";
+import { CryptoCTA } from "../../crypto-cta";
 import { PaywallCTA } from "../../paywall-cta";
 
 type Props = { params: Promise<{ username: string; slug: string }> };
@@ -98,12 +100,14 @@ function PurchaseCard({
   expiresAt,
   salesCount,
   formatTimeUntil,
+  showCrypto,
 }: {
   // biome-ignore lint/suspicious/noExplicitAny: complex join type
   link: any;
   expiresAt: string | null;
   salesCount: number;
   formatTimeUntil: (s: string) => string;
+  showCrypto: boolean;
 }) {
   return (
     <div className="border border-border rounded-2xl bg-card overflow-hidden">
@@ -161,6 +165,7 @@ function PurchaseCard({
 
         {/* CTA */}
         <PaywallCTA linkId={link.id} price={link.price} />
+        {showCrypto && <CryptoCTA linkId={link.id} />}
 
         {/* Trust row */}
         <div className="flex items-center justify-center gap-4 pt-1">
@@ -187,7 +192,7 @@ export default async function PaywallPage({ params }: Props) {
   const { data: link } = await supabase
     .from(TABLES.PRODUCTS)
     .select(
-      "id, title, subtitle, description, includes, faq, price, currency, seller_id, status, preview_image_url, total_sales, expires_at, max_orders, sellers!inner(name, username, email, stripe_connected, bio, avatar_url, twitter_handle, website_url, profile_public)",
+      "id, title, subtitle, description, includes, faq, price, currency, seller_id, status, preview_image_url, total_sales, expires_at, max_orders, sellers!inner(name, username, email, stripe_connected, bio, avatar_url, twitter_handle, website_url, profile_public, solana_wallet_address)",
     )
     .eq("slug", slug)
     .eq("sellers.username", username)
@@ -239,6 +244,9 @@ export default async function PaywallPage({ params }: Props) {
   }
 
   const seller = sellerData;
+  const showCrypto =
+    EXPERIMENTAL_CRYPTO_ENABLED && Boolean(seller?.solana_wallet_address);
+
   log.info("paywall_viewed", { link_id: link.id, slug, username });
   void trackServer({
     name: "Sealed Link Opened",
@@ -539,6 +547,7 @@ export default async function PaywallPage({ params }: Props) {
                 expiresAt={expiresAt}
                 salesCount={salesCount}
                 formatTimeUntil={formatTimeUntil}
+                showCrypto={showCrypto}
               />
             </div>
           </div>
@@ -558,8 +567,9 @@ export default async function PaywallPage({ params }: Props) {
             </p>
             <p className="text-[10px] text-muted-foreground mt-0.5">one-time</p>
           </div>
-          <div className="flex-1">
+          <div className="flex-1 space-y-2">
             <PaywallCTA linkId={link.id} price={link.price} />
+            {showCrypto && <CryptoCTA linkId={link.id} />}
           </div>
         </div>
       </div>
