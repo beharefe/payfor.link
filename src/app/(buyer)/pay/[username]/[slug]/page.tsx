@@ -194,7 +194,7 @@ export default async function PaywallPage({ params }: Props) {
   const { data: link } = await supabase
     .from(TABLES.PRODUCTS)
     .select(
-      "id, title, subtitle, description, includes, faq, price, currency, seller_id, status, preview_image_url, total_sales, expires_at, max_orders, sellers!inner(name, username, email, stripe_connected, bio, avatar_url, twitter_handle, website_url, profile_public, solana_wallet_address)",
+      "id, title, subtitle, description, includes, faq, price, currency, seller_id, status, preview_image_url, total_sales, expires_at, max_orders, sellers!inner(name, username, email, stripe_connected, bio, avatar_url, twitter_handle, website_url, profile_public)",
     )
     .eq("slug", slug)
     .eq("sellers.username", username)
@@ -204,6 +204,20 @@ export default async function PaywallPage({ params }: Props) {
 
   // biome-ignore lint/suspicious/noExplicitAny: Supabase join type
   const sellerData = link.sellers as any;
+
+  // solana_wallet_address lives in a separate query so an unapplied migration
+  // can't break every product page (same pattern as the settings page fix)
+  let sellerSolanaWallet: string | null = null;
+  if (EXPERIMENTAL_CRYPTO_ENABLED) {
+    const { data: walletData } = await supabase
+      .from(TABLES.SELLERS)
+      .select("solana_wallet_address")
+      .eq("id", sellerData?.id ?? link.seller_id)
+      .maybeSingle();
+    sellerSolanaWallet =
+      (walletData as { solana_wallet_address?: string | null } | null)
+        ?.solana_wallet_address ?? null;
+  }
   const isExpired = link.expires_at && new Date(link.expires_at) < new Date();
   const isSoldOut = link.max_orders !== null && link.max_orders !== undefined && (link.total_sales ?? 0) >= link.max_orders;
 
@@ -247,7 +261,7 @@ export default async function PaywallPage({ params }: Props) {
 
   const seller = sellerData;
   const showCrypto =
-    EXPERIMENTAL_CRYPTO_ENABLED && Boolean(seller?.solana_wallet_address);
+    EXPERIMENTAL_CRYPTO_ENABLED && Boolean(sellerSolanaWallet);
 
   log.info("paywall_viewed", { link_id: link.id, slug, username });
   void trackServer({
