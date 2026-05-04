@@ -14,6 +14,7 @@ import { AbuseReportForm } from "../../abuse-report-form";
 import { ActionCodeCTA } from "../../action-code-cta";
 import { CryptoCTA } from "../../crypto-cta";
 import { PaywallCTA } from "../../paywall-cta";
+import { WalletProvider } from "../../wallet-provider";
 
 type Props = { params: Promise<{ username: string; slug: string }> };
 
@@ -102,6 +103,7 @@ function PurchaseCard({
   salesCount,
   formatTimeUntil,
   showCrypto,
+  sellerSolanaWallet,
 }: {
   // biome-ignore lint/suspicious/noExplicitAny: complex join type
   link: any;
@@ -109,6 +111,7 @@ function PurchaseCard({
   salesCount: number;
   formatTimeUntil: (s: string) => string;
   showCrypto: boolean;
+  sellerSolanaWallet: string | null;
 }) {
   return (
     <div className="border border-border rounded-2xl bg-card overflow-hidden">
@@ -166,7 +169,11 @@ function PurchaseCard({
 
         {/* CTA */}
         <PaywallCTA linkId={link.id} price={link.price} />
-        {showCrypto && <CryptoCTA linkId={link.id} />}
+        {showCrypto && (
+          <WalletProvider>
+            <CryptoCTA linkId={link.id} price={link.price} sellerWallet={sellerSolanaWallet ?? ""} />
+          </WalletProvider>
+        )}
         {showCrypto && <ActionCodeCTA linkId={link.id} />}
 
         {/* Trust row */}
@@ -566,6 +573,7 @@ export default async function PaywallPage({ params }: Props) {
                 salesCount={salesCount}
                 formatTimeUntil={formatTimeUntil}
                 showCrypto={showCrypto}
+                sellerSolanaWallet={sellerSolanaWallet}
               />
             </div>
           </div>
@@ -587,7 +595,11 @@ export default async function PaywallPage({ params }: Props) {
           </div>
           <div className="flex-1 space-y-2">
             <PaywallCTA linkId={link.id} price={link.price} />
-            {showCrypto && <CryptoCTA linkId={link.id} />}
+            {showCrypto && (
+              <WalletProvider>
+                <CryptoCTA linkId={link.id} price={link.price} sellerWallet={sellerSolanaWallet ?? ""} />
+              </WalletProvider>
+            )}
             {showCrypto && <ActionCodeCTA linkId={link.id} />}
           </div>
         </div>

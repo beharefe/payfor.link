@@ -74,6 +74,10 @@ NEXT_PUBLIC_AMPLITUDE_API_KEY=
 SENTRY_DSN=
 SENTRY_AUTH_TOKEN=
 
+# Solana (crypto payments — requires EXPERIMENTAL_CRYPTO_ENABLED=true)
+SOLANA_RPC_URL=                        # server-side RPC (action-code-checkout, solana-confirm)
+NEXT_PUBLIC_SOLANA_RPC_URL=            # client-side RPC for @solana/wallet-adapter ConnectionProvider
+EXPERIMENTAL_CRYPTO_ENABLED=false
 
 # App
 NEXT_PUBLIC_APP_URL=http://localhost:3000

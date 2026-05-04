@@ -1,6 +1,7 @@
 import { CredibilityBar } from "@unseallink/components/credibility-bar";
 import { ActionCodeCTA } from "@unseallink/app/(buyer)/pay/action-code-cta";
 import { CryptoCTA } from "@unseallink/app/(buyer)/pay/crypto-cta";
+import { WalletProvider } from "@unseallink/app/(buyer)/pay/wallet-provider";
 import type { Metadata } from "next";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -343,7 +344,9 @@ export default function HomePage() {
                     Pay via Stripe →
                   </div>
                   <div className="pointer-events-none select-none">
-                    <CryptoCTA linkId="preview" />
+                    <WalletProvider>
+                      <CryptoCTA linkId="preview" price={49} sellerWallet="" />
+                    </WalletProvider>
                   </div>
                   <div className="pointer-events-none select-none">
                     <ActionCodeCTA linkId="preview" />

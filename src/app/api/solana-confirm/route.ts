@@ -1,13 +1,17 @@
 import { generateAccessToken } from "@unseallink/lib/access-token";
-import { getActionCodesClient } from "@unseallink/lib/action-codes";
 import { TABLES } from "@unseallink/lib/db";
 import { sendBuyerAccessEmail, sendSaleNotificationEmail } from "@unseallink/lib/email";
 import { EXPERIMENTAL_CRYPTO_ENABLED } from "@unseallink/lib/feature-flags";
-const CRYPTO_PLATFORM_FEE_PERCENT = 1;
 import { log } from "@unseallink/lib/logger";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { serializeError } from "@unseallink/lib/utils";
+import { validateTransfer, type Amount } from "@solana/pay";
+import { Connection, PublicKey } from "@solana/web3.js";
+import BigNumber from "bignumber.js";
 import { NextResponse } from "next/server";
+
+const USDC_MINT = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
+const CRYPTO_PLATFORM_FEE_PERCENT = 1;
 
 export async function GET(request: Request) {
   if (!EXPERIMENTAL_CRYPTO_ENABLED) {
@@ -15,15 +19,74 @@ export async function GET(request: Request) {
   }
 
   const { searchParams } = new URL(request.url);
-  const code = searchParams.get("code");
+  const txSignature = searchParams.get("txSignature");
   const linkId = searchParams.get("linkId");
   const email = searchParams.get("email");
+  const referenceStr = searchParams.get("reference");
 
-  if (!code || !linkId || !email) {
+  if (!txSignature || !linkId || !email || !referenceStr) {
     return NextResponse.json(
-      { error: "code, linkId, and email are required" },
+      { error: "txSignature, linkId, email, and reference are required" },
       { status: 400 },
     );
+  }
+
+  const supabase = createServiceClient();
+
+  const { data: product } = await supabase
+    .from(TABLES.PRODUCTS)
+    .select("id, seller_id, destination_url, title, price, version, max_orders, total_sales")
+    .eq("id", linkId)
+    .single();
+
+  if (!product) {
+    return NextResponse.json({ error: "Product not found" }, { status: 404 });
+  }
+
+  // Idempotency — return existing order without re-running order creation logic.
+  const { data: existingOrder } = await supabase
+    .from(TABLES.ORDERS)
+    .select("id")
+    .eq("crypto_transaction_id", txSignature)
+    .maybeSingle();
+
+  if (existingOrder) {
+    return NextResponse.json({ status: "complete", orderId: existingOrder.id });
+  }
+
+  const { data: walletData } = await supabase
+    .from(TABLES.SELLERS)
+    .select("solana_wallet_address")
+    .eq("id", product.seller_id)
+    .maybeSingle();
+
+  const sellerWallet = (walletData as { solana_wallet_address?: string | null } | null)
+    ?.solana_wallet_address;
+
+  if (!sellerWallet) {
+    return NextResponse.json({ error: "Seller wallet not configured" }, { status: 400 });
+  }
+
+  const rpcUrl =
+    process.env.SOLANA_RPC_URL ?? "https://api.mainnet-beta.solana.com";
+  const connection = new Connection(rpcUrl, "confirmed");
+
+  try {
+    await validateTransfer(
+      connection,
+      txSignature,
+      {
+        recipient: new PublicKey(sellerWallet),
+        // biome-ignore lint/suspicious/noExplicitAny: BigNumber type conflict between bignumber.js and @solana/pay's nested copy
+        amount: new BigNumber(product.price) as unknown as Amount,
+        splToken: USDC_MINT,
+        reference: new PublicKey(referenceStr),
+      },
+      { commitment: "confirmed" },
+    );
+  } catch {
+    // Transfer not confirmed yet — tell the client to keep polling.
+    return NextResponse.json({ status: "pending" });
   }
 
   const host =
@@ -33,46 +96,17 @@ export async function GET(request: Request) {
   const proto = request.headers.get("x-forwarded-proto") ?? "https";
   const appUrl = `${proto}://${host}`;
 
-  const client = getActionCodesClient();
-
-  let resolved: Awaited<ReturnType<typeof client.relay.resolve>>;
   try {
-    resolved = await client.relay.resolve("solana", code);
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    const isExpired =
-      msg.toLowerCase().includes("expired") ||
-      msg.toLowerCase().includes("not found");
-    return NextResponse.json(
-      { status: isExpired ? "expired" : "error", message: msg },
-      { status: 200 },
-    );
-  }
-
-  const data = resolved.data;
-
-  if (!data || data.mode !== "sign-and-execute-transaction") {
-    // Code resolved but no transaction attached yet, or still pending
-    return NextResponse.json({ status: "waiting" });
-  }
-
-  // Transaction was attached — check if it finalized
-  if (!("txHash" in data)) {
-    return NextResponse.json({ status: "waiting" });
-  }
-
-  const txHash = (data as { txHash: string }).txHash;
-
-  try {
-    const orderId = await finalizeActionCodeOrder({
-      txHash,
+    const orderId = await finalizeSolanaOrder({
+      txSignature,
       linkId,
       email: email.toLowerCase(),
+      product,
       appUrl,
     });
     return NextResponse.json({ status: "complete", orderId });
   } catch (err) {
-    log.error("action_code_status: finalize error", { error: serializeError(err) });
+    log.error("solana_confirm: finalize error", { error: serializeError(err) });
     return NextResponse.json(
       { status: "error", message: "Failed to finalize order" },
       { status: 500 },
@@ -80,30 +114,32 @@ export async function GET(request: Request) {
   }
 }
 
-async function finalizeActionCodeOrder(params: {
-  txHash: string;
+async function finalizeSolanaOrder(params: {
+  txSignature: string;
   linkId: string;
   email: string;
+  product: {
+    id: string;
+    seller_id: string;
+    destination_url: string;
+    title: string;
+    price: number;
+    version: number;
+    max_orders: number | null;
+    total_sales: number | null;
+  };
   appUrl: string;
 }): Promise<string> {
   const supabase = createServiceClient();
-  const { txHash, linkId, email, appUrl } = params;
+  const { txSignature, email, product, appUrl } = params;
 
-  // Idempotency — return existing order if already processed
-  const { data: existingOrder } = await supabase
+  // Double-check idempotency inside the transaction to guard against races.
+  const { data: existing } = await supabase
     .from(TABLES.ORDERS)
     .select("id")
-    .eq("crypto_transaction_id", txHash)
+    .eq("crypto_transaction_id", txSignature)
     .maybeSingle();
-  if (existingOrder) return existingOrder.id;
-
-  const { data: product } = await supabase
-    .from(TABLES.PRODUCTS)
-    .select("id, seller_id, destination_url, title, price, version, max_orders, total_sales")
-    .eq("id", linkId)
-    .single();
-
-  if (!product) throw new Error(`Product not found: ${linkId}`);
+  if (existing) return existing.id;
 
   const platformFee = Math.round(product.price * CRYPTO_PLATFORM_FEE_PERCENT) / 100;
 
@@ -121,7 +157,7 @@ async function finalizeActionCodeOrder(params: {
       product_version: product.version,
       currency: "usd",
       payment_processor: "solana",
-      crypto_transaction_id: txHash,
+      crypto_transaction_id: txSignature,
     })
     .select("id")
     .single();
@@ -168,7 +204,7 @@ async function finalizeActionCodeOrder(params: {
     productTitle: product.title,
     orderUrl: `${appUrl}/orders/${insertedOrder.id}`,
   }).catch((err) =>
-    log.error("action_code_status: buyer_access_email_failed", {
+    log.error("solana_confirm: buyer_access_email_failed", {
       order_id: insertedOrder.id,
       error: serializeError(err),
     }),
@@ -189,17 +225,17 @@ async function finalizeActionCodeOrder(params: {
       platformFee: 0,
       dashboardUrl: `${appUrl}/dashboard`,
     }).catch((err) =>
-      log.error("action_code_status: sale_notification_failed", {
+      log.error("solana_confirm: sale_notification_failed", {
         order_id: insertedOrder.id,
         error: serializeError(err),
       }),
     );
   }
 
-  log.info("action_code_status: order created", {
+  log.info("solana_confirm: order created", {
     order_id: insertedOrder.id,
     product_id: product.id,
-    tx_hash: txHash,
+    tx_signature: txSignature,
   });
 
   return insertedOrder.id;

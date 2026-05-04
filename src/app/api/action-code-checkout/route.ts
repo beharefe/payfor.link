@@ -1,12 +1,8 @@
 import { getActionCodesClient } from "@unseallink/lib/action-codes";
 import { TABLES } from "@unseallink/lib/db";
 import { EXPERIMENTAL_CRYPTO_ENABLED } from "@unseallink/lib/feature-flags";
-import {
-  CRYPTO_PLATFORM_FEE_PERCENT,
-  createHelioPayLink,
-  prepareHelioTransaction,
-} from "@unseallink/lib/helio";
 import { log } from "@unseallink/lib/logger";
+import { buildUsdcTransferTx } from "@unseallink/lib/solana-tx";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { serializeError } from "@unseallink/lib/utils";
 import { NextResponse } from "next/server";
@@ -87,27 +83,14 @@ export async function POST(request: Request) {
   }
 
   try {
-    const payLink = await createHelioPayLink({
-      productTitle: product.title,
-      priceUsd: product.price,
-      sellerWalletAddress: seller.solana_wallet_address,
+    // Build the USDC transfer directly on Solana — no Helio paylink needed.
+    // Detection happens via action-code-status polling relay.resolve for txHash.
+    const transaction = await buildUsdcTransferTx({
+      buyerPublicKey: buyerPubkey,
+      sellerPublicKey: seller.solana_wallet_address,
+      amountUsd: product.price,
     });
 
-    const transaction = await prepareHelioTransaction({
-      paylinkId: payLink.id,
-      payerWalletAddress: buyerPubkey,
-    });
-
-    // Store pending checkout so the Helio webhook can create the order as a backup
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
-    await supabase.from(TABLES.PENDING_CRYPTO_CHECKOUTS).insert({
-      helio_paylink_id: payLink.id,
-      product_id: product.id,
-      buyer_email: email.toLowerCase(),
-      expires_at: expiresAt,
-    });
-
-    // Attach the payment transaction to the action code — user approves in wallet
     await client.relay.consume({
       code,
       chain: "solana",
@@ -118,10 +101,11 @@ export async function POST(request: Request) {
       },
     });
 
-    log.info("action_code_checkout: transaction attached", {
+    log.info("action_code_checkout: usdc transaction attached", {
       product_id: product.id,
-      paylink_id: payLink.id,
       buyer_pubkey: buyerPubkey,
+      seller_pubkey: seller.solana_wallet_address,
+      amount_usd: product.price,
     });
 
     return NextResponse.json({ ok: true });
