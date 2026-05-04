@@ -77,6 +77,8 @@ SENTRY_AUTH_TOKEN=
 # Solana (crypto payments — requires EXPERIMENTAL_CRYPTO_ENABLED=true)
 SOLANA_RPC_URL=                        # server-side RPC (action-code-checkout, solana-confirm)
 NEXT_PUBLIC_SOLANA_RPC_URL=            # client-side RPC for @solana/wallet-adapter ConnectionProvider
+PLATFORM_SOLANA_WALLET=               # platform wallet address — receives 4.5% fee from Action Codes payments
+NEXT_PUBLIC_PLATFORM_SOLANA_WALLET=   # same wallet, exposed client-side for wallet adapter fee split
 EXPERIMENTAL_CRYPTO_ENABLED=false
 
 # App

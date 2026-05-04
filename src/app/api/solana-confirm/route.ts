@@ -9,9 +9,9 @@ import { validateTransfer, type Amount } from "@solana/pay";
 import { Connection, PublicKey } from "@solana/web3.js";
 import BigNumber from "bignumber.js";
 import { NextResponse } from "next/server";
+import { PLATFORM_FEE_BPS, splitMicroUsdc } from "@unseallink/lib/solana-tx";
 
 const USDC_MINT = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
-const CRYPTO_PLATFORM_FEE_PERCENT = 1;
 
 export async function GET(request: Request) {
   if (!EXPERIMENTAL_CRYPTO_ENABLED) {
@@ -71,21 +71,25 @@ export async function GET(request: Request) {
     process.env.SOLANA_RPC_URL ?? "https://api.mainnet-beta.solana.com";
   const connection = new Connection(rpcUrl, "confirmed");
 
+  // Validate the seller's net share (total minus 4.5% platform fee).
+  const totalMicroUsdc = BigInt(Math.round(product.price * 1_000_000));
+  const { seller: sellerMicroUsdc } = splitMicroUsdc(totalMicroUsdc);
+  // biome-ignore lint/suspicious/noExplicitAny: BigNumber type conflict between bignumber.js and @solana/pay's nested copy
+  const sellerAmount = new BigNumber(sellerMicroUsdc.toString()).dividedBy(1_000_000) as unknown as Amount;
+
   try {
     await validateTransfer(
       connection,
       txSignature,
       {
         recipient: new PublicKey(sellerWallet),
-        // biome-ignore lint/suspicious/noExplicitAny: BigNumber type conflict between bignumber.js and @solana/pay's nested copy
-        amount: new BigNumber(product.price) as unknown as Amount,
+        amount: sellerAmount,
         splToken: USDC_MINT,
         reference: new PublicKey(referenceStr),
       },
       { commitment: "confirmed" },
     );
   } catch {
-    // Transfer not confirmed yet — tell the client to keep polling.
     return NextResponse.json({ status: "pending" });
   }
 
@@ -141,7 +145,7 @@ async function finalizeSolanaOrder(params: {
     .maybeSingle();
   if (existing) return existing.id;
 
-  const platformFee = Math.round(product.price * CRYPTO_PLATFORM_FEE_PERCENT) / 100;
+  const platformFee = Math.round(product.price * PLATFORM_FEE_BPS) / 10_000;
 
   const { data: insertedOrder, error: insertError } = await supabase
     .from(TABLES.ORDERS)

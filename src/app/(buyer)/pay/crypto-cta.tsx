@@ -3,13 +3,16 @@
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { PhantomWalletName, SolflareWalletName, CoinbaseWalletName } from "@solana/wallet-adapter-wallets";
 import { createTransfer, type Amount } from "@solana/pay";
-import { Keypair, PublicKey } from "@solana/web3.js";
+import { Keypair, PublicKey, Transaction } from "@solana/web3.js";
+import { getAssociatedTokenAddressSync, createTransferInstruction, createAssociatedTokenAccountIdempotentInstruction, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import BigNumber from "bignumber.js";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { useRef, useState, useMemo } from "react";
 import type { WalletName } from "@solana/wallet-adapter-base";
+import { PLATFORM_FEE_BPS, splitMicroUsdc } from "@unseallink/lib/solana-tx";
 
 const USDC_MINT = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
+const PLATFORM_WALLET = process.env.NEXT_PUBLIC_PLATFORM_SOLANA_WALLET ?? "";
 
 type Step = "collapsed" | "email" | "connecting" | "ready" | "confirming" | "done";
 
@@ -85,16 +88,34 @@ export function CryptoCTA({
 
     let txSignature: string;
     try {
-      const recipient = new PublicKey(sellerWallet);
+      const USDC_DECIMALS = 6;
+      const totalMicroUsdc = BigInt(Math.round(price * 10 ** USDC_DECIMALS));
+      const { seller: sellerMicroUsdc, platform: platformMicroUsdc } =
+        splitMicroUsdc(totalMicroUsdc);
+
+      // createTransfer builds the seller leg with the reference key for on-chain tracking.
+      // biome-ignore lint/suspicious/noExplicitAny: BigNumber type conflict between bignumber.js and @solana/pay's nested copy
+      const sellerAmount = new BigNumber(sellerMicroUsdc.toString()).dividedBy(10 ** USDC_DECIMALS) as unknown as Amount;
       const transaction = await createTransfer(connection, publicKey, {
-        recipient,
-        // biome-ignore lint/suspicious/noExplicitAny: BigNumber type conflict between bignumber.js and @solana/pay's nested copy
-        amount: new BigNumber(price) as unknown as Amount,
+        recipient: new PublicKey(sellerWallet),
+        amount: sellerAmount,
         splToken: USDC_MINT,
         reference,
         memo: `unseal:${linkId}`,
       });
-      txSignature = await sendTransaction(transaction, connection);
+
+      // Append 4.5% platform fee leg to the same atomic transaction.
+      if (PLATFORM_WALLET && platformMicroUsdc > 0n) {
+        const platform = new PublicKey(PLATFORM_WALLET);
+        const buyerAta = getAssociatedTokenAddressSync(USDC_MINT, publicKey);
+        const platformAta = getAssociatedTokenAddressSync(USDC_MINT, platform);
+        (transaction as Transaction).add(
+          createAssociatedTokenAccountIdempotentInstruction(publicKey, platformAta, platform, USDC_MINT),
+          createTransferInstruction(buyerAta, platformAta, publicKey, platformMicroUsdc, [], TOKEN_PROGRAM_ID),
+        );
+      }
+
+      txSignature = await sendTransaction(transaction as Transaction, connection);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Transaction failed. Try again.");
       setStep("ready");

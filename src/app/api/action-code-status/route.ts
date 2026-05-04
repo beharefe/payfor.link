@@ -3,7 +3,7 @@ import { getActionCodesClient } from "@unseallink/lib/action-codes";
 import { TABLES } from "@unseallink/lib/db";
 import { sendBuyerAccessEmail, sendSaleNotificationEmail } from "@unseallink/lib/email";
 import { EXPERIMENTAL_CRYPTO_ENABLED } from "@unseallink/lib/feature-flags";
-const CRYPTO_PLATFORM_FEE_PERCENT = 1;
+import { PLATFORM_FEE_BPS } from "@unseallink/lib/solana-tx";
 import { log } from "@unseallink/lib/logger";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { serializeError } from "@unseallink/lib/utils";
@@ -105,7 +105,7 @@ async function finalizeActionCodeOrder(params: {
 
   if (!product) throw new Error(`Product not found: ${linkId}`);
 
-  const platformFee = Math.round(product.price * CRYPTO_PLATFORM_FEE_PERCENT) / 100;
+  const platformFee = Math.round(product.price * PLATFORM_FEE_BPS) / 10_000;
 
   const { data: insertedOrder, error: insertError } = await supabase
     .from(TABLES.ORDERS)

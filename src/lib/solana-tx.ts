@@ -17,7 +17,18 @@ const USDC_MINT = new PublicKey(
 );
 const USDC_DECIMALS = 6;
 
-// Derives the Associated Token Account address for (owner, USDC mint).
+// 4.5% platform fee — matches Stripe fee. Integer basis points avoid float errors.
+export const PLATFORM_FEE_BPS = 450;
+
+// Splits a micro-USDC total into seller and platform shares using integer arithmetic.
+export function splitMicroUsdc(totalMicroUsdc: bigint): {
+  seller: bigint;
+  platform: bigint;
+} {
+  const platform = (totalMicroUsdc * BigInt(PLATFORM_FEE_BPS)) / BigInt(10_000);
+  return { seller: totalMicroUsdc - platform, platform };
+}
+
 function getUsdcAta(owner: PublicKey): PublicKey {
   const [address] = PublicKey.findProgramAddressSync(
     [owner.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), USDC_MINT.toBuffer()],
@@ -26,8 +37,7 @@ function getUsdcAta(owner: PublicKey): PublicKey {
   return address;
 }
 
-// Creates the ATA if it doesn't exist yet — idempotent, safe to include always.
-// Uses instruction variant 1 (CreateIdempotent) from the Associated Token Program v1.0.5+.
+// Creates the ATA if it doesn't exist — idempotent (variant 1 of Associated Token Program).
 function createAtaIdempotentInstruction(
   payer: PublicKey,
   ata: PublicKey,
@@ -47,7 +57,7 @@ function createAtaIdempotentInstruction(
   });
 }
 
-// SPL Token Transfer instruction (instruction index 3).
+// SPL Token Transfer instruction (index 3).
 function createUsdcTransferInstruction(
   source: PublicKey,
   destination: PublicKey,
@@ -68,27 +78,32 @@ function createUsdcTransferInstruction(
   });
 }
 
-// Builds an unsigned, serialized USDC transfer transaction from buyer → seller.
-// The buyer is the fee payer and sole signer — they sign via Action Codes.
-// Returns a base64-encoded serialized Transaction ready for relay.consume.
+// Builds an unsigned USDC transfer transaction for the Action Codes flow.
+// Splits payment: 95.5% → seller, 4.5% → platform wallet (PLATFORM_SOLANA_WALLET).
+// Buyer is fee payer and sole signer — they sign via Action Codes relay.consume.
 export async function buildUsdcTransferTx(params: {
   buyerPublicKey: string;
   sellerPublicKey: string;
   amountUsd: number;
 }): Promise<string> {
+  const platformWallet = process.env.PLATFORM_SOLANA_WALLET;
+  if (!platformWallet) throw new Error("PLATFORM_SOLANA_WALLET must be set");
+
   const rpcUrl =
     process.env.SOLANA_RPC_URL ?? "https://api.mainnet-beta.solana.com";
   const connection = new Connection(rpcUrl, "confirmed");
 
   const buyer = new PublicKey(params.buyerPublicKey);
   const seller = new PublicKey(params.sellerPublicKey);
+  const platform = new PublicKey(platformWallet);
 
   const buyerAta = getUsdcAta(buyer);
   const sellerAta = getUsdcAta(seller);
+  const platformAta = getUsdcAta(platform);
 
-  const amountMicroUsdc = BigInt(
-    Math.round(params.amountUsd * 10 ** USDC_DECIMALS),
-  );
+  const totalMicroUsdc = BigInt(Math.round(params.amountUsd * 10 ** USDC_DECIMALS));
+  const { seller: sellerMicroUsdc, platform: platformMicroUsdc } =
+    splitMicroUsdc(totalMicroUsdc);
 
   const { blockhash } = await connection.getLatestBlockhash("confirmed");
 
@@ -96,9 +111,10 @@ export async function buildUsdcTransferTx(params: {
   tx.recentBlockhash = blockhash;
   tx.feePayer = buyer;
 
-  // Ensure seller's USDC account exists — idempotent, no-op if already created.
   tx.add(createAtaIdempotentInstruction(buyer, sellerAta, seller));
-  tx.add(createUsdcTransferInstruction(buyerAta, sellerAta, buyer, amountMicroUsdc));
+  tx.add(createAtaIdempotentInstruction(buyer, platformAta, platform));
+  tx.add(createUsdcTransferInstruction(buyerAta, sellerAta, buyer, sellerMicroUsdc));
+  tx.add(createUsdcTransferInstruction(buyerAta, platformAta, buyer, platformMicroUsdc));
 
   return tx
     .serialize({ requireAllSignatures: false, verifySignatures: false })
