@@ -11,7 +11,7 @@ export async function pingIndexNow(urls: string[]): Promise<void> {
       body: JSON.stringify({
         host,
         key: KEY,
-        keyLocation: `${APP_URL}/api/indexnow-key.txt`,
+        keyLocation: `${APP_URL}/${KEY}.txt`,
         urlList: urls,
       }),
     });

@@ -51,6 +51,8 @@ const nextConfig: NextConfig = {
       },
       // /@username/slug  → paywall with seller verification
       { source: "/@:username/:slug", destination: "/pay/:username/:slug" },
+      // IndexNow key verification — /{key}.txt must equal the key value
+      { source: "/:key.txt", destination: "/api/indexnow-key.txt" },
     ];
   },
   async headers() {
