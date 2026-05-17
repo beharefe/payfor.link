@@ -47,7 +47,7 @@ async function submit(urls) {
     body: JSON.stringify({
       host,
       key: KEY,
-      keyLocation: `${APP_URL}/api/indexnow-key`,
+      keyLocation: `${APP_URL}/api/indexnow-key.txt`,
       urlList: urls,
     }),
   });
