@@ -2,6 +2,7 @@
 
 import { trackServer } from "@unseallink/lib/amplitude-server";
 import { TABLES } from "@unseallink/lib/db";
+import { pingIndexNow } from "@unseallink/lib/indexnow";
 import { log } from "@unseallink/lib/logger";
 import { detectProductType, isValidUrl } from "@unseallink/lib/product-utils";
 import { checkUrlSafe } from "@unseallink/lib/safe-browsing";
@@ -100,7 +101,7 @@ export async function createProduct(
   // Detect status — active immediately if Stripe already connected
   const { data: seller } = await supabase
     .from(TABLES.SELLERS)
-    .select("stripe_connected")
+    .select("stripe_connected, username")
     .eq("id", user.id)
     .single();
 
@@ -154,6 +155,11 @@ export async function createProduct(
     },
     user.id,
   );
+
+  if (status === "active" && seller?.username) {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
+    void pingIndexNow([`${appUrl}/@${seller.username}/${slug}`]);
+  }
 
   redirect(`/dashboard/links/${link.id}`);
 }

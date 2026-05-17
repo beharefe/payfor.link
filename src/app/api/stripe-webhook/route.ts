@@ -2,6 +2,7 @@ import { sendBuyerAccessEmail, sendDisputeAlert, sendSaleNotificationEmail, send
 import { generateAccessToken } from "@unseallink/lib/access-token";
 import { trackServer } from "@unseallink/lib/amplitude-server";
 import { TABLES } from "@unseallink/lib/db";
+import { pingIndexNow } from "@unseallink/lib/indexnow";
 import { log } from "@unseallink/lib/logger";
 import { isAtlasPromoCovered, calculateStripeFee } from "@unseallink/lib/pricing/fees";
 import { recordPaymentUsage, reversePaymentUsage } from "@unseallink/lib/promotions/promotions-service";
@@ -435,11 +436,34 @@ async function handleAccountUpdated(account: Stripe.Account, appUrl: string) {
 
   // Activate all draft products the moment the seller can accept payments.
   if (chargesEnabled) {
+    const { data: draftProducts } = await supabase
+      .from(TABLES.PRODUCTS)
+      .select("slug")
+      .eq("seller_id", seller.id)
+      .eq("status", "draft");
+
     await supabase
       .from(TABLES.PRODUCTS)
       .update({ status: "active" })
       .eq("seller_id", seller.id)
       .eq("status", "draft");
+
+    // Ping IndexNow for the newly live pages (product pages + seller profile)
+    if (draftProducts && draftProducts.length > 0) {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
+      const { data: sellerData } = await supabase
+        .from(TABLES.SELLERS)
+        .select("username")
+        .eq("id", seller.id)
+        .single();
+      if (sellerData?.username) {
+        const urls = [
+          `${appUrl}/@${sellerData.username}`,
+          ...draftProducts.map((p) => `${appUrl}/@${sellerData.username}/${p.slug}`),
+        ];
+        void pingIndexNow(urls);
+      }
+    }
   }
 
   // Send one-time welcome email on first charges_enabled signal.

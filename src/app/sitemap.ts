@@ -23,29 +23,46 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }));
 
-  // Active paywall product pages — indexable by search engines and AI crawlers
-  let paywallRoutes: MetadataRoute.Sitemap = [];
+  let productRoutes: MetadataRoute.Sitemap = [];
+  let sellerRoutes: MetadataRoute.Sitemap = [];
+
   try {
     const supabase = createServiceClient();
-    const { data: products } = await supabase
-      .from(TABLES.PRODUCTS)
-      .select("slug, updated_at, sellers!inner(name)")
-      .eq("status", "active");
+
+    const [{ data: products }, { data: sellers }] = await Promise.all([
+      supabase
+        .from(TABLES.PRODUCTS)
+        .select("slug, updated_at, sellers!inner(username)")
+        .eq("status", "active"),
+      supabase
+        .from(TABLES.SELLERS)
+        .select("username, updated_at")
+        .eq("profile_public", true),
+    ]);
 
     if (products) {
-      paywallRoutes = products.map((p) => {
-        const seller = p.sellers as unknown as { name: string };
+      productRoutes = products.map((p) => {
+        const seller = p.sellers as unknown as { username: string };
         return {
-          url: `${APP_URL}/pay/${seller.name}/${p.slug}`,
+          url: `${APP_URL}/@${seller.username}/${p.slug}`,
           changeFrequency: "weekly" as const,
           priority: 0.6,
           lastModified: p.updated_at ? new Date(p.updated_at) : undefined,
         };
       });
     }
+
+    if (sellers) {
+      sellerRoutes = sellers.map((s) => ({
+        url: `${APP_URL}/@${s.username}`,
+        changeFrequency: "weekly" as const,
+        priority: 0.5,
+        lastModified: s.updated_at ? new Date(s.updated_at) : undefined,
+      }));
+    }
   } catch {
-    // Non-fatal — sitemap still works without live product pages
+    // Non-fatal — sitemap still works without live pages
   }
 
-  return [...staticRoutes, ...mdxRoutes, ...paywallRoutes];
+  return [...staticRoutes, ...mdxRoutes, ...sellerRoutes, ...productRoutes];
 }
