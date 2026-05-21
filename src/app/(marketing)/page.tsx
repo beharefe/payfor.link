@@ -274,7 +274,7 @@ export default function HomePage() {
                 href="/auth"
                 className="inline-flex items-center px-6 py-3 bg-primary text-primary-foreground rounded-full font-medium text-sm hover:opacity-90 transition-opacity no-underline"
               >
-                Create your first paid link →
+                Create your first access link →
               </Link>
             </div>
 
@@ -319,6 +319,10 @@ export default function HomePage() {
             <div className="rounded-2xl border border-border bg-card overflow-hidden relative">
               {/* Preview area — rings signal locked content */}
               <div className="h-44 bg-muted/20 border-b border-border flex items-center justify-center relative overflow-hidden">
+                <span className="absolute top-3 left-3 z-20 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-background/90 border border-border text-muted-foreground backdrop-blur-sm">
+                  <Lock className="size-2.5 shrink-0" aria-hidden="true" />
+                  Sealed until paid
+                </span>
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div className="absolute w-52 h-52 rounded-full border border-border/25 animate-pulse" style={{ animationDuration: "3.5s" }} />
                   <div className="absolute w-36 h-36 rounded-full border border-border/35" />
@@ -405,10 +409,10 @@ export default function HomePage() {
           <div className="flex items-end justify-between px-6 mb-8">
             <div>
               <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-2">
-                Sell anything with a URL
+                Sell access to any private link.
               </p>
               <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
-                If it has a link, you can paywall it. No file uploads ever.
+                If it&apos;s a legal digital resource with a URL, you can sell access to it. No file uploads ever.
                 Your content stays where it lives.
               </p>
             </div>
@@ -676,6 +680,20 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── Stripe + unseal split ────────────────────────────────────── */}
+      <section className="border-t border-border py-16 md:py-20">
+        <div className="max-w-5xl mx-auto px-6 text-center">
+          <p className="text-2xl md:text-3xl font-medium tracking-tight text-foreground max-w-xl mx-auto leading-snug">
+            Stripe handles payment.
+            <br />
+            unseal handles access.
+          </p>
+          <p className="text-sm text-muted-foreground mt-4 max-w-md mx-auto leading-relaxed">
+            Buyers pay via Stripe. Your content URL unlocks automatically the moment payment confirms — no manual delivery.
+          </p>
+        </div>
+      </section>
+
       {/* ── FAQ ──────────────────────────────────────────────────────── */}
       <section className="border-t border-border py-16 md:py-24">
         <div className="max-w-5xl mx-auto px-6">
@@ -730,7 +748,7 @@ export default function HomePage() {
           href="/auth"
           className="relative inline-flex items-center px-7 py-3.5 bg-primary text-primary-foreground rounded-full font-medium text-base hover:opacity-90 transition-opacity no-underline"
         >
-          Create your first paid link →
+          Create your first access link →
         </Link>
         <p className="relative mt-4 text-xs text-muted-foreground">
           Free to list. 4.5% per sale. First $500 fee-free for new sellers.

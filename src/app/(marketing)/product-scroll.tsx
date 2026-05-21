@@ -68,7 +68,7 @@ const PRODUCTS = [
   {
     icon: <Link2 className="size-5 shrink-0" aria-hidden="true" />,
     label: "Any URL",
-    desc: "If it has a link, you can charge for it.",
+    desc: "If it's a legal digital resource with a URL, you can sell access to it.",
   },
 ];
 

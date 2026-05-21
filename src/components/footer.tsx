@@ -37,7 +37,10 @@ export function Footer() {
               Turn any link into a paywall. Buyers pay via Stripe and unlock
               access instantly. No uploads. No storefront. No minimum payout.
             </p>
-            <span className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs text-muted-foreground leading-relaxed max-w-xs mt-3">
+              unseal.link is for legal digital resources only. Adult, illegal, pirated, harmful, or deceptive content is not allowed.
+            </p>
+            <span className="text-xs text-muted-foreground mt-3">
               © {new Date().getFullYear()} unseal.link · Payments by{" "}
               <span className="font-semibold" style={{ color: "#635BFF" }}>Stripe</span>
             </span>
