@@ -104,7 +104,7 @@
 
 ## Company
 
-- Operated by Trana, Inc., Delaware C-Corp (incorporated via Stripe Atlas)
+- Operated by unseal.link, Delaware C-Corp (incorporated via Stripe Atlas)
 - Address: 1111B S Governors Ave STE 39117, Dover, DE 19904, United States
 - Contact: info@unseal.link
 - Founded: April 2026
