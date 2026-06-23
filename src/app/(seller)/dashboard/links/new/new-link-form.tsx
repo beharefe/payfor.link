@@ -1,6 +1,7 @@
 "use client";
 
 import { createProductAction } from "@unseallink/app/actions/product";
+import { ProductAttestationModal } from "@unseallink/components/product-attestation-modal";
 import { hasUnicodeChars } from "@unseallink/lib/slugify";
 import { Clock, Loader2, LockKeyhole, Mail, Timer, X } from "lucide-react";
 import { useRef, useState, useTransition } from "react";
@@ -123,13 +124,14 @@ export function NewLinkForm() {
   const [descriptionValue, setDescriptionValue] = useState<string>("");
   const [mobileTab, setMobileTab] = useState<"edit" | "preview">("edit");
   const [limitToOneSale, setLimitToOneSale] = useState(false);
-  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [showAttestation, setShowAttestation] = useState(false);
   const [subtitle, setSubtitle] = useState("");
   const [includes, setIncludes] = useState<string[]>([]);
   const [faq, setFaq] = useState<Array<{ q: string; a: string }>>([]);
   const [isPending, startTransition] = useTransition();
   const priceInputRef = useRef<HTMLInputElement>(null);
   const prevObjectUrl = useRef<string | null>(null);
+  const pendingFormData = useRef<FormData | null>(null);
 
   const priceNum = parseFloat(priceValue);
   const hasAnyUnicodeError =
@@ -199,11 +201,12 @@ export function NewLinkForm() {
     const form = e.currentTarget;
     const formData = new FormData(form);
 
+    // Phase 1: prepare form data (upload image, set fields), then open attestation modal
     startTransition(async () => {
       if (expiresAt) {
         formData.set("expires_at", new Date(expiresAt).toISOString());
       }
-      formData.set("terms_accepted", termsAccepted ? "true" : "false");
+      formData.set("terms_accepted", "true");
       formData.set("subtitle", subtitle);
       formData.set("includes", JSON.stringify(includes.filter((s) => s.trim())));
       formData.set("faq", JSON.stringify(faq.filter((item) => item.q.trim() && item.a.trim())));
@@ -221,11 +224,22 @@ export function NewLinkForm() {
         formData.set("preview_image_url", url);
       }
 
+      pendingFormData.current = formData;
+      setShowAttestation(true);
+    });
+  }
+
+  // Phase 2: attestation modal confirmed — dispatch action
+  function handleAttestationConfirm() {
+    const formData = pendingFormData.current;
+    if (!formData) return;
+    formData.set("attested", "true");
+
+    startTransition(async () => {
       try {
         const result = await createProductAction(null, formData);
         if (result) setError(result);
       } catch (err: unknown) {
-        // Re-throw Next.js redirect errors — they are intentional navigation, not failures
         if (err && typeof err === "object" && "digest" in err &&
             typeof (err as { digest: unknown }).digest === "string" &&
             (err as { digest: string }).digest.startsWith("NEXT_REDIRECT")) {
@@ -238,6 +252,13 @@ export function NewLinkForm() {
 
   return (
     <>
+      <ProductAttestationModal
+        open={showAttestation}
+        onOpenChange={setShowAttestation}
+        action="publish"
+        onConfirm={handleAttestationConfirm}
+      />
+
       {/* Mobile tabs */}
       <div className="flex lg:hidden border-b border-border mb-6 -mx-4 sm:-mx-6 px-4 sm:px-6">
         {(["edit", "preview"] as const).map((tab) => (
@@ -589,25 +610,9 @@ export function NewLinkForm() {
 
           {error && <p className="text-destructive text-sm">{error}</p>}
 
-          <label className="flex items-start gap-3 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={termsAccepted}
-              onChange={(e) => setTermsAccepted(e.target.checked)}
-              className="mt-0.5 shrink-0 accent-foreground size-4 cursor-pointer"
-            />
-            <span className="text-sm text-muted-foreground leading-snug">
-              I accept the{" "}
-              <a href="/terms" target="_blank" className="text-foreground underline underline-offset-2 hover:opacity-70 transition-opacity">
-                terms of service
-              </a>{" "}
-              and confirm I have the right to sell access to this link.
-            </span>
-          </label>
-
           <button
             type="submit"
-            disabled={isPending || priceInvalid || !termsAccepted || hasAnyUnicodeError}
+            disabled={isPending || priceInvalid || hasAnyUnicodeError}
             className="inline-flex items-center justify-center gap-2 w-full py-3.5 bg-primary text-primary-foreground rounded-full text-base font-medium cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed border-none mt-2"
           >
             {isPending && <Loader2 className="animate-spin size-4 shrink-0" />}

@@ -1,6 +1,7 @@
 "use server";
 
 import { trackServer } from "@unseallink/lib/amplitude-server";
+import { createAttestation } from "@unseallink/lib/attestations";
 import { TABLES } from "@unseallink/lib/db";
 import { pingIndexNow } from "@unseallink/lib/indexnow";
 import { log } from "@unseallink/lib/logger";
@@ -34,6 +35,7 @@ type CreateProductInput = {
   expires_at?: string | null;
   max_orders?: number | null;
   terms_accepted: boolean;
+  attested: boolean;
   subtitle?: string | null;
   includes?: string[] | null;
   faq?: Array<{ q: string; a: string }> | null;
@@ -51,6 +53,9 @@ export async function createProduct(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Unauthorized" };
+
+  if (!input.attested)
+    return { error: "Please review and confirm the product attestation." };
 
   if (!input.title?.trim()) return { error: "Title is required" };
   if (input.title.trim().length > 200) return { error: "Title must be 200 characters or less" };
@@ -142,6 +147,15 @@ export async function createProduct(
     return { error: msg };
   }
 
+  // Record attestation — non-blocking, failure logged but does not abort publish
+  void createAttestation({
+    seller_id: user.id,
+    product_id: link.id,
+    attestation_type: "publish_product",
+    product_title_snapshot: input.title.trim(),
+    destination_url: input.destination_url.trim(),
+  });
+
   void trackServer(
     {
       name: "Link Created",
@@ -182,6 +196,7 @@ export async function createProductAction(
     subtitle: formData.get("subtitle")?.toString() || null,
     includes: parseJsonArray<string>(formData.get("includes")),
     faq: parseJsonArray<{ q: string; a: string }>(formData.get("faq")),
+    attested: formData.get("attested") === "true",
   });
   if ("error" in result) return result.error;
   return null; // createProduct redirects on success
@@ -199,6 +214,7 @@ type UpdateProductInput = {
   includes?: string[] | null;
   faq?: Array<{ q: string; a: string }> | null;
   preview_image_key?: string | null;
+  attested?: boolean;
 };
 
 export async function updateProduct(
@@ -226,10 +242,10 @@ export async function updateProduct(
   if (input.faq && input.faq.length > 5) return { error: "FAQ must have 5 items or fewer" };
   if (input.faq?.some(item => ASCII_ONLY.test(item.q) || ASCII_ONLY.test(item.a))) return asciiError("FAQ");
 
-  // Verify ownership
+  // Fetch current state — needed for destination change detection and sales check
   const { data: existing } = await supabase
     .from(TABLES.PRODUCTS)
-    .select("id, seller_id, status")
+    .select("id, seller_id, status, destination_url, total_sales")
     .eq("id", input.id)
     .single();
   if (!existing || existing.seller_id !== user.id)
@@ -240,14 +256,28 @@ export async function updateProduct(
   const { safe } = await checkUrlSafe(input.destination_url);
   if (!safe) return { error: "This link was flagged. Use a different URL." };
 
-  const productType = detectProductType(input.destination_url);
+  const newUrl = input.destination_url.trim();
+  const urlChanged = newUrl !== existing.destination_url;
+
+  // Require attestation any time the access URL changes
+  if (urlChanged && !input.attested) {
+    return { error: "Please review and confirm before changing the access link." };
+  }
+
+  const productType = detectProductType(newUrl);
+
+  // Products with sales: changing destination URL pauses the listing pending review
+  // TODO: build admin review queue to re-approve paused_link_review products
+  const hasSales = (existing.total_sales ?? 0) > 0;
+  const newStatus =
+    urlChanged && hasSales ? "paused_link_review" : existing.status;
 
   const { error } = await supabase
     .from(TABLES.PRODUCTS)
     .update({
       title: input.title.trim(),
       description: input.description?.trim() || null,
-      destination_url: input.destination_url.trim(),
+      destination_url: newUrl,
       price: input.price,
       product_type: productType,
       preview_image_url: input.preview_image_url?.trim() || null,
@@ -256,6 +286,7 @@ export async function updateProduct(
       includes: input.includes?.length ? input.includes : [],
       faq: input.faq?.length ? input.faq : [],
       preview_image_key: input.preview_image_key?.trim() || null,
+      ...(newStatus !== existing.status ? { status: newStatus } : {}),
     })
     .eq("id", input.id)
     .eq("seller_id", user.id);
@@ -269,13 +300,32 @@ export async function updateProduct(
     return { error: "Failed to update product" };
   }
 
+  if (urlChanged) {
+    void createAttestation({
+      seller_id: user.id,
+      product_id: input.id,
+      attestation_type: "update_destination_url",
+      product_title_snapshot: input.title.trim(),
+      destination_url: newUrl,
+    });
+  }
+
   void trackServer(
     {
       name: "Link Settings Updated",
-      props: { link_id: input.id, changed_fields: ["title", "price", "description", "destination_url"] },
+      props: {
+        link_id: input.id,
+        changed_fields: ["title", "price", "description", "destination_url"],
+        destination_url_changed: urlChanged,
+        paused_for_review: newStatus === "paused_link_review",
+      },
     },
     user.id,
   );
+
+  if (newStatus === "paused_link_review") {
+    redirect(`/dashboard/links/${input.id}?link_paused=1`);
+  }
 
   redirect(`/dashboard/links/${input.id}`);
 }
@@ -296,6 +346,7 @@ export async function updateProductAction(
     subtitle: formData.get("subtitle")?.toString() || null,
     includes: parseJsonArray<string>(formData.get("includes")),
     faq: parseJsonArray<{ q: string; a: string }>(formData.get("faq")),
+    attested: formData.get("attested") === "true",
   });
   if ("error" in result) return result.error;
   return null;
@@ -317,6 +368,8 @@ export async function archiveProduct(id: string): Promise<ActionResult> {
     return { error: "Not found" };
   if (existing.status === "deleted" || existing.status === "suspended")
     return { error: "Cannot archive this link" };
+  if (existing.status === "paused_link_review")
+    return { error: "This link is pending review and cannot be archived. Contact support." };
 
   let newStatus: string;
   if (existing.status === "archived") {

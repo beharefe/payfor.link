@@ -8,4 +8,5 @@ export const TABLES = {
   PROMOTIONS: "promotions",
   SELLER_PROMOTIONS: "seller_promotions",
   PROMOTION_USAGE_LOG: "promotion_usage_log",
+  SELLER_ATTESTATIONS: "seller_attestations",
 } as const;

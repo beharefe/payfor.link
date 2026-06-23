@@ -19,7 +19,7 @@ export default async function EditLinkPage({
   const { data: link } = await supabase
     .from(TABLES.PRODUCTS)
     .select(
-      "id, title, description, destination_url, price, preview_image_url, expires_at, status, seller_id, subtitle, includes, faq",
+      "id, title, description, destination_url, price, preview_image_url, expires_at, status, seller_id, subtitle, includes, faq, total_sales",
     )
     .eq("id", id)
     .single();
@@ -44,6 +44,7 @@ export default async function EditLinkPage({
         </h1>
         <EditLinkForm
           id={id}
+          totalSales={link.total_sales ?? 0}
           defaultValues={{
             title: link.title,
             description: link.description ?? "",

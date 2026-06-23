@@ -1,6 +1,10 @@
 "use client";
 
 import { updateProductAction } from "@unseallink/app/actions/product";
+import {
+  type AttestationAction,
+  ProductAttestationModal,
+} from "@unseallink/components/product-attestation-modal";
 import { hasUnicodeChars } from "@unseallink/lib/slugify";
 import { useRef, useState, useTransition } from "react";
 import { X } from "lucide-react";
@@ -12,6 +16,7 @@ const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 type Props = {
   id: string;
+  totalSales: number;
   defaultValues: {
     title: string;
     description: string;
@@ -41,7 +46,7 @@ const inputClass =
 const labelClass = "block text-sm font-medium text-foreground mb-1.5";
 const hintClass = "text-xs text-muted-foreground mt-1";
 
-export function EditLinkForm({ id, defaultValues }: Props) {
+export function EditLinkForm({ id, totalSales, defaultValues }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(
@@ -58,6 +63,9 @@ export function EditLinkForm({ id, defaultValues }: Props) {
   const [subtitle, setSubtitle] = useState(defaultValues.subtitle ?? "");
   const [includes, setIncludes] = useState<string[]>(defaultValues.includes ?? []);
   const [faq, setFaq] = useState<Array<{ q: string; a: string }>>(defaultValues.faq ?? []);
+  // Controlled to detect destination URL changes before submit
+  const [destinationUrl, setDestinationUrl] = useState(defaultValues.destination_url);
+  const [showAttestation, setShowAttestation] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const hasAnyUnicodeError =
@@ -66,9 +74,15 @@ export function EditLinkForm({ id, defaultValues }: Props) {
     hasUnicodeChars(subtitle) ||
     includes.some(hasUnicodeChars) ||
     faq.some(item => hasUnicodeChars(item.q) || hasUnicodeChars(item.a));
+  const destinationUrlChanged = destinationUrl.trim() !== defaultValues.destination_url;
+  const hasSales = totalSales > 0;
+  const attestationAction: AttestationAction =
+    destinationUrlChanged && hasSales ? "update_destination_has_sales" : "update_destination";
+
   const priceInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const prevObjectUrl = useRef<string | null>(null);
+  const pendingFormData = useRef<FormData | null>(null);
 
   // Includes helpers
   function addInclude() {
@@ -162,12 +176,37 @@ export function EditLinkForm({ id, defaultValues }: Props) {
         formData.set("preview_image_url", defaultValues.preview_image_url ?? "");
       }
 
+      if (destinationUrlChanged) {
+        // Gate: show attestation modal before allowing the URL change
+        pendingFormData.current = formData;
+        setShowAttestation(true);
+        return;
+      }
+
+      const result = await updateProductAction(null, formData);
+      if (result) setError(result);
+    });
+  }
+
+  function handleAttestationConfirm() {
+    const formData = pendingFormData.current;
+    if (!formData) return;
+    formData.set("attested", "true");
+
+    startTransition(async () => {
       const result = await updateProductAction(null, formData);
       if (result) setError(result);
     });
   }
 
   return (
+    <>
+    <ProductAttestationModal
+      open={showAttestation}
+      onOpenChange={setShowAttestation}
+      action={attestationAction}
+      onConfirm={handleAttestationConfirm}
+    />
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
       <input type="hidden" name="id" value={id} />
 
@@ -342,11 +381,20 @@ export function EditLinkForm({ id, defaultValues }: Props) {
           name="destination_url"
           type="url"
           required
-          defaultValue={defaultValues.destination_url}
+          value={destinationUrl}
+          onChange={(e) => setDestinationUrl(e.target.value)}
           placeholder="https://"
           className={inputClass}
         />
-        <p className={hintClass}>The private URL buyers receive in their email after paying.</p>
+        {destinationUrlChanged ? (
+          <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+            {hasSales
+              ? "Changing the access link will pause this product. Existing buyers keep their original access."
+              : "You will need to confirm before saving the new access link."}
+          </p>
+        ) : (
+          <p className={hintClass}>The private URL buyers receive in their email after paying.</p>
+        )}
       </div>
 
       {/* Price */}
@@ -465,9 +513,12 @@ export function EditLinkForm({ id, defaultValues }: Props) {
           disabled={isPending || hasAnyUnicodeError}
           className="px-6 py-2.5 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer"
         >
-          {isPending ? "Saving…" : "Save changes"}
+          {isPending
+            ? destinationUrlChanged ? "Preparing…" : "Saving…"
+            : destinationUrlChanged ? "Save changes →" : "Save changes"}
         </button>
       </div>
     </form>
+    </>
   );
 }
