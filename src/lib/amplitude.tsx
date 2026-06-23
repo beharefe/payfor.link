@@ -155,6 +155,41 @@ export type AnalyticsEvent =
   | {
       name: "Blog Post Viewed";
       props: { slug: string; title: string };
+    }
+  // ── Discovery ────────────────────────────────────────────────────────────
+  | {
+      name: "Discover Page Viewed";
+      props: {
+        platform_filter: string | null; // null = all
+        total_results: number;
+      };
+    }
+  | {
+      name: "Discover Product Clicked";
+      props: {
+        link_id: string;
+        platform: string | null;
+        price: number;
+        position: number; // card index in grid
+      };
+    }
+  | {
+      name: "Link Submitted to Discover";
+      props: {
+        link_id: string;
+        platform: string | null;
+        risk_level: string | null;
+        total_sales: number;
+      };
+    }
+  | {
+      name: "Link Discover Status Changed";
+      props: {
+        link_id: string;
+        old_status: string | null;
+        new_status: string; // "approved" | "rejected"
+        changed_by: string; // "admin"
+      };
     };
 
 /**

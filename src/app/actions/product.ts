@@ -551,7 +551,7 @@ export async function submitToDiscover(id: string): Promise<ActionResult> {
 
   const { data: existing } = await supabase
     .from(TABLES.PRODUCTS)
-    .select("id, seller_id, status, public_status, title, destination_url, destination_risk_level")
+    .select("id, seller_id, status, public_status, title, destination_url, destination_risk_level, destination_platform, total_sales")
     .eq("id", id)
     .single();
 
@@ -590,7 +590,56 @@ export async function submitToDiscover(id: string): Promise<ActionResult> {
     destination_url: existing.destination_url,
   });
 
-  // TODO: notify admin on new public listing submission
+  void trackServer(
+    {
+      name: "Link Submitted to Discover",
+      props: {
+        link_id: id,
+        platform: existing.destination_platform ?? null,
+        risk_level: existing.destination_risk_level ?? null,
+        total_sales: existing.total_sales ?? 0,
+      },
+    },
+    user.id,
+  );
+
+  // Notify admin about new discover submission (non-blocking)
+  void (async () => {
+    try {
+      const adminEmail = process.env.ADMIN_REVIEW_EMAIL ?? "info@unseal.link";
+      const h = await headers();
+      const host = h.get("host") ?? "unseal.link";
+      const proto = h.get("x-forwarded-proto") ?? "https";
+      const db = createServiceClient();
+      const { data: seller } = await db
+        .from(TABLES.SELLERS)
+        .select("email")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      const { resend, FROM } = await import("@unseallink/lib/resend");
+      await resend.emails.send({
+        from: FROM,
+        to: adminEmail,
+        subject: `[unseal] New Discover submission: ${existing.title}`,
+        html: `<p><b>Product submitted for Discover listing review.</b></p>
+<ul>
+<li>Title: ${existing.title}</li>
+<li>Product ID: ${id}</li>
+<li>Seller ID: ${user.id}</li>
+<li>Seller email: ${seller?.email ?? "unknown"}</li>
+<li>Platform: ${existing.destination_platform ?? "unknown"}</li>
+<li>Risk level: ${existing.destination_risk_level ?? "low"}</li>
+</ul>
+<p><a href="${proto}://${host}/dashboard/links/${id}">Review product →</a></p>`,
+      });
+    } catch (err) {
+      log.error("discover_submission_admin_email failed", {
+        error: err instanceof Error ? err.message : String(err),
+        product_id: id,
+      });
+    }
+  })();
 
   redirect(`/dashboard/links/${id}?submitted=1`);
 }

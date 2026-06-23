@@ -98,7 +98,12 @@ export default async function LinkDetailPage({
                   publicStatus={link.public_status as "pending" | "approved" | "rejected" | null}
                 />
               )}
-              <ArchiveButton id={id} isArchived={isArchived} />
+              <ArchiveButton
+                id={id}
+                isArchived={isArchived}
+                totalSales={link.total_sales}
+                totalRevenue={link.total_revenue}
+              />
               <DeleteButton id={id} />
             </div>
           )}

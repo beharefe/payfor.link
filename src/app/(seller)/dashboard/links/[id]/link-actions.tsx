@@ -20,31 +20,95 @@ import { useState, useTransition } from "react";
 export function ArchiveButton({
   id,
   isArchived,
+  totalSales,
+  totalRevenue,
 }: {
   id: string;
   isArchived: boolean;
+  totalSales?: number;
+  totalRevenue?: number;
 }) {
+  const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const hasSales = (totalSales ?? 0) > 0;
 
-  function handleClick() {
+  function handleConfirm() {
     startTransition(async () => {
       const result = await archiveProduct(id);
-      if ("error" in result) setError(result.error);
+      if ("error" in result) {
+        setError(result.error);
+      } else {
+        setOpen(false);
+      }
     });
   }
 
+  // Reactivating: no confirmation needed
+  if (isArchived) {
+    return (
+      <span className="inline-flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => startTransition(async () => {
+            const result = await archiveProduct(id);
+            if ("error" in result) setError(result.error);
+          })}
+          disabled={isPending}
+          className="inline-flex items-center gap-1.5 px-4 py-2 border border-border rounded-full text-sm font-medium text-foreground cursor-pointer hover:bg-muted transition-colors disabled:opacity-60 disabled:cursor-not-allowed bg-transparent"
+        >
+          {isPending && <Loader2 className="animate-spin size-3.5 shrink-0" />}
+          {isPending ? "Saving…" : "Reactivate"}
+        </button>
+        {error && <span className="text-destructive text-sm">{error}</span>}
+      </span>
+    );
+  }
+
+  // Archiving with sales: show revenue impact dialog
   return (
     <span className="inline-flex items-center gap-2">
-      <button
-        type="button"
-        onClick={handleClick}
-        disabled={isPending}
-        className="inline-flex items-center gap-1.5 px-4 py-2 border border-border rounded-full text-sm font-medium text-foreground cursor-pointer hover:bg-muted transition-colors disabled:opacity-60 disabled:cursor-not-allowed bg-transparent"
-      >
-        {isPending && <Loader2 className="animate-spin size-3.5 shrink-0" />}
-        {isPending ? "Saving…" : isArchived ? "Reactivate" : "Archive"}
-      </button>
+      <Dialog open={open} onOpenChange={(v) => { if (!isPending) { setOpen(v); if (!v) setError(null); } }}>
+        <DialogTrigger className="inline-flex items-center gap-1.5 px-4 py-2 border border-border rounded-full text-sm font-medium text-foreground cursor-pointer hover:bg-muted transition-colors bg-transparent">
+          Archive
+        </DialogTrigger>
+        <DialogContent showCloseButton={false}>
+          <DialogHeader>
+            <DialogTitle>Archive this link?</DialogTitle>
+            <DialogDescription>
+              {hasSales
+                ? "This link will stop accepting new payments. Existing buyers keep their access."
+                : "This link will stop accepting payments. You can reactivate it any time."}
+            </DialogDescription>
+          </DialogHeader>
+          {hasSales && (
+            <div className="rounded-xl bg-muted px-4 py-3 space-y-1">
+              <p className="text-xs font-medium text-foreground">Sales you'd be pausing</p>
+              <div className="flex gap-6 pt-0.5">
+                <div>
+                  <p className="text-xs text-muted-foreground">Orders</p>
+                  <p className="text-sm font-medium text-foreground">{totalSales}</p>
+                </div>
+                {(totalRevenue ?? 0) > 0 && (
+                  <div>
+                    <p className="text-xs text-muted-foreground">Revenue earned</p>
+                    <p className="text-sm font-medium text-foreground">${(totalRevenue ?? 0).toFixed(2)}</p>
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground pt-1">You can reactivate this link any time.</p>
+            </div>
+          )}
+          {error && <p className="text-sm text-destructive">{error}</p>}
+          <DialogFooter>
+            <DialogClose render={<Button variant="outline" />}>Keep selling</DialogClose>
+            <Button onClick={handleConfirm} disabled={isPending}>
+              {isPending && <Loader2 className="animate-spin size-3.5 shrink-0" />}
+              {isPending ? "Archiving…" : "Archive"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       {error && <span className="text-destructive text-sm">{error}</span>}
     </span>
   );
@@ -107,6 +171,7 @@ export function SubmitToDiscoverButton({
   id: string;
   publicStatus: "pending" | "approved" | "rejected" | null;
 }) {
+  const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -126,25 +191,47 @@ export function SubmitToDiscoverButton({
     );
   }
 
-  function handleSubmit() {
+  function handleConfirm() {
     startTransition(async () => {
       const result = await submitToDiscover(id);
-      if ("error" in result) setError(result.error);
+      if ("error" in result) {
+        setError(result.error);
+      } else {
+        setOpen(false);
+      }
     });
   }
 
   return (
     <span className="inline-flex items-center gap-2">
-      <button
-        type="button"
-        onClick={handleSubmit}
-        disabled={isPending}
-        className="inline-flex items-center gap-1.5 px-4 py-2 border border-border rounded-full text-sm font-medium text-foreground cursor-pointer hover:bg-muted transition-colors disabled:opacity-60 disabled:cursor-not-allowed bg-transparent"
-      >
-        {isPending && <Loader2 className="animate-spin size-3.5 shrink-0" />}
-        {isPending ? "Submitting…" : publicStatus === "rejected" ? "Resubmit to Discover" : "Submit to Discover"}
-      </button>
-      {error && <span className="text-destructive text-xs">{error}</span>}
+      <Dialog open={open} onOpenChange={(v) => { if (!isPending) { setOpen(v); if (!v) setError(null); } }}>
+        <DialogTrigger className="inline-flex items-center gap-1.5 px-4 py-2 border border-border rounded-full text-sm font-medium text-foreground cursor-pointer hover:bg-muted transition-colors bg-transparent">
+          {publicStatus === "rejected" ? "Resubmit to Discover" : "Submit to Discover"}
+        </DialogTrigger>
+        <DialogContent showCloseButton={false}>
+          <DialogHeader>
+            <DialogTitle>Submit to unseal Discover?</DialogTitle>
+            <DialogDescription>
+              Your product will be reviewed against unseal's public listing guidelines.
+              It will not appear on Discover until approved. Existing buyers are not affected.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="rounded-xl bg-muted px-4 py-3 text-xs text-muted-foreground leading-relaxed space-y-1">
+            <p>By submitting, you confirm this product is accurate, legal, and ready for public discovery.</p>
+            <p>unseal may approve, reject, or remove public listings at any time per the{" "}
+              <a href="/terms" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground transition-colors">Terms</a>.
+            </p>
+          </div>
+          {error && <p className="text-sm text-destructive">{error}</p>}
+          <DialogFooter>
+            <DialogClose render={<Button variant="outline" />}>Cancel</DialogClose>
+            <Button onClick={handleConfirm} disabled={isPending}>
+              {isPending && <Loader2 className="animate-spin size-3.5 shrink-0" />}
+              {isPending ? "Submitting…" : "Submit for review"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </span>
   );
 }

@@ -104,6 +104,7 @@ function PurchaseCard({
   formatTimeUntil,
   showCrypto,
   sellerSolanaWallet,
+  isPausedForReview,
 }: {
   // biome-ignore lint/suspicious/noExplicitAny: complex join type
   link: any;
@@ -112,6 +113,7 @@ function PurchaseCard({
   formatTimeUntil: (s: string) => string;
   showCrypto: boolean;
   sellerSolanaWallet: string | null;
+  isPausedForReview: boolean;
 }) {
   return (
     <div className="border border-border rounded-2xl bg-card overflow-hidden">
@@ -588,6 +590,7 @@ export default async function PaywallPage({ params }: Props) {
                 formatTimeUntil={formatTimeUntil}
                 showCrypto={showCrypto}
                 sellerSolanaWallet={sellerSolanaWallet}
+                isPausedForReview={isPausedForReview}
               />
             </div>
           </div>

@@ -1,8 +1,9 @@
+import { trackServer } from "@unseallink/lib/amplitude-server";
 import { TABLES } from "@unseallink/lib/db";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
+import { DiscoverProductCard } from "./product-card";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
 
@@ -33,26 +34,6 @@ const CATEGORIES = [
   { label: "Other", platform: "other" },
 ];
 
-const PLATFORM_LABEL: Record<string, string> = {
-  notion: "Notion",
-  figma: "Figma",
-  canva: "Canva",
-  airtable: "Airtable",
-  github: "GitHub",
-  gitlab: "GitLab",
-  google_drive: "Google Drive",
-  google_docs: "Google Docs",
-  google_sheets: "Google Sheets",
-  google_slides: "Google Slides",
-  loom: "Loom",
-  typeform: "Typeform",
-  dropbox: "Dropbox",
-  discord: "Discord",
-  substack: "Substack",
-  beehiiv: "Beehiiv",
-  framer: "Framer",
-  webflow: "Webflow",
-};
 
 type Props = {
   searchParams: Promise<{ platform?: string }>;
@@ -83,6 +64,11 @@ export default async function DiscoverPage({ searchParams }: Props) {
   const { data: rawProducts } = await query.limit(48);
   // biome-ignore lint/suspicious/noExplicitAny: Supabase join
   const products = (rawProducts ?? []) as any[];
+
+  void trackServer({
+    name: "Discover Page Viewed",
+    props: { platform_filter: activePlatform, total_results: products.length },
+  });
 
   return (
     <>
@@ -149,91 +135,22 @@ export default async function DiscoverPage({ searchParams }: Props) {
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {products.map((product) => {
-                const seller = product.sellers as {
-                  name: string | null;
-                  username: string | null;
-                };
-                const platform = product.destination_platform as string | null;
-                const platformLabel = platform
-                  ? (PLATFORM_LABEL[platform] ?? null)
-                  : null;
-                const payUrl = `/@${seller.username}/${product.slug}`;
-
+              {products.map((product, i) => {
+                // biome-ignore lint/suspicious/noExplicitAny: Supabase join
+                const seller = product.sellers as any;
                 return (
-                  <Link
+                  <DiscoverProductCard
                     key={product.id}
-                    href={payUrl}
-                    className="group block border border-border rounded-2xl overflow-hidden bg-card no-underline hover:border-foreground/30 transition-colors"
-                  >
-                    {/* Preview image */}
-                    {product.preview_image_url ? (
-                      <div className="relative w-full aspect-[1.91/1] bg-muted overflow-hidden">
-                        <Image
-                          src={product.preview_image_url}
-                          alt={product.title}
-                          fill
-                          className="object-cover group-hover:scale-[1.02] transition-transform duration-300"
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-full aspect-[1.91/1] bg-muted flex items-center justify-center">
-                        <span className="text-3xl opacity-40">
-                          {platform === "notion"
-                            ? "📄"
-                            : platform === "figma"
-                              ? "🎨"
-                              : platform === "github"
-                                ? "💻"
-                                : platform === "canva"
-                                  ? "✏️"
-                                  : platform === "airtable"
-                                    ? "📊"
-                                    : "🔗"}
-                        </span>
-                      </div>
-                    )}
-
-                    <div className="p-5 space-y-3">
-                      {/* Platform + reviewed badge */}
-                      <div className="flex items-center gap-2 flex-wrap">
-                        {platformLabel && (
-                          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                            {platformLabel}
-                          </span>
-                        )}
-                        <span
-                          className="text-xs text-muted-foreground ml-auto"
-                          title="This listing was reviewed against unseal's public listing guidelines. Content is provided by the seller."
-                        >
-                          Reviewed listing
-                        </span>
-                      </div>
-
-                      {/* Title */}
-                      <p className="font-medium text-foreground leading-snug group-hover:text-foreground/80 transition-colors line-clamp-2">
-                        {product.title}
-                      </p>
-
-                      {/* Description */}
-                      {product.description && (
-                        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
-                          {product.description}
-                        </p>
-                      )}
-
-                      {/* Price + seller */}
-                      <div className="flex items-center justify-between pt-1">
-                        <span className="font-medium text-foreground text-sm">
-                          ${product.price.toFixed(2)}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          by @{seller.username}
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
+                    id={product.id}
+                    title={product.title}
+                    description={product.description}
+                    slug={product.slug}
+                    price={product.price}
+                    preview_image_url={product.preview_image_url}
+                    destination_platform={product.destination_platform}
+                    sellerUsername={seller?.username ?? null}
+                    position={i}
+                  />
                 );
               })}
             </div>
