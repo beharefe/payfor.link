@@ -3,12 +3,16 @@
 import { trackServer } from "@unseallink/lib/amplitude-server";
 import { createAttestation } from "@unseallink/lib/attestations";
 import { TABLES } from "@unseallink/lib/db";
+import { sendAdminProductPausedEmail } from "@unseallink/lib/email";
 import { pingIndexNow } from "@unseallink/lib/indexnow";
 import { log } from "@unseallink/lib/logger";
 import { detectProductType, isValidUrl } from "@unseallink/lib/product-utils";
 import { checkUrlSafe } from "@unseallink/lib/safe-browsing";
+import { createServiceClient } from "@unseallink/lib/supabase/server";
 import { generateSlug } from "@unseallink/lib/slugify";
 import { createClient } from "@unseallink/lib/supabase/server";
+import { analyzeDestinationUrl } from "@unseallink/lib/url-hygiene";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 const MIN_PRICE = 9.99;
@@ -58,6 +62,7 @@ export async function createProduct(
     return { error: "Please review and confirm the product attestation." };
 
   if (!input.title?.trim()) return { error: "Title is required" };
+  // URL hygiene runs before the expensive slug/Stripe checks
   if (input.title.trim().length > 200) return { error: "Title must be 200 characters or less" };
   if (ASCII_ONLY.test(input.title)) return asciiError("Title");
   if (input.description && input.description.length > 2000) return { error: "Description must be 2000 characters or less" };
@@ -73,6 +78,14 @@ export async function createProduct(
   if (input.includes?.some(s => ASCII_ONLY.test(s))) return asciiError("Includes");
   if (input.faq && input.faq.length > 5) return { error: "FAQ must have 5 items or fewer" };
   if (input.faq?.some(item => ASCII_ONLY.test(item.q) || ASCII_ONLY.test(item.a))) return asciiError("FAQ");
+
+  const hygiene = analyzeDestinationUrl(input.destination_url);
+  if (hygiene.blocked) {
+    const reason = hygiene.risk_reasons.includes("recursive_paywall")
+      ? "This link points to unseal.link itself, which is not allowed."
+      : "This link uses a protocol or domain that is not allowed.";
+    return { error: reason };
+  }
 
   const { safe } = await checkUrlSafe(input.destination_url);
   if (!safe) return { error: "This link was flagged. Use a different URL." };
@@ -126,11 +139,15 @@ export async function createProduct(
       expires_at: input.expires_at || null,
       max_orders: input.max_orders ?? null,
       terms_accepted_at: new Date().toISOString(),
-      status,
+      status: hygiene.risk_level === "medium" && status === "active" ? "paused_link_review" : status,
       subtitle: input.subtitle?.trim() || null,
       includes: input.includes?.length ? input.includes : [],
       faq: input.faq?.length ? input.faq : [],
       preview_image_key: input.preview_image_key?.trim() || null,
+      destination_host: hygiene.host,
+      destination_platform: hygiene.platform,
+      destination_risk_level: hygiene.risk_level,
+      destination_risk_reasons: hygiene.risk_reasons.length ? hygiene.risk_reasons : null,
     })
     .select("id")
     .single();
@@ -253,9 +270,6 @@ export async function updateProduct(
   if (existing.status === "deleted" || existing.status === "suspended")
     return { error: "Cannot edit this link" };
 
-  const { safe } = await checkUrlSafe(input.destination_url);
-  if (!safe) return { error: "This link was flagged. Use a different URL." };
-
   const newUrl = input.destination_url.trim();
   const urlChanged = newUrl !== existing.destination_url;
 
@@ -264,13 +278,27 @@ export async function updateProduct(
     return { error: "Please review and confirm before changing the access link." };
   }
 
+  // Run URL hygiene when URL changes (or always, to backfill metadata on other edits)
+  const hygiene = analyzeDestinationUrl(newUrl);
+  if (hygiene.blocked) {
+    const reason = hygiene.risk_reasons.includes("recursive_paywall")
+      ? "This link points to unseal.link itself, which is not allowed."
+      : "This link uses a protocol or domain that is not allowed.";
+    return { error: reason };
+  }
+
+  const { safe } = await checkUrlSafe(newUrl);
+  if (!safe) return { error: "This link was flagged. Use a different URL." };
+
   const productType = detectProductType(newUrl);
 
-  // Products with sales: changing destination URL pauses the listing pending review
-  // TODO: build admin review queue to re-approve paused_link_review products
+  // Pause when URL changes with existing sales, or URL is medium risk with sales
   const hasSales = (existing.total_sales ?? 0) > 0;
-  const newStatus =
-    urlChanged && hasSales ? "paused_link_review" : existing.status;
+  const shouldPause =
+    urlChanged && (hasSales || hygiene.risk_level === "medium");
+  const newStatus = shouldPause ? "paused_link_review" : existing.status;
+  const enteringPause =
+    newStatus === "paused_link_review" && existing.status !== "paused_link_review";
 
   const { error } = await supabase
     .from(TABLES.PRODUCTS)
@@ -286,6 +314,10 @@ export async function updateProduct(
       includes: input.includes?.length ? input.includes : [],
       faq: input.faq?.length ? input.faq : [],
       preview_image_key: input.preview_image_key?.trim() || null,
+      destination_host: hygiene.host,
+      destination_platform: hygiene.platform,
+      destination_risk_level: hygiene.risk_level,
+      destination_risk_reasons: hygiene.risk_reasons.length ? hygiene.risk_reasons : null,
       ...(newStatus !== existing.status ? { status: newStatus } : {}),
     })
     .eq("id", input.id)
@@ -308,6 +340,69 @@ export async function updateProduct(
       product_title_snapshot: input.title.trim(),
       destination_url: newUrl,
     });
+  }
+
+  // Notify admin exactly once when product newly enters paused_link_review
+  if (enteringPause) {
+    void (async () => {
+      try {
+        // Fetch seller email for admin context
+        const db = createServiceClient();
+        const { data: seller } = await db
+          .from(TABLES.SELLERS)
+          .select("email")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        // Dedupe: insert with unique key — silently skip if already notified
+        const dedupeKey = `product:${input.id}:paused_link_review`;
+        const { error: notifError } = await db
+          .from(TABLES.ADMIN_NOTIFICATIONS)
+          .insert({
+            type: "product_paused_link_review",
+            product_id: input.id,
+            seller_id: user.id,
+            sent_to: process.env.ADMIN_REVIEW_EMAIL ?? "info@unseal.link",
+            dedupe_key: dedupeKey,
+            metadata: {
+              previous_status: existing.status,
+              destination_host: hygiene.host,
+              risk_level: hygiene.risk_level,
+            },
+          });
+
+        // notifError with unique violation = already sent, skip email
+        if (notifError) {
+          if (notifError.code === "23505") return; // unique_violation
+          log.error("admin_notification insert failed", { error: notifError.message, product_id: input.id });
+        }
+
+        const h = await headers();
+        const host = h.get("host") ?? "unseal.link";
+        const proto = h.get("x-forwarded-proto") ?? "https";
+        const crypto = await import("node:crypto");
+
+        await sendAdminProductPausedEmail({
+          productId: input.id,
+          productTitle: input.title.trim(),
+          sellerId: user.id,
+          sellerEmail: seller?.email ?? null,
+          previousStatus: existing.status,
+          destinationHost: hygiene.host,
+          destinationPlatform: hygiene.platform,
+          destinationRiskLevel: hygiene.risk_level,
+          destinationRiskReasons: hygiene.risk_reasons,
+          destinationUrlHash: crypto.createHash("sha256").update(newUrl).digest("hex"),
+          totalSales: existing.total_sales ?? 0,
+          appUrl: `${proto}://${host}`,
+        });
+      } catch (err) {
+        log.error("admin_product_paused_email failed", {
+          error: err instanceof Error ? err.message : String(err),
+          product_id: input.id,
+        });
+      }
+    })();
   }
 
   void trackServer(

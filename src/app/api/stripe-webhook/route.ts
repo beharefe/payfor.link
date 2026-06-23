@@ -104,13 +104,23 @@ async function handleCheckoutSessionCompleted(
   const { data: product } = await supabase
     .from(TABLES.PRODUCTS)
     .select(
-      "id, seller_id, destination_url, title, price, version, total_sales, total_revenue, max_orders",
+      "id, seller_id, destination_url, title, price, version, status, total_sales, total_revenue, max_orders",
     )
     .eq("id", productId)
     .single();
   if (!product) {
     log.error("checkout.session.completed: product not found", {
       product_id: productId,
+    });
+    return;
+  }
+  if (product.status !== "active") {
+    // Product was paused or suspended after checkout session was created.
+    // Do not create an order — the payment will require manual resolution.
+    log.error("checkout.session.completed: product not active — skipping order", {
+      product_id: productId,
+      status: product.status,
+      payment_intent_id: paymentIntentId,
     });
     return;
   }

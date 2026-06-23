@@ -168,13 +168,26 @@ function PurchaseCard({
         </div>
 
         {/* CTA */}
-        <PaywallCTA linkId={link.id} price={link.price} />
-        {showCrypto && (
-          <WalletProvider>
-            <CryptoCTA linkId={link.id} price={link.price} sellerWallet={sellerSolanaWallet ?? ""} />
-          </WalletProvider>
+        {isPausedForReview ? (
+          <div className="rounded-xl bg-muted px-4 py-3.5 text-center space-y-1">
+            <p className="text-sm font-medium text-foreground">
+              Sales paused while this access link is under review.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              New purchases are paused until review is complete.
+            </p>
+          </div>
+        ) : (
+          <>
+            <PaywallCTA linkId={link.id} price={link.price} />
+            {showCrypto && (
+              <WalletProvider>
+                <CryptoCTA linkId={link.id} price={link.price} sellerWallet={sellerSolanaWallet ?? ""} />
+              </WalletProvider>
+            )}
+            {showCrypto && <ActionCodeCTA linkId={link.id} />}
+          </>
         )}
-        {showCrypto && <ActionCodeCTA linkId={link.id} />}
 
         {/* Trust row */}
         <div className="flex items-center justify-center gap-4 pt-1">
@@ -227,8 +240,9 @@ export default async function PaywallPage({ params }: Props) {
   }
   const isExpired = link.expires_at && new Date(link.expires_at) < new Date();
   const isSoldOut = link.max_orders !== null && link.max_orders !== undefined && (link.total_sales ?? 0) >= link.max_orders;
+  const isPausedForReview = link.status === "paused_link_review";
 
-  if (link.status !== "active" || isExpired || isSoldOut) {
+  if ((link.status !== "active" && !isPausedForReview) || isExpired || isSoldOut) {
     // Notify seller if their link is draft because Stripe isn't connected
     if (link.status === "draft" && !sellerData?.stripe_connected && sellerData?.email) {
       const h = await headers();

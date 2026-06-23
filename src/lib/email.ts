@@ -5,6 +5,7 @@
 
 import { render } from "@react-email/render";
 import { AbuseReportAlert } from "@unseallink/emails/abuse-report-alert";
+import { ProductPausedReviewEmail } from "@unseallink/emails/product-paused-review";
 import { AccessLinkEmail } from "@unseallink/emails/access-link";
 import { BuyerDisputeAlert } from "@unseallink/emails/buyer-dispute-alert";
 import { DisputeAlert } from "@unseallink/emails/dispute-alert";
@@ -15,7 +16,13 @@ import { RefundSellerEmail } from "@unseallink/emails/refund-seller";
 import { SaleNotificationEmail } from "@unseallink/emails/sale-notification";
 import { SellerWelcomeEmail } from "@unseallink/emails/seller-welcome";
 import { ACCESS_TOKEN_DAYS } from "./buyer-token";
+import { log } from "./logger";
 import { FOUNDER_EMAIL, FROM, resend } from "./resend";
+
+// Admin review email — read at runtime so missing env doesn't crash module init
+function getAdminEmail(): string {
+  return process.env.ADMIN_REVIEW_EMAIL ?? "info@unseal.link";
+}
 
 // Supabase magic link expiry is configured in the Supabase dashboard (Auth → Email → OTP Expiry).
 // Keep this in sync with that setting.
@@ -222,6 +229,54 @@ export async function sendSellerWelcomeEmail(opts: {
         sellerName: opts.sellerName,
         dashboardUrl: opts.dashboardUrl,
         promotions: opts.promotions,
+      }),
+    ),
+  });
+}
+
+/** Admin alert — sent when a product enters paused_link_review status. */
+export async function sendAdminProductPausedEmail(opts: {
+  productId: string;
+  productTitle: string;
+  sellerId: string;
+  sellerEmail?: string | null;
+  previousStatus: string;
+  destinationHost?: string | null;
+  destinationPlatform?: string | null;
+  destinationRiskLevel?: string | null;
+  destinationRiskReasons?: string[] | null;
+  destinationUrlHash?: string | null;
+  totalSales: number;
+  appUrl: string;
+}) {
+  const adminEmail = getAdminEmail();
+  if (!process.env.ADMIN_REVIEW_EMAIL) {
+    log.warn("ADMIN_REVIEW_EMAIL not set — admin review notification sent to fallback", {
+      fallback: adminEmail,
+      product_id: opts.productId,
+    });
+  }
+
+  const reviewUrl = `${opts.appUrl}/dashboard/links/${opts.productId}`;
+
+  return resend.emails.send({
+    from: FROM,
+    to: adminEmail,
+    subject: `[unseal] Product paused for link review: ${opts.productTitle}`,
+    html: await render(
+      ProductPausedReviewEmail({
+        productId: opts.productId,
+        productTitle: opts.productTitle,
+        sellerId: opts.sellerId,
+        sellerEmail: opts.sellerEmail,
+        previousStatus: opts.previousStatus,
+        destinationHost: opts.destinationHost,
+        destinationPlatform: opts.destinationPlatform,
+        destinationRiskLevel: opts.destinationRiskLevel,
+        destinationRiskReasons: opts.destinationRiskReasons,
+        destinationUrlHash: opts.destinationUrlHash,
+        totalSales: opts.totalSales,
+        reviewUrl,
       }),
     ),
   });

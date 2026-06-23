@@ -3,7 +3,10 @@ export type ProductStatus =
   | "active"
   | "suspended"
   | "archived"
-  | "deleted";
+  | "deleted"
+  | "paused_link_review";
+
+export type DestinationRiskLevel = "low" | "medium" | "blocked";
 export type OrderStatus = "paid" | "refunded" | "disputed" | "fraud";
 export type ProductType =
   | "template"
@@ -60,6 +63,10 @@ export interface Product {
   includes: string[] | null;
   faq: Array<{ q: string; a: string }>;
   preview_image_key: string | null;
+  destination_host: string | null;
+  destination_platform: string | null;
+  destination_risk_level: DestinationRiskLevel | null;
+  destination_risk_reasons: string[] | null;
   created_at: string;
   updated_at: string;
 }

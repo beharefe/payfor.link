@@ -10,10 +10,14 @@ import { ArchiveButton, DeleteButton, RefundButton } from "./link-actions";
 
 export default async function LinkDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ link_paused?: string }>;
 }) {
   const { id } = await params;
+  const sp = await searchParams;
+  const justPaused = sp.link_paused === "1";
   const supabase = await createClient();
   const {
     data: { user },
@@ -58,12 +62,13 @@ export default async function LinkDetailPage({
   const effectiveStatus = isSoldOut ? "sold_out" : link.status;
 
   const statusStyles: Record<string, string> = {
-    active:    "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
-    draft:     "bg-muted text-muted-foreground",
-    archived:  "bg-muted text-muted-foreground",
-    suspended: "bg-destructive/10 text-destructive",
-    deleted:   "bg-destructive/10 text-destructive",
-    sold_out:  "bg-muted text-muted-foreground",
+    active:              "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+    draft:               "bg-muted text-muted-foreground",
+    archived:            "bg-muted text-muted-foreground",
+    suspended:           "bg-destructive/10 text-destructive",
+    deleted:             "bg-destructive/10 text-destructive",
+    sold_out:            "bg-muted text-muted-foreground",
+    paused_link_review:  "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
   };
 
   return (
@@ -111,6 +116,18 @@ export default async function LinkDetailPage({
             <p className="text-sm text-muted-foreground leading-relaxed">{link.description}</p>
           )}
         </div>
+
+        {/* Paused for link review notice */}
+        {(justPaused || link.status === "paused_link_review") && (
+          <div className="border border-amber-200 dark:border-amber-800 rounded-2xl p-5 bg-amber-50 dark:bg-amber-900/20 space-y-1.5">
+            <p className="font-medium text-amber-900 dark:text-amber-300 text-sm">
+              {justPaused ? "Your access link change was submitted for review." : "This product is paused for link review."}
+            </p>
+            <p className="text-sm text-amber-800 dark:text-amber-400 leading-relaxed">
+              This product is paused while unseal checks the new access link. Existing buyers keep their original access. New purchases are paused until review is complete. We'll review it as soon as possible.
+            </p>
+          </div>
+        )}
 
         {/* Stripe connect prompt */}
         {!seller?.stripe_connected && (
