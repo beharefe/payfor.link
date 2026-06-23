@@ -541,3 +541,56 @@ export async function deleteProduct(id: string): Promise<ActionResult> {
 
   redirect("/dashboard");
 }
+
+export async function submitToDiscover(id: string): Promise<ActionResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Unauthorized" };
+
+  const { data: existing } = await supabase
+    .from(TABLES.PRODUCTS)
+    .select("id, seller_id, status, public_status, title, destination_url, destination_risk_level")
+    .eq("id", id)
+    .single();
+
+  if (!existing || existing.seller_id !== user.id)
+    return { error: "Not found" };
+  if (existing.status !== "active")
+    return { error: "Only active products can be submitted to Discover." };
+  if (existing.destination_risk_level === "medium" || existing.destination_risk_level === "blocked")
+    return { error: "This product's access link needs to be reviewed before it can be submitted to Discover." };
+  if (existing.public_status === "approved")
+    return { error: "This product is already listed on Discover." };
+  if (existing.public_status === "pending")
+    return { error: "This product is already pending review." };
+
+  const { error } = await supabase
+    .from(TABLES.PRODUCTS)
+    .update({ public_status: "pending" })
+    .eq("id", id)
+    .eq("seller_id", user.id);
+
+  if (error) {
+    log.error("submitToDiscover failed", {
+      error: error.message,
+      product_id: id,
+      user_id: user.id,
+    });
+    return { error: "Failed to submit. Please try again." };
+  }
+
+  // Record attestation — submit_public_listing type
+  void createAttestation({
+    seller_id: user.id,
+    product_id: id,
+    attestation_type: "submit_public_listing",
+    product_title_snapshot: existing.title,
+    destination_url: existing.destination_url,
+  });
+
+  // TODO: notify admin on new public listing submission
+
+  redirect(`/dashboard/links/${id}?submitted=1`);
+}

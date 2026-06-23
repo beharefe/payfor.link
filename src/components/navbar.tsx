@@ -33,6 +33,12 @@ export function Navbar() {
           unseal.link
         </Link>
         <div className="flex items-center gap-4">
+          <Link
+            href="/discover"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors no-underline shrink-0 hidden sm:block"
+          >
+            Discover
+          </Link>
           {!loggedIn && lastOrderId && (
             <Link
               href={`/orders?oid=${lastOrderId}`}

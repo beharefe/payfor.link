@@ -19,6 +19,7 @@ const COMPARE = [
 ];
 
 const LEGAL = [
+  { href: "/discover", label: "Discover" },
   { href: "/terms",   label: "Terms" },
   { href: "/privacy", label: "Privacy" },
   { href: "/about",   label: "About" },

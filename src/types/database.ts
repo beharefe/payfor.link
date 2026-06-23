@@ -7,6 +7,7 @@ export type ProductStatus =
   | "paused_link_review";
 
 export type DestinationRiskLevel = "low" | "medium" | "blocked";
+export type PublicStatus = "pending" | "approved" | "rejected";
 export type OrderStatus = "paid" | "refunded" | "disputed" | "fraud";
 export type ProductType =
   | "template"
@@ -67,6 +68,7 @@ export interface Product {
   destination_platform: string | null;
   destination_risk_level: DestinationRiskLevel | null;
   destination_risk_reasons: string[] | null;
+  public_status: PublicStatus | null;
   created_at: string;
   updated_at: string;
 }

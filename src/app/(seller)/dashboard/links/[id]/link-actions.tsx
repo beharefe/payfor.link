@@ -1,6 +1,6 @@
 "use client";
 
-import { archiveProduct, deleteProduct } from "@unseallink/app/actions/product";
+import { archiveProduct, deleteProduct, submitToDiscover } from "@unseallink/app/actions/product";
 import { refundPurchase } from "@unseallink/app/actions/refund";
 import { Button } from "@unseallink/components/ui/button";
 import {
@@ -96,6 +96,55 @@ export function DeleteButton({ id }: { id: string }) {
         </DialogContent>
       </Dialog>
       {error && <span className="text-destructive text-sm">{error}</span>}
+    </span>
+  );
+}
+
+export function SubmitToDiscoverButton({
+  id,
+  publicStatus,
+}: {
+  id: string;
+  publicStatus: "pending" | "approved" | "rejected" | null;
+}) {
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+
+  if (publicStatus === "approved") {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-full">
+        Listed on Discover
+      </span>
+    );
+  }
+
+  if (publicStatus === "pending") {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-full">
+        Pending review
+      </span>
+    );
+  }
+
+  function handleSubmit() {
+    startTransition(async () => {
+      const result = await submitToDiscover(id);
+      if ("error" in result) setError(result.error);
+    });
+  }
+
+  return (
+    <span className="inline-flex items-center gap-2">
+      <button
+        type="button"
+        onClick={handleSubmit}
+        disabled={isPending}
+        className="inline-flex items-center gap-1.5 px-4 py-2 border border-border rounded-full text-sm font-medium text-foreground cursor-pointer hover:bg-muted transition-colors disabled:opacity-60 disabled:cursor-not-allowed bg-transparent"
+      >
+        {isPending && <Loader2 className="animate-spin size-3.5 shrink-0" />}
+        {isPending ? "Submitting…" : publicStatus === "rejected" ? "Resubmit to Discover" : "Submit to Discover"}
+      </button>
+      {error && <span className="text-destructive text-xs">{error}</span>}
     </span>
   );
 }

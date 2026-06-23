@@ -6,18 +6,19 @@ import { ArrowUpRight } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import { InitiateStripeConnectButton } from "../../dashboard-actions";
 import { CopyLinkButton } from "./copy-link-button";
-import { ArchiveButton, DeleteButton, RefundButton } from "./link-actions";
+import { ArchiveButton, DeleteButton, RefundButton, SubmitToDiscoverButton } from "./link-actions";
 
 export default async function LinkDetailPage({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ link_paused?: string }>;
+  searchParams: Promise<{ link_paused?: string; submitted?: string }>;
 }) {
   const { id } = await params;
   const sp = await searchParams;
   const justPaused = sp.link_paused === "1";
+  const justSubmitted = sp.submitted === "1";
   const supabase = await createClient();
   const {
     data: { user },
@@ -26,7 +27,7 @@ export default async function LinkDetailPage({
 
   const { data: link } = await supabase
     .from(TABLES.PRODUCTS)
-    .select("id, title, description, slug, status, price, total_sales, total_revenue, seller_id, version, preview_image_url, max_orders")
+    .select("id, title, description, slug, status, public_status, price, total_sales, total_revenue, seller_id, version, preview_image_url, max_orders, destination_risk_level")
     .eq("id", id)
     .single();
 
@@ -91,6 +92,12 @@ export default async function LinkDetailPage({
               >
                 Edit
               </Link>
+              {link.status === "active" && !["medium", "blocked"].includes(link.destination_risk_level ?? "") && (
+                <SubmitToDiscoverButton
+                  id={id}
+                  publicStatus={link.public_status as "pending" | "approved" | "rejected" | null}
+                />
+              )}
               <ArchiveButton id={id} isArchived={isArchived} />
               <DeleteButton id={id} />
             </div>
@@ -125,6 +132,18 @@ export default async function LinkDetailPage({
             </p>
             <p className="text-sm text-amber-800 dark:text-amber-400 leading-relaxed">
               This product is paused while unseal checks the new access link. Existing buyers keep their original access. New purchases are paused until review is complete. We'll review it as soon as possible.
+            </p>
+          </div>
+        )}
+
+        {/* Submitted to Discover notice */}
+        {justSubmitted && (
+          <div className="border border-emerald-200 dark:border-emerald-800 rounded-2xl p-5 bg-emerald-50 dark:bg-emerald-900/20 space-y-1">
+            <p className="font-medium text-emerald-900 dark:text-emerald-300 text-sm">
+              Submitted for review.
+            </p>
+            <p className="text-sm text-emerald-800 dark:text-emerald-400 leading-relaxed">
+              We'll review this product against unseal's public listing guidelines. You'll be notified if it's approved or if we need more information.
             </p>
           </div>
         )}
