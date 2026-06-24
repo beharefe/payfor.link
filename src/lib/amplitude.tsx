@@ -114,6 +114,8 @@ export type AnalyticsEvent =
       props: {
         link_id: string;
         changed_fields: string[]; // ["title", "price", "description", "destination_url", "preview_image"]
+        destination_url_changed?: boolean;
+        paused_for_review?: boolean;
       };
     }
   | {
