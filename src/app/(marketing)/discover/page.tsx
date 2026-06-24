@@ -3,6 +3,17 @@ import { TABLES } from "@unseallink/lib/db";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  AirtableIcon,
+  CanvaIcon,
+  DiscordIcon,
+  FigmaIcon,
+  FreeUnlockIcon,
+  GitHubIcon,
+  GoogleDriveIcon,
+  NotionIcon,
+  OtherAccessIcon,
+} from "./platform-icons";
 import { DiscoverProductCard } from "./product-card";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
@@ -10,30 +21,83 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
 export const metadata: Metadata = {
   title: "Discover Access Products | unseal.link",
   description:
-    "Browse Notion templates, Figma files, resources, and private links you can unlock instantly through unseal.",
+    "Browse Notion templates, Figma files, Discord communities, and private links you can unlock instantly through unseal.",
   alternates: { canonical: `${APP_URL}/discover` },
   robots: { index: true, follow: true },
   openGraph: {
     title: "Discover Access Products | unseal.link",
     description:
-      "Browse Notion templates, Figma files, resources, and private links you can unlock instantly through unseal.",
+      "Browse Notion templates, Figma files, Discord communities, and private links you can unlock instantly through unseal.",
     url: `${APP_URL}/discover`,
     siteName: "unseal.link",
     type: "website",
   },
 };
 
+// Order by paid-access strength: communities → templates → repos → files → niche
 const CATEGORIES = [
   { label: "All", platform: null },
   { label: "Notion", platform: "notion" },
   { label: "Figma", platform: "figma" },
-  { label: "Canva", platform: "canva" },
-  { label: "Airtable", platform: "airtable" },
+  { label: "Discord", platform: "discord" },
   { label: "GitHub", platform: "github" },
   { label: "Google Drive", platform: "google_drive" },
+  { label: "Canva", platform: "canva" },
+  { label: "Airtable", platform: "airtable" },
+  { label: "Free", platform: "free" },
   { label: "Other", platform: "other" },
 ];
 
+const CATEGORY_CARDS = [
+  {
+    label: "Notion Templates",
+    description: "Pages, databases, wikis, and full OS systems.",
+    platform: "notion",
+    Icon: NotionIcon,
+  },
+  {
+    label: "Figma Templates",
+    description: "UI kits, components, icons, and design systems.",
+    platform: "figma",
+    Icon: FigmaIcon,
+  },
+  {
+    label: "Discord Access",
+    description: "Private communities, workshops, study groups, and creator spaces.",
+    platform: "discord",
+    Icon: DiscordIcon,
+  },
+  {
+    label: "GitHub Boilerplates",
+    description: "Starter repos, templates, and production-ready code.",
+    platform: "github",
+    Icon: GitHubIcon,
+  },
+  {
+    label: "Google Drive Resources",
+    description: "Docs, spreadsheets, presentations, and shared files.",
+    platform: "google_drive",
+    Icon: GoogleDriveIcon,
+  },
+  {
+    label: "Canva Templates",
+    description: "Social content, pitch decks, and marketing assets.",
+    platform: "canva",
+    Icon: CanvaIcon,
+  },
+  {
+    label: "Airtable Templates",
+    description: "Bases, workflows, and data-driven templates.",
+    platform: "airtable",
+    Icon: AirtableIcon,
+  },
+  {
+    label: "Free Unlocks",
+    description: "Free resources you can unlock instantly.",
+    platform: "free",
+    Icon: FreeUnlockIcon,
+  },
+];
 
 type Props = {
   searchParams: Promise<{ platform?: string }>;
@@ -41,7 +105,6 @@ type Props = {
 
 export default async function DiscoverPage({ searchParams }: Props) {
   const { platform: rawPlatform } = await searchParams;
-  // Only accept known platform values to prevent injection
   const activePlatform =
     CATEGORIES.find((c) => c.platform === rawPlatform)?.platform ?? null;
 
@@ -50,14 +113,19 @@ export default async function DiscoverPage({ searchParams }: Props) {
   let query = supabase
     .from(TABLES.PRODUCTS)
     .select(
-      "id, title, description, slug, price, currency, preview_image_url, total_sales, destination_platform, destination_host, sellers!inner(name, username, avatar_url, profile_public)",
+      "id, title, description, slug, price, currency, preview_image_url, total_sales, destination_platform, sellers!inner(name, username, avatar_url, profile_public)",
     )
     .eq("status", "active")
     .eq("public_status", "approved")
     .eq("sellers.profile_public", true)
     .order("total_sales", { ascending: false });
 
-  if (activePlatform) {
+  if (activePlatform === "free") {
+    // Free unlocks: price = 0 (no min-price products yet, future use)
+    query = query.eq("price", 0);
+  } else if (activePlatform === "other") {
+    query = query.is("destination_platform", null);
+  } else if (activePlatform) {
     query = query.eq("destination_platform", activePlatform);
   }
 
@@ -70,6 +138,9 @@ export default async function DiscoverPage({ searchParams }: Props) {
     props: { platform_filter: activePlatform, total_results: products.length },
   });
 
+  const activeLabel =
+    CATEGORIES.find((c) => c.platform === activePlatform)?.label ?? null;
+
   return (
     <>
       {/* Hero */}
@@ -81,17 +152,16 @@ export default async function DiscoverPage({ searchParams }: Props) {
           Discover access products
         </h1>
         <p className="text-lg text-muted-foreground max-w-xl leading-relaxed mb-6">
-          Browse templates, files, resources, and private links you can unlock
-          instantly through unseal.
+          Browse templates, communities, repositories, and private resources you
+          can unlock instantly through unseal.
         </p>
         <p className="text-xs text-muted-foreground border border-border rounded-full inline-flex items-center gap-1.5 px-3 py-1.5">
           <span className="size-1.5 rounded-full bg-emerald-500 shrink-0" />
-          Public listings are reviewed before appearing here. Content is
-          provided by sellers.
+          Public listings are reviewed before appearing here. Content is provided by sellers.
         </p>
       </section>
 
-      {/* Category filter */}
+      {/* Category filter pills */}
       <section className="border-t border-border px-6 py-5">
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-wrap gap-2">
@@ -124,8 +194,8 @@ export default async function DiscoverPage({ searchParams }: Props) {
           {products.length === 0 ? (
             <div className="py-20 text-center">
               <p className="text-muted-foreground text-sm mb-2">
-                {activePlatform
-                  ? `No approved ${CATEGORIES.find((c) => c.platform === activePlatform)?.label ?? activePlatform} listings yet.`
+                {activeLabel
+                  ? `No approved ${activeLabel} listings yet.`
                   : "No approved listings yet."}
               </p>
               <p className="text-xs text-muted-foreground">
@@ -165,30 +235,31 @@ export default async function DiscoverPage({ searchParams }: Props) {
             Browse by category
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            {[
-              { label: "Notion Templates", platform: "notion", emoji: "📄" },
-              { label: "Figma Templates", platform: "figma", emoji: "🎨" },
-              { label: "Canva Templates", platform: "canva", emoji: "✏️" },
-              { label: "Airtable Templates", platform: "airtable", emoji: "📊" },
-              { label: "GitHub Boilerplates", platform: "github", emoji: "💻" },
-              { label: "Google Drive Resources", platform: "google_drive", emoji: "📁" },
-            ].map((cat) => (
+            {CATEGORY_CARDS.map((cat) => (
               <Link
                 key={cat.platform}
                 href={`/discover?platform=${cat.platform}`}
                 className={`border border-border rounded-2xl p-4 bg-background hover:bg-muted/50 transition-colors no-underline group ${
-                  activePlatform === cat.platform
-                    ? "border-foreground/30"
-                    : ""
+                  activePlatform === cat.platform ? "border-foreground/30" : ""
                 }`}
               >
-                <span className="text-2xl block mb-2">{cat.emoji}</span>
-                <p className="text-sm font-medium text-foreground group-hover:text-foreground/80 transition-colors leading-snug">
+                <div className="mb-3">
+                  <cat.Icon size={28} />
+                </div>
+                <p className="text-sm font-medium text-foreground group-hover:text-foreground/80 transition-colors leading-snug mb-1">
                   {cat.label}
+                </p>
+                <p className="text-xs text-muted-foreground leading-snug line-clamp-2">
+                  {cat.description}
                 </p>
               </Link>
             ))}
           </div>
+          {/* Discord safety note */}
+          <p className="text-xs text-muted-foreground mt-4 max-w-lg">
+            Discord listings are manually reviewed. Trading signals, gambling,
+            adult, illegal, or deceptive communities are not allowed.
+          </p>
         </div>
       </section>
 

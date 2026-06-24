@@ -3,6 +3,7 @@
 import { track } from "@unseallink/lib/amplitude";
 import Image from "next/image";
 import Link from "next/link";
+import { PLATFORM_ICON, OtherAccessIcon } from "./platform-icons";
 
 const PLATFORM_LABEL: Record<string, string> = {
   notion: "Notion",
@@ -23,18 +24,6 @@ const PLATFORM_LABEL: Record<string, string> = {
   beehiiv: "Beehiiv",
   framer: "Framer",
   webflow: "Webflow",
-};
-
-const PLATFORM_EMOJI: Record<string, string> = {
-  notion: "📄",
-  figma: "🎨",
-  github: "💻",
-  canva: "✏️",
-  airtable: "📊",
-  google_drive: "📁",
-  google_docs: "📝",
-  loom: "🎬",
-  discord: "💬",
 };
 
 type Props = {
@@ -62,7 +51,7 @@ export function DiscoverProductCard({
 }: Props) {
   const platform = destination_platform;
   const platformLabel = platform ? (PLATFORM_LABEL[platform] ?? null) : null;
-  const platformEmoji = platform ? (PLATFORM_EMOJI[platform] ?? "🔗") : "🔗";
+  const IconComponent = platform ? (PLATFORM_ICON[platform] ?? OtherAccessIcon) : null;
   const payUrl = `/@${sellerUsername}/${slug}`;
 
   return (
@@ -88,14 +77,20 @@ export function DiscoverProductCard({
         </div>
       ) : (
         <div className="w-full aspect-[1.91/1] bg-muted flex items-center justify-center">
-          <span className="text-3xl opacity-40">{platformEmoji}</span>
+          {IconComponent ? (
+            <IconComponent size={40} className="opacity-30" />
+          ) : (
+            <OtherAccessIcon size={40} className="opacity-20 text-foreground" />
+          )}
         </div>
       )}
 
       <div className="p-5 space-y-3">
+        {/* Platform badge + Reviewed listing */}
         <div className="flex items-center gap-2 flex-wrap">
-          {platformLabel && (
-            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+          {platformLabel && IconComponent && (
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+              <IconComponent size={12} />
               {platformLabel}
             </span>
           )}
