@@ -125,7 +125,7 @@ export default async function DiscoverPage({ searchParams }: Props) {
             <div className="py-20 text-center">
               <p className="text-muted-foreground text-sm mb-2">
                 {activePlatform
-                  ? `No approved ${PLATFORM_LABEL[activePlatform] ?? activePlatform} listings yet.`
+                  ? `No approved ${CATEGORIES.find((c) => c.platform === activePlatform)?.label ?? activePlatform} listings yet.`
                   : "No approved listings yet."}
               </p>
               <p className="text-xs text-muted-foreground">
