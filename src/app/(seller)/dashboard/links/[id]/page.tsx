@@ -13,12 +13,13 @@ export default async function LinkDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ link_paused?: string; submitted?: string }>;
+  searchParams: Promise<{ link_paused?: string; submitted?: string; new?: string }>;
 }) {
   const { id } = await params;
   const sp = await searchParams;
   const justPaused = sp.link_paused === "1";
   const justSubmitted = sp.submitted === "1";
+  const justCreated = sp.new === "1";
   const supabase = await createClient();
   const {
     data: { user },
@@ -138,6 +139,36 @@ export default async function LinkDetailPage({
             <p className="text-sm text-amber-800 dark:text-amber-400 leading-relaxed">
               This product is paused while unseal checks the new access link. Existing buyers keep their original access. New purchases are paused until review is complete. We'll review it as soon as possible.
             </p>
+          </div>
+        )}
+
+        {/* New product: optional Submit to Discover prompt */}
+        {justCreated &&
+          link.status === "active" &&
+          !link.public_status &&
+          !["medium", "blocked"].includes(link.destination_risk_level ?? "") && (
+          <div className="border border-border rounded-2xl p-5 bg-card space-y-3">
+            <div>
+              <p className="font-medium text-foreground text-sm mb-1">
+                Your product is live.
+              </p>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Want buyers to find it on unseal Discover? Listings are manually
+                reviewed before appearing publicly.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <SubmitToDiscoverButton
+                id={id}
+                publicStatus={link.public_status as "pending" | "approved" | "rejected" | null}
+              />
+              <Link
+                href={`/dashboard/links/${id}`}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors no-underline"
+              >
+                Skip
+              </Link>
+            </div>
           </div>
         )}
 

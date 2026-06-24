@@ -192,7 +192,8 @@ export async function createProduct(
     void pingIndexNow([`${appUrl}/@${seller.username}/${slug}`]);
   }
 
-  redirect(`/dashboard/links/${link.id}`);
+  // ?new=1 triggers the optional "Submit to Discover" prompt on the link detail page
+  redirect(`/dashboard/links/${link.id}?new=1`);
 }
 
 /** FormData-compatible wrapper for use with useActionState in Client Components. */
