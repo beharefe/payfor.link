@@ -2,6 +2,7 @@
 
 import { trackServer } from "@unseallink/lib/amplitude-server";
 import { TABLES } from "@unseallink/lib/db";
+import { UNSEAL_SHUTDOWN_MODE } from "@unseallink/lib/feature-flags";
 import { grantSignupPromotions } from "@unseallink/lib/promotions/promotions-service";
 import { createClient } from "@unseallink/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -29,6 +30,10 @@ async function generateHandle(
 }
 
 export async function saveOnboardingName(formData: FormData) {
+  if (UNSEAL_SHUTDOWN_MODE) {
+    redirect(`/auth?error=${encodeURIComponent("New seller accounts are no longer accepted. unseal.link is shutting down.")}`);
+  }
+
   const name = formData.get("name")?.toString()?.trim();
   if (!name || name.length < 1) redirect("/onboarding/name?error=name_required");
   if (name.length > 60) redirect("/onboarding/name?error=name_too_long");

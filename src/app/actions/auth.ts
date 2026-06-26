@@ -2,6 +2,7 @@
 
 import { trackServer } from "@unseallink/lib/amplitude-server";
 import { TABLES } from "@unseallink/lib/db";
+import { UNSEAL_SHUTDOWN_MODE } from "@unseallink/lib/feature-flags";
 import { createClient } from "@unseallink/lib/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -65,6 +66,10 @@ export async function verifySellerOtp(formData: FormData): Promise<void> {
         .update({ email: user.email ?? "" })
         .eq("id", user.id);
     }
+  }
+
+  if (UNSEAL_SHUTDOWN_MODE && needsOnboarding) {
+    redirect(`/auth?error=${encodeURIComponent("New seller accounts are no longer accepted. unseal.link is shutting down.")}`);
   }
 
   if (!needsOnboarding && user) {

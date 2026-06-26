@@ -23,6 +23,37 @@ export default async function OnboardingNamePage({
     .single();
   if (seller?.name && seller?.username) redirect("/dashboard");
 
+  if (process.env.UNSEAL_SHUTDOWN_MODE === "true") {
+    return (
+      <main className="min-h-dvh flex flex-col items-center justify-center px-6 py-16 bg-background">
+        <div className="w-full max-w-sm space-y-4">
+          <h1 className="text-2xl font-medium tracking-tight text-foreground">
+            New accounts are closed
+          </h1>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            unseal.link is shutting down and no longer accepts new seller accounts.
+          </p>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            If you have an existing account, sign in with the email you used before.
+            Contact{" "}
+            <a href="mailto:support@unseal.link" className="text-foreground underline hover:no-underline">
+              support@unseal.link
+            </a>{" "}
+            if you need help.
+          </p>
+          <form action={signOutToAuth} className="pt-2">
+            <button
+              type="submit"
+              className="text-sm text-muted-foreground underline underline-offset-2 hover:text-foreground transition-colors"
+            >
+              Use a different email →
+            </button>
+          </form>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-dvh flex flex-col items-center justify-center px-6 py-16 bg-background">
       <div className="w-full max-w-sm">

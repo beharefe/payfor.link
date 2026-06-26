@@ -17,13 +17,14 @@ import {
 import { DiscoverProductCard } from "./product-card";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
+const IS_SHUTDOWN = process.env.UNSEAL_SHUTDOWN_MODE === "true";
 
 export const metadata: Metadata = {
   title: "Discover Access Products | unseal.link",
   description:
     "Browse Notion templates, Figma files, Discord communities, and private links you can unlock instantly through unseal.",
   alternates: { canonical: `${APP_URL}/discover` },
-  robots: { index: true, follow: true },
+  robots: IS_SHUTDOWN ? { index: false, follow: false } : { index: true, follow: true },
   openGraph: {
     title: "Discover Access Products | unseal.link",
     description:
@@ -104,6 +105,39 @@ type Props = {
 };
 
 export default async function DiscoverPage({ searchParams }: Props) {
+  if (IS_SHUTDOWN) {
+    return (
+      <>
+        <section className="pt-20 pb-12 px-6 max-w-5xl mx-auto">
+          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-5">
+            Discover
+          </p>
+          <h1 className="text-4xl md:text-5xl font-medium tracking-tight text-foreground mb-4 leading-[1.1]">
+            unseal Discover is closed
+          </h1>
+          <p className="text-lg text-muted-foreground max-w-xl leading-relaxed mb-8">
+            unseal.link is shutting down and public discovery is no longer accepting listings.
+            Existing buyer access links remain available during the shutdown period.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/"
+              className="inline-flex items-center px-5 py-2.5 bg-primary text-primary-foreground rounded-full font-medium text-sm hover:opacity-90 transition-opacity no-underline"
+            >
+              Go home
+            </Link>
+            <a
+              href="mailto:support@unseal.link"
+              className="inline-flex items-center px-5 py-2.5 border border-border rounded-full font-medium text-sm hover:bg-muted transition-colors no-underline text-foreground"
+            >
+              Contact support
+            </a>
+          </div>
+        </section>
+      </>
+    );
+  }
+
   const { platform: rawPlatform } = await searchParams;
   const activePlatform =
     CATEGORIES.find((c) => c.platform === rawPlatform)?.platform ?? null;

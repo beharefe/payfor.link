@@ -4,7 +4,7 @@ import { createClient } from "@unseallink/lib/supabase/client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-export function Navbar() {
+export function Navbar({ isShutdown = false }: { isShutdown?: boolean }) {
   const [loggedIn, setLoggedIn] = useState<boolean | null>(null);
   const [lastOrderId, setLastOrderId] = useState<string | null>(null);
 
@@ -33,12 +33,14 @@ export function Navbar() {
           unseal.link
         </Link>
         <div className="flex items-center gap-4">
-          <Link
-            href="/discover"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors no-underline shrink-0 hidden sm:block"
-          >
-            Discover
-          </Link>
+          {!isShutdown && (
+            <Link
+              href="/discover"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors no-underline shrink-0 hidden sm:block"
+            >
+              Discover
+            </Link>
+          )}
           {!loggedIn && lastOrderId && (
             <Link
               href={`/orders?oid=${lastOrderId}`}
@@ -59,7 +61,7 @@ export function Navbar() {
               href="/auth"
               className="shrink-0 px-4 py-2 bg-primary text-primary-foreground no-underline rounded-full font-medium text-sm hover:opacity-90 transition-opacity"
             >
-              Start selling
+              {isShutdown ? "Sign in" : "Start selling"}
             </Link>
           )}
         </div>

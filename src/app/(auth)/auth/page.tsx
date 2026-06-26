@@ -42,6 +42,12 @@ export default async function AuthPage({
               "Seller sign-in. Enter your email and we'll send you a code."
             )}
           </p>
+          {!sent && process.env.UNSEAL_SHUTDOWN_MODE === "true" && (
+            <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed mt-3 px-3 py-2.5 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+              New seller accounts are no longer accepted. unseal.link is shutting down.
+              Existing sellers can still sign in below.
+            </p>
+          )}
           {!sent && (
             <p className="text-xs text-muted-foreground mt-2">
               Looking for something you bought?{" "}

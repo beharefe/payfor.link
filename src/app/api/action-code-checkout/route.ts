@@ -1,6 +1,6 @@
 import { getActionCodesClient } from "@unseallink/lib/action-codes";
 import { TABLES } from "@unseallink/lib/db";
-import { EXPERIMENTAL_CRYPTO_ENABLED } from "@unseallink/lib/feature-flags";
+import { EXPERIMENTAL_CRYPTO_ENABLED, UNSEAL_SHUTDOWN_MODE } from "@unseallink/lib/feature-flags";
 import { log } from "@unseallink/lib/logger";
 import { buildUsdcTransferTx } from "@unseallink/lib/solana-tx";
 import { createServiceClient } from "@unseallink/lib/supabase/server";
@@ -10,6 +10,10 @@ import { NextResponse } from "next/server";
 export async function POST(request: Request) {
   if (!EXPERIMENTAL_CRYPTO_ENABLED) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  if (UNSEAL_SHUTDOWN_MODE) {
+    return NextResponse.json({ error: "Sales are no longer available. unseal.link is shutting down." }, { status: 503 });
   }
 
   let body: { linkId?: string; email?: string; code?: string };

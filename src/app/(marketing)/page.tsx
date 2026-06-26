@@ -13,8 +13,14 @@ const ProductScroll = dynamic(() =>
 );
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://unseal.link";
+const IS_SHUTDOWN = process.env.UNSEAL_SHUTDOWN_MODE === "true";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = IS_SHUTDOWN ? {
+  title: "unseal.link — Service Shutdown",
+  description: "unseal.link is shutting down. Existing buyer access links remain available during the shutdown period.",
+  alternates: { canonical: APP_URL },
+  robots: { index: true, follow: true },
+} : {
   title: "unseal.link — Turn any URL into a paid access link",
   description:
     "Paste a Notion, Figma, Drive or Discord link, set a price, and buyers unlock it instantly after payment. 4.5% fee. No uploads, no storefront, no buyer account.",
@@ -244,6 +250,49 @@ const faqJsonLd = {
 };
 
 export default function HomePage() {
+  if (IS_SHUTDOWN) {
+    return (
+      <main className="flex-1 flex items-center justify-center px-6 py-24">
+        <div className="max-w-xl mx-auto space-y-6">
+          <h1 className="text-4xl md:text-5xl font-medium tracking-tight text-foreground leading-[1.1]">
+            unseal.link is shutting down
+          </h1>
+          <p className="text-lg text-muted-foreground leading-relaxed">
+            unseal.link started as a simple way to sell access to private links, templates, files, and digital resources.
+          </p>
+          <p className="text-base text-muted-foreground leading-relaxed">
+            We are no longer accepting new sellers, new products, or new purchases.
+          </p>
+          <p className="text-base text-muted-foreground leading-relaxed">
+            Existing buyers can continue using their access links during the shutdown period.
+            If you bought something through unseal and need help, contact{" "}
+            <a href="mailto:support@unseal.link" className="text-foreground underline hover:no-underline">
+              support@unseal.link
+            </a>
+            .
+          </p>
+          <div className="flex flex-wrap gap-3 pt-2">
+            <Link
+              href="/orders"
+              className="inline-flex items-center px-6 py-3 bg-primary text-primary-foreground rounded-full font-medium text-sm hover:opacity-90 transition-opacity no-underline"
+            >
+              View existing order →
+            </Link>
+            <Link
+              href="/auth"
+              className="inline-flex items-center px-6 py-3 border border-border rounded-full font-medium text-sm hover:bg-muted transition-colors no-underline text-foreground"
+            >
+              Seller sign in
+            </Link>
+          </div>
+          <p className="text-xs text-muted-foreground pt-2">
+            Existing access links will remain available during the shutdown period.
+          </p>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <>
       {/* biome-ignore lint/security/noDangerouslySetInnerHtml: controlled JSON-LD */}
@@ -786,3 +835,4 @@ export default function HomePage() {
     </>
   );
 }
+

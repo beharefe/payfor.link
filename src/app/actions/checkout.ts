@@ -2,6 +2,7 @@
 
 import { trackServer } from "@unseallink/lib/amplitude-server";
 import { TABLES } from "@unseallink/lib/db";
+import { UNSEAL_SHUTDOWN_MODE } from "@unseallink/lib/feature-flags";
 import { log } from "@unseallink/lib/logger";
 import { calculateFee } from "@unseallink/lib/promotions/promotions-service";
 import { stripe } from "@unseallink/lib/stripe";
@@ -14,6 +15,10 @@ type ActionResult = { error: string };
 export async function createCheckoutSession(
   linkId: string,
 ): Promise<ActionResult | never> {
+  if (UNSEAL_SHUTDOWN_MODE) {
+    return { error: "Sales are no longer available. unseal.link is shutting down." };
+  }
+
   const supabase = createServiceClient();
 
   const { data: link } = await supabase

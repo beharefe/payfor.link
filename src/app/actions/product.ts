@@ -4,6 +4,7 @@ import { trackServer } from "@unseallink/lib/amplitude-server";
 import { createAttestation } from "@unseallink/lib/attestations";
 import { TABLES } from "@unseallink/lib/db";
 import { sendAdminProductPausedEmail } from "@unseallink/lib/email";
+import { UNSEAL_SHUTDOWN_MODE } from "@unseallink/lib/feature-flags";
 import { pingIndexNow } from "@unseallink/lib/indexnow";
 import { log } from "@unseallink/lib/logger";
 import { detectProductType, isValidUrl } from "@unseallink/lib/product-utils";
@@ -51,6 +52,10 @@ type ActionResult = { error: string } | { id: string };
 export async function createProduct(
   input: CreateProductInput,
 ): Promise<ActionResult> {
+  if (UNSEAL_SHUTDOWN_MODE) {
+    return { error: "unseal.link is shutting down and no longer accepts new products." };
+  }
+
   const supabase = await createClient();
 
   const {
@@ -238,6 +243,10 @@ type UpdateProductInput = {
 export async function updateProduct(
   input: UpdateProductInput,
 ): Promise<ActionResult> {
+  if (UNSEAL_SHUTDOWN_MODE) {
+    return { error: "unseal.link is shutting down. Product editing is no longer available." };
+  }
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -544,6 +553,10 @@ export async function deleteProduct(id: string): Promise<ActionResult> {
 }
 
 export async function submitToDiscover(id: string): Promise<ActionResult> {
+  if (UNSEAL_SHUTDOWN_MODE) {
+    return { error: "unseal.link is shutting down. Discover submissions are closed." };
+  }
+
   const supabase = await createClient();
   const {
     data: { user },

@@ -25,7 +25,58 @@ const LEGAL = [
   { href: "/about",   label: "About" },
 ];
 
+const LEGAL_SHUTDOWN = [
+  { href: "/shutdown", label: "Shutdown notice" },
+  { href: "/orders",   label: "Access your order" },
+  { href: "/terms",    label: "Terms" },
+  { href: "/privacy",  label: "Privacy" },
+];
+
 export function Footer() {
+  const isShutdown = process.env.UNSEAL_SHUTDOWN_MODE === "true";
+
+  if (isShutdown) {
+    return (
+      <footer className="border-t border-border mt-auto">
+        <div className="max-w-5xl mx-auto px-6 py-10 sm:py-12">
+          <div className="flex flex-col sm:flex-row gap-10 sm:gap-16">
+            <div className="flex flex-col gap-2 sm:flex-1">
+              <span className="text-sm font-medium text-foreground">unseal.link</span>
+              <p className="text-xs text-muted-foreground leading-relaxed max-w-xs">
+                unseal.link is shutting down. New sellers, products, and purchases are no longer accepted.
+                Existing access links remain available during the shutdown period.
+              </p>
+              <p className="text-xs text-muted-foreground leading-relaxed max-w-xs mt-1">
+                Support:{" "}
+                <a href="mailto:support@unseal.link" className="underline hover:no-underline">
+                  support@unseal.link
+                </a>
+              </p>
+              <span className="text-xs text-muted-foreground mt-3">
+                © {new Date().getFullYear()} unseal.link · Payments by{" "}
+                <span className="font-semibold" style={{ color: "#635BFF" }}>Stripe</span>
+              </span>
+            </div>
+            <div className="flex flex-col gap-2.5 shrink-0">
+              <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-1">
+                Company
+              </p>
+              {LEGAL_SHUTDOWN.map(({ href, label }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors no-underline"
+                >
+                  {label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      </footer>
+    );
+  }
+
   return (
     <footer className="border-t border-border mt-auto">
       <div className="max-w-5xl mx-auto px-6 py-10 sm:py-12">

@@ -68,7 +68,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     themeColor: "#111111",
     metadataBase: new URL(baseUrl),
     alternates: { canonical },
-    robots: isUnavailable ? { index: false, follow: false } : { index: true, follow: true },
+    robots: isUnavailable || process.env.UNSEAL_SHUTDOWN_MODE === "true" ? { index: false, follow: false } : { index: true, follow: true },
     openGraph: {
       title,
       description,
@@ -105,6 +105,7 @@ function PurchaseCard({
   showCrypto,
   sellerSolanaWallet,
   isPausedForReview,
+  isShutdown,
 }: {
   // biome-ignore lint/suspicious/noExplicitAny: complex join type
   link: any;
@@ -114,6 +115,7 @@ function PurchaseCard({
   showCrypto: boolean;
   sellerSolanaWallet: string | null;
   isPausedForReview: boolean;
+  isShutdown: boolean;
 }) {
   return (
     <div className="border border-border rounded-2xl bg-card overflow-hidden">
@@ -170,7 +172,17 @@ function PurchaseCard({
         </div>
 
         {/* CTA */}
-        {isPausedForReview ? (
+        {isShutdown ? (
+          <div className="rounded-xl bg-muted px-4 py-3.5 text-center space-y-1.5">
+            <p className="text-sm font-medium text-foreground">
+              Sales are no longer available
+            </p>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              unseal.link is shutting down and this product can no longer be purchased.
+              If you already bought this product, your access link still works.
+            </p>
+          </div>
+        ) : isPausedForReview ? (
           <div className="rounded-xl bg-muted px-4 py-3.5 text-center space-y-1">
             <p className="text-sm font-medium text-foreground">
               Sales paused while this access link is under review.
@@ -285,6 +297,7 @@ export default async function PaywallPage({ params }: Props) {
   const seller = sellerData;
   const showCrypto =
     EXPERIMENTAL_CRYPTO_ENABLED && Boolean(sellerSolanaWallet);
+  const isShutdown = process.env.UNSEAL_SHUTDOWN_MODE === "true";
 
   log.info("paywall_viewed", { link_id: link.id, slug, username });
   void trackServer({
@@ -591,6 +604,7 @@ export default async function PaywallPage({ params }: Props) {
                 showCrypto={showCrypto}
                 sellerSolanaWallet={sellerSolanaWallet}
                 isPausedForReview={isPausedForReview}
+                isShutdown={isShutdown}
               />
             </div>
           </div>
@@ -610,15 +624,22 @@ export default async function PaywallPage({ params }: Props) {
             </p>
             <p className="text-[10px] text-muted-foreground mt-0.5">one-time</p>
           </div>
-          <div className="flex-1 space-y-2">
-            <PaywallCTA linkId={link.id} price={link.price} />
-            {showCrypto && (
-              <WalletProvider>
-                <CryptoCTA linkId={link.id} price={link.price} sellerWallet={sellerSolanaWallet ?? ""} />
-              </WalletProvider>
-            )}
-            {showCrypto && <ActionCodeCTA linkId={link.id} />}
-          </div>
+          {isShutdown ? (
+            <div className="flex-1 rounded-xl bg-muted px-4 py-3 text-center">
+              <p className="text-sm font-medium text-foreground">Sales are no longer available</p>
+              <p className="text-xs text-muted-foreground mt-0.5">unseal.link is shutting down.</p>
+            </div>
+          ) : (
+            <div className="flex-1 space-y-2">
+              <PaywallCTA linkId={link.id} price={link.price} />
+              {showCrypto && (
+                <WalletProvider>
+                  <CryptoCTA linkId={link.id} price={link.price} sellerWallet={sellerSolanaWallet ?? ""} />
+                </WalletProvider>
+              )}
+              {showCrypto && <ActionCodeCTA linkId={link.id} />}
+            </div>
+          )}
         </div>
       </div>
     </main>

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { EditLinkForm } from "./edit-link-form";
 
+const IS_SHUTDOWN = process.env.UNSEAL_SHUTDOWN_MODE === "true";
+
 export default async function EditLinkPage({
   params,
 }: {
@@ -26,6 +28,30 @@ export default async function EditLinkPage({
 
   if (!link || link.seller_id !== user.id) notFound();
   if (link.status === "deleted" || link.status === "suspended") notFound();
+
+  if (IS_SHUTDOWN) {
+    return (
+      <main>
+        <div className="max-w-xl mx-auto px-4 sm:px-6 py-10">
+          <Link
+            href={`/dashboard/links/${id}`}
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors no-underline block mb-6"
+          >
+            ← Back
+          </Link>
+          <div className="space-y-3">
+            <h1 className="text-xl font-medium tracking-tight text-foreground">
+              Product editing is closed
+            </h1>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              unseal.link is shutting down and no longer accepts new products or product changes.
+              Existing buyer access remains available during the shutdown period.
+            </p>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main>
